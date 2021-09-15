@@ -1,0 +1,13 @@
+.App {
+  position: relative;
+}
+
+/* .my-video {
+  position: absolute;
+  left: 0;
+  top: 0;
+} */
+
+.video-list {
+  display: flex;
+}
