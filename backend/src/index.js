@@ -1,15 +1,32 @@
 require('dotenv').config();
 const express = require("express");
 const http = require("http");
+const dbConnection = require('./db-connection')
 const app = express();
 const server = http.createServer(app);
 const io = require('socket.io')(server, {
-  cors: '*'
+    cors: '*'
 })
+const userRoutes = require('./routes/user.routes')
 
 const users = {};
 
 const socketToRoom = {};
+const PORT = process.env.PORT || 3001
+const HOST = process.env.HOST || 'locahost'
+
+//database connect
+dbConnection.connect()
+dbConnection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
+    if (error) throw error;
+    console.log('The solution is: ', results[0].solution);
+});
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+//routes
+app.use('/', userRoutes)
 
 io.on('connection', socket => {
     socket.on("join room", roomID => {
@@ -35,21 +52,18 @@ io.on('connection', socket => {
                 socket.broadcast.to(roomID).emit('user disconnected', socket.id);
             }
         });
-    
+
     });
 
-    socket.on("sending signal", ({signal, callerID, userToSignal}) => {
+    socket.on("sending signal", ({ signal, callerID, userToSignal }) => {
         io.to(userToSignal).emit('user joined', { signal, callerID });
     });
 
-    socket.on("returning signal", ({signal, callerID}) => {
+    socket.on("returning signal", ({ signal, callerID }) => {
         io.to(callerID).emit('receiving returned signal', { signal, userId: socket.id });
     });
-
-    
-    
-
 });
-server.listen(3001, () => {
-  console.log('server is running on port 3001')
+
+server.listen(PORT, HOST, () => {
+    console.log(`server is running on port ${HOST}:${PORT}`)
 })
