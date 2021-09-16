@@ -1,37 +1,55 @@
-const express = require('express')
-const app = express()
-const server = require('http').createServer(app)
-const cors = require('cors')
+require('dotenv').config();
+const express = require("express");
+const http = require("http");
+const app = express();
+const server = http.createServer(app);
 const io = require('socket.io')(server, {
   cors: '*'
 })
-const { v4: uuidV4 } = require('uuid')
 
-app.use(cors())
-app.use(express.static('public'))
+const users = {};
 
-app.get('/', (req, res) => {
-  res.redirect(`/${uuidV4()}`)
-})
-
-app.get('/:room', (req, res) => {
-  // res.render('room', { roomId: req.params.room })
-  return res.status(200).json({ roomId: req.params.room })
-})
+const socketToRoom = {};
 
 io.on('connection', socket => {
-  console.log(socket.id)
-  socket.on('join-room', (roomId, userId) => {
-    console.log(`roomId ${roomId} userId ${userId}`)
-    socket.join(roomId)
-    socket.broadcast.to(roomId).emit('user-connected', userId)
+    socket.on("join room", roomID => {
+        if (users[roomID]) {
 
-    socket.on('disconnect', () => {
-      socket.broadcast.to(roomId).emit('user-disconnected', userId)
-    })
-  })
-})
+            users[roomID].push(socket.id);
+        } else {
+            users[roomID] = [socket.id];
+        }
+        socket.join(roomID);
+        socketToRoom[socket.id] = roomID;
+        const usersInThisRoom = users[roomID].filter(id => id !== socket.id);
+        console.log(socket.id);
+        socket.emit("all users", usersInThisRoom);
 
+        socket.on('disconnect', () => {
+            const roomID = socketToRoom[socket.id];
+            let room = users[roomID];
+            if (room) {
+                room = room.filter(id => id !== socket.id);
+                users[roomID] = room;
+                console.log('emittttttttttt', socket.id)
+                socket.broadcast.to(roomID).emit('user disconnected', socket.id);
+            }
+        });
+    
+    });
+
+    socket.on("sending signal", ({signal, callerID, userToSignal}) => {
+        io.to(userToSignal).emit('user joined', { signal, callerID });
+    });
+
+    socket.on("returning signal", ({signal, callerID}) => {
+        io.to(callerID).emit('receiving returned signal', { signal, userId: socket.id });
+    });
+
+    
+    
+
+});
 server.listen(3001, () => {
   console.log('server is running on port 3001')
 })
