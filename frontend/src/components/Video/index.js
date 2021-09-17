@@ -1,22 +1,21 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from "react";
 
-const Video = ({ stream }) => {
-  const localVideo = useRef();
-
-  // localVideo.current is null on first render
-  // localVideo.current.srcObject = stream;
+const Video = ({peer}) => {
+  const ref = useRef();
 
   useEffect(() => {
-    // Let's update the srcObject only after the ref has been set
-    // and then every time the stream prop updates
-    if (localVideo.current) localVideo.current.srcObject = stream;
-  }, [stream, localVideo]);
+    peer.on("stream", stream => {
+      ref.current.srcObject = stream;
+
+    })
+  }, []);
 
   return (
     <div>
-      <video style={{ height: 300, width: 300 }} ref={localVideo} autoPlay muted/>
+      <video width="320px" height="320"  ref={ref} autoPlay/>
     </div>
+
   );
-};
+}
 
 export default Video;

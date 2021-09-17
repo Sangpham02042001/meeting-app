@@ -1,22 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { socketClient } from "../../utils";
 import Peer from "simple-peer";
+import Video from "../../components/Video";
+import './room.css';
+import { Container, Row, Col, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
-
-const Video = (props) => {
-    const ref = useRef();
-
-    useEffect(() => {
-        props.peer.on("stream", stream => {
-            ref.current.srcObject = stream;
-
-        })
-    }, []);
-
-    return (
-        <video autoPlay ref={ref} />
-    );
-}
 
 
 const Room = (props) => {
@@ -64,7 +53,7 @@ const Room = (props) => {
 
 
             socketClient.on("user disconnected", userId => {
-                
+
                 const item = peersRef.current.find(p => p.peerID === userId);
                 item.peer.destroy()
                 console.log(item);
@@ -106,31 +95,68 @@ const Room = (props) => {
         return peer;
     }
 
-    const handleActiveVideo = (event) => {
-        event.preventDefault();
+    const handleActiveVideo = () => {
+
         let checkVideoActive = userVideo.current.srcObject.getVideoTracks()[0].enabled;
         userVideo.current.srcObject.getVideoTracks()[0].enabled = !checkVideoActive;
+
+        if (checkVideoActive) {
+            setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "none" }))
+
+        } else {
+            setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "" }))
+        }
         setIsVideoActive(!checkVideoActive);
-        
+
     }
 
-    const handleActiveAudio = (event) => {
-        event.preventDefault();
+    const handleActiveAudio = () => {
         let checkAudioActive = userVideo.current.srcObject.getAudioTracks()[0].enabled;
         userVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
+
+        setIsMicroActive(!checkAudioActive);
     }
 
+    const [myVideoStyle, setMyVideoStyle] = useState({
+        display: ""
+    })
+    const [isMicroActive, setIsMicroActive] = useState(true);
+
     return (
-        <div>
-            <button onClick={handleActiveVideo}>Video</button>
-            <button onClick={handleActiveAudio}>Audio</button>
-            {!isVideoActive && <div>Not show camera</div>}
-            <video muted ref={userVideo} autoPlay />
-            {peers.length > 0 && peers.map((peer, index) => {
-                return (
-                    <Video key={index} peer={peer} />
-                );
-            })}
+        <div className="room-meeting">
+            <Container >
+                <div className="all-video">
+                    <div>
+                        <video width="320px" height="320px" style={myVideoStyle} muted ref={userVideo} autoPlay />
+                        {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white" }}>Video hidden</div>}
+
+                    </div>
+                    <div>
+                        {peers.length > 0 && peers.map((peer, index) => {
+                            return (
+                                <Video key={index} peer={peer} />
+                            );
+                        })}
+                    </div>
+                </div>
+                <Row className="tool-bar justify-content-md-center" >
+                    <Col xs lg="6" >
+                        <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px" }}>
+                            {!isVideoActive ? <i class="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                        </Button>
+
+                        <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px" }}>
+                            {!isMicroActive ? <i class="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                        </Button>
+
+                        <Button variant="danger" style={{ borderRadius: "50%", margin: "10px" }}>
+                            <Link to="/"><i style={{color: "white"}} className="fas fa-phone" ></i></Link>
+                        </Button>
+
+                    </Col>
+
+                </Row>
+            </Container>
         </div>
     );
 };
