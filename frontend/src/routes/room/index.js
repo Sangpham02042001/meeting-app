@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 
 
 const Room = (props) => {
-    const [peers, setPeers] = useState({});
+    const [peers, setPeers] = useState([]);
     const [isVideoActive, setIsVideoActive] = useState(true);
     const userVideo = useRef();
     let peersRef = useRef([]);
@@ -31,7 +31,10 @@ const Room = (props) => {
                         peerID: userID,
                         peer,
                     })
-                    peers.push(peer);
+                    peers.push({
+                        peerID: userID,
+                        peer,
+                    });
                 })
                 setPeers(peers);
             })
@@ -42,7 +45,10 @@ const Room = (props) => {
                     peerID: callerID,
                     peer,
                 })
-                setPeers(peers => [...peers, peer]);
+                setPeers(peers => [...peers, {
+                    peerID: callerID,
+                    peer,
+                }]);
             });
 
             socketClient.on("receiving returned signal", ({ signal, callerID, userId }) => {
@@ -58,7 +64,8 @@ const Room = (props) => {
                 item.peer.destroy()
                 console.log(item);
                 setPeers(peers => {
-                    return peers.filter(p => p !== item.peer)
+
+                    return peers.filter(p => p.peerID !== userId);
                 })
             })
         })
@@ -128,13 +135,14 @@ const Room = (props) => {
                 <div className="all-video">
                     <div>
                         <video width="320px" height="320px" style={myVideoStyle} muted ref={userVideo} autoPlay />
-                        {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white" }}>Video hidden</div>}
+                        {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white", textAlign: "center" }}>{socketClient.id}</div>}
 
                     </div>
                     <div>
-                        {peers.length > 0 && peers.map((peer, index) => {
+                        {peers.length > 0 && peers.map((peerObj) => {
+                            console.log('eee', peers)
                             return (
-                                <Video key={index} peer={peer} />
+                                <Video key={peerObj.peerID}  peer={peerObj.peer} peerId={peerObj.peerID} />
                             );
                         })}
                     </div>
@@ -142,15 +150,15 @@ const Room = (props) => {
                 <Row className="tool-bar justify-content-md-center" >
                     <Col xs lg="6" >
                         <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px" }}>
-                            {!isVideoActive ? <i class="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                            {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
                         </Button>
 
                         <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px" }}>
-                            {!isMicroActive ? <i class="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                            {!isMicroActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
                         </Button>
 
                         <Button variant="danger" style={{ borderRadius: "50%", margin: "10px" }}>
-                            <Link to="/"><i style={{color: "white"}} className="fas fa-phone" ></i></Link>
+                            <Link to="/"><i style={{ color: "white" }} className="fas fa-phone" ></i></Link>
                         </Button>
 
                     </Col>
