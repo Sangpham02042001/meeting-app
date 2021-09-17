@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const http = require("http");
-const dbConnection = require('./db-connection')
+const sequelize = require('./models')
 const app = express();
 const server = http.createServer(app);
 const io = require('socket.io')(server, {
@@ -10,17 +10,11 @@ const io = require('socket.io')(server, {
 const userRoutes = require('./routes/user.routes')
 
 const users = {};
+sequelize.sync()
 
 const socketToRoom = {};
 const PORT = process.env.PORT || 3001
 const HOST = process.env.HOST || 'locahost'
-
-//database connect
-dbConnection.connect()
-dbConnection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
-    if (error) throw error;
-    console.log('The solution is: ', results[0].solution);
-});
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

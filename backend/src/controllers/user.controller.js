@@ -1,22 +1,33 @@
 const bcrypt = require('bcrypt')
-const dbConnection = require('../db-connection')
+const User = require('../models/user')
 
 const signup = async (req, res) => {
   let saltRounds = 10
   const { firstName, lastName, email, password } = req.body
-  bcrypt.hash(password, saltRounds, (error, hash_password) => {
-    if (error) {
-      return res.status(400).json({ error })
+  try {
+    const user = await User.findOne({
+      where: {
+        email: email
+      }
+    })
+    if (user) {
+      console.log(user.toJSON())
+      return res.status(400).json({ error: `${email} has already existed` })
     }
-    let sql = `INSERT INTO users(firstName, lastName, email, hash_password)` +
-      ` VALUES('${firstName}','${lastName}','${email}','${hash_password}')`
-    dbConnection.query(sql, (error, results, fields) => {
+    bcrypt.hash(password, saltRounds, async (error, hash_password) => {
       if (error) {
         return res.status(400).json({ error })
       }
-      return res.status(201).json({ results })
+      const newUser = await User.create({
+        firstName, lastName, email, hash_password
+      })
+      console.log(newUser.toJSON())
+      return res.status(201).json(newUser.toJSON())
     })
-  })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
 }
 
 module.exports = { signup }
