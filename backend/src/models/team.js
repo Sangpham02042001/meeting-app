@@ -3,10 +3,10 @@ const Meeting = require('./meeting')
 const sequelize = require('./index')
 const Message = require('./message')
 
-class Group extends Model {
+class Team extends Model {
 }
 
-Group.init({
+Team.init({
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -19,23 +19,23 @@ Group.init({
   coverPhoto: {
     type: DataTypes.BLOB
   },
-  groupType: {
+  teamType: {
     type: DataTypes.STRING,
     defaultValue: 'public',
   }
 }, {
   sequelize,
-  modelName: 'Group'
+  modelName: 'Team'
 })
 
-Group.hasMany(Meeting, {
+Team.hasMany(Meeting, {
   as: 'meetings', //alias
-  foreignKey: 'groupId'
+  foreignKey: 'teamId'
 })
 
-Group.hasMany(Message, {
+Team.hasMany(Message, {
   as: 'messages',
-  foreignKey: 'groupId'
+  foreignKey: 'teamId'
 })
 
-module.exports = Group
+module.exports = Team

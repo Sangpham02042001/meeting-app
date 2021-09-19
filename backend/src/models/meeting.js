@@ -1,6 +1,4 @@
 const { DataTypes, Model } = require('sequelize')
-const User = require('./user')
-const Group = require('./group')
 const sequelize = require('./index')
 
 class Meeting extends Model {

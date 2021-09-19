@@ -1,7 +1,7 @@
 const { DataTypes, Model } = require('sequelize')
 const sequelize = require('./index')
 const Conversation = require('./conversation');
-const Group = require('./group');
+const Team = require('./team');
 const Meeting = require('./meeting');
 const Message = require('./message')
 
@@ -50,29 +50,29 @@ Conversation.belongsToMany(User, {
   foreignKey: 'conversationId',
 })
 
-User.belongsToMany(Group, {
-  through: 'Users_Groups',
+User.belongsToMany(Team, {
+  through: 'Users_Teams',
   foreignKey: 'userId'
 })
-Group.belongsToMany(User, {
-  through: 'Users_Groups',
-  foreignKey: 'groupId'
+Team.belongsToMany(User, {
+  through: 'Users_Teams',
+  foreignKey: 'teamId'
 })
 
-User.belongsToMany(Group, {
-  through: 'Request_Users_Groups',
+User.belongsToMany(Team, {
+  through: 'Request_Users_Teams',
   foreignKey: 'userId'
 })
-Group.belongsToMany(User, {
-  through: 'Request_Users_Groups',
-  foreignKey: 'groupId'
+Team.belongsToMany(User, {
+  through: 'Request_Users_Teams',
+  foreignKey: 'teamId'
 })
 
 Meeting.belongsTo(User, {
   as: 'host',
   foreignKey: 'hostId'
 })
-Group.belongsTo(User, {
+Team.belongsTo(User, {
   as: 'host',
   foreignKey: 'hostId'
 })
