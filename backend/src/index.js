@@ -8,6 +8,8 @@ const io = require('socket.io')(server, {
     cors: '*'
 })
 const userRoutes = require('./routes/user.routes')
+const groupRoutes = require('./routes/group.routes')
+const meetingRoutes = require('./routes/meeting.routes')
 
 const users = {};
 sequelize.sync()
@@ -21,6 +23,8 @@ app.use(express.urlencoded({ extended: true }))
 
 //routes
 app.use('/', userRoutes)
+app.use('/', groupRoutes)
+app.use('/', meetingRoutes)
 
 io.on('connection', socket => {
     socket.on("join room", roomID => {

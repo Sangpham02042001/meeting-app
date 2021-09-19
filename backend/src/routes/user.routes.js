@@ -8,6 +8,6 @@ router.route('/api/signup')
 
 router.route('/api/users/:userId')
   .get(getUserInfo)
-  .post(updateUserInfo)
+  .put(updateUserInfo)
 
 module.exports = router
