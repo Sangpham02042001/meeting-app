@@ -30,30 +30,36 @@ export default class SignUp extends Component {
         return (
             <div>
                 <Form onSubmit={this.handleSubmit}>
-                    <Form.Control
+                    <Form.Group>
+                        <Form.Control
                         type="email"
                         name="email"
                         placeholder="Email"
                         value={this.state.email}
                         onChange={this.handleChange}
                         required
-                    />
-                    <Form.Control
+                        />
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Control
                         type="password"
                         name="password"
                         placeholder="Mật khẩu"
                         value={this.state.password}
                         onChange={this.handleChange}
                         required
-                    />
-                    <Form.Control
+                        />
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Control
                         type="password"
                         name="password"
                         placeholder="Nhập lại mật khẩu"
                         value={this.state.password_confirmation}
                         onChange={this.handleChange}
                         required
-                    />
+                        />
+                    </Form.Group>
                     <Button type="submit">Đăng ký</Button>
                 </Form>
             </div>

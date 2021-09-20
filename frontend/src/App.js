@@ -5,6 +5,7 @@ import Room from "./routes/room";
 import Main from './components/MainComponent';
 import Login from './components/auth/LoginComponent';
 import SignUp from './components/auth/SignUpComponent';
+import './App.css'
 
 function App() {
   return (

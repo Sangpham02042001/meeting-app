@@ -11,3 +11,22 @@
 .video-list {
   display: flex;
 }
+
+.btn-primary {
+  color: #fff;
+  background-color: rgb(44, 26, 77);
+  border-color: rgb(44, 26, 77);
+}
+
+.btn-primary:hover {
+  background-color: rgb(65, 37, 117);
+}
+
+.login {
+  background-color: #ffffff;
+  border-radius: 10%;
+  color: rgb(70, 30, 145);
+  width: 25em;
+  height: 25em;
+  /* padding-top: 0px; */
+}
