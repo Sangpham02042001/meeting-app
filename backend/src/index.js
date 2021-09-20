@@ -7,6 +7,8 @@ const server = http.createServer(app);
 const io = require('socket.io')(server, {
     cors: '*'
 })
+
+const authRoutes = require('./routes/auth.routes')
 const userRoutes = require('./routes/user.routes')
 const teamRotues = require('./routes/team.routes')
 const meetingRoutes = require('./routes/meeting.routes')
@@ -22,6 +24,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 //routes
+app.use('/', authRoutes)
 app.use('/', userRoutes)
 app.use('/', teamRotues)
 app.use('/', meetingRoutes)
