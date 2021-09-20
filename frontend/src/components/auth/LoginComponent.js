@@ -39,12 +39,12 @@ export default class Login extends Component {
     render() {
         return (
             <div>
-                <div className="container-fluid d-flex vh-100 vw-100 justify-content-center align-items-center" style={{backgroundColor: '#2c1a4d'}}>
+                <div className="container-fluid loginPage d-flex vh-100 vw-100 justify-content-center align-items-center">
                     <div className="row vw-100 mx-5 align-items-center">
-                        <div className="text-light col-md-5 offset-md-3 align-items-center justify-content-center">
+                        <div className="text-light col-md-3 offset-md-2 align-items-center justify-content-center">
                             <h1>ĐĂNG NHẬP</h1>
                         </div>
-                        <div className="row col-6 col-md-3 login align-items-center d-flex justify-content-center">
+                        <div className="row col-6 col-md-5 offset-md-2 login align-items-center d-flex justify-content-center">
                             <Form onSubmit={this.handleSubmit}>
                                 <Form.Group className="mb-3" controlId="formEmail">
                                     <Form.Label><h3>Email</h3></Form.Label>
@@ -73,8 +73,14 @@ export default class Login extends Component {
                                 <Form.Group className="mb-3" controlId="formBasicCheckbox">
                                     <Form.Check type="checkbox" label="Remember me" />
                                 </Form.Group>
-                                <div className="d-grid gap-2">
+                                <div className="d-grid gap-2 mb-3">
                                     <Button dark className="mb-3 submit" type="submit"><h4>Đăng nhập</h4></Button> 
+                                </div>
+                                <div className="d-flex otherLogin mb-1">
+                                    <div>Hoặc đăng nhập bằng:</div>
+                                    <a href="#" className="btn btn-secondary"><i className="bi bi-facebook"></i></a>
+                                    <a href="#" className="btn btn-info"><i className="bi bi-twitter"></i></a>
+			                        <a href="#" className="btn btn-danger"><i className="bi bi-google"></i></a>
                                 </div>
                             </Form>
                             <Button dark onClick={this.toggleModal}>Chưa có tài khoản? Đăng ký</Button>

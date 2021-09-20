@@ -30,7 +30,8 @@ export default class SignUp extends Component {
         return (
             <div>
                 <Form onSubmit={this.handleSubmit}>
-                    <Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Email</Form.Label>
                         <Form.Control
                         type="email"
                         name="email"
@@ -40,7 +41,8 @@ export default class SignUp extends Component {
                         required
                         />
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Mật khẩu</Form.Label>
                         <Form.Control
                         type="password"
                         name="password"
@@ -50,7 +52,8 @@ export default class SignUp extends Component {
                         required
                         />
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Nhập lại mật khẩu</Form.Label>
                         <Form.Control
                         type="password"
                         name="password"
@@ -60,7 +63,9 @@ export default class SignUp extends Component {
                         required
                         />
                     </Form.Group>
-                    <Button type="submit">Đăng ký</Button>
+                    <div className="d-grid gap-2">
+                        <Button className="mb-3 submit" type="submit">Đăng ký</Button>
+                    </div>
                 </Form>
             </div>
         )

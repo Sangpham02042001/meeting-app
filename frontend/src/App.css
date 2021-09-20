@@ -1,3 +1,7 @@
+:root {
+  --main-color: linear-gradient(to right, #0d6efd 0%, #031633 100%);
+}
+
 .App {
   position: relative;
 }
@@ -14,19 +18,64 @@
 
 .btn-primary {
   color: #fff;
-  background-color: rgb(44, 26, 77);
-  border-color: rgb(44, 26, 77);
+  background: var(--main-color);
+  border-color: rgb(0, 0, 0);
 }
 
 .btn-primary:hover {
-  background-color: rgb(65, 37, 117);
+  background-color: rgb(69, 39, 124);
 }
 
 .login {
-  background-color: #ffffff;
+  background-color: #000000;
   border-radius: 10%;
-  color: rgb(70, 30, 145);
-  width: 25em;
-  height: 25em;
+  color: rgb(255, 255, 255);
+  width: 30em;
+  height: 30em;
+  /* font-family: 'Poppins'; */
   /* padding-top: 0px; */
+}
+
+/* @font-face {
+  font-family: 'Poppins';
+  src: url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLBT5Z11lFd2JQEl8qw.woff2) format('woff2');
+} */
+
+.otherLogin > * {
+  margin-right: 20px;
+}
+
+.loginPage {
+  background: var(--main-color);
+}
+
+.form-control {
+  background-color: #313131;
+  border: none;
+}
+
+.form-control:not(active){
+  background-color: #313131;
+}
+
+.form-control:focus{
+  background-color:#313131;
+  color: #fff;
+}
+
+.check-box {
+  background-color: #000000;
+}
+
+.modal-backdrop {
+  background-color: #000000;
+}
+
+.modal .modal-content {
+  background-color: #000000;
+  color: #fff;
+}
+
+.close-button {
+  background-color: #fff;
 }
