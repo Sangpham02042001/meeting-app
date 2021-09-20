@@ -1,5 +1,9 @@
 const { DataTypes, Model } = require('sequelize')
 const sequelize = require('./index')
+const Conversation = require('./conversation');
+const Team = require('./team');
+const Meeting = require('./meeting');
+const Message = require('./message')
 
 class User extends Model {
   getFullname() {
@@ -35,6 +39,56 @@ User.init({
 }, {
   sequelize,
   modelName: 'User'
+})
+
+User.belongsToMany(Conversation, {
+  through: 'Users_Conversations',
+  foreignKey: 'userId',
+})
+Conversation.belongsToMany(User, {
+  through: 'Users_Conversations',
+  foreignKey: 'conversationId',
+})
+
+User.belongsToMany(Team, {
+  through: 'Users_Teams',
+  foreignKey: 'userId'
+})
+Team.belongsToMany(User, {
+  through: 'Users_Teams',
+  foreignKey: 'teamId'
+})
+
+User.belongsToMany(Team, {
+  through: 'Request_Users_Teams',
+  foreignKey: 'userId'
+})
+Team.belongsToMany(User, {
+  through: 'Request_Users_Teams',
+  foreignKey: 'teamId'
+})
+
+Meeting.belongsTo(User, {
+  as: 'host',
+  foreignKey: 'hostId'
+})
+Team.belongsTo(User, {
+  as: 'host',
+  foreignKey: 'hostId'
+})
+
+Meeting.belongsToMany(User, {
+  through: 'Users_Meetings',
+  foreignKey: 'meetingId'
+})
+User.belongsToMany(Meeting, {
+  through: 'Users_Meetings',
+  foreignKey: 'userId'
+})
+
+User.hasMany(Message, {
+  as: 'messages',
+  foreignKey: 'userId'
 })
 
 module.exports = User
