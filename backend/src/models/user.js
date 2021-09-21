@@ -1,4 +1,4 @@
-const { DataTypes, Model } = require('sequelize')
+const { DataTypes, Model, Sequelize } = require('sequelize')
 const sequelize = require('./index')
 const Conversation = require('./conversation');
 const Team = require('./team');
@@ -52,19 +52,23 @@ Conversation.belongsToMany(User, {
 
 User.belongsToMany(Team, {
   through: 'Users_Teams',
+  as: 'teams',
   foreignKey: 'userId'
 })
 Team.belongsToMany(User, {
   through: 'Users_Teams',
+  as: 'members',
   foreignKey: 'teamId'
 })
 
 User.belongsToMany(Team, {
   through: 'Request_Users_Teams',
-  foreignKey: 'userId'
+  as: 'requestingTeams',
+  foreignKey: 'requestUserId'
 })
 Team.belongsToMany(User, {
   through: 'Request_Users_Teams',
+  as: 'requestUsers',
   foreignKey: 'teamId'
 })
 
