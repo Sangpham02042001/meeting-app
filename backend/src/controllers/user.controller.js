@@ -26,8 +26,8 @@ const signup = async (req, res) => {
       const newUser = await User.create({
         firstName, lastName, email, hash_password
       })
-      console.log(newUser.toJSON())
-      return res.status(201).json({ user: newUser.toJSON() })
+      newUser.hash_password = undefined
+      return res.status(201).json({ user: newUser })
     })
   } catch (error) {
     console.log(error)

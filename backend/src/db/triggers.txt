@@ -1,0 +1,13 @@
+DELIMITER $$
+DROP TRIGGER IF EXISTS after_team_insert;
+CREATE TRIGGER after_team_insert
+	AFTER INSERT ON teams
+    FOR EACH ROW
+BEGIN 
+	INSERT INTO users_teams
+    SET userId = NEW.hostId,
+		teamId = NEW.id,
+        createdAt = NOW(),
+        updatedAt = NOW();
+END $$
+DELIMITER ;

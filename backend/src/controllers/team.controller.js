@@ -1,10 +1,27 @@
 const formidable = require('formidable')
 const fs = require('fs')
+const sequelize = require('../models')
 const Team = require('../models/team')
 const User = require('../models/user')
 
 const getTeamInfo = async (req, res) => {
-
+  let { teamId } = req.params
+  const teams = await sequelize.query(
+    "SELECT t.name, t.teamType, COUNT(*) as numOfMembers " +
+    "FROM teams t " +
+    "LEFT JOIN users_teams ut ON t.id = ut.teamId " +
+    "WHERE t.id = :teamId",
+    {
+      replacements: {
+        teamId
+      },
+      raw: true,
+      type: sequelize.QueryTypes.SELECT
+    }
+  )
+  return res.status(200).json({
+    team: teams[0]
+  })
 }
 
 const createTeam = async (req, res) => {
@@ -41,10 +58,7 @@ const createTeam = async (req, res) => {
         coverPhoto,
         teamType,
         hostId: id
-      }, {
-        include: [User]
       })
-      console.log(team)
       team.coverPhoto = undefined
       return res.status(201).json({ team })
     } catch (error) {
@@ -54,4 +68,59 @@ const createTeam = async (req, res) => {
   })
 }
 
-module.exports = { getTeamInfo, createTeam }
+const getTeamCoverPhoto = async (req, res) => {
+  let { teamId } = req.params
+  let team = await Team.findOne({
+    where: {
+      id: teamId
+    },
+    attributes: ['coverPhoto']
+  })
+  if (!team) {
+    return res.status(400).json({ error: 'Team not found' })
+  }
+  if (team.coverPhoto) {
+    return res.send(team.coverPhoto)
+  }
+}
+
+const getTeamMembers = async (req, res) => {
+  let { teamId } = req.params
+  try {
+    const members = await sequelize.query(
+      "CALL getTeamMembers(:teamId)",
+      {
+        replacements: {
+          teamId
+        }
+      }
+    )
+    return res.status(200).json({ members })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const getTeamRequestMembers = async (req, res) => {
+  let { teamId } = req.params
+  try {
+    const requestMembers = await sequelize.query(
+      "CALL getTeamRequestMembers(:teamId)",
+      {
+        replacements: {
+          teamId
+        }
+      }
+    )
+    return res.status(200).json({ requestMembers })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+module.exports = {
+  getTeamInfo, createTeam, getTeamCoverPhoto,
+  getTeamMembers, getTeamRequestMembers
+}

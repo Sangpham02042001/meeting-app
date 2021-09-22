@@ -1,0 +1,56 @@
+DELIMITER $$
+DROP PROCEDURE IF EXISTS getTeamMembers;
+CREATE PROCEDURE getTeamMembers(IN teamId INT)
+BEGIN
+	SELECT CONCAT(u.firstName, ' ', u.lastName) as userName,
+		u.id
+	FROM users_teams ut
+	INNER JOIN users u ON u.id = ut.userId
+	WHERE ut.teamId = teamId; 
+END $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS getTeamRequestMembers;
+CREATE PROCEDURE getTeamRequestMembers(IN teamId INT)
+BEGIN 
+SELECT CONCAT(u.firstName, ' ', u.lastName) as userName,
+		u.id
+FROM request_users_teams rut
+INNER JOIN users u ON u.id = rut.requestUserId
+WHERE rut.teamId = teamId;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS updateBasicUserInfo;
+CREATE PROCEDURE updateBasicUserInfo(
+	IN userId INT,
+    IN firstName VARCHAR(255),
+    IN lastName VARCHAR(255),
+    IN avatar BLOB
+)
+BEGIN
+	IF firstName != '' THEN
+		UPDATE users
+        SET firstName = firstName
+        WHERE id = userId;
+    END IF;
+    
+    IF lastName != '' THEN
+		UPDATE users
+        SET lastName = lastName
+        WHERE id = userId;
+    END IF;
+    
+    IF avatar IS NOT NULL THEN
+		UPDATE users
+		SET avatar = avatar
+		WHERE id = userId;
+    END IF;
+    
+    SELECT u.id, u.lastName, u.firstName FROM users u
+    WHERE id = userId;
+END $$
+
+DELIMITER ;
