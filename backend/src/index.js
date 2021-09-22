@@ -54,15 +54,21 @@ io.on('connection', socket => {
             }
         });
 
+        socket.on('user-send-message', ({message, userId}) => {
+            socket.broadcast.to(roomID).emit('user-receive-message', {message, userId});
+        })
+
     });
 
     socket.on("sending signal", ({ signal, callerID, userToSignal }) => {
-        io.to(userToSignal).emit('user joined', { signal, callerID });
+        socket.to(userToSignal).emit('user joined', { signal, callerID });
     });
 
     socket.on("returning signal", ({ signal, callerID }) => {
-        io.to(callerID).emit('receiving returned signal', { signal, userId: socket.id });
+        socket.to(callerID).emit('receiving returned signal', { signal, userId: socket.id });
     });
+
+    
 });
 
 server.listen(PORT, HOST, () => {
