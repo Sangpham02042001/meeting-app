@@ -130,6 +130,7 @@ const requestJoinTeam = async (req, res) => {
     if (!team) {
       throw `Team ${team.name} not found`
     }
+    console.log(team)
     if (team.hostId == req.auth.id) {
       throw 'You are the admin of this group'
     }
@@ -137,7 +138,10 @@ const requestJoinTeam = async (req, res) => {
     let requestUsers = await team.getRequestUsers({
       attributes: ['id']
     })
-    let members = await team.getMembers()
+    let members = await team.getMembers({
+      attributes: ['id']
+    })
+    console.log(members)
     if (members.length && members.map(m => m.id).indexOf(req.auth.id) >= 0) {
       throw `You are the member of ${team.name} team`
     }
@@ -149,13 +153,36 @@ const requestJoinTeam = async (req, res) => {
       message: 'Request to join successfullly'
     })
   } catch (err) {
+    console.log(err)
     return res.status(400).json({
       error: err
     })
   }
 }
 
+const getTeamsJoined = async (req, res) => {
+  const { id } = req.auth
+  let user = await User.findByPk(id)
+  let teams = await user.getTeams({
+    attributes: ['id', 'hostId']
+  })
+  return res.status(200).json({
+    teams
+  })
+}
+
+const getTeamsRequesting = async (req, res) => {
+  const { id } = req.auth
+  let user = await User.findByPk(id)
+  let teams = await user.getRequestingTeams({
+    attributes: ['id', 'hostId']
+  })
+  return res.status(200).json({
+    teams
+  })
+}
+
 module.exports = {
   signup, getUserInfo, updateUserInfo, getUserAvatar,
-  requestJoinTeam
+  requestJoinTeam, getTeamsJoined, getTeamsRequesting
 }

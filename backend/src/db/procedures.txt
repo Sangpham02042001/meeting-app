@@ -52,5 +52,29 @@ BEGIN
     SELECT u.id, u.lastName, u.firstName FROM users u
     WHERE id = userId;
 END $$
+DELIMITER ;
 
+DELIMITER $$
+DROP PROCEDURE IF EXISTS removeRequestUsers;
+CREATE PROCEDURE removeRequestUsers(
+	users VARCHAR(255),
+    teamId INT,
+	confirmFlag BOOLEAN
+)
+BEGIN
+	DELETE FROM request_users_teams rut
+    WHERE rut.teamId = teamId AND FIND_IN_SET(rut.requestUserId, users);
+    IF confirmFlag THEN
+		SET @array = users;
+        WHILE (LOCATE(',', @array) > 0)
+        DO
+			SET @id = CONVERT(ELT(1, @array), SIGNED INT);
+            SET @array = SUBSTRING(@array, LOCATE(',',@array) + 1);
+            IF @id != '' THEN
+				INSERT INTO users_teams VALUES(NOW(), NOW(), @id, teamId);
+            END IF;
+        END WHILE;
+    END IF;
+    SELECT 'Successfully' message;
+END$$
 DELIMITER ;

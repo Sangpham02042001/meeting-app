@@ -102,7 +102,7 @@ const getTeamMembers = async (req, res) => {
   }
 }
 
-const getTeamRequestMembers = async (req, res) => {
+const getTeamRequestUsers = async (req, res) => {
   let { teamId } = req.params
   try {
     const requestMembers = await sequelize.query(
@@ -120,7 +120,77 @@ const getTeamRequestMembers = async (req, res) => {
   }
 }
 
+const isAdmin = async (req, res, next) => {
+  let { id } = req.auth
+  let { teamId } = req.params
+  try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      },
+      attributes: ['hostId']
+    })
+    if (!team) {
+      throw `Team not found`
+    }
+    console.log(team)
+    console.log(id)
+    if (team.hostId != id) {
+      throw `You aren't the admin of this group`
+    }
+    next()
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const confirmUserRequests = async (req, res) => {
+  let { teamId } = req.params
+  let { users } = req.body
+  let stringifyUsers = ''
+  users.forEach(userId => stringifyUsers += `${userId},`)
+  console.log(stringifyUsers)
+  const messages = await sequelize.query(
+    "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
+    {
+      replacements: {
+        users: stringifyUsers,
+        teamId,
+        confirmFlag: true
+      }
+    }
+  )
+  console.log(messages[0])
+  if (messages[0]) {
+    return res.status(200).json(messages[0])
+  }
+}
+
+const removeUserRequests = async (req, res) => {
+  let { teamId } = req.params
+  let { users } = req.body
+  let stringifyUsers = ''
+  users.forEach(userId => stringifyUsers += `${userId},`)
+  console.log(stringifyUsers)
+  const messages = await sequelize.query(
+    "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
+    {
+      replacements: {
+        users: stringifyUsers,
+        teamId,
+        confirmFlag: false
+      }
+    }
+  )
+  console.log(messages[0])
+  if (messages[0]) {
+    return res.status(200).json(messages[0])
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
-  getTeamMembers, getTeamRequestMembers
+  getTeamMembers, getTeamRequestUsers, isAdmin,
+  confirmUserRequests, removeUserRequests
 }
