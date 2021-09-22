@@ -133,11 +133,10 @@ const isAdmin = async (req, res, next) => {
     if (!team) {
       throw `Team not found`
     }
-    console.log(team)
-    console.log(id)
     if (team.hostId != id) {
       throw `You aren't the admin of this group`
     }
+    req.hostId = team.hostId
     next()
   } catch (error) {
     console.log(error)
@@ -170,6 +169,9 @@ const confirmUserRequests = async (req, res) => {
 const removeUserRequests = async (req, res) => {
   let { teamId } = req.params
   let { users } = req.body
+  if (users.indexOf(req.hostId) >= 0) {
+    throw `You are the admin of this group, can't remove yourself!`
+  }
   let stringifyUsers = ''
   users.forEach(userId => stringifyUsers += `${userId},`)
   console.log(stringifyUsers)
@@ -189,8 +191,38 @@ const removeUserRequests = async (req, res) => {
   }
 }
 
+const removeMembers = async (req, res) => {
+  let { teamId } = req.params
+  let { users } = req.body
+  let stringifyUsers = ''
+  users.forEach(userId => stringifyUsers += `${userId},`)
+  console.log(stringifyUsers)
+  try {
+    const result = await sequelize.query(
+      "DELETE FROM users_teams ut " +
+      "WHERE ut.teamId = :teamId AND FIND_IN_SET(ut.userId, :users);",
+      {
+        replacements: {
+          teamId,
+          users: stringifyUsers
+        }
+      }
+    )
+    console.log(result)
+    if (result.length > 0) {
+      return res.status(200).json({
+        message: 'Remove members successfully'
+      })
+    }
+    return res.status(200).json({ result })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers, isAdmin,
-  confirmUserRequests, removeUserRequests
+  confirmUserRequests, removeUserRequests, removeMembers
 }

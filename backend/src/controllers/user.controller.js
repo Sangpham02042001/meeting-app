@@ -130,7 +130,6 @@ const requestJoinTeam = async (req, res) => {
     if (!team) {
       throw `Team ${team.name} not found`
     }
-    console.log(team)
     if (team.hostId == req.auth.id) {
       throw 'You are the admin of this group'
     }
@@ -141,7 +140,6 @@ const requestJoinTeam = async (req, res) => {
     let members = await team.getMembers({
       attributes: ['id']
     })
-    console.log(members)
     if (members.length && members.map(m => m.id).indexOf(req.auth.id) >= 0) {
       throw `You are the member of ${team.name} team`
     }
