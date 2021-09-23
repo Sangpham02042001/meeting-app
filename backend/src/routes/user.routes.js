@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const { signup, getUserInfo, updateUserInfo, getUserAvatar,
-  requestJoinTeam, getTeamsJoined, getTeamsRequesting, outTeam } = require('../controllers/user.controller')
+  requestJoinTeam, getTeamsJoined, getRequestingTeams,
+  outTeam, cancelJoinRequest } = require('../controllers/user.controller')
 const { requireSignin } = require('../controllers/auth.controller')
 
 const router = Router()
@@ -18,7 +19,10 @@ router.route('/api/users/:userId/teams/:teamId')
   .delete(requireSignin, outTeam)
 
 router.route('/api/users/:userId/requesting-teams')
-  .get(requireSignin, getTeamsRequesting)
+  .get(requireSignin, getRequestingTeams)
+
+router.route('/api/users/:userId/requesting-teams/:teamId')
+  .delete(requireSignin, cancelJoinRequest)
 
 router.route('/api/users/:userId')
   .get(getUserInfo)

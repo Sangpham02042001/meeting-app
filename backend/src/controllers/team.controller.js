@@ -1,5 +1,6 @@
 const formidable = require('formidable')
 const fs = require('fs')
+const { QueryTypes } = require('sequelize')
 const sequelize = require('../models')
 const Team = require('../models/team')
 const User = require('../models/user')
@@ -239,9 +240,36 @@ const removeTeam = async (req, res) => {
   }
 }
 
+const inviteUsers = async (req, res) => {
+  let { users } = req.body
+  let { teamId } = req.params
+  try {
+    let result
+    for (let user of users) {
+      result = await sequelize.query(
+        "INSERT INTO invited_users_teams " +
+        "SET teamId = :teamId, invitedUserId = :user, createdAt = NOW(), updatedAt = NOW()",
+        {
+          replacements: {
+            teamId, user
+          },
+          type: QueryTypes.INSERT
+        }
+      )
+      console.log(result)
+    }
+    return res.status(200).json({
+      message: 'Invite successfully'
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers, isAdmin,
   confirmUserRequests, removeUserRequests, removeMembers,
-  removeTeam
+  removeTeam, inviteUsers
 }

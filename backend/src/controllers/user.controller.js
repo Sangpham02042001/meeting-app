@@ -4,6 +4,7 @@ const formidable = require('formidable')
 const User = require('../models/user')
 const Team = require('../models/team')
 const sequelize = require('../models')
+const { QueryTypes } = require('sequelize')
 
 let saltRounds = 10
 
@@ -128,7 +129,7 @@ const requestJoinTeam = async (req, res) => {
       attributes: ['hostId', 'name']
     })
     if (!team) {
-      throw `Team ${team.name} not found`
+      throw `Team with id ${teamId} not found`
     }
     if (team.hostId == req.auth.id) {
       throw 'You are the admin of this group'
@@ -169,7 +170,7 @@ const getTeamsJoined = async (req, res) => {
   })
 }
 
-const getTeamsRequesting = async (req, res) => {
+const getRequestingTeams = async (req, res) => {
   const { id } = req.auth
   let user = await User.findByPk(id)
   let teams = await user.getRequestingTeams({
@@ -196,16 +197,17 @@ const outTeam = async (req, res) => {
       if (members.map(member => member.id).indexOf(userId) < 0) {
         throw `You are not the member of this group`
       }
-      let result = await sequelize.query(
+      await sequelize.query(
         "DELETE FROM users_teams WHERE teamId = :teamId AND userId = :userId",
         {
           replacements: {
             teamId, userId
-          }
+          },
+          type: QueryTypes.DELETE
         }
       )
       return res.status(200).json({
-        result
+        message: 'Out team successfully'
       })
     }
   } catch (error) {
@@ -214,8 +216,27 @@ const outTeam = async (req, res) => {
   }
 }
 
+const cancelJoinRequest = async (req, res) => {
+  let { userId, teamId } = req.params
+  try {
+    await sequelize.query(
+      "DELETE FROM request_users_teams WHERE teamId = :teamId AND requestUserId = :userId",
+      {
+        replacements: {
+          teamId, userId
+        },
+        type: QueryTypes.DELETE
+      }
+    )
+    return res.status(200).json({ message: 'Cancel join request successfully' })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   signup, getUserInfo, updateUserInfo, getUserAvatar,
-  requestJoinTeam, getTeamsJoined, getTeamsRequesting,
-  outTeam
+  requestJoinTeam, getTeamsJoined, getRequestingTeams,
+  outTeam, cancelJoinRequest
 }

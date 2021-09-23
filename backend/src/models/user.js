@@ -72,6 +72,17 @@ Team.belongsToMany(User, {
   foreignKey: 'teamId'
 })
 
+User.belongsToMany(Team, {
+  through: 'Invited_Users_Teams',
+  as: 'invitedTeams',
+  foreignKey: 'invitedUserId'
+})
+Team.belongsToMany(User, {
+  through: 'Invited_Users_Teams',
+  as: 'invitedUsers',
+  foreignKey: 'teamId'
+})
+
 Meeting.belongsTo(User, {
   as: 'host',
   foreignKey: 'hostId'
