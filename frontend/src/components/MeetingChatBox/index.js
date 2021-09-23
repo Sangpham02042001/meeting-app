@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Button, InputGroup, FormControl } from 'react-bootstrap';
-import './chatBox.css';
+import './meetingChatBox.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendMessage } from '../../store/reducers/roomChatBox';
 import { socketClient } from '../../utils';

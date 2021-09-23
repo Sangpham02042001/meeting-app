@@ -1,12 +1,138 @@
+.home-app {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    height: calc(100% - 56px);
+}
+
 .list-selection {
     display: flex;
     flex-direction: column;
-    list-style-type: none;
     width: 80px;
-    height: 100%;
-    position: absolute;
+    position: relative;
     margin: 0;
     padding: 0;
-    background-color: rgb(90, 118, 156);
+    background-color: #212529;
+    height: 100%;
+    text-align: center;
     
+}
+
+.btn-list-selection {
+    margin-top: 25px;
+}
+
+.btn-list-selection .btn-default {
+    width: 60px;
+    height: 60px;
+    border-style: none;
+    border-radius: 15px;
+    background-color: #31363b;
+    color: white
+ 
+}
+
+.btn-list-selection .btn-default:hover {
+    background-color: rgba(207, 209, 211, 0.212);
+}
+
+.btn-list-selection .btn-active {
+    width: 60px;
+    height: 60px;
+    border-style: none;
+    border-radius: 15px;
+    background-color: #4e6379;
+    color: white
+}
+
+.user-list-selection {
+    margin-bottom: 100px;
+}
+
+.user-list-selection .btn-user {
+    width: 60px;
+    height: 60px;
+    border-style: none;
+    border-radius: 50%;
+    background-color: #212529;
+    color: white
+}
+
+.user-list-selection .btn-user:hover {
+    background-color: #e9e9e91c;
+}
+
+.friend-chat-list {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-width: 250px;
+    width: 20%;
+    height: 100%;
+    background-color: #f0f0f0;
+    box-shadow: 2px 2px 1px #dadcdf;
+}
+
+.friend-chat {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 15px;
+}
+
+.friend-chat:hover {
+    background-color: #ffffff;
+}
+
+.friend-chat-content {
+    width: 80%;
+    background-color: #ccdbeb;
+}
+
+
+.group-chat-list {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-width: 250px;
+    width: 20%;
+    height: 100%;
+    background-color: #f0f0f0;
+    box-shadow: 2px 2px 1px #dadcdf;
+    z-index: 5px;
+}
+
+
+.group-chat {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 15px;
+}
+
+.group-chat:hover {
+    background-color: #ffffff;
+}
+
+.group-chat-content {
+    display: flex;
+    flex-direction: column;
+    width: 65%;
+    height: 100%;
+    background-color: aliceblue;
+    position: relative;
+    z-index: -5px;
+    
+}
+
+.member-group {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    top: 0;
+    right: 0;
+    background-color: #869bb1;
+    width: 15%;
+    height: 100%;
+    min-width: 150px;
 }

@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Home from "./routes/home";
 import Meeting from "./routes/meeting";
-import Main from './components/MainComponent';
 import Login from './components/auth/LoginComponent';
 import SignUp from './components/auth/SignUpComponent';
 import './App.css'
@@ -13,7 +12,6 @@ function App() {
       <Switch>
         <Route path="/" exact component={Home} />
         <Route path="/meeting/:meetingId" component={Meeting} />
-        {/* <Route exact path="/" component={() => <Main />} /> */}
         <Route exact path="/login" component={() => <Login />} />
         <Route exact path="/signup" component={() => <SignUp />} />
         <Redirect to="/" />

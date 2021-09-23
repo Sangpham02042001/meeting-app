@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { socketClient } from "../../utils";
 import Peer from "simple-peer";
-import Video from "../../components/Video";
+import Video from "../../components/MeetingVideo";
 import './meeting.css';
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import ChatBox from "../../components/ChatBox";
+import MeetingChatBox from "../../components/MeetingChatBox";
 
 
 
@@ -196,13 +196,13 @@ const Meeting = (props) => {
                     </Col>
                     {isOpenChat &&
                         <Col md="3">
-                            <ChatBox chatVisible={handleVisibleChat} sendMessage={handleSendMessage} />
+                            <MeetingChatBox chatVisible={handleVisibleChat} sendMessage={handleSendMessage} />
                         </Col>
                     }
 
                     {isOpenUsers &&
-                        <Col className="chatbox" md="4">
-                            <div className="chatbox-header">
+                        <Col className="Meetingchatbox" md="4">
+                            <div className="Meetingchatbox-header">
                                 Users
                                 <span>
                                     <Button variant="outline-light" onClick={handleVisibleUsers}>
@@ -210,7 +210,7 @@ const Meeting = (props) => {
                                     </Button>
                                 </span>
                             </div>
-                            <div className="chatbox-content">
+                            <div className="Meetingchatbox-content">
 
                             </div>
 
@@ -218,8 +218,8 @@ const Meeting = (props) => {
                     }
 
                     {isOpenInfo &&
-                        <Col className="chatbox" md="4">
-                            <div className="chatbox-header">
+                        <Col className="Meetingchatbox" md="4">
+                            <div className="Meetingchatbox-header">
                                 Info
                                 <span>
                                     <Button variant="outline-light" onClick={handleVisibleInfo}>
@@ -227,7 +227,7 @@ const Meeting = (props) => {
                                     </Button>
                                 </span>
                             </div>
-                            <div className="chatbox-content">
+                            <div className="Meetingchatbox-content">
 
                             </div>
                         </Col>
