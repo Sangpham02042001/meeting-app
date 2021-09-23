@@ -50,6 +50,7 @@ const getUserInfo = async (req, res) => {
       })
     }
     user.hash_password = undefined
+    user.avatar = undefined
     console.log((await user).getFullname)
     return res.status(200).json({ user })
   } catch (error) {
@@ -159,7 +160,7 @@ const requestJoinTeam = async (req, res) => {
   }
 }
 
-const getTeamsJoined = async (req, res) => {
+const getJoinedTeams = async (req, res) => {
   const { id } = req.auth
   let user = await User.findByPk(id)
   let teams = await user.getTeams({
@@ -174,7 +175,7 @@ const getRequestingTeams = async (req, res) => {
   const { id } = req.auth
   let user = await User.findByPk(id)
   let teams = await user.getRequestingTeams({
-    attributes: ['id', 'hostId']
+    attributes: ['id', 'hostId', 'name']
   })
   return res.status(200).json({
     teams
@@ -235,8 +236,74 @@ const cancelJoinRequest = async (req, res) => {
   }
 }
 
+const confirmInvitations = async (req, res) => {
+  let { userId } = req.params
+  let { teams } = req.body
+  let stringifyTeams = ''
+  teams.forEach(userId => stringifyTeams += `${userId},`)
+  console.log(stringifyTeams)
+  try {
+    const messages = await sequelize.query(
+      "CALL removeInvitations(:teams, :userId, :confirmFlag)",
+      {
+        replacements: {
+          teams: stringifyTeams,
+          userId,
+          confirmFlag: true
+        }
+      }
+    )
+    console.log(messages[0])
+    if (messages[0]) {
+      return res.status(200).json(messages[0])
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const removeInvitations = async (req, res) => {
+  let { userId } = req.params
+  let { teams } = req.body
+  let stringifyTeams = ''
+  teams.forEach(userId => stringifyTeams += `${userId},`)
+  console.log(stringifyTeams)
+  try {
+    const messages = await sequelize.query(
+      "CALL removeInvitations(:teams, :userId, :confirmFlag)",
+      {
+        replacements: {
+          teams: stringifyTeams,
+          userId,
+          confirmFlag: false
+        }
+      }
+    )
+    console.log(messages[0])
+    if (messages[0]) {
+      return res.status(200).json(messages[0])
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const getInvitations = async (req, res) => {
+  const { id } = req.auth
+  let user = await User.findByPk(id)
+  let teams = await user.getInvitedTeams({
+    attributes: ['id', 'hostId', 'name']
+  })
+  return res.status(200).json({
+    teams
+  })
+}
+
 module.exports = {
   signup, getUserInfo, updateUserInfo, getUserAvatar,
-  requestJoinTeam, getTeamsJoined, getRequestingTeams,
-  outTeam, cancelJoinRequest
+  requestJoinTeam, getJoinedTeams, getRequestingTeams,
+  outTeam, cancelJoinRequest, confirmInvitations,
+  removeInvitations, getInvitations
 }

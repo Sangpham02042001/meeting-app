@@ -151,19 +151,24 @@ const confirmUserRequests = async (req, res) => {
   let stringifyUsers = ''
   users.forEach(userId => stringifyUsers += `${userId},`)
   console.log(stringifyUsers)
-  const messages = await sequelize.query(
-    "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
-    {
-      replacements: {
-        users: stringifyUsers,
-        teamId,
-        confirmFlag: true
+  try {
+    const messages = await sequelize.query(
+      "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
+      {
+        replacements: {
+          users: stringifyUsers,
+          teamId,
+          confirmFlag: true
+        }
       }
+    )
+    console.log(messages[0])
+    if (messages[0]) {
+      return res.status(200).json(messages[0])
     }
-  )
-  console.log(messages[0])
-  if (messages[0]) {
-    return res.status(200).json(messages[0])
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
   }
 }
 
@@ -176,19 +181,24 @@ const removeUserRequests = async (req, res) => {
   let stringifyUsers = ''
   users.forEach(userId => stringifyUsers += `${userId},`)
   console.log(stringifyUsers)
-  const messages = await sequelize.query(
-    "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
-    {
-      replacements: {
-        users: stringifyUsers,
-        teamId,
-        confirmFlag: false
+  try {
+    const messages = await sequelize.query(
+      "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
+      {
+        replacements: {
+          users: stringifyUsers,
+          teamId,
+          confirmFlag: false
+        }
       }
+    )
+    console.log(messages[0])
+    if (messages[0]) {
+      return res.status(200).json(messages[0])
     }
-  )
-  console.log(messages[0])
-  if (messages[0]) {
-    return res.status(200).json(messages[0])
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
   }
 }
 
@@ -199,23 +209,20 @@ const removeMembers = async (req, res) => {
   users.forEach(userId => stringifyUsers += `${userId},`)
   console.log(stringifyUsers)
   try {
-    const result = await sequelize.query(
+    await sequelize.query(
       "DELETE FROM users_teams ut " +
       "WHERE ut.teamId = :teamId AND FIND_IN_SET(ut.userId, :users);",
       {
         replacements: {
           teamId,
           users: stringifyUsers
-        }
+        },
+        type: QueryTypes.DELETE
       }
     )
-    console.log(result)
-    if (result.length > 0) {
-      return res.status(200).json({
-        message: 'Remove members successfully'
-      })
-    }
-    return res.status(200).json({ result })
+    return res.status(200).json({
+      message: 'Remove members successfully'
+    })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
@@ -225,15 +232,16 @@ const removeMembers = async (req, res) => {
 const removeTeam = async (req, res) => {
   let { teamId } = req.params
   try {
-    const result = await sequelize.query(
+    await sequelize.query(
       "DELETE FROM teams WHERE id = :teamId",
       {
         replacements: {
           teamId
-        }
+        },
+        type: QueryTypes.DELETE
       }
     )
-    return res.status(200).json({ result })
+    return res.status(200).json({ message: 'Delete team successfully' })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
@@ -267,9 +275,39 @@ const inviteUsers = async (req, res) => {
   }
 }
 
+const removeInvitations = async (req, res) => {
+  let { teamId } = req.params
+  let { users } = req.body
+  try {
+    if (!users || users.length === 0) {
+      throw 'Error with removing empty user list'
+    }
+    let stringifyUsers = ''
+    users.forEach(userId => stringifyUsers += `${userId},`)
+    console.log(stringifyUsers)
+    await sequelize.query(
+      "DELETE FROM invited_users_teams iut " +
+      "WHERE iut.teamId = :teamId AND FIND_IN_SET(iut.invitedUserId, :users);",
+      {
+        replacements: {
+          teamId,
+          users: stringifyUsers
+        },
+        type: QueryTypes.DELETE
+      }
+    )
+    return res.status(200).json({
+      message: 'Remove invitations successfully'
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers, isAdmin,
   confirmUserRequests, removeUserRequests, removeMembers,
-  removeTeam, inviteUsers
+  removeTeam, inviteUsers, removeInvitations
 }

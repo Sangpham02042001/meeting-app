@@ -78,3 +78,28 @@ BEGIN
     SELECT 'Successfully' message;
 END$$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS removeInvitations;
+CREATE PROCEDURE removeInvitations(
+	teams VARCHAR(255),
+    userId INT,
+	confirmFlag BOOLEAN
+)
+BEGIN
+	DELETE FROM invited_users_teams iut
+    WHERE iut.invitedUserId = userId AND FIND_IN_SET(iut.teamId, teams);
+    IF confirmFlag THEN
+		SET @array = teams;
+        WHILE (LOCATE(',', @array) > 0)
+        DO
+			SET @id = CONVERT(ELT(1, @array), SIGNED INT);
+            SET @array = SUBSTRING(@array, LOCATE(',',@array) + 1);
+            IF @id != '' THEN
+				INSERT INTO users_teams VALUES(NOW(), NOW(), userId, @id);
+            END IF;
+        END WHILE;
+    END IF;
+    SELECT 'Successfully' message;
+END $$
+DELIMITER ;
