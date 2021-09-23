@@ -221,8 +221,27 @@ const removeMembers = async (req, res) => {
   }
 }
 
+const removeTeam = async (req, res) => {
+  let { teamId } = req.params
+  try {
+    const result = await sequelize.query(
+      "DELETE FROM teams WHERE id = :teamId",
+      {
+        replacements: {
+          teamId
+        }
+      }
+    )
+    return res.status(200).json({ result })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers, isAdmin,
-  confirmUserRequests, removeUserRequests, removeMembers
+  confirmUserRequests, removeUserRequests, removeMembers,
+  removeTeam
 }

@@ -11,3 +11,29 @@ BEGIN
         updatedAt = NOW();
 END $$
 DELIMITER ;
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS before_meeting_delete;
+CREATE TRIGGER before_meeting_delete
+BEFORE DELETE ON meetings FOR EACH ROW
+BEGIN 
+	DELETE FROM users_meetings um
+    WHERE um.meetingId = OLD.id;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS before_team_delete;
+CREATE TRIGGER before_team_delete
+BEFORE DELETE ON teams FOR EACH ROW
+BEGIN 
+	DELETE FROM meetings m
+    WHERE m.teamId = OLD.id;
+
+    DELETE FROM users_teams ut
+    WHERE ut.teamId = OLD.id;
+
+    DELETE FROM request_users_teams rut
+    WHERE rut.teamId = OLD.id;
+END $$
+DELIMITER ;

@@ -162,7 +162,7 @@ const getTeamsJoined = async (req, res) => {
   const { id } = req.auth
   let user = await User.findByPk(id)
   let teams = await user.getTeams({
-    attributes: ['id', 'hostId']
+    attributes: ['id', 'hostId', 'name']
   })
   return res.status(200).json({
     teams
@@ -180,7 +180,42 @@ const getTeamsRequesting = async (req, res) => {
   })
 }
 
+const outTeam = async (req, res) => {
+  let { userId, teamId } = req.params
+  try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      },
+      attributes: ['hostId', 'name']
+    })
+    if (team) {
+      let members = await team.getMembers({
+        attributes: ['id']
+      })
+      if (members.map(member => member.id).indexOf(userId) < 0) {
+        throw `You are not the member of this group`
+      }
+      let result = await sequelize.query(
+        "DELETE FROM users_teams WHERE teamId = :teamId AND userId = :userId",
+        {
+          replacements: {
+            teamId, userId
+          }
+        }
+      )
+      return res.status(200).json({
+        result
+      })
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   signup, getUserInfo, updateUserInfo, getUserAvatar,
-  requestJoinTeam, getTeamsJoined, getTeamsRequesting
+  requestJoinTeam, getTeamsJoined, getTeamsRequesting,
+  outTeam
 }
