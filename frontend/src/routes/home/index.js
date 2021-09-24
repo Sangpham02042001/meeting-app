@@ -6,6 +6,7 @@ import Teams from "../teams";
 import Friends from "../friends";
 import Setting from "../setting";
 import Profile from "../profile";
+import HomeComponent from "../../components/HomeComponent";
 
 const Home = (props) => {
 
@@ -51,12 +52,7 @@ const Home = (props) => {
                     </div>
                     <Switch>
                         <Route exact path="/">
-                            <div className="home-component">
-                                Write here
-                                <h1>
-                                    Hello
-                                </h1>
-                            </div>
+                            <HomeComponent />
                         </Route>
                         <Route path="/profile">
                             <Profile />
