@@ -11,6 +11,7 @@ function App() {
     <BrowserRouter>
       <Switch>
         <Route path="/" exact component={Home} />
+        {/* <Route path="/teams" /> */}
         <Route path="/meeting/:meetingId" component={Meeting} />
         <Route exact path="/login" component={() => <Login />} />
         <Route exact path="/signup" component={() => <SignUp />} />

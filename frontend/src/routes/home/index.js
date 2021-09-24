@@ -1,33 +1,13 @@
 import React, { useState } from "react";
-import { v1 as uuid } from "uuid";
 import { Button, Container, Navbar } from 'react-bootstrap';
+import { BrowserRouter as Router, Route, Switch, Redirect, Link, NavLink } from "react-router-dom";
 import './home.css';
+import Teams from "../teams";
+import Friends from "../friends";
+import Setting from "../setting";
+import Profile from "../profile";
 
 const Home = (props) => {
-    const [isFriendList, setIsFriendList] = useState(false);
-    const [isGroupList, setIsGroupList] = useState(false);
-
-    const create = () => {
-        const id = uuid();
-        props.history.push(`/meeting/${id}`);
-    }
-
-    const handleShowFriendList = () => {
-        if (isGroupList) {
-            setIsGroupList(false)
-        }
-        setIsFriendList(true);
-
-    }
-
-    const handleShowGroupList = () => {
-        if (isFriendList) {
-            setIsFriendList(false)
-        }
-        setIsGroupList(true);
-
-    }
-
 
     return (
         <>
@@ -39,105 +19,48 @@ const Home = (props) => {
                 </Container>
             </Navbar>
             <div className="home-app">
-                <div className="list-selection">
-                    <div className="user-list-selection">
-                        <button className="btn-user">
-                            <i className="fas fa-user"></i>
-                        </button>
-                    </div>
-                    <div className="btn-list-selection">
-                        <button className={isFriendList ? "btn-active" : "btn-default"} onClick={handleShowFriendList}>Friend</button>
-                    </div>
-                    <div className="btn-list-selection">
-                        <button className={isGroupList ? "btn-active" : "btn-default"} onClick={handleShowGroupList}>Group</button>
-                    </div>
-                    <div className="btn-list-selection">
-                        <button className="btn-default" >Note</button>
-                    </div>
-                    <div className="btn-list-selection">
-                        <button className="btn-default" >Setting</button>
-                    </div>
+                <Router>
+                    <div className="list-selection">
+                        <div className="user-list-selection">
+                            <Link to='/profile'>
+                                <button className="btn-user" >
+                                    <i className="fas fa-user"></i>
+                                </button>
+                            </Link>
 
-                </div>
-                {isFriendList &&
-                    <>
-                        <div className="friend-chat-list">
-                            <div className="friend-chat">
-                                <div>Avatar</div>
-                                <div style={{ marginLeft: "15px" }}>
-                                    <div>
-                                        Name
-                                    </div>
-                                    <div>content</div>
-                                </div>
-                            </div>
-                            <div className="friend-chat">
-                                <div>Avatar</div>
-                                <div style={{ marginLeft: "15px" }}>
-                                    <div>
-                                        Name
-                                    </div>
-                                    <div>content</div>
-                                </div>
-                            </div>
                         </div>
-                        <div className="friend-chat-content">
-                            <h2>Content</h2>
+                        <div className="btn-list-selection">
+                            <NavLink to='/friends' activeClassName="btn-active">
+                                <button className="btn-default" >Friend</button>
+                            </NavLink>
                         </div>
-                    </>
-                }
-                {isGroupList &&
-                    <>
-                        <div className="group-chat-list">
-                            <div className="group-chat">
-                                <div>Avatar</div>
-                                <div style={{ marginLeft: "15px" }}>
-                                    <div>
-                                        Group
-                                    </div>
-                                    <div>content </div>
-                                </div>
-                            </div>
-                            <div className="group-chat">
-                                <div>Avatar</div>
-                                <div style={{ marginLeft: "15px" }}>
-                                    <div>
-                                        Group
-                                    </div>
-                                    <div>
-                                        content
+                        <div className="btn-list-selection">
+                            <NavLink to='/teams'  activeClassName="btn-active">
+                                <button className="btn-default"> Group</button>
+                            </NavLink>
+                        </div>
+                        <div className="btn-list-selection">
+                            <NavLink to='/setting'  activeClassName="btn-active">
+                                <button className="btn-default" >Setting</button>
+                            </NavLink>
+                        </div>
 
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="group-chat-content">
-                            <h2>Content</h2>
-                            <div className="btn-list-selection">
-                                <Button onClick={create} style={{color: "black"}}>
-                                    Start
-                                </Button>
-                            </div>
-                        </div>
-                        <div className="member-group">
-                            <div>
-                                member 1
-                            </div>
-                            <div>
-                                memeber 2
-                            </div>
-                            <div>
-                                member 3
-                            </div>
-                            <div>
-                                memeber 4
-                            </div>
-                            <div>
-                                memeber 5
-                            </div>
-                        </div>
-                    </>
-                }
+                    </div>
+                    <Switch>
+                        <Route path="/profile">
+                            <Profile />
+                        </Route>
+                        <Route path="/friends" >
+                            <Friends />
+                        </Route>
+                        <Route path="/teams" >
+                            <Teams />
+                        </Route>
+                        <Route path="/setting" >
+                            <Setting />
+                        </Route>
+                    </Switch>
+                </Router>
 
             </div>
         </>
