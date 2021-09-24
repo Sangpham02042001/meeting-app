@@ -1,22 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
 import { Form, Button, Alert } from "react-bootstrap";
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
+import Loading from "../Loading";
+import { isAuthenticated } from "../../store/reducers/user";
 import './auth.css'
 
 export default function SignUp() {
-    // constructor(props) {
-    //     super(props);
+    const userReducer = useSelector(state => state.userReducer)
+    const dispatch = useDispatch()
 
-    //     this.state = {
-    //         email: "",
-    //         password: "",
-    //         password_confirmation: "",
-    //         signupErrors: ""
-    //     }
+    useEffect(() => {
+        if (!userReducer.loaded) {
+            dispatch(isAuthenticated())
+        }
+    }, [])
 
-    //     this.handleChange = this.handleChange.bind(this);
-    //     this.handleSubmit = this.handleSubmit.bind(this);
-    // }
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [email, setEmail] = useState('')
@@ -61,79 +60,81 @@ export default function SignUp() {
         }
     }
     return (
-        <div style={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
-            <div className="form-container">
-                <h1 style={{ marginBottom: '30px' }}>Meeting App</h1>
-                <Form onSubmit={handleSubmit} className="auth-form">
-                    <Form.Group className="mb-3">
-                        <Form.Label>First Name</Form.Label>
-                        <Form.Control
-                            name="firstName"
-                            placeholder="First Name"
-                            value={firstName}
-                            onChange={handleChange("firstName")}
-                            required
-                        />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Last Name</Form.Label>
-                        <Form.Control
-                            name="lastName"
-                            placeholder="Last Name"
-                            value={lastName}
-                            onChange={handleChange("lastName")}
-                            required
-                        />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Email</Form.Label>
-                        <Form.Control
-                            type="email"
-                            name="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={handleChange("email")}
-                            required
-                        />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control
-                            type="password"
-                            name="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={handleChange("password")}
-                            required
-                            autoComplete="off"
-                        />
-                    </Form.Group>
-                    {passwordError && <p className="error-message">
-                        {passwordError}
-                    </p>}
-                    <Form.Group className="mb-3">
-                        <Form.Label>Confirm Password</Form.Label>
-                        <Form.Control
-                            type="password"
-                            name="password"
-                            placeholder="Confirm Password"
-                            value={passwordConfirmation}
-                            onChange={handleChange("passwordConfirmation")}
-                            required
-                            autoComplete="off"
-                        />
-                    </Form.Group>
-                    {passwordCfError && <p className="error-message">
-                        {passwordCfError}
-                    </p>}
-                    <div>
-                        <Button className="mb-3 submit-btn" type="submit">Sign up</Button> <br />
-                        <p style={{ textAlign: 'center', marginBottom: 0 }}>
-                            Have account ? <Link to="/login">Sign in here</Link>
-                        </p>
+        !userReducer.loaded ? <Loading />
+            : (userReducer.authenticated ? <Redirect to="/" />
+                : <div style={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
+                    <div className="form-container">
+                        <h1 style={{ marginBottom: '30px' }}>Meeting App</h1>
+                        <Form onSubmit={handleSubmit} className="auth-form">
+                            <Form.Group className="mb-3">
+                                <Form.Label>First Name</Form.Label>
+                                <Form.Control
+                                    name="firstName"
+                                    placeholder="First Name"
+                                    value={firstName}
+                                    onChange={handleChange("firstName")}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Last Name</Form.Label>
+                                <Form.Control
+                                    name="lastName"
+                                    placeholder="Last Name"
+                                    value={lastName}
+                                    onChange={handleChange("lastName")}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Email</Form.Label>
+                                <Form.Control
+                                    type="email"
+                                    name="email"
+                                    placeholder="Email"
+                                    value={email}
+                                    onChange={handleChange("email")}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Password</Form.Label>
+                                <Form.Control
+                                    type="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    value={password}
+                                    onChange={handleChange("password")}
+                                    required
+                                    autoComplete="off"
+                                />
+                            </Form.Group>
+                            {passwordError && <p className="error-message">
+                                {passwordError}
+                            </p>}
+                            <Form.Group className="mb-3">
+                                <Form.Label>Confirm Password</Form.Label>
+                                <Form.Control
+                                    type="password"
+                                    name="password"
+                                    placeholder="Confirm Password"
+                                    value={passwordConfirmation}
+                                    onChange={handleChange("passwordConfirmation")}
+                                    required
+                                    autoComplete="off"
+                                />
+                            </Form.Group>
+                            {passwordCfError && <p className="error-message">
+                                {passwordCfError}
+                            </p>}
+                            <div>
+                                <Button className="mb-3 submit-btn" type="submit">Sign up</Button> <br />
+                                <p style={{ textAlign: 'center', marginBottom: 0 }}>
+                                    Have account ? <Link to="/login">Sign in here</Link>
+                                </p>
+                            </div>
+                        </Form>
                     </div>
-                </Form>
-            </div>
-        </div>
+                </div>)
     )
 }

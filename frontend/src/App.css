@@ -7,6 +7,13 @@
   position: relative;
 }
 
+.layout {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  height: calc(100% - 56px);
+}
+
 /* .my-video {
   position: absolute;
   left: 0;

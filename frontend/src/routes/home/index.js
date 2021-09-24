@@ -1,26 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
 import { Button, Container, Navbar } from 'react-bootstrap';
-import { BrowserRouter as Router, Route, Switch, Redirect, Link, NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import './home.css';
-import Teams from "../teams";
-import Friends from "../friends";
-import Setting from "../setting";
-import Profile from "../profile";
+import Welcome from "../../components/Welcome";
 import HomeComponent from "../../components/HomeComponent";
+import { isAuthenticated } from '../../store/reducers/user';
+import Loading from "../../components/Loading";
 
 const Home = (props) => {
+    const userReducer = useSelector(state => state.userReducer)
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if (!userReducer.loaded) {
+            dispatch(isAuthenticated())
+        }
+    }, [])
 
     return (
-        <>
-            <Navbar bg="dark" variant="dark">
-                <Container>
-                    <Navbar.Brand href="/">
-                        MEETING APP
-                    </Navbar.Brand>
-                </Container>
-            </Navbar>
-            <div className="home-app">
-                <Router>
+        !userReducer.loaded ? <Loading /> : (
+            userReducer.authenticated ? <>
+                <Navbar bg="dark" variant="dark">
+                    <Container>
+                        <Navbar.Brand href="/">
+                            MEETING APP
+                        </Navbar.Brand>
+                    </Container>
+                </Navbar>
+                <div className="layout">
                     <div className="list-selection">
                         <div className="user-list-selection">
                             <Link to='/profile'>
@@ -50,27 +58,10 @@ const Home = (props) => {
                             </NavLink>
                         </div>
                     </div>
-                    <Switch>
-                        <Route exact path="/">
-                            <HomeComponent />
-                        </Route>
-                        <Route path="/profile">
-                            <Profile />
-                        </Route>
-                        <Route path="/friends" >
-                            <Friends />
-                        </Route>
-                        <Route path="/teams" >
-                            <Teams />
-                        </Route>
-                        <Route path="/setting" >
-                            <Setting />
-                        </Route>
-                    </Switch>
-                </Router>
-
-            </div>
-        </>
+                    <HomeComponent />
+                </div>
+            </> : <Welcome />
+        )
     );
 };
 
