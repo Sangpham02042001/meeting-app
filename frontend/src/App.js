@@ -10,10 +10,14 @@ function App() {
   return (
     <BrowserRouter>
       <Switch>
-        <Route path="/" exact component={Home} />
+        <Route path="/" exact component={Home} /> no la cai may`
         <Route path="/meeting/:meetingId" component={Meeting} />
         <Route exact path="/login" component={() => <Login />} />
         <Route exact path="/signup" component={() => <SignUp />} />
+        <Switch>
+          {/* <Navbar /> */}
+          {/* Private route */}
+        </Switch>
         <Redirect to="/" />
       </Switch>
     </BrowserRouter>
