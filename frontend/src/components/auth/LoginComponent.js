@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Form, Button, Modal } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import SignUp from "./SignUpComponent";
+import './auth.css'
 // import "frontend/src/App.css";
 
 export default class Login extends Component {
@@ -27,7 +28,7 @@ export default class Login extends Component {
     }
 
     handleSubmit(event) {
-        
+
     }
 
     toggleModal() {
@@ -38,20 +39,17 @@ export default class Login extends Component {
 
     render() {
         return (
-            <div>
+            <>
                 <div className="container-fluid loginPage d-flex vh-100 vw-100 justify-content-center align-items-center">
-                    <div className="row vw-100 mx-5 align-items-center">
-                        <div className="text-light col-md-3 offset-md-2 align-items-center justify-content-center">
-                            <h1>ĐĂNG NHẬP</h1>
-                        </div>
-                        <div className="row col-6 col-md-5 offset-md-2 login align-items-center d-flex justify-content-center">
+                    <div className="row vw-100 mx-5 align-items-center form-container">
+                        <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Meeting App</h1>
+                        <div className="row col-6 col-md-5 auth-form align-items-center d-flex justify-content-center">
                             <Form onSubmit={this.handleSubmit}>
                                 <Form.Group className="mb-3" controlId="formEmail">
-                                    <Form.Label><h3>Email</h3></Form.Label>
+                                    <Form.Label>Email</Form.Label>
                                     <Form.Control
                                         type="email"
                                         name="email"
-                                        id="email"
                                         placeholder="Email"
                                         value={this.state.email}
                                         onChange={this.handleChange}
@@ -59,43 +57,48 @@ export default class Login extends Component {
                                     />
                                 </Form.Group>
                                 <Form.Group className="mb-3">
-                                    <Form.Label><h3>Mật khẩu</h3></Form.Label>
+                                    <Form.Label>Password</Form.Label>
                                     <Form.Control
                                         type="password"
                                         name="password"
-                                        id="password"
-                                        placeholder="Mật khẩu"
+                                        placeholder="Password"
                                         value={this.state.password}
                                         onChange={this.handleChange}
                                         required
+                                        autoComplete="off"
                                     />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="formBasicCheckbox">
                                     <Form.Check type="checkbox" label="Remember me" />
                                 </Form.Group>
                                 <div className="d-grid gap-2 mb-3">
-                                    <Button dark className="mb-3 submit" type="submit"><h4>Đăng nhập</h4></Button> 
+                                    <Button className="mb-3 submit" type="submit">
+                                        <h4 style={{ margin: 0 }}>Log in</h4>
+                                    </Button>
                                 </div>
                                 <div className="d-flex otherLogin mb-1">
-                                    <div>Hoặc đăng nhập bằng:</div>
+                                    <div>Or log in with:</div>
                                     <a href="#" className="btn btn-secondary"><i className="bi bi-facebook"></i></a>
                                     <a href="#" className="btn btn-info"><i className="bi bi-twitter"></i></a>
-			                        <a href="#" className="btn btn-danger"><i className="bi bi-google"></i></a>
+                                    <a href="#" className="btn btn-danger"><i className="bi bi-google"></i></a>
                                 </div>
-                            </Form>
-                            <Button dark onClick={this.toggleModal}>Chưa có tài khoản? Đăng ký</Button>
+                            </Form> <br /> <br />
+                            {/* <Button onClick={this.toggleModal}>Don't have account? Sign up</Button> */}
+                            <p style={{ textAlign: 'center', marginBottom: 0 }}>
+                                Don't have account? <Link to="/signup">Sign up here</Link>
+                            </p>
                         </div>
                     </div>
                 </div>
-                <Modal show={this.state.isModalOpen} onHide={this.toggleModal}>
+                {/* <Modal show={this.state.isModalOpen} onHide={this.toggleModal}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Đăng ký</Modal.Title>
+                        <Modal.Title>Sign up</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <SignUp/>
+                        <SignUp />
                     </Modal.Body>
-                </Modal>
-            </div>
+                </Modal> */}
+            </>
 
         )
     }
