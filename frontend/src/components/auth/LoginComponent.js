@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Form, Button, Modal } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import SignUp from "./SignUpComponent";
 import './auth.css'
 // import "frontend/src/App.css";
 
@@ -28,7 +27,7 @@ export default class Login extends Component {
     }
 
     handleSubmit(event) {
-
+        window.localStorage.setItem('user', JSON.stringify({trung: "hello"}))
     }
 
     toggleModal() {
@@ -64,8 +63,8 @@ export default class Login extends Component {
                                         placeholder="Password"
                                         value={this.state.password}
                                         onChange={this.handleChange}
-                                        required
                                         autoComplete="off"
+                                        required
                                     />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="formBasicCheckbox">

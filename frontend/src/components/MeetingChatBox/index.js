@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { Button, InputGroup, FormControl } from 'react-bootstrap';
 import './meetingChatBox.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { saveMessage } from '../../store/reducers/roomChatBox';
+import { saveMessage } from '../../store/reducers/meeting.reducer';
 import { socketClient } from '../../utils';
 
 export default function ChatBox({ chatVisible }) {
     const dispatch = useDispatch();
     const [message, setMessage] = useState('');
-    const messages = useSelector(state => state.roomChatBoxReducer.messages);
+    const messages = useSelector(state => state.meetingReducer.messages);
 
     useEffect(() => {
         socketClient.on('receive-message', ({ message, userId }) => {

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Form, Button, Alert } from "react-bootstrap";
 import { Link, Redirect } from 'react-router-dom';
 import Loading from "../Loading";
-import { isAuthenticated } from "../../store/reducers/user";
+import { isAuthenticated } from "../../store/reducers/user.reducer";
 import './auth.css'
 
 export default function SignUp() {
@@ -58,6 +58,7 @@ export default function SignUp() {
             setPasswordCfError("Confirm password doesn't match")
             return
         }
+      
     }
     return (
         !userReducer.loaded ? <Loading />

@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Route, Redirect } from 'react-router-dom'
-import { isAuthenticated } from '../../store/reducers/user'
+import { isAuthenticated } from '../../store/reducers/user.reducer'
 import Loading from "../../components/Loading";
 import Layout from '../../components/Layout'
+import Welcome from '../../components/Welcome'
 
 export default function PrivateRoute({ children, ...rest }) {
   const userReducer = useSelector(state => state.userReducer)
-  const dispatch = useDispatch()
-
+  const dispatch = useDispatch();
+  console.log(rest)
   useEffect(() => {
     if (!userReducer.loaded) {
       dispatch(isAuthenticated())
@@ -21,17 +22,10 @@ export default function PrivateRoute({ children, ...rest }) {
         {...rest}
         render={
           () => (
-            userReducer.authenticated ? <>
-              <Layout>
-                {children}
-              </Layout>
-            </> : (
-              <Redirect
-                to={{
-                  pathname: '/login'
-                }}
-              />
-            ))
+            <Layout>
+              {children}
+            </Layout>
+          )
         }
       />
   )

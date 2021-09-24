@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { socketClient } from "../../utils";
 import Peer from "simple-peer";
-import Video from "../../components/MeetingVideo";
 import './meeting.css';
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import Video from "../../components/MeetingVideo";
 import MeetingChatBox from "../../components/MeetingChatBox";
+import MeetingUserList from "../../components/MeetingUserList";
 
 
 
@@ -181,38 +181,22 @@ const Meeting = (props) => {
             <div className="room-content">
                 <div className="users-content">
                     <div className="user-frame">
-                        <video width="320px" height="320px" style={myVideoStyle} muted ref={userVideo} autoPlay />
+                        <video width="100%" height="100%" style={myVideoStyle} muted ref={userVideo} autoPlay />
                         {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white", textAlign: "center" }}>{socketClient.id}</div>}
                     </div>
 
                     {peers.length > 0 && peers.map((peerObj) => {
                         return (
                             <div key={peerObj.peerID} className="user-frame">
-                                <Video  peer={peerObj.peer} peerId={peerObj.peerID} />
+                                <Video peer={peerObj.peer} peerId={peerObj.peerID} />
                             </div>
-
                         );
                     })}
 
                 </div>
                 {isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
-                {isOpenUsers &&
-                    <Col className="meeting-chatbox" md="4">
-                        <div className="chatbox-header">
-                            Users
-                            <span>
-                                <Button variant="outline-light" onClick={handleVisibleUsers}>
-                                    <i style={{ color: "black" }} className="fas fa-times"></i>
-                                </Button>
-                            </span>
-                        </div>
-                        <div className="chatbox-content">
-
-                        </div>
-
-                    </Col>
-                }
+                {isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} />}
 
                 {isOpenInfo &&
                     <Col className="meeting-chatbox" md="4">
