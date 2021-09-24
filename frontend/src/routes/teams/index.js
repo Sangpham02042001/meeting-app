@@ -4,11 +4,11 @@ import './teams.css';
 import {v1 as uuid} from 'uuid';
 
 export default function Teams(props) {
-
-    const create = () => {
-        const id = uuid();
-        props.history.push(`/meeting/${id}`);
-    }
+    const id = uuid();
+    // const create = () => {
+    //     const id = uuid();
+    //     props.history.push(`/meeting/${id}`);
+    // }
     return (
         <>
             <div className="group-chat-list">
@@ -37,7 +37,7 @@ export default function Teams(props) {
             <div className="group-chat-content">
                 <h2>Content</h2>
                 <div className="btn-list-selection">
-                    <Button onClick={create} style={{ color: "black" }}>
+                    <Button href={`/meeting/${id}`} style={{ color: "black" }}>
                         Start
                     </Button>
                 </div>

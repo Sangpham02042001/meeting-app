@@ -6,10 +6,10 @@
   height: 100%;
   opacity: 1;
   overflow-x: hidden;
-  position: absolute;
   right: 20px;
   top: 0;
-  width: 360px;
+  min-width: 0px;
+  width: 460px;
   border-radius: 10px;
 }
 

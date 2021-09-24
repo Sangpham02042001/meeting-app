@@ -27,7 +27,11 @@ const Home = (props) => {
                                     <i className="fas fa-user"></i>
                                 </button>
                             </Link>
-
+                        </div>
+                        <div className="btn-list-selection">
+                            <NavLink exact to='/' activeClassName="btn-active">
+                                <button className="btn-default" >Home</button>
+                            </NavLink>
                         </div>
                         <div className="btn-list-selection">
                             <NavLink to='/friends' activeClassName="btn-active">
@@ -44,9 +48,13 @@ const Home = (props) => {
                                 <button className="btn-default" >Setting</button>
                             </NavLink>
                         </div>
-
                     </div>
                     <Switch>
+                        <Route exact path="/">
+                            <h1>
+                                Hello
+                            </h1>
+                        </Route>
                         <Route path="/profile">
                             <Profile />
                         </Route>

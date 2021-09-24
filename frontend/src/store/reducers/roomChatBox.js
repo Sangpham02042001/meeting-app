@@ -13,13 +13,13 @@ export const roomChatBoxSlice = createSlice({
     
   },
   reducers: {
-    sendMessage: (state, action) => {
+    saveMessage: (state, action) => {
       const {message, userId, userName} = action.payload;
       state.messages.push({message, userId, userName});
     }
   }
 })
 
-export const {sendMessage} = roomChatBoxSlice.actions;
+export const {saveMessage} = roomChatBoxSlice.actions;
 
 export default roomChatBoxSlice.reducer

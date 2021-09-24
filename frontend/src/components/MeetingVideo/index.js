@@ -15,8 +15,8 @@ const Video = ({peer, peerId}) => {
 
   return (
     <div style={{ color: "white", border: "2px solid white", textAlign: "center" }}>
-      {/* <div>{index}</div> */}
-      <video width="320px" height="320"  ref={ref} autoPlay/>
+      {/* <div>{index}</div> */} 
+      <video ref={ref} autoPlay/>
     </div>
 
   );

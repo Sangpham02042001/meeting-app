@@ -157,10 +157,6 @@ const Meeting = (props) => {
         setIsOpenInfo(!isOpenInfo);
     }
 
-    const handleSendMessage = (event) => {
-        console.log(event.value)
-    }
-
     const handleEndMeeting = () => {
         peers.map(peer => {
             peer.peer.destroy();
@@ -182,27 +178,24 @@ const Meeting = (props) => {
 
     return (
         <div className="room-meeting">
-
-            <Row className="room-content">
-                <Col >
-                    <div>
+            <div className="room-content">
+                <div className="users-content">
+                    <div className="user-frame">
                         <video width="320px" height="320px" style={myVideoStyle} muted ref={userVideo} autoPlay />
                         {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white", textAlign: "center" }}>{socketClient.id}</div>}
+                    </div>
 
-                    </div>
-                    <div>
-                        {peers.length > 0 && peers.map((peerObj) => {
-                            return (
-                                <Video key={peerObj.peerID} peer={peerObj.peer} peerId={peerObj.peerID} />
-                            );
-                        })}
-                    </div>
-                </Col>
-                {isOpenChat &&
-                    <Col md="3">
-                        <MeetingChatBox chatVisible={handleVisibleChat} sendMessage={handleSendMessage} />
-                    </Col>
-                }
+                    {peers.length > 0 && peers.map((peerObj) => {
+                        return (
+                            <div key={peerObj.peerID} className="user-frame">
+                                <Video  peer={peerObj.peer} peerId={peerObj.peerID} />
+                            </div>
+
+                        );
+                    })}
+
+                </div>
+                {isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
                 {isOpenUsers &&
                     <Col className="meeting-chatbox" md="4">
@@ -237,7 +230,7 @@ const Meeting = (props) => {
                     </Col>
                 }
 
-            </Row>
+            </div>
             <Row >
                 <Col md={{ span: 3, offset: 5 }} >
                     <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px" }}>
