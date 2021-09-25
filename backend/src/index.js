@@ -13,6 +13,7 @@ const authRoutes = require('./routes/auth.routes')
 const userRoutes = require('./routes/user.routes')
 const teamRotues = require('./routes/team.routes')
 const meetingRoutes = require('./routes/meeting.routes')
+const notificationRoutes = require('./routes/notification.routes')
 
 sequelize.sync()
 
@@ -31,6 +32,7 @@ app.use('/', authRoutes)
 app.use('/', userRoutes)
 app.use('/', teamRotues)
 app.use('/', meetingRoutes)
+app.use('/', notificationRoutes)
 
 io.on('connection', socket => {
     socket.on("join-meeting", meetingId => {

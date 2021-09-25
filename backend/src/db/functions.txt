@@ -1,9 +1,10 @@
 DELIMITER $$
-DROP FUNCTION IF EXISTS createNotification;
-CREATE FUNCTION createNotification(
+DROP FUNCTION IF EXISTS createTeamNotification;
+CREATE FUNCTION createTeamNotification(
 	content VARCHAR(400),
   relativeLink VARCHAR(255),
-  userId INT
+  userId INT,
+  teamId INT
 )
 RETURNS VARCHAR(5)
 DETERMINISTIC
@@ -12,6 +13,7 @@ BEGIN
     SET content = content,
 		    relativeLink = relativeLink,
         userId = userId,
+        teamId = teamId,
         createdAt = NOW(),
         updatedAt = NOW();
 	RETURN "";

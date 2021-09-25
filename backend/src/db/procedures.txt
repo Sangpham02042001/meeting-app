@@ -83,7 +83,7 @@ BEGIN
             SET @array = SUBSTRING(@array, LOCATE(',',@array) + 1);
             IF @id != '' THEN
 				INSERT INTO users_teams VALUES(NOW(), NOW(), @id, teamId);
-				SET tmp = createNotification(@content, @relativeLink, @id);
+				SET tmp = createTeamNotification(@content, @relativeLink, @id, teamId);
             END IF;
         END WHILE;
     END IF;

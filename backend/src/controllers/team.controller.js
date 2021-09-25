@@ -3,7 +3,6 @@ const fs = require('fs')
 const { QueryTypes } = require('sequelize')
 const sequelize = require('../models')
 const Team = require('../models/team')
-const User = require('../models/user')
 
 const getTeamInfo = async (req, res) => {
   let { teamId } = req.params
@@ -256,7 +255,7 @@ const inviteUsers = async (req, res) => {
     for (let user of users) {
       result = await sequelize.query(
         "INSERT INTO invited_users_teams " +
-        "SET teamId = :teamId, invitedUserId = :user, createdAt = NOW(), updatedAt = NOW()",
+        "SET teamId = :teamId, invitedUserId = :user, createdAt = NOW(), updatedAt = NOW();",
         {
           replacements: {
             teamId, user

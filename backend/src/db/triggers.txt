@@ -37,3 +37,13 @@ BEGIN
     WHERE rut.teamId = OLD.id;
 END $$
 DELIMITER ;
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS before_delete_invitation;
+CREATE TRIGGER before_delete_invitation
+BEFORE DELETE ON invited_users_teams FOR EACH ROW
+BEGIN 
+	DELETE FROM notifications 
+    WHERE teamId = OLD.teamId AND userId = OLD.invitedUserId AND notiType = "team-invitation";
+END $$
+DELIMITER ;

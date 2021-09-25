@@ -21,12 +21,26 @@ Notification.init({
   isRead: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  teamId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  conversationId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   }
 }, {
   sequelize,
   modelName: 'Notification',
   indexes: [
-    { fields: ['userId'] }
+    { fields: ['userId'] },
+    { fields: ['teamId'] },
+    { fields: ['conversationId'] }
   ]
 })
 
