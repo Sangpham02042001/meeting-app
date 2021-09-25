@@ -9,6 +9,7 @@ import Profile from "./routes/profile";
 import Meeting from "./routes/meeting";
 import Login from './components/auth/LoginComponent';
 import SignUp from './components/auth/SignUpComponent';
+import axios from 'axios';
 import './App.css'
 import PrivateRoute from './routes/private';
 import Welcome from './components/Welcome';

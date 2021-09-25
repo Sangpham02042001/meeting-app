@@ -4,7 +4,9 @@ import { Form, Button, Alert } from "react-bootstrap";
 import { Link, Redirect } from 'react-router-dom';
 import Loading from "../Loading";
 import { isAuthenticated } from "../../store/reducers/user.reducer";
+import axios from "axios";
 import './auth.css'
+import { baseURL } from "../../utils/config";
 
 export default function SignUp() {
     const userReducer = useSelector(state => state.userReducer)
@@ -23,6 +25,7 @@ export default function SignUp() {
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
     const [passwordError, setPasswordError] = useState('')
     const [passwordCfError, setPasswordCfError] = useState('')
+    const [signupError, setSignupError] = useState('')
 
     const handleChange = type => event => {
         let val = event.target.value;
@@ -50,6 +53,25 @@ export default function SignUp() {
 
     const handleSubmit = (event) => {
         event.preventDefault()
+        let data = {
+            email,
+            password,
+            firstName,
+            lastName
+        }
+
+        axios
+            .post(
+                `${baseURL}/api/signup`,
+                data
+            )
+            .then((response) => {
+
+                setSignupError('');
+            })
+            .catch(error => {
+                setSignupError(email + " is already being used.");
+            })
         if (password.length < 6) {
             setPasswordError('Password must has at least 6 characters')
             return
