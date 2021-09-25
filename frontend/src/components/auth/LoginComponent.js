@@ -9,10 +9,10 @@ import { baseURL } from "../../utils/config";
 import './auth.css'
 // import "frontend/src/App.css";
 
-export default function Login() {
+export default function Login(...rest) {
     const userReducer = useSelector(state => state.userReducer)
     const dispatch = useDispatch()
-
+    console.log(rest)
     useEffect(() => {
         if (!userReducer.loaded) {
             dispatch(isAuthenticated())
