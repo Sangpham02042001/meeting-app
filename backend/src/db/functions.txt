@@ -1,0 +1,19 @@
+DELIMITER $$
+DROP FUNCTION IF EXISTS createNotification;
+CREATE FUNCTION createNotification(
+	content VARCHAR(400),
+  relativeLink VARCHAR(255),
+  userId INT
+)
+RETURNS VARCHAR(5)
+DETERMINISTIC
+BEGIN
+	INSERT INTO notifications 
+    SET content = content,
+		    relativeLink = relativeLink,
+        userId = userId,
+        createdAt = NOW(),
+        updatedAt = NOW();
+	RETURN "";
+END $$
+DELIMITER ;
