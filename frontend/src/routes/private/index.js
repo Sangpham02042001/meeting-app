@@ -8,8 +8,7 @@ import Welcome from '../../components/Welcome'
 
 export default function PrivateRoute({ children, ...rest }) {
   const userReducer = useSelector(state => state.userReducer)
-  const dispatch = useDispatch();
-  console.log(rest)
+  const dispatch = useDispatch()
   useEffect(() => {
     if (!userReducer.loaded) {
       dispatch(isAuthenticated())
@@ -22,9 +21,9 @@ export default function PrivateRoute({ children, ...rest }) {
         {...rest}
         render={
           () => (
-            <Layout>
+            userReducer.authenticated ? <Layout>
               {children}
-            </Layout>
+            </Layout> : (rest.path === '/' ? <Welcome /> : <Redirect to="/login" />)
           )
         }
       />
