@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const http = require("http");
+const cors = require('cors');
 const sequelize = require('./models')
 const app = express();
 const server = http.createServer(app);
@@ -22,6 +23,7 @@ const PORT = process.env.PORT || 3001
 const HOST = process.env.HOST || 'locahost'
 
 app.use(express.json())
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 
 //routes
@@ -44,7 +46,7 @@ io.on('connection', socket => {
         console.log(socket.id);
         socket.emit("all-users", usersInThisRoom);
 
-        
+
 
         socket.on('disconnect-meeting', () => {
             const meetingId = socketToMeeting[socket.id];
@@ -56,8 +58,8 @@ io.on('connection', socket => {
             }
         })
 
-        socket.on('send-message', ({message, userId}) => {
-            socket.broadcast.to(meetingId).emit('receive-message', {message, userId});
+        socket.on('send-message', ({ message, userId }) => {
+            socket.broadcast.to(meetingId).emit('receive-message', { message, userId });
         })
 
     });
@@ -81,7 +83,7 @@ io.on('connection', socket => {
             socket.broadcast.to(meetingId).emit('disconnected-meeting', socket.id);
         }
     });
-    
+
 });
 
 server.listen(PORT, HOST, () => {
