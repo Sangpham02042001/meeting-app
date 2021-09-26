@@ -9,10 +9,11 @@ import { isAuthenticated, signin } from "../../store/reducers/user.reducer";
 import './auth.css'
 // import "frontend/src/App.css";
 
-export default function Login() {
+export default function Login(...rest) {
     const userReducer = useSelector(state => state.userReducer)
     const dispatch = useDispatch()
     const history = useHistory()
+
     useEffect(() => {
         if (!userReducer.loaded) {
             dispatch(isAuthenticated())
