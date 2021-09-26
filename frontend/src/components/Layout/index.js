@@ -9,13 +9,6 @@ export default function Layout({ children }) {
       <Navbar />
       <div className="layout">
         <div className="list-selection">
-          <div className="user-list-selection">
-            <Link to='/profile'>
-              <button className="btn-user" >
-                <i className="fas fa-user"></i>
-              </button>
-            </Link>
-          </div>
           <div className="btn-list-selection">
             <NavLink exact to='/' activeClassName="btn-active">
               <button className="btn-default" >Home</button>

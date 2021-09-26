@@ -12,7 +12,7 @@ import SignUp from './components/auth/SignUpComponent';
 import axios from 'axios';
 import './App.css'
 import PrivateRoute from './routes/private';
-import Welcome from './components/Welcome';
+import NotFound from './components/NotFound';
 import { isAuthenticated } from './store/reducers/user.reducer'
 
 function App() {
@@ -52,7 +52,8 @@ function App() {
         <PrivateRoute path="/setting" >
           <Setting />
         </PrivateRoute>
-        <Redirect to="/" />
+        {/* <Redirect to="/" /> */}
+        <Route component={() => <NotFound />} />
         {/* </> */}
         {/* } */}
 
