@@ -6,6 +6,7 @@ import Teams from "./routes/teams";
 import Friends from "./routes/friends";
 import Setting from "./routes/setting";
 import Profile from "./routes/profile";
+import Activities from './routes/activities';
 import Login from './components/auth/LoginComponent';
 import SignUp from './components/auth/SignUpComponent';
 import Meeting from './routes/meeting'
@@ -28,6 +29,9 @@ function App() {
         </PrivateRoute>
         <PrivateRoute path="/friends" >
           <Friends />
+        </PrivateRoute>
+        <PrivateRoute path="/activities" >
+          <Activities />
         </PrivateRoute>
         <PrivateRoute path="/teams" >
           <Teams />

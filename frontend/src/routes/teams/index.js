@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import './teams.css';
-import {v1 as uuid} from 'uuid';
+import { v1 as uuid } from 'uuid';
 
 export default function Teams(props) {
     const id = uuid();
@@ -11,7 +11,7 @@ export default function Teams(props) {
     // }
     return (
         <>
-            <div className="group-chat-list">
+            <div className="layout-leftside-list">
                 <div className="group-chat">
                     <div>Avatar</div>
                     <div style={{ marginLeft: "15px" }}>

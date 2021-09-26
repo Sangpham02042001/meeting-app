@@ -4,6 +4,7 @@ import Navbar from '../Navbar'
 import './layout.css'
 
 export default function Layout({ children }) {
+
   return (
     <>
       <Navbar />
@@ -15,8 +16,13 @@ export default function Layout({ children }) {
             </NavLink>
           </div>
           <div className="btn-list-selection">
+            <NavLink to="/activities" activeClassName="btn-active">
+              <button className="btn-default" >Activity</button>
+            </NavLink>
+          </div>
+          <div className="btn-list-selection">
             <NavLink to='/friends' activeClassName="btn-active">
-              <button className="btn-default" >Friend</button>
+              <button className="btn-default" >Chat</button>
             </NavLink>
           </div>
           <div className="btn-list-selection">

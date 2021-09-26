@@ -59,3 +59,19 @@
 .user-list-selection .btn-user:hover {
   background-color: #e9e9e91c;
 }
+
+.layout-leftside-list {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-width: 250px;
+  width: 20%;
+  height: 100%;
+  background-color: #f0f0f0;
+  box-shadow: 2px 2px 1px #dadcdf;
+}
+
+.layout-rightside-content {
+  width: 80%;
+  background-color: #ccdbeb;
+}

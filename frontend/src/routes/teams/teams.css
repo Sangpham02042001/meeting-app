@@ -1,4 +1,5 @@
-.group-chat-list {
+/* has been moved to layout => reuse */
+/* .group-chat-list {
     display: flex;
     flex-direction: column;
     position: relative;
@@ -8,39 +9,37 @@
     background-color: #f0f0f0;
     box-shadow: 2px 2px 1px #dadcdf;
     z-index: 5px;
-}
-
+} */
 
 .group-chat {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 15px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 15px;
 }
 
 .group-chat:hover {
-    background-color: #ffffff;
+  background-color: #ffffff;
 }
 
 .group-chat-content {
-    display: flex;
-    flex-direction: column;
-    width: 65%;
-    height: 100%;
-    background-color: aliceblue;
-    position: relative;
-    z-index: -5px;
-    
+  display: flex;
+  flex-direction: column;
+  width: 65%;
+  height: 100%;
+  background-color: aliceblue;
+  position: relative;
+  z-index: -5px;
 }
 
 .member-group {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    top: 0;
-    right: 0;
-    background-color: #869bb1;
-    width: 15%;
-    height: 100%;
-    min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  top: 0;
+  right: 0;
+  background-color: #869bb1;
+  width: 15%;
+  height: 100%;
+  min-width: 150px;
 }

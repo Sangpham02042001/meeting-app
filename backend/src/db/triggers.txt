@@ -35,6 +35,9 @@ BEGIN
 
     DELETE FROM request_users_teams rut
     WHERE rut.teamId = OLD.id;
+
+    DELETE FROM notifications n
+    WHERE n.teamId = OLD.id; 
 END $$
 DELIMITER ;
 

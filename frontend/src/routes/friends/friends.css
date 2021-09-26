@@ -1,4 +1,5 @@
-.friend-chat-list {
+/* has been moved to layout => reuse */
+/* .friend-chat-list {
     display: flex;
     flex-direction: column;
     position: relative;
@@ -7,21 +8,21 @@
     height: 100%;
     background-color: #f0f0f0;
     box-shadow: 2px 2px 1px #dadcdf;
-}
+} */
 
 .friend-chat {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 15px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 15px;
 }
 
 .friend-chat:hover {
-    background-color: #ffffff;
+  background-color: #ffffff;
 }
 
-.friend-chat-content {
-    width: 80%;
-    background-color: #ccdbeb;
-}
-
+/* has been moved to layout => reuse */
+/* .friend-chat-content {
+  width: 80%;
+  background-color: #ccdbeb;
+} */

@@ -4,7 +4,7 @@ import './friends.css'
 export default function Friends() {
     return (
         <>
-            <div className="friend-chat-list">
+            <div className="layout-leftside-list">
                 <div className="friend-chat">
                     <div>Avatar</div>
                     <div style={{ marginLeft: "15px" }}>
@@ -24,7 +24,7 @@ export default function Friends() {
                     </div>
                 </div>
             </div>
-            <div className="friend-chat-content">
+            <div className="layout-rightside-content">
                 <h2>Content</h2>
             </div>
         </>
