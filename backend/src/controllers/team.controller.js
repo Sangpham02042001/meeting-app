@@ -265,9 +265,10 @@ const inviteUsers = async (req, res) => {
     let result
     for (let user of users) {
       result = await sequelize.query(
+        "DECLARE tmp VARCHAR(10); " +
+        "SET tmp = createTeamNotification(:content, :relativeLink, :user, :teamId); " +
         "INSERT INTO invited_users_teams " +
-        "SET teamId = :teamId, invitedUserId = :user, createdAt = NOW(), updatedAt = NOW(); " +
-        "SET tmp = createTeamNotification(content = :content, relativeLink = :relativeLink, id = :user, teamId = :teamId); ",
+        "SET teamId = :teamId, invitedUserId = :user, createdAt = NOW(), updatedAt = NOW(); ",
         {
           replacements: {
             teamId, user, relativeLink, content
