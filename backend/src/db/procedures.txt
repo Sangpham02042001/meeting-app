@@ -115,3 +115,35 @@ BEGIN
     SELECT 'Successfully' message;
 END $$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS inviteUsers;
+CREATE PROCEDURE inviteUsers(
+	IN teamId INT,
+    IN users VARCHAR(255)
+)
+BEGIN 
+	DECLARE hostName VARCHAR(255);
+    DECLARE teamName VARCHAR(255);
+    DECLARE tmp VARCHAR(10);
+    SET @array = users;
+        
+	SELECT CONCAT(u.firstName, " ", u.lastName),
+		   t.name INTO hostName, teamName
+	FROM teams t
+	INNER JOIN users u ON u.id = t.hostId
+	WHERE t.id = teamId;
+	SET @content = CONCAT(hostName, " has invited you to join ",teamName);
+	SET @relativeLink = CONCAT("/teams/",teamId);
+	WHILE (LOCATE(',', @array) > 0)
+		DO
+			SET @id = CONVERT(ELT(1, @array), SIGNED INT);
+			SET @array = SUBSTRING(@array, LOCATE(',',@array) + 1);
+			IF @id != '' THEN
+				INSERT INTO invited_users_teams VALUES(NOW(), NOW(), @id, teamId);
+				SET tmp = createTeamNotification(@content, @relativeLink, @id, teamId);
+			END IF;
+	END WHILE;
+    SELECT 'Invite Successfully' message;
+END$$
+DELIMITER ;
