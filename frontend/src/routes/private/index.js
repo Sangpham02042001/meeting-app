@@ -24,6 +24,7 @@ export default function PrivateRoute({ children, ...rest }) {
                 {children}
               </Layout>
             )}
+
       />
   )
 }

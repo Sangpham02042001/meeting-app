@@ -11,17 +11,17 @@ import SignUp from './components/auth/SignUpComponent';
 import Meeting from './routes/meeting'
 import './App.css';
 import PrivateRoute from './routes/private';
-import Welcome from './components/Welcome';
+import NotFound from './components/NotFound';
 import { isAuthenticated } from './store/reducers/user.reducer'
 
 function App() {
-  const userReducer = useSelector(state => state.userReducer)
-  const dispatch = useDispatch();
-  useEffect(() => {
-    if (!userReducer.loaded) {
-      dispatch(isAuthenticated())
-    }
-  }, [])
+  // const userReducer = useSelector(state => state.userReducer)
+  // const dispatch = useDispatch();
+  // useEffect(() => {
+  //   if (!userReducer.loaded) {
+  //     dispatch(isAuthenticated())
+  //   }
+  // }, [])
   return (
     <BrowserRouter>
        <Switch>
