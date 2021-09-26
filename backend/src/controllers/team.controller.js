@@ -165,6 +165,8 @@ const confirmUserRequests = async (req, res) => {
     console.log(messages[0])
     if (messages[0]) {
       return res.status(200).json(messages[0])
+    } else {
+      return res.status(400).json({ error: 'Some thing wrong' })
     }
   } catch (error) {
     console.log(error)
@@ -251,36 +253,25 @@ const removeTeam = async (req, res) => {
 const inviteUsers = async (req, res) => {
   let { users } = req.body
   let { teamId } = req.params
+  let stringifyUsers = ''
+  users.forEach(userId => stringifyUsers += `${userId},`)
+  console.log(stringifyUsers)
   try {
-    let team = await Team.findOne({
-      where: {
-        id: teamId
-      },
-      attributes: ['hostId', 'name']
-    })
-    let host = await team.getHost()
-    let adminName = host.getFullname()
-    let content = `${adminName} has invited you to join ${team.name}`
-    let relativeLink = `/teams/${teamId}`
-    let result
-    for (let user of users) {
-      result = await sequelize.query(
-        "DECLARE tmp VARCHAR(10); " +
-        "SET tmp = createTeamNotification(:content, :relativeLink, :user, :teamId); " +
-        "INSERT INTO invited_users_teams " +
-        "SET teamId = :teamId, invitedUserId = :user, createdAt = NOW(), updatedAt = NOW(); ",
-        {
-          replacements: {
-            teamId, user, relativeLink, content
-          },
-          type: QueryTypes.INSERT
+    const messages = await sequelize.query(
+      "CALL inviteUsers(:teamId, :users)",
+      {
+        replacements: {
+          users: stringifyUsers,
+          teamId
         }
-      )
-      console.log(result)
+      }
+    )
+    console.log(messages[0])
+    if (messages[0]) {
+      return res.status(200).json(messages[0])
+    } else {
+      return res.status(400).json({ error: 'Some thing wrong' })
     }
-    return res.status(200).json({
-      message: 'Invite successfully'
-    })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
