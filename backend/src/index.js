@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const http = require("http");
+const cors = require('cors');
 const sequelize = require('./models')
 const app = express();
 const server = http.createServer(app);
@@ -12,15 +13,18 @@ const authRoutes = require('./routes/auth.routes')
 const userRoutes = require('./routes/user.routes')
 const teamRotues = require('./routes/team.routes')
 const meetingRoutes = require('./routes/meeting.routes')
+const notificationRoutes = require('./routes/notification.routes')
 
-const users = {};
 sequelize.sync()
 
-const socketToRoom = {};
+const users = {};
+const socketToMeeting = {};
+
 const PORT = process.env.PORT || 3001
 const HOST = process.env.HOST || 'locahost'
 
 app.use(express.json())
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 
 //routes
@@ -28,47 +32,60 @@ app.use('/', authRoutes)
 app.use('/', userRoutes)
 app.use('/', teamRotues)
 app.use('/', meetingRoutes)
+app.use('/', notificationRoutes)
 
 io.on('connection', socket => {
-    socket.on("join room", roomID => {
-        if (users[roomID]) {
+    socket.on("join-meeting", meetingId => {
+        if (users[meetingId]) {
 
-            users[roomID].push(socket.id);
+            users[meetingId].push(socket.id);
         } else {
-            users[roomID] = [socket.id];
+            users[meetingId] = [socket.id];
         }
-        socket.join(roomID);
-        socketToRoom[socket.id] = roomID;
-        const usersInThisRoom = users[roomID].filter(id => id !== socket.id);
+        socket.join(meetingId);
+        socketToMeeting[socket.id] = meetingId;
+        const usersInThisRoom = users[meetingId].filter(id => id !== socket.id);
         console.log(socket.id);
-        socket.emit("all users", usersInThisRoom);
+        socket.emit("all-users", usersInThisRoom);
 
-        socket.on('disconnect', () => {
-            const roomID = socketToRoom[socket.id];
-            let room = users[roomID];
+
+
+        socket.on('disconnect-meeting', () => {
+            const meetingId = socketToMeeting[socket.id];
+            let room = users[meetingId];
             if (room) {
                 room = room.filter(id => id !== socket.id);
-                users[roomID] = room;
-                console.log('emittttttttttt', socket.id)
-                socket.broadcast.to(roomID).emit('user disconnected', socket.id);
+                users[meetingId] = room;
+                socket.broadcast.to(meetingId).emit('disconnected-meeting', socket.id);
             }
-        });
+        })
 
-        socket.on('user-send-message', ({message, userId}) => {
-            socket.broadcast.to(roomID).emit('user-receive-message', {message, userId});
+        socket.on('send-message', ({ message, userId }) => {
+            socket.broadcast.to(meetingId).emit('receive-message', { message, userId });
         })
 
     });
 
-    socket.on("sending signal", ({ signal, callerID, userToSignal }) => {
-        socket.to(userToSignal).emit('user joined', { signal, callerID });
+    socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
+        socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
+    })
+
+    socket.on("returning-signal", ({ signal, callerID }) => {
+        socket.to(callerID).emit('receiving-returned-signal', { signal, userId: socket.id });
     });
 
-    socket.on("returning signal", ({ signal, callerID }) => {
-        socket.to(callerID).emit('receiving returned signal', { signal, userId: socket.id });
+
+
+    socket.on('disconnect', () => {
+        const meetingId = socketToMeeting[socket.id];
+        let room = users[meetingId];
+        if (room) {
+            room = room.filter(id => id !== socket.id);
+            users[meetingId] = room;
+            socket.broadcast.to(meetingId).emit('disconnected-meeting', socket.id);
+        }
     });
 
-    
 });
 
 server.listen(PORT, HOST, () => {

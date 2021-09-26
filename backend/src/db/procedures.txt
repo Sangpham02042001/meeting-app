@@ -62,16 +62,28 @@ CREATE PROCEDURE removeRequestUsers(
 	confirmFlag BOOLEAN
 )
 BEGIN
+	DECLARE teamName VARCHAR(255);
+    DECLARE hostName VARCHAR(255);
+    DECLARE tmp VARCHAR(10);
 	DELETE FROM request_users_teams rut
     WHERE rut.teamId = teamId AND FIND_IN_SET(rut.requestUserId, users);
     IF confirmFlag THEN
 		SET @array = users;
+        
+        SELECT CONCAT(u.firstName, " ", u.lastName),
+			   t.name INTO hostName, teamName
+        FROM teams t
+        INNER JOIN users u ON u.id = t.hostId
+        WHERE t.id = teamId;
+        SET @content = CONCAT(hostName, " has confirmed your request to join ",teamName);
+        SET @relativeLink = CONCAT("/teams/",teamId);
         WHILE (LOCATE(',', @array) > 0)
         DO
 			SET @id = CONVERT(ELT(1, @array), SIGNED INT);
             SET @array = SUBSTRING(@array, LOCATE(',',@array) + 1);
             IF @id != '' THEN
 				INSERT INTO users_teams VALUES(NOW(), NOW(), @id, teamId);
+				SET tmp = createTeamNotification(@content, @relativeLink, @id, teamId);
             END IF;
         END WHILE;
     END IF;

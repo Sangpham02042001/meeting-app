@@ -1,58 +1,60 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
 import { Form, Button, Modal } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import SignUp from "./SignUpComponent";
+import { useHistory } from "react-router";
+import { Link, Redirect } from "react-router-dom";
+import axios from 'axios';
+import Loading from "../Loading";
+import { isAuthenticated, signin } from "../../store/reducers/user.reducer";
 import './auth.css'
 // import "frontend/src/App.css";
 
-export default class Login extends Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            email: "",
-            password: "",
-            loginErrors: "",
-            isModalOpen: false
+export default function Login() {
+    const userReducer = useSelector(state => state.userReducer)
+    const dispatch = useDispatch()
+    const history = useHistory()
+    useEffect(() => {
+        if (!userReducer.loaded) {
+            dispatch(isAuthenticated())
+        } else {
+            if (userReducer.authenticated) {
+                console.log('redirect')
+                history.push('/')
+            } else if (userReducer.error) {
+                setLoginError(userReducer.error)
+            } else {
+                if (!userReducer.authenticated) {
+                    dispatch(isAuthenticated())
+                }
+            }
         }
+    }, [userReducer.authenticated, userReducer.error, userReducer.loaded])
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.toggleModal = this.toggleModal.bind(this);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        dispatch(signin({ email, password }))
     }
 
-    handleChange(event) {
-        this.setState({
-            [event.target.name]: event.target.value
-        });
-    }
-
-    handleSubmit(event) {
-
-    }
-
-    toggleModal() {
-        this.setState({
-            isModalOpen: !this.state.isModalOpen
-        });
-    }
-
-    render() {
-        return (
-            <>
-                <div className="container-fluid loginPage d-flex vh-100 vw-100 justify-content-center align-items-center">
+    return (
+        !userReducer.loaded ? <Loading />
+            : (userReducer.authenticated ? <Redirect to="/" />
+                : <div className="container-fluid loginPage d-flex vh-100 vw-100 justify-content-center align-items-center">
                     <div className="row vw-100 mx-5 align-items-center form-container">
                         <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Meeting App</h1>
                         <div className="row col-6 col-md-5 auth-form align-items-center d-flex justify-content-center">
-                            <Form onSubmit={this.handleSubmit}>
+                            <Form onSubmit={handleSubmit}>
                                 <Form.Group className="mb-3" controlId="formEmail">
                                     <Form.Label>Email</Form.Label>
                                     <Form.Control
                                         type="email"
                                         name="email"
                                         placeholder="Email"
-                                        value={this.state.email}
-                                        onChange={this.handleChange}
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
                                         required
                                     />
                                 </Form.Group>
@@ -62,8 +64,8 @@ export default class Login extends Component {
                                         type="password"
                                         name="password"
                                         placeholder="Password"
-                                        value={this.state.password}
-                                        onChange={this.handleChange}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
                                         required
                                         autoComplete="off"
                                     />
@@ -71,6 +73,7 @@ export default class Login extends Component {
                                 <Form.Group className="mb-3" controlId="formBasicCheckbox">
                                     <Form.Check type="checkbox" label="Remember me" />
                                 </Form.Group>
+                                {loginError && <p className='error-message'>{loginError}</p>}
                                 <div className="d-grid gap-2 mb-3">
                                     <Button className="mb-3 submit" type="submit">
                                         <h4 style={{ margin: 0 }}>Log in</h4>
@@ -83,23 +86,12 @@ export default class Login extends Component {
                                     <a href="#" className="btn btn-danger"><i className="bi bi-google"></i></a>
                                 </div>
                             </Form> <br /> <br />
-                            {/* <Button onClick={this.toggleModal}>Don't have account? Sign up</Button> */}
                             <p style={{ textAlign: 'center', marginBottom: 0 }}>
                                 Don't have account? <Link to="/signup">Sign up here</Link>
                             </p>
                         </div>
                     </div>
                 </div>
-                {/* <Modal show={this.state.isModalOpen} onHide={this.toggleModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Sign up</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <SignUp />
-                    </Modal.Body>
-                </Modal> */}
-            </>
-
-        )
-    }
+            )
+    )
 }

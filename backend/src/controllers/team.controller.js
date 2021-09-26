@@ -252,14 +252,25 @@ const inviteUsers = async (req, res) => {
   let { users } = req.body
   let { teamId } = req.params
   try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      },
+      attributes: ['hostId', 'name']
+    })
+    let host = await team.getHost()
+    let adminName = host.getFullname()
+    let content = `${adminName} has invited you to join ${team.name}`
+    let relativeLink = `/teams/${teamId}`
     let result
     for (let user of users) {
       result = await sequelize.query(
         "INSERT INTO invited_users_teams " +
-        "SET teamId = :teamId, invitedUserId = :user, createdAt = NOW(), updatedAt = NOW()",
+        "SET teamId = :teamId, invitedUserId = :user, createdAt = NOW(), updatedAt = NOW(); " +
+        "SET tmp = createTeamNotification(content = :content, relativeLink = :relativeLink, id = :user, teamId = :teamId); ",
         {
           replacements: {
-            teamId, user
+            teamId, user, relativeLink, content
           },
           type: QueryTypes.INSERT
         }

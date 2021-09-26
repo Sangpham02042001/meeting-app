@@ -4,7 +4,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 
 
-export const roomChatBoxSlice = createSlice({
+export const meetingSlice = createSlice({
   name: 'RoomChatBox',
   initialState: {
     messages: []
@@ -20,6 +20,6 @@ export const roomChatBoxSlice = createSlice({
   }
 })
 
-export const {saveMessage} = roomChatBoxSlice.actions;
+export const {saveMessage} = meetingSlice.actions;
 
-export default roomChatBoxSlice.reducer
+export default meetingSlice.reducer
