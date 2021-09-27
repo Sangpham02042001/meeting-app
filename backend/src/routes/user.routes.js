@@ -2,7 +2,8 @@ const { Router } = require('express')
 const { signup, getUserInfo, updateUserInfo, getUserAvatar,
   requestJoinTeam, getJoinedTeams, getRequestingTeams,
   outTeam, cancelJoinRequest, confirmInvitations,
-  removeInvitations, getInvitations } = require('../controllers/user.controller')
+  removeInvitations, getInvitations, getNotifications,
+  searchUsers } = require('../controllers/user.controller')
 const { requireSignin } = require('../controllers/auth.controller')
 
 const router = Router()
@@ -13,8 +14,14 @@ router.route('/api/signup')
 router.route('/api/users/teams/:teamId')
   .post(requireSignin, requestJoinTeam)
 
+router.route('/api/users/search')
+  .post(requireSignin, searchUsers)
+
 router.route('/api/users/:userId/teams')
   .get(requireSignin, getJoinedTeams)
+
+router.route('/api/users/:userId/notifications')
+  .get(requireSignin, getNotifications)
 
 router.route('/api/users/:userId/confirm-invitations')
   .post(requireSignin, confirmInvitations)

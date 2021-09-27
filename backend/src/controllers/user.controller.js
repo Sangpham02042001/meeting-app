@@ -117,6 +117,9 @@ const getUserAvatar = async (req, res) => {
   })
   if (user.avatar) {
     return res.send(user.avatar)
+  } else {
+    const readStream = fs.createReadStream('./src/public/images/default_avt.jpg')
+    readStream.pipe(res)
   }
 }
 
@@ -292,18 +295,62 @@ const removeInvitations = async (req, res) => {
 
 const getInvitations = async (req, res) => {
   const { id } = req.auth
-  let user = await User.findByPk(id)
-  let teams = await user.getInvitedTeams({
-    attributes: ['id', 'hostId', 'name']
-  })
-  return res.status(200).json({
-    teams
-  })
+  try {
+    let user = await User.findByPk(id)
+    let teams = await user.getInvitedTeams({
+      attributes: ['id', 'hostId', 'name']
+    })
+    return res.status(200).json({
+      teams
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const getNotifications = async (req, res) => {
+  let { id } = req.auth
+  try {
+    let notifications = await sequelize.query(
+      "SELECT * FROM notifications WHERE userId = :id",
+      {
+        replacements: {
+          id
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    return res.status(200).json({ notifications })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const searchUsers = async (req, res) => {
+  let { id } = req.auth
+  let { text } = req.body
+  try {
+    let result = await sequelize.query(
+      'CALL searchUsers(:id, :text)',
+      {
+        replacements: {
+          id, text
+        }
+      }
+    )
+    return res.status(200).json({ users: result })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
 }
 
 module.exports = {
   signup, getUserInfo, updateUserInfo, getUserAvatar,
   requestJoinTeam, getJoinedTeams, getRequestingTeams,
   outTeam, cancelJoinRequest, confirmInvitations,
-  removeInvitations, getInvitations
+  removeInvitations, getInvitations, getNotifications,
+  searchUsers
 }

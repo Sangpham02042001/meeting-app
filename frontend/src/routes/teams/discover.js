@@ -1,15 +1,27 @@
 import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { useHistory } from 'react-router'
 import {
   Col, Container, Image, Row, Button,
-  Modal, Form
+  Modal, Form, Spinner
 } from 'react-bootstrap'
+import axios from 'axios'
+import { baseURL } from '../../utils'
 import { Link } from 'react-router-dom'
 
 export default function TeamDiscover() {
+  const user = useSelector(state => state.userReducer.user)
+  const history = useHistory()
   const [teamName, setTeamName] = useState('')
+  const [loading, setLoading] = useState(false)
   const [isPublicTeam, setPublicTeam] = useState(true)
-  const [teamCoverPhoto, setTeamCoverPhoto] = useState('');
+  const [newTeamId, setNewTeamId] = useState(0)
+  const [searchUsers, setSearchUsers] = useState([])
+  const [invitedUsers, setInvitedUsers] = useState([])
+  const [searchUserName, setSearchUserName] = useState('')
+  const [teamCoverPhoto, setTeamCoverPhoto] = useState('')
   const [isCreateModalShow, setCreateModalShow] = useState(false)
+  const [isInviteModalShow, setInviteModalShow] = useState(false)
 
   const handleCreateModalClose = () => {
     setCreateModalShow(false)
@@ -22,9 +34,79 @@ export default function TeamDiscover() {
     setCreateModalShow(true)
   }
 
-  const handleTeamCoverPhoto = (e) => {
-    setTeamCoverPhoto(e.target.files[0])
-    console.log(e.target.files[0])
+  const handleInviteUserModal = () => {
+    setInviteModalShow(true)
+  }
+
+  const handleInviteModalClose = () => {
+    setInviteModalShow(false)
+    setSearchUserName('')
+    setSearchUsers([])
+    setInvitedUsers([])
+  }
+
+  const handleSearchUser = async () => {
+    let token = JSON.parse(localStorage.getItem('user')).token
+    setLoading(true)
+    let response = await axios.post(`${baseURL}/api/users/search`, {
+      text: searchUserName
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    setSearchUsers(response.data.users)
+    setLoading(false)
+  }
+
+  const handleAddInvitedUser = user => e => {
+    setInvitedUsers([
+      ...invitedUsers,
+      user
+    ])
+    setSearchUsers(searchUsers.filter(u => u.id !== user.id))
+  }
+
+  const handleInviteAll = async () => {
+    let token = JSON.parse(localStorage.getItem('user')).token
+    setLoading(true)
+    let response = await axios.post(`${baseURL}/api/teams/${newTeamId}/users`, {
+      users: invitedUsers.map(user => user.id)
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    setLoading(false)
+    if (response.status == 200) {
+      history.push('/teams')
+    }
+    setInviteModalShow(false)
+  }
+
+  const deleteUser = user => e => {
+    setInvitedUsers(invitedUsers.filter(u => u.id !== user.id))
+  }
+
+  const createTeamAndInviteUsers = async () => {
+    let token = JSON.parse(localStorage.getItem('user')).token
+    let formData = new FormData()
+    formData.append('name', teamName)
+    formData.append('coverPhoto', teamCoverPhoto)
+    formData.append('teamType', isPublicTeam ? 'public' : 'private')
+    setLoading(true)
+    let response = await axios.post(`${baseURL}/api/teams`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    setLoading(false)
+    if (response.status == 201) {
+      handleCreateModalClose()
+      setInviteModalShow(true)
+      console.log(response.data)
+      setNewTeamId(response.data.team.id)
+    }
   }
 
   return (
@@ -68,7 +150,7 @@ export default function TeamDiscover() {
           <Form.Group className="mb-3" controlId="formTeamPrivacy">
             <Form.Label>Privacy</Form.Label>
             <Form.Select aria-label="Default select example"
-              onChange={e => setPublicTeam(e.target.value)}>
+              onChange={e => setPublicTeam(e.target.value === 'true' ? true : false)}>
               <option value={true}>Public - Anyone can request to join and find this team</option>
               <option value={false}>Private - Only team owners can add members</option>
             </Form.Select>
@@ -76,11 +158,6 @@ export default function TeamDiscover() {
 
           <Form.Group className="mb-3" controlId="formTeamCoverPhoto">
             <Form.Label>Team Cover Photo</Form.Label> <br />
-            {/* <input
-              type="file" accept="image/*"
-              value={teamCoverPhoto}
-              onChange={(e) => setTeamCoverPhoto(e.target.files[0])}
-            /> */}
             <Form.Control
               type="file"
               accept='image/*'
@@ -92,11 +169,85 @@ export default function TeamDiscover() {
           <Button variant="secondary" onClick={handleCreateModalClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleCreateModalClose}>
-            Save Changes
+          <Button variant="primary"
+            disabled={!teamName || !teamCoverPhoto}
+            style={{ backgroundColor: '#364087' }}
+            onClick={createTeamAndInviteUsers}>
+            Next
           </Button>
         </Modal.Footer>
       </Modal>
-    </Container>
+
+
+      <Modal show={isInviteModalShow} onHide={handleInviteModalClose} size="lg" centered>
+        <Modal.Body>
+          <h4>Invite users to join your team</h4>
+          <div style={{ textAlign: 'right', marginBottom: '10px' }}>
+            <Button style={{ backgroundColor: '#364087' }} disabled={!searchUserName}
+              onClick={handleSearchUser}>
+              Search
+            </Button>
+          </div>
+          <Form.Control type="text" placeholder="Enter user name or email"
+            value={searchUserName} onChange={e => setSearchUserName(e.target.value)} />
+          {searchUserName && (
+            (loading ? <div style={{ textAlign: 'center', padding: '10px' }}>
+              <Spinner animation="border" role="status">
+              </Spinner>
+            </div> : <div className="invited-user-list">
+              {searchUsers.filter(user => invitedUsers.map(u => u.id).indexOf(user.id) < 0)
+                .map(user => (
+                  <div key={user.id} className="invited-user-item">
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                      <Image src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
+                      <span>
+                        <p>{user.userName}</p>
+                        <p>{user.email}</p>
+                      </span>
+                    </span>
+                    <Button variant="success" title="Add to the list of invited users"
+                      onClick={handleAddInvitedUser(user)}>
+                      Add
+                    </Button>
+                  </div>
+                ))}
+            </div>)
+          )}
+          {invitedUsers.length > 0 && <>
+            <hr />
+            <h4>User list</h4>
+          </>}
+          {<div className="invited-user-list">
+            {invitedUsers.map(user => (
+              <div key={user.id} className="invited-user-item">
+                <span style={{ display: 'flex', alignItems: 'center' }}>
+                  <Image src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
+                  <span>
+                    <p>{user.userName}</p>
+                    <p>{user.email}</p>
+                  </span>
+                </span>
+                <Button variant="danger" title="Remove"
+                  onClick={deleteUser(user)}>
+                  Remove
+                </Button>
+              </div>
+            ))}
+          </div>}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleInviteModalClose}>
+            Skip
+          </Button>
+          <Button variant="primary" style={{ backgroundColor: '#364087' }} onClick={handleInviteAll}>
+            Invite
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Button variant="secondary" onClick={handleInviteUserModal}>
+        Open Invite User Modal
+      </Button>
+    </Container >
   )
 }

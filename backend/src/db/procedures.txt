@@ -147,3 +147,18 @@ BEGIN
     SELECT 'Invite Successfully' message;
 END$$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS searchUsers;
+CREATE PROCEDURE searchUsers(
+	IN userId INT,
+    IN text VARCHAR(255)
+)
+BEGIN 
+	DECLARE my_text VARCHAR(255) DEFAULT CONCAT('%', text, '%');
+	SELECT CONCAT(u.firstName, ' ', u.lastName) as userName,
+			u.id, u.email
+    FROM users u
+    WHERE u.id != userId AND (u.email LIKE my_text OR CONCAT(u.firstName, ' ', u.lastName) LIKE my_text);
+END $$
+DELIMITER ;
