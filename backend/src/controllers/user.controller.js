@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
 const fs = require('fs')
+const { v4 } = require('uuid')
 const formidable = require('formidable')
 const User = require('../models/user')
 const Team = require('../models/team')
@@ -69,16 +70,29 @@ const updateUserInfo = async (req, res) => {
     try {
       let avatar
       if (files.avatar) {
-        if (files.avatar.size > 2097152) {
-          throw Error('Image upload larger than 2MB')
-        }
-        avatar = fs.readFileSync(files.avatar.path)
+        let fileType = files.avatar.path.split('.')[files.avatar.path.split('.').length - 1]
+        avatar = `${v4()}.${fileType}`
+        fs.createReadStream(files.avatar.path)
+          .pipe(fs.createWriteStream(`./src/public/users-avatars/${avatar}`))
       } else {
-        avatar = null
+        avatar = ''
       }
       let firstName = fields.firstName || ''
       let lastName = fields.lastName || ''
       let userId = Number(req.auth.id)
+      let user = await User.findOne({
+        where: {
+          id: userId
+        },
+        attributes: ['avatar']
+      })
+      if (user.avatar) {
+        fs.unlink(`./src/public/users-avatars/${user.avatar}`, (err) => {
+          if (err) {
+            throw err
+          }
+        })
+      }
       const result = await sequelize.query(
         'CALL updateBasicUserInfo(:userId, :firstName, :lastName, :avatar)',
         {
@@ -90,8 +104,8 @@ const updateUserInfo = async (req, res) => {
           }
         }
       )
-      let user = result[0]
-      return res.status(200).json({ user })
+      let updatedUser = result[0]
+      return res.status(200).json({ user: updatedUser })
     } catch (error) {
       if (error.name === 'SequelizeDatabaseError') {
         if (error.parent.errno == 1406) {
@@ -116,7 +130,7 @@ const getUserAvatar = async (req, res) => {
     attributes: ['avatar']
   })
   if (user.avatar) {
-    return res.send(user.avatar)
+    fs.createReadStream(`./src/public/users-avatars/${user.avatar}`).pipe(res)
   } else {
     const readStream = fs.createReadStream('./src/public/images/default_avt.jpg')
     readStream.pipe(res)

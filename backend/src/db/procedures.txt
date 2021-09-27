@@ -28,7 +28,7 @@ CREATE PROCEDURE updateBasicUserInfo(
 	IN userId INT,
     IN firstName VARCHAR(255),
     IN lastName VARCHAR(255),
-    IN avatar BLOB
+    IN avatar VARCHAR(255)
 )
 BEGIN
 	IF firstName != '' THEN
@@ -43,7 +43,7 @@ BEGIN
         WHERE id = userId;
     END IF;
     
-    IF avatar IS NOT NULL THEN
+    IF avatar != '' THEN
 		UPDATE users
 		SET avatar = avatar
 		WHERE id = userId;

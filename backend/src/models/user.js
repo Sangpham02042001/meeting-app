@@ -34,7 +34,7 @@ User.init({
     allowNull: false
   },
   avatar: {
-    type: DataTypes.BLOB
+    type: DataTypes.STRING,
   }
 }, {
   sequelize,

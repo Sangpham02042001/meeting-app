@@ -1,5 +1,6 @@
 const formidable = require('formidable')
 const fs = require('fs')
+const { v4 } = require('uuid')
 const { QueryTypes } = require('sequelize')
 const sequelize = require('../models')
 const Team = require('../models/team')
@@ -37,7 +38,12 @@ const createTeam = async (req, res) => {
     let coverPhoto,
       teamType = fields.teamType || 'public'
     if (files.coverPhoto) {
-      coverPhoto = fs.readFileSync(files.coverPhoto.path)
+      let fileType = files.coverPhoto.path.split('.')[files.coverPhoto.path.split('.').length - 1]
+      coverPhoto = `${v4()}.${fileType}`
+      let writeStream = fs.createWriteStream(`./src/public/teams-coverphotos/${coverPhoto}`)
+      fs.createReadStream(files.coverPhoto.path).pipe(writeStream)
+    } else {
+      coverPhoto = ''
     }
     try {
       let teams = await Team.findAll({
@@ -81,7 +87,7 @@ const getTeamCoverPhoto = async (req, res) => {
     return res.status(400).json({ error: 'Team not found' })
   }
   if (team.coverPhoto) {
-    return res.send(team.coverPhoto)
+    fs.createReadStream(`./src/public/teams-coverphotos/${team.coverPhoto}`).pipe(res)
   }
 }
 
