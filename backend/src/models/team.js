@@ -17,7 +17,7 @@ Team.init({
     allowNull: false
   },
   coverPhoto: {
-    type: DataTypes.BLOB
+    type: DataTypes.STRING
   },
   teamType: {
     type: DataTypes.STRING,
