@@ -10,6 +10,7 @@
   flex-direction: column;
   width: 80px;
   position: relative;
+  top: 0;
   margin: 0;
   padding: 0;
   background-color: #212529;
@@ -18,7 +19,7 @@
 }
 
 .btn-list-selection {
-  margin-top: 25px;
+  margin-top: 50px;
 }
 
 .btn-list-selection .btn-default {
@@ -26,8 +27,18 @@
   height: 60px;
   border-style: none;
   border-radius: 15px;
-  background-color: #31363b;
+  background-color: #212529;
   color: white;
+  font-size: 18px;
+}
+
+.btn-list-selection .btn-active::before {
+  content: "";
+  height: 60px;
+  border-left: solid .2rem #6264a7;
+  background-color: aqua;
+  left: .1rem;
+  position: absolute;
 }
 
 .btn-list-selection .btn-default:hover {
@@ -39,25 +50,16 @@
   height: 60px;
   border-style: none;
   border-radius: 15px;
-  background-color: #4e6379;
+  /* background-color: rgba(207, 209, 211, 0.212); */
   color: white;
+  font-size: 23px;
 }
 
-.user-list-selection {
-  margin-bottom: 100px;
-}
-
-.user-list-selection .btn-user {
-  width: 60px;
-  height: 60px;
-  border-style: none;
-  border-radius: 50%;
-  background-color: #212529;
-  color: white;
-}
-
-.user-list-selection .btn-user:hover {
-  background-color: #e9e9e91c;
+.content-layout {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
 }
 
 .layout-leftside-list {

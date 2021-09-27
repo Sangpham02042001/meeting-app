@@ -3,9 +3,8 @@ import { createSlice } from '@reduxjs/toolkit'
 
 
 
-
 export const meetingSlice = createSlice({
-  name: 'RoomChatBox',
+  name: 'Meeting',
   initialState: {
     messages: []
   },

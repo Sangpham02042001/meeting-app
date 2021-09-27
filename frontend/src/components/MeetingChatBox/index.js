@@ -24,7 +24,6 @@ export default function ChatBox({ chatVisible }) {
             event.preventDefault();
             handleSendMessage(event);
             setMessage('');
-
         }
     }
 
@@ -70,7 +69,6 @@ export default function ChatBox({ chatVisible }) {
                         <i style={{ color: "#1A73E8" }} className="far fa-paper-plane"></i>
                     </Button>
                 </InputGroup>
-
             </div>
         </div>
     )

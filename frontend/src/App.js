@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Home from "./routes/home";
 import Teams from "./routes/teams";
-import Friends from "./routes/friends";
+import Conversations from "./routes/conversations";
 import Setting from "./routes/setting";
 import Profile from "./routes/profile";
 import Activities from './routes/activities';
@@ -28,8 +28,8 @@ function App() {
         <PrivateRoute path="/profile">
           <Profile />
         </PrivateRoute>
-        <PrivateRoute path="/friends" >
-          <Friends />
+        <PrivateRoute path="/conversations" >
+          <Conversations />
         </PrivateRoute>
         <PrivateRoute path="/activities" >
           <Activities />

@@ -12,31 +12,34 @@ export default function Layout({ children }) {
         <div className="list-selection">
           <div className="btn-list-selection">
             <NavLink exact to='/' activeClassName="btn-active">
-              <button className="btn-default" >Home</button>
+              <button className="btn-default" ><i className="fas fa-home"></i></button>
             </NavLink>
           </div>
-          <div className="btn-list-selection">
+          {/* <div className="btn-list-selection">
             <NavLink to="/activities" activeClassName="btn-active">
               <button className="btn-default" >Activity</button>
             </NavLink>
-          </div>
+          </div> */}
           <div className="btn-list-selection">
-            <NavLink to='/friends' activeClassName="btn-active">
-              <button className="btn-default" >Chat</button>
+            <NavLink to='/conversations' activeClassName="btn-active">
+              <button className="btn-default" ><i className="fas fa-comment-dots"></i></button>
+
             </NavLink>
           </div>
           <div className="btn-list-selection">
             <NavLink to='/teams' activeClassName="btn-active">
-              <button className="btn-default"> Teams</button>
+              <button className="btn-default"><i className="fas fa-users"></i></button>
             </NavLink>
           </div>
           <div className="btn-list-selection">
             <NavLink to='/setting' activeClassName="btn-active">
-              <button className="btn-default" >Setting</button>
+              <button className="btn-default" ><i className="fas fa-cog"></i></button>
             </NavLink>
           </div>
         </div>
-        {children}
+        <div className="content-layout">
+          {children}
+        </div>
       </div>
     </>
   )
