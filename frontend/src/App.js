@@ -7,6 +7,7 @@ import Friends from "./routes/friends";
 import Setting from "./routes/setting";
 import Profile from "./routes/profile";
 import Activities from './routes/activities';
+import TeamDiscover from './routes/teams/discover';
 import Login from './components/auth/LoginComponent';
 import SignUp from './components/auth/SignUpComponent';
 import Meeting from './routes/meeting'
@@ -34,7 +35,14 @@ function App() {
           <Activities />
         </PrivateRoute>
         <PrivateRoute path="/teams" >
-          <Teams />
+          <Switch>
+            <Route exact path="/teams">
+              <Teams />
+            </Route>
+            <Route path="/teams/discover">
+              <TeamDiscover />
+            </Route>
+          </Switch>
         </PrivateRoute>
         <PrivateRoute path="/setting" >
           <Setting />

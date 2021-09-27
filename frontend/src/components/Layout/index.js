@@ -27,7 +27,7 @@ export default function Layout({ children }) {
           </div>
           <div className="btn-list-selection">
             <NavLink to='/teams' activeClassName="btn-active">
-              <button className="btn-default"> Team</button>
+              <button className="btn-default"> Teams</button>
             </NavLink>
           </div>
           <div className="btn-list-selection">

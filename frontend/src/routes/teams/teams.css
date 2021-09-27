@@ -43,3 +43,42 @@
   height: 100%;
   min-width: 150px;
 }
+
+.teams-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  align-items: center;
+}
+
+.teams-header button {
+  background-color: #fff;
+  box-shadow: 0 0 1px 1px #dddddd;
+}
+
+.teams-header button:hover {
+  background-color: #efeff0;
+}
+
+.create-team-box {
+  max-width: 250px;
+  background-color: #fff;
+  box-shadow: 0 0 1px 1px #dddddd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 15px 0 25px 0;
+}
+
+.create-team-empty-img {
+  width: 70px;
+  border-radius: 10px;
+}
+
+.create-team-box-user {
+  width: 35px;
+  margin: 0 5px;
+  color: rgb(36, 36, 36);
+}

@@ -1,17 +1,14 @@
 import React from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Row, Col, Container } from 'react-bootstrap';
 import './teams.css';
 import { v1 as uuid } from 'uuid';
+import { Link } from 'react-router-dom';
 
 export default function Teams(props) {
-    const id = uuid();
-    // const create = () => {
-    //     const id = uuid();
-    //     props.history.push(`/meeting/${id}`);
-    // }
-    return (
-        <>
-            <div className="layout-leftside-list">
+	const id = uuid();
+	return (
+		<>
+			{/* <div className="layout-leftside-list">
                 <div className="group-chat">
                     <div>Avatar</div>
                     <div style={{ marginLeft: "15px" }}>
@@ -58,7 +55,20 @@ export default function Teams(props) {
                 <div>
                     memeber 5
                 </div>
-            </div>
-        </>
-    )
+            </div> */}
+			<Container fluid>
+				<Row>
+					<Col className="teams-header" sm={12}>
+						<h3>Teams</h3>
+						<Link to='/teams/discover'>
+							<Button variant="light">
+								<i className="fas fa-user-friends" style={{ marginRight: '10px' }}></i>
+								Join or create team
+							</Button>
+						</Link>
+					</Col>
+				</Row>
+			</Container>
+		</>
+	)
 }
