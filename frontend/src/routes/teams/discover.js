@@ -8,9 +8,11 @@ import {
 import axios from 'axios'
 import { baseURL } from '../../utils'
 import { Link } from 'react-router-dom'
+import { createNewTeam } from '../../store/reducers/team.reducer'
 
 export default function TeamDiscover() {
   const user = useSelector(state => state.userReducer.user)
+  const dispatch = useDispatch()
   const history = useHistory()
   const [teamName, setTeamName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -22,6 +24,14 @@ export default function TeamDiscover() {
   const [teamCoverPhoto, setTeamCoverPhoto] = useState('')
   const [isCreateModalShow, setCreateModalShow] = useState(false)
   const [isInviteModalShow, setInviteModalShow] = useState(false)
+
+  useEffect(() => {
+    return () => {
+      setInvitedUsers([])
+      setSearchUsers([])
+      setTeamCoverPhoto('')
+    }
+  }, [])
 
   const handleCreateModalClose = () => {
     setCreateModalShow(false)
@@ -78,10 +88,10 @@ export default function TeamDiscover() {
       }
     })
     setLoading(false)
+    setInviteModalShow(false)
     if (response.status == 200) {
       history.push('/teams')
     }
-    setInviteModalShow(false)
   }
 
   const deleteUser = user => e => {
@@ -105,6 +115,12 @@ export default function TeamDiscover() {
       handleCreateModalClose()
       setInviteModalShow(true)
       console.log(response.data)
+      let { team } = response.data
+      dispatch(createNewTeam({
+        id: team.id,
+        name: team.name,
+        hostId: team.hostId
+      }))
       setNewTeamId(response.data.team.id)
     }
   }
@@ -190,50 +206,52 @@ export default function TeamDiscover() {
           </div>
           <Form.Control type="text" placeholder="Enter user name or email"
             value={searchUserName} onChange={e => setSearchUserName(e.target.value)} />
-          {searchUserName && (
-            (loading ? <div style={{ textAlign: 'center', padding: '10px' }}>
-              <Spinner animation="border" role="status">
-              </Spinner>
-            </div> : <div className="invited-user-list">
-              {searchUsers.filter(user => invitedUsers.map(u => u.id).indexOf(user.id) < 0)
-                .map(user => (
-                  <div key={user.id} className="invited-user-item">
-                    <span style={{ display: 'flex', alignItems: 'center' }}>
-                      <Image src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
-                      <span>
-                        <p>{user.userName}</p>
-                        <p>{user.email}</p>
+          <div style={{ minHeight: '300px' }}>
+            {searchUserName && (
+              (loading ? <div style={{ textAlign: 'center', padding: '10px' }}>
+                <Spinner animation="border" role="status">
+                </Spinner>
+              </div> : <div className="invited-user-list">
+                {searchUsers.filter(user => invitedUsers.map(u => u.id).indexOf(user.id) < 0)
+                  .map(user => (
+                    <div key={user.id} className="invited-user-item">
+                      <span style={{ display: 'flex', alignItems: 'center' }}>
+                        <Image src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
+                        <span>
+                          <p>{user.userName}</p>
+                          <p>{user.email}</p>
+                        </span>
                       </span>
+                      <Button variant="success" title="Add to the list of invited users"
+                        onClick={handleAddInvitedUser(user)}>
+                        Add
+                      </Button>
+                    </div>
+                  ))}
+              </div>)
+            )}
+            {invitedUsers.length > 0 && <>
+              <hr />
+              <h4>User list</h4>
+            </>}
+            {<div className="invited-user-list">
+              {invitedUsers.map(user => (
+                <div key={user.id} className="invited-user-item">
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <Image src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
+                    <span>
+                      <p>{user.userName}</p>
+                      <p>{user.email}</p>
                     </span>
-                    <Button variant="success" title="Add to the list of invited users"
-                      onClick={handleAddInvitedUser(user)}>
-                      Add
-                    </Button>
-                  </div>
-                ))}
-            </div>)
-          )}
-          {invitedUsers.length > 0 && <>
-            <hr />
-            <h4>User list</h4>
-          </>}
-          {<div className="invited-user-list">
-            {invitedUsers.map(user => (
-              <div key={user.id} className="invited-user-item">
-                <span style={{ display: 'flex', alignItems: 'center' }}>
-                  <Image src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
-                  <span>
-                    <p>{user.userName}</p>
-                    <p>{user.email}</p>
                   </span>
-                </span>
-                <Button variant="danger" title="Remove"
-                  onClick={deleteUser(user)}>
-                  Remove
-                </Button>
-              </div>
-            ))}
-          </div>}
+                  <Button variant="danger" title="Remove"
+                    onClick={deleteUser(user)}>
+                    Remove
+                  </Button>
+                </div>
+              ))}
+            </div>}
+          </div>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleInviteModalClose}>
@@ -244,10 +262,6 @@ export default function TeamDiscover() {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      <Button variant="secondary" onClick={handleInviteUserModal}>
-        Open Invite User Modal
-      </Button>
     </Container >
   )
 }

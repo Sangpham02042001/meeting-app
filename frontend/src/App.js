@@ -14,6 +14,7 @@ import Meeting from './routes/meeting'
 import './App.css'
 import PrivateRoute from './routes/private';
 import NotFound from './components/NotFound';
+import Team from './routes/team';
 
 function App() {
   return (
@@ -41,6 +42,9 @@ function App() {
             </Route>
             <Route path="/teams/discover">
               <TeamDiscover />
+            </Route>
+            <Route path="/teams/:teamId">
+              <Team />
             </Route>
           </Switch>
         </PrivateRoute>

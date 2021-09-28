@@ -181,7 +181,14 @@ const getJoinedTeams = async (req, res) => {
   const { id } = req.auth
   let user = await User.findByPk(id)
   let teams = await user.getTeams({
-    attributes: ['id', 'hostId', 'name']
+    attributes: ['id', 'hostId', 'name'],
+  })
+  teams = teams.map(team => {
+    return {
+      id: team.id,
+      name: team.name,
+      hostId: team.hostId
+    }
   })
   return res.status(200).json({
     teams

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Form, Button, Alert } from "react-bootstrap";
+import { Form, Button, Modal } from "react-bootstrap";
 import { Link, Redirect } from 'react-router-dom';
 import Loading from "../Loading";
 import { isAuthenticated } from "../../store/reducers/user.reducer";
@@ -25,6 +25,7 @@ export default function SignUp() {
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
     const [passwordError, setPasswordError] = useState('')
     const [passwordCfError, setPasswordCfError] = useState('')
+    const [isModalShow, setModalShow] = useState(false)
     const [signupError, setSignupError] = useState('')
 
     const handleChange = type => event => {
@@ -47,12 +48,27 @@ export default function SignUp() {
                 break;
             case "passwordConfirmation":
                 setPasswordConfirmation(val)
+                if (val === password) {
+                    setPasswordCfError('')
+                }
                 break;
         }
     }
 
+    const handleCloseModal = () => {
+        setModalShow(false)
+    }
+
     const handleSubmit = (event) => {
         event.preventDefault()
+        if (password.length < 6) {
+            setPasswordError('Password must has at least 6 characters')
+            return
+        }
+        if (password !== passwordConfirmation) {
+            setPasswordCfError("Confirm password doesn't match")
+            return
+        }
         let data = {
             email,
             password,
@@ -66,21 +82,19 @@ export default function SignUp() {
                 data
             )
             .then((response) => {
-
+                if (response.status === 201) {
+                    setEmail('')
+                    setFirstName('')
+                    setLastName('')
+                    setPassword('')
+                    setPasswordConfirmation('')
+                    setModalShow(true)
+                }
                 setSignupError('');
             })
             .catch(error => {
                 setSignupError(email + " is already being used.");
             })
-        if (password.length < 6) {
-            setPasswordError('Password must has at least 6 characters')
-            return
-        }
-        if (password !== passwordConfirmation) {
-            setPasswordCfError("Confirm password doesn't match")
-            return
-        }
-      
     }
     return (
         !userReducer.loaded ? <Loading />
@@ -120,6 +134,9 @@ export default function SignUp() {
                                     required
                                 />
                             </Form.Group>
+                            {signupError && <p className="error-message">
+                                {signupError}
+                            </p>}
                             <Form.Group className="mb-3">
                                 <Form.Label>Password</Form.Label>
                                 <Form.Control
@@ -158,6 +175,22 @@ export default function SignUp() {
                             </div>
                         </Form>
                     </div>
+                    <Modal show={isModalShow} onHide={handleCloseModal}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Welcome to Meeting App</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>Sign up successfully.</Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={handleCloseModal}>
+                                Close
+                            </Button>
+                            <Button variant="primary">
+                                <Link style={{ color: '#fff', textDecoration: 'none' }} to='/login'>
+                                    Log in now
+                                </Link>
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
                 </div>)
     )
 }

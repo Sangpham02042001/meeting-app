@@ -16,7 +16,6 @@ export const signin = createAsyncThunk('user/signin', async ({ email, password }
       email, password
     });
     if (response.status === 200) {
-      console.log(response.data)
       return {
         user: response.data
       }
