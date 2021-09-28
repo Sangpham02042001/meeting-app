@@ -43,6 +43,9 @@ function App() {
             <Route path="/teams/discover">
               <TeamDiscover />
             </Route>
+            <Route path="/teams/:teamId/setting">
+              <Team />
+            </Route>
             <Route path="/teams/:teamId">
               <Team />
             </Route>

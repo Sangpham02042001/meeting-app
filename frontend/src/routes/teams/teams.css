@@ -132,9 +132,12 @@
   transition: background-color 0.3s ease;
 }
 
-.team-item img {
+.team-item-image {
   width: 150px;
   height: 100px;
   margin-bottom: 10px;
   border-radius: 10px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }

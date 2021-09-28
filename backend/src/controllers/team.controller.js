@@ -9,7 +9,7 @@ const User = require('../models/user')
 const getTeamInfo = async (req, res) => {
   let { teamId } = req.params
   const teams = await sequelize.query(
-    "SELECT t.name, t.teamType, COUNT(*) as numOfMembers " +
+    "SELECT t.name, t.teamType, t.id, COUNT(*) as numOfMembers " +
     "FROM teams t " +
     "LEFT JOIN users_teams ut ON t.id = ut.teamId " +
     "WHERE t.id = :teamId",

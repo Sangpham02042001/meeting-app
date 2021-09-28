@@ -5,6 +5,7 @@ import { baseURL } from '../../utils'
 
 const initialState = {
   joinedTeam: [],
+  team: {},
   joinedTeamLoaded: false,
   error: null,
   loading: false,
@@ -19,6 +20,17 @@ export const getJoinedTeams = createAsyncThunk('teams/getJoinedTeams', async () 
   })
   let { teams } = response.data
   return { teams }
+})
+
+export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId }, { rejectWithValue }) => {
+  let { token } = JSON.parse(window.localStorage.getItem('user'))
+  let response = await axios.get(`${baseURL}/api/teams/${teamId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  let { team } = response.data
+  return { team }
 })
 
 export const teamSlice = createSlice({
@@ -43,6 +55,17 @@ export const teamSlice = createSlice({
       state.loading = false
       state.joinedTeamLoaded = false
       state.error = action.error.message
+    },
+    [getTeamInfo.pending]: (state) => {
+      state.loading = true
+    },
+    [getTeamInfo.fulfilled]: (state, action) => {
+      state.team = extend(state.team, action.payload.team)
+      state.loading = false
+    },
+    [getTeamInfo.rejected]: (state, action) => {
+      // state.error = action.payload.error
+      state.loading = false
     }
   }
 })

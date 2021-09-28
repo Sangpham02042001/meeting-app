@@ -7,4 +7,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.loading-container img {
+  width: 100px;
 }
