@@ -53,8 +53,10 @@ export const teamSlice = createSlice({
   initialState,
   reducers: {
     createNewTeam: (state, action) => {
-      let { team } = action.payload
-      state.joinedTeam.push(team)
+      let { id, hostId, name } = action.payload
+      state.joinedTeam.push({
+        id, hostId, name
+      })
     }
   },
   extraReducers: {
