@@ -23,6 +23,20 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
+DROP PROCEDURE IF EXISTS getTeamInvitedUsers;
+CREATE PROCEDURE getTeamInvitedUsers(
+	IN teamId INT
+)
+BEGIN
+	SELECT CONCAT(u.firstName, ' ', u.lastName) as userName,
+		u.id
+	FROM invited_users_teams iut
+	INNER JOIN users u ON u.id = iut.invitedUserId
+	WHERE iut.teamId = teamId;
+END $$
+DELIMITER ;
+
+DELIMITER $$
 DROP PROCEDURE IF EXISTS updateBasicUserInfo;
 CREATE PROCEDURE updateBasicUserInfo(
 	IN userId INT,

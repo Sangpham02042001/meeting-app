@@ -9,7 +9,7 @@ const User = require('../models/user')
 const getTeamInfo = async (req, res) => {
   let { teamId } = req.params
   const teams = await sequelize.query(
-    "SELECT t.name, t.teamType, t.id, COUNT(*) as numOfMembers " +
+    "SELECT t.name, t.teamType, t.id, t.hostId, COUNT(*) as numOfMembers " +
     "FROM teams t " +
     "LEFT JOIN users_teams ut ON t.id = ut.teamId " +
     "WHERE t.id = :teamId",
@@ -121,6 +121,24 @@ const getTeamRequestUsers = async (req, res) => {
       }
     )
     return res.status(200).json({ requestMembers })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const getTeamInvitedUsers = async (req, res) => {
+  let { teamId } = req.params
+  try {
+    const invitedUsers = await sequelize.query(
+      "CALL getTeamInvitedUsers(:teamId)",
+      {
+        replacements: {
+          teamId
+        }
+      }
+    )
+    return res.status(200).json({ invitedUsers })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
@@ -318,5 +336,5 @@ module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers, isAdmin,
   confirmUserRequests, removeUserRequests, removeMembers,
-  removeTeam, inviteUsers, removeInvitations
+  removeTeam, inviteUsers, removeInvitations, getTeamInvitedUsers
 }

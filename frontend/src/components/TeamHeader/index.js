@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link } from 'react-router-dom'
-import { Button } from 'react-bootstrap'
+import { Button, Modal } from 'react-bootstrap'
 import { baseURL } from '../../utils'
+import './teamheader.css'
 
 export default function TeamHeader() {
   const { teamId } = useParams()
   const teamReducer = useSelector(state => state.teamReducer)
-
+  const user = useSelector(state => state.userReducer.user)
   return (
     <div className='team-header'>
       <div style={{ display: 'flex' }}>
@@ -25,14 +26,20 @@ export default function TeamHeader() {
           <i className="fas fa-video"></i> Meeting
         </Button>
         <div className="navbar-btn">
-          <div className="dropdown" style={{ marginRight: '50px' }}>
+          <div className="dropdown" style={{ marginRight: 0 }}>
             <button className="dropdown-btn" style={{ color: "white" }}>
               <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
             </button>
             <div className="dropdown-content">
-              <Link to={`/teams/${teamId}/setting`}>
+              {teamReducer.team.hostId === user.id && <Link to={`/teams/${teamId}/setting`}>
                 <i className="fas fa-cog"></i> Manage Team
-              </Link>
+              </Link>}
+              {teamReducer.team.hostId === user.id && <span>
+                <i className="fas fa-trash-alt"></i> Delete Team
+              </span>}
+              {teamReducer.team.hostId !== user.id && <span>
+                <i className="fas fa-sign-out-alt"></i> Leave Team
+              </span>}
             </div>
           </div>
         </div>

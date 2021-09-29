@@ -3,7 +3,7 @@ const { requireSignin } = require('../controllers/auth.controller')
 const { getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers, isAdmin,
   confirmUserRequests, removeUserRequests, removeMembers,
-  removeTeam, inviteUsers, removeInvitations } = require('../controllers/team.controller')
+  removeTeam, inviteUsers, removeInvitations, getTeamInvitedUsers } = require('../controllers/team.controller')
 
 const router = Router()
 
@@ -12,6 +12,9 @@ router.route('/api/teams/:teamId/members')
 
 router.route('/api/teams/:teamId/requestusers')
   .get(requireSignin, isAdmin, getTeamRequestUsers)
+
+router.route('/api/teams/:teamId/invited-users')
+  .get(requireSignin, getTeamInvitedUsers)
 
 router.route('/api/teams/:teamId/users')
   .post(requireSignin, isAdmin, inviteUsers)

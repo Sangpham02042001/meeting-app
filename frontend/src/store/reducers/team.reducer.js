@@ -7,6 +7,7 @@ const initialState = {
   joinedTeam: [],
   team: {},
   joinedTeamLoaded: false,
+  teamLoaded: false,
   error: null,
   loading: false,
 }
@@ -30,6 +31,13 @@ export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId
     }
   })
   let { team } = response.data
+  response = await axios.get(`${baseURL}/api/teams/${teamId}/invited-users`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  let { invitedUsers } = response.data
+  team.invitedUsers = invitedUsers
   return { team }
 })
 
@@ -62,10 +70,12 @@ export const teamSlice = createSlice({
     [getTeamInfo.fulfilled]: (state, action) => {
       state.team = extend(state.team, action.payload.team)
       state.loading = false
+      state.teamLoaded = true
     },
     [getTeamInfo.rejected]: (state, action) => {
       // state.error = action.payload.error
       state.loading = false
+      state.teamLoaded = true
     }
   }
 })
