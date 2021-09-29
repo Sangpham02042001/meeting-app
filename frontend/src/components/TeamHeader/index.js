@@ -5,7 +5,7 @@ import { Button, Modal } from 'react-bootstrap'
 import { baseURL } from '../../utils'
 import './teamheader.css'
 
-export default function TeamHeader() {
+export default function TeamHeader({ showTeamInfo }) {
   const { teamId } = useParams()
   const teamReducer = useSelector(state => state.teamReducer)
   const user = useSelector(state => state.userReducer.user)
@@ -22,6 +22,7 @@ export default function TeamHeader() {
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
+        <i className="far fa-question-circle" onClick={showTeamInfo}></i>
         <Button variant="light" className="meeting-btn">
           <i className="fas fa-video"></i> Meeting
         </Button>

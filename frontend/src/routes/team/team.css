@@ -1,0 +1,29 @@
+.team-container {
+  display: flex;
+}
+
+.team-container > div {
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+.team-body {
+  /* background-color: #ebebeb; */
+}
+
+.team-info-container {
+  padding: 10px;
+  /* background-color: #ebebeb; */
+  width: 20%;
+  border-left: 1px solid #cecccc;
+}
+
+.team-info-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin-right: 10px;
+}

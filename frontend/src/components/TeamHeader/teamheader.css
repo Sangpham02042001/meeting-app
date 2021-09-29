@@ -4,6 +4,7 @@
   border-bottom: 1px solid var(--gray-shadow);
   flex-direction: row;
   justify-content: space-between;
+  background-color: #f8f7f7;
 }
 
 .team-header .team-header-coverphoto {
@@ -29,4 +30,17 @@
 
 .team-header .dropdown-content {
   transform: translate(-50px, 5px);
+}
+
+.team-header .fa-question-circle {
+  margin-right: 10px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.team-header .fa-question-circle:hover {
+  background-color: gray;
+  color: #fff;
+  border-radius: 50%;
+  transition: background-color 0.4s ease;
 }

@@ -1,5 +1,5 @@
 .loading-container {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
@@ -9,6 +9,7 @@
   align-items: center;
   overflow: hidden;
   z-index: 100;
+  background-color: #ffffffc9;
 }
 
 .loading-container img {

@@ -38,6 +38,13 @@ export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId
   })
   let { invitedUsers } = response.data
   team.invitedUsers = invitedUsers
+  response = await axios.get(`${baseURL}/api/teams/${teamId}/members`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  let { members } = response.data
+  team.members = members
   return { team }
 })
 

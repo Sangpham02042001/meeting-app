@@ -60,3 +60,12 @@
 .dropdown:hover .dropdown-btn {
   background-color: #858585;
 }
+
+.nav-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}

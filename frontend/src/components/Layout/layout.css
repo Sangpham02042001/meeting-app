@@ -19,7 +19,7 @@
 }
 
 .btn-list-selection {
-  margin-top: 50px;
+  /* margin-top: 50px; */
 }
 
 .btn-list-selection .btn-default {
@@ -35,9 +35,9 @@
 .btn-list-selection .btn-active::before {
   content: "";
   height: 60px;
-  border-left: solid .2rem #6264a7;
+  border-left: solid 0.2rem #6264a7;
   background-color: aqua;
-  left: .1rem;
+  left: 0.1rem;
   position: absolute;
 }
 

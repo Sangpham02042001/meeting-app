@@ -1,9 +1,12 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
 import { Container, Navbar as Nav, Col, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import { baseURL } from '../../utils'
 import './navbar.css'
 
 export default function Navbar() {
+  let user = useSelector(state => state.userReducer.user)
   return (
     <Nav bg="dark" variant="dark" className="navbar">
       <Nav.Brand href="/" className="nav-brand">
@@ -12,7 +15,7 @@ export default function Navbar() {
 
       <div className="navbar-btn">
         <div className="dropdown" >
-          <button className="dropdown-btn" style={{ color: "white" }}>
+          <button className="dropdown-btn" style={{ color: "white", marginRight: '20px' }}>
             <i className="fas fa-bell"></i>
           </button>
           <div className="dropdown-content">
@@ -23,8 +26,10 @@ export default function Navbar() {
         </div>
 
         <div className="dropdown" >
-          <button className="dropdown-btn" style={{ color: "white" }}>
-            <i className="fas fa-user"></i>
+          <button className="dropdown-btn" style={{ color: "white", padding: 0 }}>
+            <div className='nav-user-avatar'
+              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }}>
+            </div>
           </button>
           <div className="dropdown-content">
             <Link to="/profile">Profile</Link>
