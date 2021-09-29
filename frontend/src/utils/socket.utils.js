@@ -6,4 +6,4 @@ const socketClient = io(baseURL, {
   autoConnect: false
 })
 
-export {socketClient, baseURL };
+export {socketClient };

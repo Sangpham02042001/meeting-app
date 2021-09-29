@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { axiosInstance } from '../../utils'
-import extend from 'lodash/extend'
+import extend from 'lodash/extend';
+import { socketClient } from '../../utils';
 
 const initialState = {
   user: {},
@@ -28,6 +29,10 @@ export const signin = createAsyncThunk('user/signin', async ({ email, password }
   }
 })
 
+export const getAllUserInfo = createAsyncThunk('user/getAllUserInfo', async () => {
+  const response = await axiosInstance.get('/api/users')
+})
+
 
 export const userSlice = createSlice({
   name: 'User',
@@ -42,6 +47,8 @@ export const userSlice = createSlice({
         state.user = user
         state.loading = false
         state.authenticated = true
+        socketClient.auth = { userId: user.id };
+        socketClient.connect();
       }
       state.loaded = true
     }

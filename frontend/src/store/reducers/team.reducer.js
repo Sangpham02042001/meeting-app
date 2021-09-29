@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
 import extend from 'lodash/extend'
-import { baseURL } from '../../utils'
+import { axiosAuth, baseURL } from '../../utils'
 
 const initialState = {
   joinedTeam: [],
@@ -14,35 +13,19 @@ const initialState = {
 
 export const getJoinedTeams = createAsyncThunk('teams/getJoinedTeams', async () => {
   let { token, id } = JSON.parse(window.localStorage.getItem('user'))
-  let response = await axios.get(`${baseURL}/api/users/${id}/teams`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
+  let response = await axiosAuth.get('${baseURL}/api/users/${id}/teams')
   let { teams } = response.data
   return { teams }
 })
 
 export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId }, { rejectWithValue }) => {
   let { token } = JSON.parse(window.localStorage.getItem('user'))
-  let response = await axios.get(`${baseURL}/api/teams/${teamId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
+  let response = await axiosAuth.get('/api/teams/${teamId}')
   let { team } = response.data
-  response = await axios.get(`${baseURL}/api/teams/${teamId}/invited-users`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
+  response = await axiosAuth.get(`/api/teams/${teamId}/invited-users`)
   let { invitedUsers } = response.data
   team.invitedUsers = invitedUsers
-  response = await axios.get(`${baseURL}/api/teams/${teamId}/members`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
+  response = await axiosAuth.get(`/api/teams/${teamId}/members`)
   let { members } = response.data
   team.members = members
   return { team }

@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Form, Button, Modal } from "react-bootstrap";
 import { useHistory } from "react-router";
 import { Link, Redirect } from "react-router-dom";
-import axios from 'axios';
 import Loading from "../Loading";
 import { isAuthenticated, signin } from "../../store/reducers/user.reducer";
 import './auth.css'

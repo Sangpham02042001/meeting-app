@@ -11,7 +11,7 @@ export default function ChatBox({ chatVisible }) {
     const messages = useSelector(state => state.meetingReducer.messages);
 
     useEffect(() => {
-        socketClient.on('receive-message', ({ message, userId }) => {
+        socketClient.on('receive-message-team', ({ message, userId }) => {
             dispatch(saveMessage({ message, userId }));
         })
     }, [])
@@ -32,8 +32,7 @@ export default function ChatBox({ chatVisible }) {
         let userId = socketClient.id;
         if (message !== '') {
             dispatch(saveMessage({ message, userId }));
-
-            socketClient.emit("send-message", ({ message, userId }))
+            socketClient.emit("send-message-team", ({ message, userId }));
             setMessage('');
         }
 

@@ -4,9 +4,8 @@ import { Form, Button, Modal } from "react-bootstrap";
 import { Link, Redirect } from 'react-router-dom';
 import Loading from "../Loading";
 import { isAuthenticated } from "../../store/reducers/user.reducer";
-import axios from "axios";
+import { axiosInstance } from "../../utils";
 import './auth.css'
-import { baseURL } from "../../utils/config";
 
 export default function SignUp() {
     const userReducer = useSelector(state => state.userReducer)
@@ -76,11 +75,7 @@ export default function SignUp() {
             lastName
         }
 
-        axios
-            .post(
-                `${baseURL}/api/signup`,
-                data
-            )
+        axiosInstance.post('/api/signup', data)
             .then((response) => {
                 if (response.status === 201) {
                     setEmail('')

@@ -1,22 +1,24 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { axiosInstance } from '../../utils';
 
 
 export const conversationSlice = createSlice({
   name: 'Conversation',
   initialState: {
-    messages: []
+    messages: [],
+    conversations: []
   },
   extraReducers: {
     
   },
   reducers: {
-    saveMessage: (state, action) => {
-      const {content, userId, userName} = action.payload;
-      state.messages.push({content, userId, userName});
+    sendMessage: (state, action) => {
+      const {content, userId, userName, conversationId} = action.payload;
+      state.messages.push({content, userId, userName, conversationId});
     }
   }
 })
 
-export const {saveMessage} = conversationSlice.actions;
+export const {sendMessage} = conversationSlice.actions;
 
 export default conversationSlice.reducer

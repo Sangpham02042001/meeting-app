@@ -5,8 +5,7 @@ import {
   Col, Container, Image, Row, Button,
   Modal, Form, Spinner
 } from 'react-bootstrap'
-import axios from 'axios'
-import { baseURL } from '../../utils'
+import { axiosAuth, baseURL } from '../../utils'
 import { Link } from 'react-router-dom'
 import { createNewTeam } from '../../store/reducers/team.reducer'
 
@@ -58,12 +57,8 @@ export default function TeamDiscover() {
   const handleSearchUser = async () => {
     let token = JSON.parse(localStorage.getItem('user')).token
     setLoading(true)
-    let response = await axios.post(`${baseURL}/api/users/search`, {
+    let response = await axiosAuth.post('/api/users/search', {
       text: searchUserName
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
     })
     setSearchUsers(response.data.users)
     setLoading(false)
@@ -80,12 +75,8 @@ export default function TeamDiscover() {
   const handleInviteAll = async () => {
     let token = JSON.parse(localStorage.getItem('user')).token
     setLoading(true)
-    let response = await axios.post(`${baseURL}/api/teams/${newTeamId}/users`, {
+    let response = await axiosAuth.post(`/api/teams/${newTeamId}/users`, {
       users: invitedUsers.map(user => user.id)
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
     })
     setLoading(false)
     setInviteModalShow(false)
@@ -105,11 +96,7 @@ export default function TeamDiscover() {
     formData.append('coverPhoto', teamCoverPhoto)
     formData.append('teamType', isPublicTeam ? 'public' : 'private')
     setLoading(true)
-    let response = await axios.post(`${baseURL}/api/teams`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    let response = await axiosAuth.post('/api/teams', formData);
     setLoading(false)
     if (response.status == 201) {
       handleCreateModalClose()
