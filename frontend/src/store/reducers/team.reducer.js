@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import extend from 'lodash/extend'
-import { axiosAuth, baseURL } from '../../utils'
+import { axiosAuth } from '../../utils'
 
 const initialState = {
   joinedTeams: [],

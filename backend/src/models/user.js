@@ -6,7 +6,7 @@ const Meeting = require('./meeting');
 const Message = require('./message')
 
 class User extends Model {
-  getFullname() {
+  getFullName() {
     return [this.firstName, this.lastName].join(' ');
   }
 }
@@ -43,6 +43,7 @@ User.init({
 
 User.belongsToMany(Conversation, {
   through: 'Users_Conversations',
+  as: 'userConversations',
   foreignKey: 'userId',
 })
 Conversation.belongsToMany(User, {

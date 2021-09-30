@@ -52,7 +52,7 @@ const getUserInfo = async (req, res) => {
     }
     user.hash_password = undefined
     user.avatar = undefined
-    console.log((await user).getFullname)
+    console.log((await user).getFullName)
     return res.status(200).json({ user })
   } catch (error) {
     console.log(error)
@@ -397,6 +397,8 @@ const searchUsers = async (req, res) => {
     return res.status(400).json({ error })
   }
 }
+
+
 
 module.exports = {
   signup, getUserInfo, updateUserInfo, getUserAvatar,

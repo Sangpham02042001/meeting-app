@@ -17,7 +17,7 @@ Conversation.init({
 })
 
 Conversation.hasMany(Message, {
-  as: 'messsages',
+  as: 'messages',
   foreignKey: 'conversationId'
 })
 

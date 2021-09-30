@@ -23,7 +23,7 @@ const signin = async (req, res) => {
 
       user.avatar = undefined
       user.hash_password = undefined
-      console.log(user.getFullname())
+      console.log(user.getFullName())
       return res.status(200).json({
         token,
         lastName: user.lastName,
