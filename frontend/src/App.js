@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Home from "./routes/home";
 import Teams from "./routes/teams";
 import Conversations from "./routes/conversations";
 import Setting from "./routes/setting";
 import Profile from "./routes/profile";
-import Activities from './routes/activities';
 import TeamDiscover from './routes/teams/discover';
 import Login from './components/auth/LoginComponent';
 import SignUp from './components/auth/SignUpComponent';
@@ -32,9 +30,6 @@ function App() {
         </PrivateRoute>
         <PrivateRoute path="/conversations" >
           <Conversations />
-        </PrivateRoute>
-        <PrivateRoute path="/activities" >
-          <Activities />
         </PrivateRoute>
         <PrivateRoute path="/teams" >
           <Switch>

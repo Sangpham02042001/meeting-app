@@ -35,8 +35,8 @@
 .btn-list-selection .btn-active::before {
   content: "";
   height: 60px;
-  border-left: solid .2rem #6264a7;
-  left: .1rem;
+  border-left: solid 0.2rem #6264a7;
+  left: 0.1rem;
   position: absolute;
 }
 

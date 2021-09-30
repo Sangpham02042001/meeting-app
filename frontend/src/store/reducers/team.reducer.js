@@ -13,14 +13,13 @@ const initialState = {
 
 export const getJoinedTeams = createAsyncThunk('teams/getJoinedTeams', async () => {
   let { token, id } = JSON.parse(window.localStorage.getItem('user'))
-  let response = await axiosAuth.get('${baseURL}/api/users/${id}/teams')
+  let response = await axiosAuth.get(`/api/users/${id}/teams`)
   let { teams } = response.data
   return { teams }
 })
 
 export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId }, { rejectWithValue }) => {
-  let { token } = JSON.parse(window.localStorage.getItem('user'))
-  let response = await axiosAuth.get('/api/teams/${teamId}')
+  let response = await axiosAuth.get(`/api/teams/${teamId}`)
   let { team } = response.data
   response = await axiosAuth.get(`/api/teams/${teamId}/invited-users`)
   let { invitedUsers } = response.data

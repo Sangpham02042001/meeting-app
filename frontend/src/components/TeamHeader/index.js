@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom'
 import { Button, Modal } from 'react-bootstrap'
 import { baseURL } from '../../utils'
 import './teamheader.css'
+import Dropdown from '../Dropdown'
 
 export default function TeamHeader({ showTeamInfo }) {
   const { teamId } = useParams()
@@ -27,22 +28,24 @@ export default function TeamHeader({ showTeamInfo }) {
           <i className="fas fa-video"></i> Meeting
         </Button>
         <div className="navbar-btn">
-          <div className="dropdown" style={{ marginRight: 0 }}>
-            <button className="dropdown-btn" style={{ color: "white" }}>
+          <Dropdown
+            dropdownStyle={{ transform: 'translateX(-60px)' }}
+            icon={<button className="dropdown-btn" style={{ color: "white" }}>
               <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
             </button>
-            <div className="dropdown-content">
+            }>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               {teamReducer.team.hostId === user.id && <Link to={`/teams/${teamId}/setting`}>
                 <i className="fas fa-cog"></i> Manage Team
               </Link>}
-              {teamReducer.team.hostId === user.id && <span>
+              {teamReducer.team.hostId === user.id && <span style={{ padding: '12px 16px' }}>
                 <i className="fas fa-trash-alt"></i> Delete Team
               </span>}
-              {teamReducer.team.hostId !== user.id && <span>
+              {teamReducer.team.hostId !== user.id && <span style={{ padding: '12px 16px' }}>
                 <i className="fas fa-sign-out-alt"></i> Leave Team
               </span>}
             </div>
-          </div>
+          </Dropdown>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { Container, Navbar as Nav, Col, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { baseURL } from '../../utils'
+import Dropdown from '../Dropdown'
 import './navbar.css'
 
 export default function Navbar() {
@@ -14,7 +15,36 @@ export default function Navbar() {
       </Nav.Brand>
 
       <div className="navbar-btn">
-        <div className="dropdown" >
+        <Dropdown
+          style={{ marginRight: '20px' }}
+          icon={
+            <button className="dropdown-btn" style={{ color: "white" }}>
+              <i style={{ color: '#fff', cursor: 'pointer', fontSize: '20px' }} className="fas fa-bell"></i>
+            </button>}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <Link to="/profile">Profile</Link>
+            <a href="#">Link 2</a>
+            <a href="#">Link 3</a>
+          </div>
+        </Dropdown>
+
+        <Dropdown
+          style={{ marginRight: '60px' }}
+          icon={
+            <button style={{ background: 'transparent', border: 'none' }}>
+              <div className='nav-user-avatar'
+                style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }}>
+              </div>
+            </button>}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <Link to="/profile">Profile</Link>
+            <a href="#">Link 2</a>
+            <a href="#">Link 3</a>
+          </div>
+        </Dropdown>
+        {/* <div className="dropdown" >
           <button className="dropdown-btn" style={{ color: "white", marginRight: '20px' }}>
             <i className="fas fa-bell"></i>
           </button>
@@ -23,9 +53,9 @@ export default function Navbar() {
             <a href="#">Link 2</a>
             <a href="#">Link 3</a>
           </div>
-        </div>
+        </div> */}
 
-        <div className="dropdown" >
+        {/* <div className="dropdown" >
           <button className="dropdown-btn" style={{ color: "white", padding: 0 }}>
             <div className='nav-user-avatar'
               style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }}>
@@ -36,7 +66,7 @@ export default function Navbar() {
             <a href="#">Link 2</a>
             <a href="#">Logout</a>
           </div>
-        </div>
+        </div> */}
 
       </div>
     </Nav >

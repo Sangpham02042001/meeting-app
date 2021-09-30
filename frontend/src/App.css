@@ -50,19 +50,14 @@
   background: var(--main-color);
 }
 
-/* .form-control {
-  background-color: #313131;
-  border: none;
+a {
+  color: #000000;
+  text-decoration: none;
 }
 
-.form-control:not(active) {
-  background-color: #313131;
+a:hover {
+  color: #000000;
 }
-
-.form-control:focus {
-  background-color: #313131;
-  color: #fff;
-} */
 
 .check-box {
   background-color: #000000;
