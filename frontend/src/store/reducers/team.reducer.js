@@ -3,7 +3,8 @@ import extend from 'lodash/extend'
 import { axiosAuth, baseURL } from '../../utils'
 
 const initialState = {
-  joinedTeam: [],
+  joinedTeams: [],
+  requestTeams: [],
   team: {},
   joinedTeamLoaded: false,
   teamLoaded: false,
@@ -12,8 +13,15 @@ const initialState = {
 }
 
 export const getJoinedTeams = createAsyncThunk('teams/getJoinedTeams', async () => {
-  let { token, id } = JSON.parse(window.localStorage.getItem('user'))
+  let { id } = JSON.parse(window.localStorage.getItem('user'))
   let response = await axiosAuth.get(`/api/users/${id}/teams`)
+  let { teams } = response.data
+  return { teams }
+})
+
+export const getRequestTeams = createAsyncThunk('teams/getRequestTeams', async () => {
+  let { id } = JSON.parse(window.localStorage.getItem('user'))
+  let response = await axiosAuth.get(`/api/users/${id}/requesting-teams`)
   let { teams } = response.data
   return { teams }
 })
@@ -30,13 +38,28 @@ export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId
   return { team }
 })
 
+export const requestJoinTeam = createAsyncThunk('teams/requestJoin', async ({ team }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.post(`/api/users/teams/${team.id}`)
+    if (response.status == 200) {
+      return { team }
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
 export const teamSlice = createSlice({
   name: 'Team',
   initialState,
   reducers: {
     createNewTeam: (state, action) => {
       let { id, hostId, name } = action.payload
-      state.joinedTeam.push({
+      state.joinedTeams.push({
         id, hostId, name
       })
     }
@@ -46,13 +69,24 @@ export const teamSlice = createSlice({
       state.loading = true
     },
     [getJoinedTeams.fulfilled]: (state, action) => {
-      state.joinedTeam = action.payload.teams
+      state.joinedTeams = action.payload.teams
       state.loading = false
       state.joinedTeamLoaded = true
     },
     [getJoinedTeams.rejected]: (state, action) => {
       state.loading = false
       state.joinedTeamLoaded = false
+      state.error = action.error.message
+    },
+    [getRequestTeams.pending]: (state) => {
+      state.loading = true
+    },
+    [getRequestTeams.fulfilled]: (state, action) => {
+      state.requestTeams = action.payload.teams
+      state.loading = false
+    },
+    [getRequestTeams.rejected]: (state, action) => {
+      state.loading = false
       state.error = action.error.message
     },
     [getTeamInfo.pending]: (state) => {
@@ -67,6 +101,16 @@ export const teamSlice = createSlice({
       // state.error = action.payload.error
       state.loading = false
       state.teamLoaded = true
+    },
+    [requestJoinTeam.pending]: (state) => {
+      state.loading = true
+    },
+    [requestJoinTeam.fulfilled]: (state, action) => {
+      state.requestTeams.push(action.payload.team)
+      state.loading = false
+    },
+    [requestJoinTeam.rejected]: (state, action) => {
+      console.log(action.payload.error)
     }
   }
 })

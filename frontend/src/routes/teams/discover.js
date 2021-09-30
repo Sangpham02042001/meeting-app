@@ -7,18 +7,20 @@ import {
 } from 'react-bootstrap'
 import { axiosAuth, baseURL } from '../../utils'
 import { Link } from 'react-router-dom'
-import { createNewTeam } from '../../store/reducers/team.reducer'
+import { createNewTeam, requestJoinTeam } from '../../store/reducers/team.reducer'
 
 export default function TeamDiscover() {
   const user = useSelector(state => state.userReducer.user)
   const dispatch = useDispatch()
   const history = useHistory()
   const [teamName, setTeamName] = useState('')
+  const [searchTeamName, setSearchTeamName] = useState('')
   const [loading, setLoading] = useState(false)
   const [isPublicTeam, setPublicTeam] = useState(true)
   const [newTeamId, setNewTeamId] = useState(0)
   const [searchUsers, setSearchUsers] = useState([])
   const [invitedUsers, setInvitedUsers] = useState([])
+  const [searchTeams, setSearchTeams] = useState([])
   const [searchUserName, setSearchUserName] = useState('')
   const [teamCoverPhoto, setTeamCoverPhoto] = useState('')
   const [isCreateModalShow, setCreateModalShow] = useState(false)
@@ -54,8 +56,8 @@ export default function TeamDiscover() {
     setInvitedUsers([])
   }
 
-  const handleSearchUser = async () => {
-    let token = JSON.parse(localStorage.getItem('user')).token
+  const handleSearchUser = async (e) => {
+    e.preventDefault()
     setLoading(true)
     let response = await axiosAuth.post('/api/users/search', {
       text: searchUserName
@@ -73,7 +75,6 @@ export default function TeamDiscover() {
   }
 
   const handleInviteAll = async () => {
-    let token = JSON.parse(localStorage.getItem('user')).token
     setLoading(true)
     let response = await axiosAuth.post(`/api/teams/${newTeamId}/users`, {
       users: invitedUsers.map(user => user.id)
@@ -90,7 +91,6 @@ export default function TeamDiscover() {
   }
 
   const createTeamAndInviteUsers = async () => {
-    let token = JSON.parse(localStorage.getItem('user')).token
     let formData = new FormData()
     formData.append('name', teamName)
     formData.append('coverPhoto', teamCoverPhoto)
@@ -110,6 +110,34 @@ export default function TeamDiscover() {
       }))
       setNewTeamId(response.data.team.id)
     }
+  }
+
+  const handleSearchTeams = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    let response = await axiosAuth.post('/api/teams/search', {
+      name: searchTeamName
+    })
+    setSearchTeams(response.data.teams)
+    setLoading(false)
+  }
+
+  const cancelSearchTeams = e => {
+    e.preventDefault()
+    setSearchTeams([])
+    setSearchTeamName('')
+  }
+
+  const cancelSearchUsers = e => {
+    e.preventDefault()
+    setSearchUsers([])
+    setSearchUserName('')
+  }
+
+  const handleRequestJoin = team => e => {
+    e.preventDefault()
+    dispatch(requestJoinTeam({ team }))
+    setSearchTeams(searchTeams.filter(t => t.id != team.id))
   }
 
   return (
@@ -136,6 +164,49 @@ export default function TeamDiscover() {
               <i className="fas fa-user-friends" style={{ marginRight: '10px' }}></i>
               Create team
             </Button>
+          </div>
+        </Col>
+        <Col sm={12} style={{ marginTop: '15px', display: "flex", justifyContent: 'space-between' }}>
+          <h3>Search teams you want to join</h3>
+          <Form onSubmit={handleSearchTeams}>
+            <Form.Group className="mb-3 search-team-box" controlId="formTeams">
+              {loading && <div style={{ textAlign: 'center', marginRight: '10px' }}>
+                <Spinner animation="border" role="status">
+                </Spinner>
+              </div>}
+              <Form.Control
+                name="teamName"
+                placeholder="Search teams"
+                value={searchTeamName}
+                onChange={e => setSearchTeamName(e.target.value)}
+                required
+              />
+              {searchTeams.length <= 0 ? <i className="fas fa-search"></i>
+                : <i className="fas fa-times" style={{ cursor: 'pointer' }}
+                  onClick={cancelSearchTeams}>
+                </i>}
+            </Form.Group>
+          </Form>
+        </Col>
+        <Col sm={12}>
+          <div className="team-list" style={{ overflowY: 'auto', padding: '10px 0' }}>
+            {searchTeams.map(team => (
+              <div key={team.id} className="team-item">
+                <div className='team-item-image'
+                  style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${team.id}")` }}>
+                </div>
+                <h5>{team.name}</h5>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '80%' }}>
+                  <Button onClick={handleRequestJoin(team)}>Request to join</Button>
+                  <Button variant="secondary"
+                    onClick={e => {
+                      e.preventDefault()
+                      setSearchTeams(searchTeams.filter(t => t.id !== team.id))
+                    }}
+                  >Hide</Button>
+                </div>
+              </div>
+            ))}
           </div>
         </Col>
       </Row>
@@ -185,14 +256,16 @@ export default function TeamDiscover() {
       <Modal show={isInviteModalShow} onHide={handleInviteModalClose} size="lg" centered>
         <Modal.Body>
           <h4>Invite users to join your team</h4>
-          <div style={{ textAlign: 'right', marginBottom: '10px' }}>
-            <Button style={{ backgroundColor: '#364087' }} disabled={!searchUserName}
-              onClick={handleSearchUser}>
-              Search
-            </Button>
-          </div>
-          <Form.Control type="text" placeholder="Enter user name or email"
-            value={searchUserName} onChange={e => setSearchUserName(e.target.value)} />
+          <Form onSubmit={handleSearchUser}>
+            <Form.Group className="mb-3 search-team-box" controlId="formUsers">
+              <Form.Control type="text" placeholder="Enter user name or email"
+                value={searchUserName} onChange={e => setSearchUserName(e.target.value)} />
+              {searchUsers.length <= 0 ? <i className="fas fa-search"></i>
+                : <i className="fas fa-times" style={{ cursor: 'pointer' }}
+                  onClick={cancelSearchUsers}>
+                </i>}
+            </Form.Group>
+          </Form>
           <div style={{ minHeight: '300px' }}>
             {searchUserName && (
               (loading ? <div style={{ textAlign: 'center', padding: '10px' }}>

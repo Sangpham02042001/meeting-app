@@ -141,3 +141,18 @@
   background-size: cover;
   background-repeat: no-repeat;
 }
+
+.search-team-box {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-team-box > input {
+  border-radius: 10px;
+}
+
+.search-team-box > i {
+  position: absolute;
+  right: 10px;
+}

@@ -332,9 +332,35 @@ const removeInvitations = async (req, res) => {
   }
 }
 
+const searchTeams = async (req, res) => {
+  let userId = req.auth.id
+  let { name } = req.body
+  try {
+    let teams = await sequelize.query(
+      "SELECT t.name, t.id, t.hostId FROM teams t " +
+      "WHERE t.name LIKE :name AND t.teamType = 'public' " +
+      "AND t.id NOT IN (SELECT teamId FROM users_teams WHERE userId = :userId " +
+      " UNION SELECT teamId FROM invited_users_teams WHERE invitedUserId = :userId " +
+      " UNION SELECT teamId FROM request_users_teams WHERE requestUserId = :userId);",
+      {
+        replacements: {
+          userId, name: `%${name}%`
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    return res.status(200).json({ teams })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers, isAdmin,
   confirmUserRequests, removeUserRequests, removeMembers,
-  removeTeam, inviteUsers, removeInvitations, getTeamInvitedUsers
+  removeTeam, inviteUsers, removeInvitations,
+  getTeamInvitedUsers, searchTeams
 }

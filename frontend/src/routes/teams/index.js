@@ -32,7 +32,7 @@ export default function Teams(props) {
 				</Row>
 				<Row>
 					<div className="team-list">
-						{teamReducer.joinedTeam.map(team => (
+						{teamReducer.joinedTeams.map(team => (
 							<Link key={team.id} className="team-item" to={`/teams/${team.id}`}>
 								<div className='team-item-image'
 									style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${team.id}")` }}>
