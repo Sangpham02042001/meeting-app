@@ -332,17 +332,47 @@ const getInvitations = async (req, res) => {
 
 const getNotifications = async (req, res) => {
   let { id } = req.auth
+  let offset = Number(req.query.offset)
+  let num = Number(req.query.num)
   try {
-    let notifications = await sequelize.query(
-      "SELECT * FROM notifications WHERE userId = :id",
-      {
-        replacements: {
-          id
-        },
-        type: QueryTypes.SELECT
+    if (offset == undefined || num == undefined) {
+      let notifications = await sequelize.query(
+        "SELECT * FROM notifications WHERE userId = :id ORDER BY isRead DESC;",
+        {
+          replacements: {
+            id
+          },
+          type: QueryTypes.SELECT
+        }
+      )
+      let numOfNotifications = await sequelize.query(
+        "SELECT COUNT(*) as numOfNotifications FROM notifications WHERE userid = :id;",
+        {
+          replacements: {
+            id
+          },
+          type: QueryTypes.SELECT
+        }
+      )
+      numOfNotifications = numOfNotifications[0]['numOfNotifications']
+      let fragFlag = false
+      if (numOfNotifications > 10) {
+        notifications = notifications.slice(0, 10),
+          fragFlag = true
       }
-    )
-    return res.status(200).json({ notifications })
+      return res.status(200).json({ notifications, numOfNotifications })
+    } else {
+      let notifications = await sequelize.query(
+        "SELECT * FROM notifications WHERE userId = :id ORDER BY isRead DESC LIMIT :offset, :num;",
+        {
+          replacements: {
+            id, offset, num
+          },
+          type: QueryTypes.SELECT
+        }
+      )
+      return res.status(200).json({ notifications })
+    }
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
