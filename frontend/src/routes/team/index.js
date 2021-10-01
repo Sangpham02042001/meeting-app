@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
 import { Container, Modal, Button, Image } from 'react-bootstrap'
-import { getTeamInfo } from '../../store/reducers/team.reducer'
+import { getTeamInfo, requestJoinTeam } from '../../store/reducers/team.reducer'
 import { baseURL } from '../../utils'
 import Loading from '../../components/Loading'
 import './team.css'
@@ -13,7 +13,10 @@ export default function Team(props) {
   const teamReducer = useSelector(state => state.teamReducer)
   const user = useSelector(state => state.userReducer.user)
   const dispatch = useDispatch()
+  const history = useHistory()
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
+  const [isRequestModalShow, setRequestModalShow] = useState(false)
+  const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
   const [isTeamInfoShow, setTeamInfoShow] = useState(false)
 
   useEffect(() => {
@@ -21,20 +24,63 @@ export default function Team(props) {
   }, [teamId])
 
   useEffect(() => {
-    if (teamReducer.team.invitedUsers) {
-      teamReducer.team.invitedUsers.some(u => u.id == user.id)
-        && setInvitedModalShow(true)
+    if (teamReducer.teamLoaded) {
+      if (!teamReducer.team.name) {
+        history.push('/notfound')
+      }
+      if (teamReducer.team.invitedUsers.some(u => u.id == user.id)) {
+        setInvitedModalShow(true)
+        return
+      }
+      if (teamReducer.team.requestUsers.some(u => u.id == user.id)) {
+        setRequestModalShow(true)
+        return
+      }
+      teamReducer.team.members.every(u => u.id != user.id)
+        && setNotMemmberModalShow(true)
     }
-  }, [teamReducer.team.invitedUsers])
+  }, [teamReducer.teamLoaded])
 
   const handleCloseInvitedModal = () => {
     setInvitedModalShow(false)
-    useHistory().push('/teams')
+    history.push('/teams')
+  }
+
+  const handleCloseNotMemberModal = () => {
+    setNotMemmberModalShow(false)
+    history.push('/teams')
+  }
+
+  const handleCloseRequestModal = () => {
+    setRequestModalShow(false)
+    history.push('/teams')
   }
 
   const showTeamInfo = () => {
-    console.log('fadfa')
     setTeamInfoShow(!isTeamInfoShow)
+  }
+
+  const handleRequestJoin = e => {
+    e.preventDefault()
+    dispatch(requestJoinTeam({
+      team: {
+        id: teamReducer.team.id,
+        name: teamReducer.team.name,
+        hostId: teamReducer.team.hostId
+      }
+    }))
+  }
+
+  const handleRefuseInvitation = () => {
+    setInvitedModalShow(false)
+  }
+
+  const handleConfirmInvitation = () => {
+    setInvitedModalShow(false)
+  }
+
+  const handleCancelRequest = () => {
+    setRequestModalShow(false)
   }
 
   return (
@@ -66,11 +112,35 @@ export default function Team(props) {
         <Modal show={isInvitedModalShow} onHide={handleCloseInvitedModal}>
           <Modal.Body>You are invited to join this team</Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseInvitedModal}>
+            <Button variant="secondary" onClick={handleRefuseInvitation}>
               Refuse
             </Button>
-            <Button variant="primary">
+            <Button variant="primary" onClick={handleConfirmInvitation}>
               Agree
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={isNotMemberModalShow}>
+          <Modal.Body>You aren't member of this team. Request to join this team ?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseNotMemberModal}>
+              No
+            </Button>
+            <Button variant="primary" onClick={handleRequestJoin}>
+              Yes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={isRequestModalShow}>
+          <Modal.Body>You are requesting to join this team. Wait for the admin approve you request ?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCancelRequest}>
+              Cancel Request
+            </Button>
+            <Button variant="primary" onClick={handleCloseRequestModal}>
+              Back to My teams
             </Button>
           </Modal.Footer>
         </Modal>

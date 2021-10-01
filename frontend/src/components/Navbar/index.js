@@ -30,7 +30,7 @@ export default function Navbar() {
         </Dropdown>
 
         <Dropdown
-          style={{ marginRight: '60px' }}
+          style={{ marginRight: '30px' }}
           icon={
             <button style={{ background: 'transparent', border: 'none' }}>
               <div className='nav-user-avatar'
@@ -68,6 +68,7 @@ export default function Navbar() {
           </div>
         </div>
 
+        <strong className="navbar-username">{user.firstName}</strong>
       </div>
     </Nav >
 

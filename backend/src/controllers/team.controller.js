@@ -112,7 +112,7 @@ const getTeamMembers = async (req, res) => {
 const getTeamRequestUsers = async (req, res) => {
   let { teamId } = req.params
   try {
-    const requestMembers = await sequelize.query(
+    const requestUsers = await sequelize.query(
       "CALL getTeamRequestMembers(:teamId)",
       {
         replacements: {
@@ -120,7 +120,7 @@ const getTeamRequestUsers = async (req, res) => {
         }
       }
     )
-    return res.status(200).json({ requestMembers })
+    return res.status(200).json({ requestUsers })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })

@@ -15,7 +15,7 @@ router.route('/api/teams/:teamId/members')
   .get(requireSignin, getTeamMembers)
 
 router.route('/api/teams/:teamId/requestusers')
-  .get(requireSignin, isAdmin, getTeamRequestUsers)
+  .get(requireSignin, getTeamRequestUsers)
 
 router.route('/api/teams/:teamId/invited-users')
   .get(requireSignin, getTeamInvitedUsers)

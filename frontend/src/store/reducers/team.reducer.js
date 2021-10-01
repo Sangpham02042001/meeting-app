@@ -4,8 +4,13 @@ import { axiosAuth } from '../../utils'
 
 const initialState = {
   joinedTeams: [],
-  requestTeams: [],
-  team: {},
+  requestingTeams: [],
+  invitedTeams: [],
+  team: {
+    members: [],
+    invitedUsers: [],
+    requestUsers: []
+  },
   joinedTeamLoaded: false,
   teamLoaded: false,
   error: null,
@@ -35,6 +40,9 @@ export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId
   response = await axiosAuth.get(`/api/teams/${teamId}/members`)
   let { members } = response.data
   team.members = members
+  response = await axiosAuth.get(`/api/teams/${teamId}/requestusers`)
+  let { requestUsers } = response.data
+  team.requestUsers = requestUsers
   return { team }
 })
 
@@ -82,7 +90,7 @@ export const teamSlice = createSlice({
       state.loading = true
     },
     [getRequestTeams.fulfilled]: (state, action) => {
-      state.requestTeams = action.payload.teams
+      state.requestingTeams = action.payload.teams
       state.loading = false
     },
     [getRequestTeams.rejected]: (state, action) => {
@@ -106,7 +114,7 @@ export const teamSlice = createSlice({
       state.loading = true
     },
     [requestJoinTeam.fulfilled]: (state, action) => {
-      state.requestTeams.push(action.payload.team)
+      state.requestingTeams.push(action.payload.team)
       state.loading = false
     },
     [requestJoinTeam.rejected]: (state, action) => {
