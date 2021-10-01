@@ -109,7 +109,6 @@
 .team-list {
   display: flex;
   flex-wrap: wrap;
-  margin-top: 10px;
 }
 
 .team-item {
@@ -124,6 +123,7 @@
   height: 200px;
   margin: 0 5px;
   border-radius: 10px;
+  margin-top: 10px;
 }
 
 .team-item:hover {

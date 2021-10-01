@@ -9,6 +9,16 @@
 
 .navbar-btn {
   display: flex;
+  align-items: center;
+}
+
+.navbar-username {
+  white-space: nowrap;
+  width: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  transform: translateX(-20px);
 }
 
 .dropdown {

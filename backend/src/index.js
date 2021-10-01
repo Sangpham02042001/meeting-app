@@ -12,13 +12,13 @@ const io = require('socket.io')(server, {
 const authRoutes = require('./routes/auth.routes')
 const userRoutes = require('./routes/user.routes')
 const teamRoutes = require('./routes/team.routes')
-const conversationRoutes = require('./routes/conversation.routes')
+// const conversationRoutes = require('./routes/conversation.routes')
 const meetingRoutes = require('./routes/meeting.routes')
 const notificationRoutes = require('./routes/notification.routes')
 
 sequelize.sync()
 
-const socketServer = require('./socket.server');
+// const socketServer = require('./socket.server');
 
 
 const PORT = process.env.PORT || 3001
@@ -32,7 +32,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/', authRoutes)
 app.use('/', userRoutes)
 app.use('/', teamRoutes)
-app.use('/', conversationRoutes)
+// app.use('/', conversationRoutes)
 app.use('/', meetingRoutes)
 app.use('/', notificationRoutes)
 
@@ -46,9 +46,9 @@ io.use((socket, next) => {
     next();
 })
 
-io.on('connection', socket => {
-    socketServer(socket)
-});
+// io.on('connection', socket => {
+//     socketServer(socket)
+// });
 
 server.listen(PORT, HOST, () => {
     console.log(`server is running on port ${HOST}:${PORT}`)

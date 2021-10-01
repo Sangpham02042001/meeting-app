@@ -30,7 +30,7 @@ export default function Navbar() {
         </Dropdown>
 
         <Dropdown
-          style={{ marginRight: '60px' }}
+          style={{ marginRight: '30px' }}
           icon={
             <button style={{ background: 'transparent', border: 'none' }}>
               <div className='nav-user-avatar'
@@ -44,30 +44,8 @@ export default function Navbar() {
             <a href="#">Link 3</a>
           </div>
         </Dropdown>
-        {/* <div className="dropdown" >
-          <button className="dropdown-btn" style={{ color: "white", marginRight: '20px' }}>
-            <i className="fas fa-bell"></i>
-          </button>
-          <div className="dropdown-content">
-            <Link to="/profile">Profile</Link>
-            <a href="#">Link 2</a>
-            <a href="#">Link 3</a>
-          </div>
-        </div> */}
 
-        {/* <div className="dropdown" >
-          <button className="dropdown-btn" style={{ color: "white", padding: 0 }}>
-            <div className='nav-user-avatar'
-              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }}>
-            </div>
-          </button>
-          <div className="dropdown-content">
-            <Link to="/profile">Profile</Link>
-            <a href="#">Link 2</a>
-            <a href="#">Logout</a>
-          </div>
-        </div> */}
-
+        <strong className="navbar-username">{user.firstName}</strong>
       </div>
     </Nav >
 
