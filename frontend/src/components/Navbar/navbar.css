@@ -37,6 +37,7 @@
   border-radius: 50%;
   width: 36px;
   height: 36px;
+  padding: 0;
 }
 
 .dropdown-content {
@@ -63,13 +64,18 @@
   display: block;
 }
 
+
+.dropdown-content:hover {
+  display: block;
+}
+
 .dropdown-content > *:hover {
   background-color: #f1f1f1;
   color: #000;
 }
 
 .dropdown > .dropdown-btn:hover {
-  background-color: #858585;
+  background-color: #8f8c8c9a;
 }
 
 .nav-user-avatar {

@@ -7,16 +7,19 @@ export default function Dropdown({ children, icon, style, dropdownStyle }) {
     setShow(!isShow)
   }
 
+
   return (
     <div className="my-dropdown" style={style}>
-      {React.isValidElement(icon) && React.cloneElement(icon, { onClick: toggleShow })}
-      <div className='my-dropdown-content'
+      {/* {React.isValidElement(icon) && React.cloneElement(icon, { onClick: toggleShow })} */}
+      <button className="dropdown-btn" style={{ color: "white" }} onClick={toggleShow}>
+        {icon}
+      </button>
+      {isShow && <div className='my-dropdown-content'
         style={{
-          display: isShow ? 'block' : 'none',
           transform: dropdownStyle && dropdownStyle.transform || 'none'
         }}>
         {children}
-      </div>
+      </div>}
     </div>
   )
 }
