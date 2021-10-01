@@ -13,7 +13,7 @@ import './App.css'
 import PrivateRoute from './routes/private';
 import NotFound from './components/NotFound';
 import Team from './routes/team';
-import TeamSetting from './routes/team/team-setting';
+import TeamSetting from './routes/team/setting';
 
 function App() {
   return (
@@ -42,8 +42,10 @@ function App() {
             <Route path="/teams/:teamId/setting">
               <TeamSetting />
             </Route>
-            <Route path="/teams/:teamId">
+            <Route exact path="/teams/:teamId">
               <Team />
+            </Route>
+            <Route render={() => <Redirect to="/notfound" />}>
             </Route>
           </Switch>
         </PrivateRoute>

@@ -46,6 +46,22 @@ export default function TeamHeader({ showTeamInfo }) {
               </span>}
             </div>
           </Dropdown>
+          {/* <div className="dropdown" style={{ marginRight: '5px' }}>
+            <button className="dropdown-btn" style={{ color: "white" }}>
+              <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
+            </button>
+            <div className="dropdown-content" style={{ width: '170px' }}>
+              {teamReducer.team.hostId === user.id && <Link to={`/teams/${teamId}/setting`}>
+                <i className="fas fa-cog"></i> Manage Team
+              </Link>}
+              {teamReducer.team.hostId === user.id && <span style={{ padding: '12px 16px' }}>
+                <i className="fas fa-trash-alt"></i> Delete Team
+              </span>}
+              {teamReducer.team.hostId !== user.id && <span style={{ padding: '12px 16px' }}>
+                <i className="fas fa-sign-out-alt"></i> Leave Team
+              </span>}
+            </div>
+          </div> */}
         </div>
       </div>
     </div>
