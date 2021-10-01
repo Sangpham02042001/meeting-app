@@ -15,7 +15,7 @@ export default function Navbar() {
       </Nav.Brand>
 
       <div className="navbar-btn">
-        <Dropdown
+        {/* <Dropdown
           style={{ marginRight: '20px' }}
           icon={
             <button className="dropdown-btn" style={{ color: "white" }}>
@@ -43,8 +43,8 @@ export default function Navbar() {
             <a href="#">Link 2</a>
             <a href="#">Link 3</a>
           </div>
-        </Dropdown>
-        {/* <div className="dropdown" >
+        </Dropdown> */}
+        <div className="dropdown" >
           <button className="dropdown-btn" style={{ color: "white", marginRight: '20px' }}>
             <i className="fas fa-bell"></i>
           </button>
@@ -53,12 +53,12 @@ export default function Navbar() {
             <a href="#">Link 2</a>
             <a href="#">Link 3</a>
           </div>
-        </div> */}
+        </div>
 
-        {/* <div className="dropdown" >
+        <div className="dropdown" >
           <button className="dropdown-btn" style={{ color: "white", padding: 0 }}>
             <div className='nav-user-avatar'
-              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }}>
+              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}"), url("./avatar.svg")` }}>
             </div>
           </button>
           <div className="dropdown-content">
@@ -66,7 +66,7 @@ export default function Navbar() {
             <a href="#">Link 2</a>
             <a href="#">Logout</a>
           </div>
-        </div> */}
+        </div>
 
       </div>
     </Nav >
