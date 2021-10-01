@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
 import { Container, Modal, Button, Image } from 'react-bootstrap'
-import { getTeamInfo, requestJoinTeam } from '../../store/reducers/team.reducer'
+import {
+  getTeamInfo, requestJoinTeam, refuseInvitations,
+  confirmInvitations
+} from '../../store/reducers/team.reducer'
 import { baseURL } from '../../utils'
 import Loading from '../../components/Loading'
 import './team.css'
@@ -33,11 +36,15 @@ export default function Team(props) {
         return
       }
       if (teamReducer.team.requestUsers.some(u => u.id == user.id)) {
-        setRequestModalShow(true)
+        history.push('/teams')
         return
       }
-      teamReducer.team.members.every(u => u.id != user.id)
-        && setNotMemmberModalShow(true)
+      if (teamReducer.team.members.every(u => u.id != user.id)) {
+        // if (teamReducer.team.teamType === 'private') {
+        history.push('/teams')
+        // }
+        // setNotMemmberModalShow(true)
+      }
     }
   }, [teamReducer.teamLoaded])
 
@@ -73,10 +80,21 @@ export default function Team(props) {
 
   const handleRefuseInvitation = () => {
     setInvitedModalShow(false)
+    dispatch(refuseInvitations({
+      teams: [teamReducer.team.id]
+    }))
+    history.push('/teams')
   }
 
   const handleConfirmInvitation = () => {
     setInvitedModalShow(false)
+    dispatch(confirmInvitations({
+      teams: [{
+        id: teamReducer.team.id,
+        name: teamReducer.team.name,
+        hostId: teamReducer.team.hostId
+      }]
+    }))
   }
 
   const handleCancelRequest = () => {

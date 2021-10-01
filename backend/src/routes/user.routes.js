@@ -38,8 +38,8 @@ router.route('/api/users/:userId/requesting-teams')
 router.route('/api/users/:userId/invitations')
   .get(requireSignin, getInvitations)
 
-router.route('/api/users/:userId/requesting-teams/:teamId')
-  .delete(requireSignin, cancelJoinRequest)
+router.route('/api/users/:userId/cancel-request')
+  .put(requireSignin, cancelJoinRequest)
 
 router.route('/api/users/:userId')
   .get(getUserInfo)

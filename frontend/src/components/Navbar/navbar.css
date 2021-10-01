@@ -18,12 +18,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   color: #fff;
-  transform: translateX(-20px);
+  margin-right: 10px;
 }
 
 .dropdown {
   position: relative;
-  margin-right: 100px;
+  margin-right: 20px;
   display: flex;
   justify-content: center;
 }
@@ -59,7 +59,6 @@
   cursor: pointer;
 }
 
-
 .dropdown > .dropdown-btn:focus + .dropdown-content {
   display: block;
 }
@@ -68,7 +67,6 @@
   background-color: #f1f1f1;
   color: #000;
 }
-
 
 .dropdown > .dropdown-btn:hover {
   background-color: #858585;
@@ -82,4 +80,3 @@
   background-size: cover;
   background-repeat: no-repeat;
 }
-

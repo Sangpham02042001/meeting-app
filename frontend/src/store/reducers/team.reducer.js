@@ -61,6 +61,43 @@ export const requestJoinTeam = createAsyncThunk('teams/requestJoin', async ({ te
   }
 })
 
+export const refuseInvitations = createAsyncThunk('teams/refuseInvitations', async ({ teams }, { rejectWithValue }) => {
+  try {
+    let { id } = JSON.parse(window.localStorage.getItem('user'))
+    let response = await axiosAuth.put(`/api/users/${id}/remove-invitations`, {
+      teams
+    })
+    if (response.status == 200) {
+      return { teams }
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
+export const confirmInvitations = createAsyncThunk('teams/confirmInvitations', async ({ teams }, { rejectWithValue }) => {
+  try {
+    let { id } = JSON.parse(window.localStorage.getItem('user'))
+    let _teams = teams.map(team => team.id)
+    let response = await axiosAuth.post(`/api/users/${id}/confirm-invitations`, {
+      teams: _teams
+    })
+    if (response.status == 200) {
+      return { teams }
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
 export const teamSlice = createSlice({
   name: 'Team',
   initialState,
@@ -119,7 +156,33 @@ export const teamSlice = createSlice({
     },
     [requestJoinTeam.rejected]: (state, action) => {
       console.log(action.payload.error)
-    }
+      state.loading = false
+    },
+    [refuseInvitations.pending]: state => {
+      state.loading = true
+    },
+    [refuseInvitations.fulfilled]: (state, action) => {
+      let { teams } = action.payload
+      state.invitedTeams = state.invitedTeams.filter(team => teams.indexOf(team.id) >= 0)
+      state.loading = false
+    },
+    [refuseInvitations.rejected]: (state, action) => {
+      state.loading = false
+      console.log(action.payload.error)
+    },
+    [confirmInvitations.pending]: state => {
+      state.loading = true
+    },
+    [confirmInvitations.fulfilled]: (state, action) => {
+      let { teams } = action.payload
+      state.invitedTeams = state.invitedTeams.filter(team => teams.indexOf(team.id) >= 0)
+      state.loading = false
+      state.joinedTeams.concat(teams)
+    },
+    [confirmInvitations.rejected]: (state, action) => {
+      state.loading = false
+      console.log(action.payload.error)
+    },
   }
 })
 

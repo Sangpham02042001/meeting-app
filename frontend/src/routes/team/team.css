@@ -16,6 +16,7 @@
   /* background-color: #ebebeb; */
   width: 20%;
   border-left: 1px solid #cecccc;
+  min-width: 200px;
 }
 
 .team-info-user-avatar {

@@ -242,13 +242,19 @@ const outTeam = async (req, res) => {
 }
 
 const cancelJoinRequest = async (req, res) => {
-  let { userId, teamId } = req.params
+  let { userId } = req.params
+  let { teams } = req.body
+  let stringifyTeams = ''
+  teams.forEach(teamId => stringifyTeams += `${teamId},`)
+  console.log(stringifyTeams)
   try {
     await sequelize.query(
-      "DELETE FROM request_users_teams WHERE teamId = :teamId AND requestUserId = :userId",
+      "DELETE FROM request_users_teams rut " +
+      "WHERE rut.requestUserId = :userId AND FIND_IN_SET(rut.teamId, ':teams')",
       {
         replacements: {
-          teamId, userId
+          userId,
+          teams: stringifyTeams
         },
         type: QueryTypes.DELETE
       }
@@ -264,7 +270,7 @@ const confirmInvitations = async (req, res) => {
   let { userId } = req.params
   let { teams } = req.body
   let stringifyTeams = ''
-  teams.forEach(userId => stringifyTeams += `${userId},`)
+  teams.forEach(teamId => stringifyTeams += `${teamId},`)
   console.log(stringifyTeams)
   try {
     const messages = await sequelize.query(
@@ -291,7 +297,7 @@ const removeInvitations = async (req, res) => {
   let { userId } = req.params
   let { teams } = req.body
   let stringifyTeams = ''
-  teams.forEach(userId => stringifyTeams += `${userId},`)
+  teams.forEach(teamId => stringifyTeams += `${teamId},`)
   console.log(stringifyTeams)
   try {
     const messages = await sequelize.query(
@@ -332,12 +338,12 @@ const getInvitations = async (req, res) => {
 
 const getNotifications = async (req, res) => {
   let { id } = req.auth
-  let offset = Number(req.query.offset)
-  let num = Number(req.query.num)
+  let { offset, num } = req.query
+  console.log(!isNaN(offset))
   try {
-    if (offset == undefined || num == undefined) {
+    if (isNaN(offset) || isNaN(num)) {
       let notifications = await sequelize.query(
-        "SELECT * FROM notifications WHERE userId = :id ORDER BY isRead DESC;",
+        "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt ASC;",
         {
           replacements: {
             id
@@ -363,10 +369,10 @@ const getNotifications = async (req, res) => {
       return res.status(200).json({ notifications, numOfNotifications })
     } else {
       let notifications = await sequelize.query(
-        "SELECT * FROM notifications WHERE userId = :id ORDER BY isRead DESC LIMIT :offset, :num;",
+        "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt ASC LIMIT :offset, :num;",
         {
           replacements: {
-            id, offset, num
+            id, offset: Number(offset), num: Number(num)
           },
           type: QueryTypes.SELECT
         }

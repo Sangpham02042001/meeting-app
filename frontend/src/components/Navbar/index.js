@@ -58,7 +58,7 @@ export default function Navbar() {
         <div className="dropdown" >
           <button className="dropdown-btn" style={{ color: "white", padding: 0 }}>
             <div className='nav-user-avatar'
-              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}"), url("./avatar.svg")` }}>
+              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }}>
             </div>
           </button>
           <div className="dropdown-content">
