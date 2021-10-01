@@ -132,7 +132,7 @@ const getUserAvatar = async (req, res) => {
   if (user.avatar) {
     fs.createReadStream(`./src/public/users-avatars/${user.avatar}`).pipe(res)
   } else {
-    const readStream = fs.createReadStream('./src/public/images/default_avt.jpg')
+    const readStream = fs.createReadStream('./src/public/images/default_avatar.png')
     readStream.pipe(res)
   }
 }
