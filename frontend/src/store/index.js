@@ -3,13 +3,15 @@ import meetingReducer from './reducers/meeting.reducer';
 import userReducer from './reducers/user.reducer';
 import conversationReducer from './reducers/conversation.reducer';
 import teamReducer from './reducers/team.reducer';
+import notificationReducer from './reducers/notification.reducer';
 
 const store = configureStore({
   reducer: {
     meetingReducer,
     userReducer,
     conversationReducer,
-    teamReducer
+    teamReducer,
+    notificationReducer
   }
 })
 

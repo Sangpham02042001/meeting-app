@@ -1,9 +1,16 @@
-import React from 'react'
+import React, {useEffect} from 'react'
+import { useDispatch } from 'react-redux'
 import { Link, NavLink } from 'react-router-dom'
+import { getNotifs } from '../../store/reducers/notification.reducer'
 import Navbar from '../Navbar'
 import './layout.css'
 
 export default function Layout({ children }) {
+  const dispatch = useDispatch()
+  
+  useEffect(() => {
+    dispatch(getNotifs())
+  }, [])
 
   return (
     <>

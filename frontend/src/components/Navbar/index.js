@@ -10,6 +10,16 @@ export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
   const [isDropdown, setIsDropdown] = useState(false);
  
+  let notifications = useSelector(state => state.notificationReducer.notifications)
+
+  const noti = notifications.map((notification) => {
+    return (
+      <a href="#" key={notification.id}>
+        {notification.content}
+      </a>
+    )
+  })
+
   return (
     <Nav bg="dark" variant="dark" className="navbar">
       <Nav.Brand href="/" className="nav-brand">
@@ -23,11 +33,9 @@ export default function Navbar() {
             <i style={{ color: '#fff', cursor: 'pointer', fontSize: '20px' }} className="fas fa-bell"></i>
           }
         >
-
-          <Link to="/profile">Profile</Link>
-          <a href="#">Link 2</a>
-          <a href="#">Link 3</a>
-
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {noti}
+          </div>
         </Dropdown>
 
         <Dropdown
@@ -49,9 +57,7 @@ export default function Navbar() {
             <i className="fas fa-bell"></i>
           </button>
           <div className="dropdown-content">
-            <Link to="/profile">Profile</Link>
-            <a href="#">Link 2</a>
-            <a href="#">Link 3</a>
+            {noti}
           </div>
         </div>
 
