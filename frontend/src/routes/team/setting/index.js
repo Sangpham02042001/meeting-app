@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Route, Switch, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
-import { Container, Col } from 'react-bootstrap'
+import { Container, Col, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { useHistory, useParams } from 'react-router'
 import {
@@ -37,16 +37,18 @@ export default function TeamSetting(props) {
 
   return (
     teamReducer.loading ? <Loading /> :
-      <Container fluid style={{ padding: '10px' }}>
+      <Container fluid style={{ paddingTop: '15px' }}>
         <Col sm={12}>
           <Link to={`/teams/${teamId}`} style={{ color: '#000', textDecoration: 'none' }}>
             &lt; &nbsp;Back
           </Link>
         </Col>
         <h3 style={{ margin: '15px 0 20px 0' }}>Setting</h3>
-        <Col sm={12} style={{ display: 'flex', alignItems: 'flex-start', paddingLeft: '30px' }}>
-          <SettingList />
-          <div style={{ marginLeft: '20px' }}>
+        <Row style={{ display: 'flex', alignItems: 'flex-start' }}>
+          <Col sm={2} style={{ paddingLeft: '30px' }}>
+            <SettingList />
+          </Col>
+          <Col sm={6}>
             <Switch>
               <Route path="/teams/:teamId/setting/members">
                 <TeamMembers />
@@ -63,8 +65,8 @@ export default function TeamSetting(props) {
               <Route render={() => <Redirect to="/notfound" />}>
               </Route>
             </Switch>
-          </div>
-        </Col>
+          </Col>
+        </Row>
       </Container>
   )
 }

@@ -67,7 +67,7 @@ BEGIN
     FROM users u
     WHERE u.id = NEW.requestUserId;
     SET @content = CONCAT(userName, ' requests to join ', teamName);
-    SET @relativeLink = CONCAT('/teams/', NEW.teamId, '/requestusers');
+    SET @relativeLink = CONCAT('/teams/', NEW.teamId, '/setting/requestusers');
     SET tmp = createTeamNotification(@content, @relativeLink, hostId, NEW.teamId);
 END $$ 
 DELIMITER ;

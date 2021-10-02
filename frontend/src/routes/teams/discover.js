@@ -254,13 +254,17 @@ export default function TeamDiscover() {
 
 
       <Modal show={isInviteModalShow} onHide={handleInviteModalClose} size="lg" centered>
+        <Modal.Header>
+          <Modal.Title>Invite users to join your team</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
-          <h4>Invite users to join your team</h4>
           <Form onSubmit={handleSearchUser}>
             <Form.Group className="mb-3 search-team-box" controlId="formUsers">
               <Form.Control type="text" placeholder="Enter user name or email"
                 value={searchUserName} onChange={e => setSearchUserName(e.target.value)} />
-              {searchUsers.length <= 0 ? <i className="fas fa-search"></i>
+              {searchUsers.length <= 0 ?
+                <i className="fas fa-search" style={{ cursor: 'pointer' }}
+                  onClick={handleSearchUser}></i>
                 : <i className="fas fa-times" style={{ cursor: 'pointer' }}
                   onClick={cancelSearchUsers}>
                 </i>}

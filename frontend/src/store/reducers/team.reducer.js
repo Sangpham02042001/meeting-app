@@ -111,6 +111,25 @@ export const confirmInvitations = createAsyncThunk('teams/confirmInvitations', a
   }
 })
 
+export const inviteUsers = createAsyncThunk('teams/inviteUsers', async ({ teamId, users }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.post(`/api/teams/${teamId}/users`, {
+      users: users.map(user => user.id)
+    })
+    if (response.status == 200) {
+      return { users }
+    } else {
+      throw 'Something wrong'
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
 export const teamSlice = createSlice({
   name: 'Team',
   initialState,
@@ -207,6 +226,17 @@ export const teamSlice = createSlice({
       console.log(action.payload)
       state.error = action.payload.error
       state.loading = false
+    },
+    [inviteUsers.pending]: state => {
+      state.loading = true
+    },
+    [inviteUsers.fulfilled]: (state, action) => {
+      state.team.invitedUsers.concat(action.payload.users)
+      state.loading = false
+    },
+    [inviteUsers.rejected]: (state, action) => {
+      state.loading = false
+      state.error = action.payload.error
     }
   }
 })

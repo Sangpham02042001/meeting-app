@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Container, Navbar as Nav, Col, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
@@ -9,16 +9,8 @@ import './navbar.css'
 export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
   const [isDropdown, setIsDropdown] = useState(false);
- 
-  let notifications = useSelector(state => state.notificationReducer.notifications)
 
-  const noti = notifications.map((notification) => {
-    return (
-      <a href="#" key={notification.id}>
-        {notification.content}
-      </a>
-    )
-  })
+  let notifications = useSelector(state => state.notificationReducer.notifications)
 
   return (
     <Nav bg="dark" variant="dark" className="navbar">
@@ -53,11 +45,17 @@ export default function Navbar() {
 
         </Dropdown> */}
         <div className="dropdown" >
-          <button className="dropdown-btn" style={{ color: "white", marginRight: '20px' }} >
+          <button className="dropdown-btn" style={{ color: "white" }} >
             <i className="fas fa-bell"></i>
           </button>
-          <div className="dropdown-content">
-            {noti}
+          <div className="dropdown-content" style={{ minWidth: '300px' }}>
+            {notifications.map((notification) => {
+              return (
+                <Link to={notification.relativeLink} key={notification.id}>
+                  {notification.content}
+                </Link>
+              )
+            })}
           </div>
         </div>
 
