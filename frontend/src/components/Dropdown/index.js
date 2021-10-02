@@ -10,10 +10,10 @@ export default function Dropdown({ children, icon, style, dropdownStyle }) {
 
   return (
     <div className="my-dropdown" style={style}>
-      {/* {React.isValidElement(icon) && React.cloneElement(icon, { onClick: toggleShow })} */}
-      <button className="dropdown-btn" style={{ color: "white" }} onClick={toggleShow}>
+      {React.isValidElement(icon) && React.cloneElement(icon, { onClick: toggleShow })}
+      {/* <button className="dropdown-btn" style={{ color: "white" }} onClick={toggleShow}>
         {icon}
-      </button>
+      </button> */}
       {isShow && <div className='my-dropdown-content'
         style={{
           transform: dropdownStyle && dropdownStyle.transform || 'none'

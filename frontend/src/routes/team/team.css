@@ -28,3 +28,13 @@
   background-repeat: no-repeat;
   margin-right: 10px;
 }
+
+.team-setting-coverphoto {
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin-bottom: 10px;
+}

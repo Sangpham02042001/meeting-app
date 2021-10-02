@@ -176,3 +176,35 @@ BEGIN
     WHERE u.id != userId AND (u.email LIKE my_text OR CONCAT(u.firstName, ' ', u.lastName) LIKE my_text);
 END $$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS updateBasicTeamInfo;
+CREATE PROCEDURE updateBasicTeamInfo(
+	IN teamId INT,
+    IN teamName VARCHAR(255),
+    IN coverPhoto VARCHAR(255),
+    IN teamType VARCHAR(255)
+)
+BEGIN
+	IF teamName != '' THEN
+		UPDATE teams 
+        SET name = teamName
+        WHERE id = teamId;
+	END IF;
+        
+	IF teamType != '' THEN
+		UPDATE teams
+        SET teamType = teamType
+        WHERE id = teamId;
+	END IF;
+    
+    IF coverPhoto != '' THEN
+		UPDATE teams
+        SET coverPhoto = coverPhoto
+        WHERE id = teamId;
+	END IF;
+    
+	SELECT t.name, t.teamType FROM teams t
+	WHERE t.id = teamId;
+END$$
+DELIMITER ;

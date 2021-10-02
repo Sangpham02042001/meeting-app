@@ -354,7 +354,70 @@ const searchTeams = async (req, res) => {
     console.log(error)
     return res.status(400).json({ error })
   }
+}
 
+const updateBasicTeamInfo = async (req, res) => {
+  let { teamId } = req.params
+  const form = formidable.IncomingForm()
+  form.keepExtensions = true
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.log(err)
+      return res.status(400).json({ error: err })
+    }
+    try {
+      let coverPhoto
+      if (files.coverPhoto) {
+        let fileType = files.coverPhoto.path.split('.')[files.coverPhoto.path.split('.').length - 1]
+        coverPhoto = `${v4()}.${fileType}`
+        fs.createReadStream(files.coverPhoto.path)
+          .pipe(fs.createWriteStream(`./src/public/teams-coverphotos/${coverPhoto}`))
+      } else {
+        coverPhoto = ''
+      }
+      let name = fields.name || ''
+      let teamType = fields.teamType || ''
+      let team = await Team.findOne({
+        where: {
+          id: teamId
+        },
+        attributes: ['coverPhoto']
+      })
+      if (files.coverPhoto) {
+        fs.unlink(`./src/public/teams-coverphotos/${team.coverPhoto}`, (err) => {
+          if (err) {
+            console.log(err)
+            throw err
+          }
+        })
+      }
+      const result = await sequelize.query(
+        'CALL updateBasicTeamInfo(:teamId, :teamName, :coverPhoto, :teamType)',
+        {
+          replacements: {
+            teamId,
+            teamName: name,
+            coverPhoto,
+            teamType
+          }
+        }
+      )
+      let _team = result[0]
+      return res.status(200).json({ team: _team })
+    } catch (error) {
+      console.log(error)
+      if (error.name === 'SequelizeDatabaseError') {
+        if (error.parent.errno == 1406) {
+          return res.status(400).json({
+            error: 'Too large image to update'
+          })
+        }
+      }
+      return res.status(400).json({
+        error
+      })
+    }
+  })
 }
 
 module.exports = {
@@ -362,5 +425,5 @@ module.exports = {
   getTeamMembers, getTeamRequestUsers, isAdmin,
   confirmUserRequests, removeUserRequests, removeMembers,
   removeTeam, inviteUsers, removeInvitations,
-  getTeamInvitedUsers, searchTeams
+  getTeamInvitedUsers, searchTeams, updateBasicTeamInfo
 }

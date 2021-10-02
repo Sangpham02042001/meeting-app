@@ -46,6 +46,19 @@ export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId
   return { team }
 })
 
+export const updateBasicTeamInfo = createAsyncThunk('teams/updateInfo', async ({ data, teamId }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.put(`/api/teams/${teamId}`, data)
+    return response.data
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
 export const requestJoinTeam = createAsyncThunk('teams/requestJoin', async ({ team }, { rejectWithValue }) => {
   try {
     let response = await axiosAuth.post(`/api/users/teams/${team.id}`)
@@ -183,6 +196,18 @@ export const teamSlice = createSlice({
       state.loading = false
       console.log(action.payload.error)
     },
+    [updateBasicTeamInfo.pending]: (state) => {
+      state.loading = true
+    },
+    [updateBasicTeamInfo.fulfilled]: (state, action) => {
+      state.team = extend(state.team, action.payload.team)
+      state.loading = false
+    },
+    [updateBasicTeamInfo.rejected]: (state, action) => {
+      console.log(action.payload)
+      state.error = action.payload.error
+      state.loading = false
+    }
   }
 })
 

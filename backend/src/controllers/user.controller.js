@@ -86,7 +86,7 @@ const updateUserInfo = async (req, res) => {
         },
         attributes: ['avatar']
       })
-      if (user.avatar) {
+      if (user.avatar && files.avatar) {
         fs.unlink(`./src/public/users-avatars/${user.avatar}`, (err) => {
           if (err) {
             throw err

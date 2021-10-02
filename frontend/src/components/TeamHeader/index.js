@@ -34,7 +34,7 @@ export default function TeamHeader({ showTeamInfo }) {
               <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
             </button>
             }>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '160px' }}>
               {teamReducer.team.hostId === user.id && <Link to={`/teams/${teamId}/setting`}>
                 <i className="fas fa-cog"></i> Manage Team
               </Link>}

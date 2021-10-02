@@ -50,6 +50,14 @@
   background: var(--main-color);
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
+.btn:disabled {
+  pointer-events: all;
+}
+
 /* a {
   color: #000000;
   text-decoration: none;
