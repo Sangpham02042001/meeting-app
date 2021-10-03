@@ -78,6 +78,7 @@ CREATE PROCEDURE removeRequestUsers(
 BEGIN
 	DECLARE teamName VARCHAR(255);
     DECLARE hostName VARCHAR(255);
+    DECLARE hostId INT;
     DECLARE tmp VARCHAR(10);
 	DELETE FROM request_users_teams rut
     WHERE rut.teamId = teamId AND FIND_IN_SET(rut.requestUserId, users);
@@ -85,7 +86,7 @@ BEGIN
 		SET @array = users;
         
         SELECT CONCAT(u.firstName, " ", u.lastName),
-			   t.name INTO hostName, teamName
+			   t.name, t.hostId INTO hostName, teamName, hostId
         FROM teams t
         INNER JOIN users u ON u.id = t.hostId
         WHERE t.id = teamId;
@@ -97,7 +98,7 @@ BEGIN
             SET @array = SUBSTRING(@array, LOCATE(',',@array) + 1);
             IF @id != '' THEN
 				INSERT INTO users_teams VALUES(NOW(), NOW(), @id, teamId);
-				SET tmp = createTeamNotification(@content, @relativeLink, @id, teamId);
+				SET tmp = createTeamNotification(@content, @relativeLink, @id, teamId, hostId);
             END IF;
         END WHILE;
     END IF;
@@ -139,11 +140,12 @@ CREATE PROCEDURE inviteUsers(
 BEGIN 
 	DECLARE hostName VARCHAR(255);
     DECLARE teamName VARCHAR(255);
+    DECLARE hostId INT;
     DECLARE tmp VARCHAR(10);
     SET @array = users;
         
 	SELECT CONCAT(u.firstName, " ", u.lastName),
-		   t.name INTO hostName, teamName
+		   t.name, t.hostId INTO hostName, teamName, hostId
 	FROM teams t
 	INNER JOIN users u ON u.id = t.hostId
 	WHERE t.id = teamId;
@@ -155,7 +157,7 @@ BEGIN
 			SET @array = SUBSTRING(@array, LOCATE(',',@array) + 1);
 			IF @id != '' THEN
 				INSERT INTO invited_users_teams VALUES(NOW(), NOW(), @id, teamId);
-				SET tmp = createTeamNotification(@content, @relativeLink, @id, teamId);
+				SET tmp = createTeamNotification(@content, @relativeLink, @id, teamId, hostId);
 			END IF;
 	END WHILE;
     SELECT 'Invite Successfully' message;

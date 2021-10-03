@@ -26,6 +26,10 @@ Notification.init({
     type: DataTypes.INTEGER,
     allowNull: false
   },
+  createdBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
   teamId: {
     type: DataTypes.INTEGER,
     allowNull: true

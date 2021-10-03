@@ -4,7 +4,8 @@ CREATE FUNCTION createTeamNotification(
 	content VARCHAR(400),
   relativeLink VARCHAR(255),
   userId INT,
-  teamId INT
+  teamId INT,
+  createdBy INT
 )
 RETURNS VARCHAR(5)
 DETERMINISTIC
@@ -15,7 +16,8 @@ BEGIN
         userId = userId,
         teamId = teamId,
         createdAt = NOW(),
-        updatedAt = NOW();
+        updatedAt = NOW(),
+        createdBy = createdBy;
 	RETURN "";
 END $$
 DELIMITER ;
