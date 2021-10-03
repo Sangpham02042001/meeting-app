@@ -130,6 +130,24 @@ export const inviteUsers = createAsyncThunk('teams/inviteUsers', async ({ teamId
   }
 })
 
+export const deleteTeam = createAsyncThunk('teams/delete', async ({ teamId }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.delete(`/api/teams/${teamId}`)
+    if (response.status == 200) {
+      return {
+        message: response.data.message,
+        teamId
+      }
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
 export const teamSlice = createSlice({
   name: 'Team',
   initialState,
@@ -235,6 +253,23 @@ export const teamSlice = createSlice({
       state.loading = false
     },
     [inviteUsers.rejected]: (state, action) => {
+      state.loading = false
+      state.error = action.payload.error
+    },
+    [deleteTeam.pending]: (state) => {
+      state.loading = false
+    },
+    [deleteTeam.fulfilled]: (state, action) => {
+      state.team = {
+        members: [],
+        invitedUsers: [],
+        requestUsers: []
+      }
+      let { teamId } = action.payload
+      state.joinedTeams = state.joinedTeams.filter(team => team.id != teamId)
+      state.loading = false
+    },
+    [deleteTeam.rejected]: (state, action) => {
       state.loading = false
       state.error = action.payload.error
     }

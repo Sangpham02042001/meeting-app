@@ -1,15 +1,33 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useHistory } from 'react-router-dom'
 import { Button, Modal } from 'react-bootstrap'
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import Dropdown from '../Dropdown'
+import { deleteTeam } from '../../store/reducers/team.reducer'
 
 export default function TeamHeader({ showTeamInfo }) {
   const { teamId } = useParams()
+  const dispatch = useDispatch()
+  const history = useHistory()
   const teamReducer = useSelector(state => state.teamReducer)
   const user = useSelector(state => state.userReducer.user)
+  const [isDeleteModalShow, setDeleteModalShow] = useState(false)
+
+  const handleDeleteTeam = async () => {
+    console.log('delete team')
+    dispatch(deleteTeam({
+      teamId
+    }))
+    setDeleteModalShow(false)
+    history.push('/teams')
+  }
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalShow(false)
+  }
+
   return (
     <div className='team-header'>
       <div style={{ display: 'flex' }}>
@@ -38,9 +56,13 @@ export default function TeamHeader({ showTeamInfo }) {
               {teamReducer.team.hostId === user.id && <Link to={`/teams/${teamId}/setting`}>
                 <i className="fas fa-cog"></i> Manage Team
               </Link>}
-              {teamReducer.team.hostId === user.id && <span style={{ padding: '12px 16px' }}>
-                <i className="fas fa-trash-alt"></i> Delete Team
-              </span>}
+              {teamReducer.team.hostId === user.id &&
+                <span style={{ padding: '12px 16px', cursor: 'pointer' }} onClick={e => {
+                  e.preventDefault()
+                  setDeleteModalShow(true)
+                }}>
+                  <i className="fas fa-trash-alt"></i> Delete Team
+                </span>}
               {teamReducer.team.hostId !== user.id && <span style={{ padding: '12px 16px' }}>
                 <i className="fas fa-sign-out-alt"></i> Leave Team
               </span>}
@@ -62,6 +84,17 @@ export default function TeamHeader({ showTeamInfo }) {
               </span>}
             </div>
           </div> */}
+          <Modal show={isDeleteModalShow} centered onHide={handleCloseDeleteModal}>
+            <Modal.Header closeButton>
+              <h4>Confirm delete this team</h4>
+            </Modal.Header>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseDeleteModal}>
+                Cancel
+              </Button>
+              <Button onClick={handleDeleteTeam}>Delete</Button>
+            </Modal.Footer>
+          </Modal>
         </div>
       </div>
     </div>

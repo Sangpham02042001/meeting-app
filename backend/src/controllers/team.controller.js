@@ -258,6 +258,18 @@ const removeMembers = async (req, res) => {
 const removeTeam = async (req, res) => {
   let { teamId } = req.params
   try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      },
+      attributes: ['coverPhoto']
+    })
+    fs.unlink(`./src/public/teams-coverphotos/${team.coverPhoto}`, (err) => {
+      if (err) {
+        console.log(err)
+        throw err
+      }
+    })
     await sequelize.query(
       "DELETE FROM teams WHERE id = :teamId",
       {
