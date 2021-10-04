@@ -38,3 +38,8 @@
   background-repeat: no-repeat;
   margin-bottom: 10px;
 }
+
+.team-message-input:focus {
+  box-shadow: 0 0 0 1px var(--gray-shadow);
+  border-color: transparent;
+}

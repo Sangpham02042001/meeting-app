@@ -118,6 +118,7 @@ export default function Team(props) {
                 <Form style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
                   <Form.Group className="search-team-box" controlId="formUsers">
                     <Form.Control type="text" placeholder="Chat"
+                      className='team-message-input'
                       value={input} onChange={e => setInput(e.target.value)} />
                     <i className="fas fa-search" style={{ cursor: 'pointer' }}></i>
                   </Form.Group>

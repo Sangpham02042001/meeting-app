@@ -40,7 +40,7 @@ export default function TeamSetting(props) {
       <Container fluid style={{ paddingTop: '15px' }}>
         <Col sm={12}>
           <Link to={`/teams/${teamId}`} style={{ color: '#000', textDecoration: 'none' }}>
-            &lt; &nbsp;Back
+            <strong>&lt; Back</strong>
           </Link>
         </Col>
         <h3 style={{ margin: '15px 0 20px 0' }}>Setting</h3>

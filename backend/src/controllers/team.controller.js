@@ -5,6 +5,7 @@ const { QueryTypes } = require('sequelize')
 const sequelize = require('../models')
 const Team = require('../models/team')
 const User = require('../models/user')
+const Message = require('../models/message')
 
 const getTeamInfo = async (req, res) => {
   let { teamId } = req.params
@@ -139,30 +140,6 @@ const getTeamInvitedUsers = async (req, res) => {
       }
     )
     return res.status(200).json({ invitedUsers })
-  } catch (error) {
-    console.log(error)
-    return res.status(400).json({ error })
-  }
-}
-
-const isAdmin = async (req, res, next) => {
-  let { id } = req.auth
-  let { teamId } = req.params
-  try {
-    let team = await Team.findOne({
-      where: {
-        id: teamId
-      },
-      attributes: ['hostId']
-    })
-    if (!team) {
-      throw `Team not found`
-    }
-    if (team.hostId != id) {
-      throw `You aren't the admin of this group`
-    }
-    req.hostId = team.hostId
-    next()
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
@@ -432,10 +409,75 @@ const updateBasicTeamInfo = async (req, res) => {
   })
 }
 
+const sendMessage = async (req, res) => {
+  let { content } = req.body
+  let { id } = req.auth
+  let { teamId } = req.params
+
+  try {
+    const message = await Message.create({
+      content,
+      userId: id,
+      teamId
+    })
+    return res.status(201).json({ message })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const getTeamMessages = async (req, res) => {
+  let { offset, num } = req.query
+  let { teamId } = req.params
+  try {
+    if (isNaN(offset) || isNaN(num)) {
+      let numOfMessages = await sequelize.query(
+        "SELECT COUNT(*) as num FROM messages m WHERE m.teamId = :teamId",
+        {
+          replacements: {
+            teamId
+          },
+          type: QueryTypes.SELECT
+        }
+      )
+      let messages = await sequelize.query(
+        "CALL getTeamMessages(:teamId, 0, 0)",
+        {
+          replacements: {
+            teamId
+          }
+        }
+      )
+      return res.status(200).json({
+        numOfMessages: numOfMessages[0].num,
+        messages
+      })
+    } else {
+      console.log('call here')
+      let messages = await sequelize.query(
+        "CALL getTeamMessages(:teamId, :offset, :num)",
+        {
+          replacements: {
+            teamId, offset: Number(offset), num: Number(num)
+          }
+        }
+      )
+      return res.status(200).json({
+        messages
+      })
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
-  getTeamMembers, getTeamRequestUsers, isAdmin,
+  getTeamMembers, getTeamRequestUsers,
   confirmUserRequests, removeUserRequests, removeMembers,
   removeTeam, inviteUsers, removeInvitations,
-  getTeamInvitedUsers, searchTeams, updateBasicTeamInfo
+  getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
+  sendMessage, getTeamMessages
 }

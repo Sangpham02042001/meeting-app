@@ -1,6 +1,8 @@
 const bcrpyt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
+const sequelize = require('../models')
+const { QueryTypes } = require('sequelize')
 
 const signin = async (req, res) => {
   let { email, password } = req.body
@@ -59,4 +61,58 @@ const requireSignin = (req, res, next) => {
   }
 }
 
-module.exports = { signin, requireSignin }
+const isAdmin = async (req, res, next) => {
+  let { id } = req.auth
+  let { teamId } = req.params
+  try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      },
+      attributes: ['hostId']
+    })
+    if (!team) {
+      throw `Team not found`
+    }
+    if (team.hostId != id) {
+      throw `You aren't the admin of this team`
+    }
+    req.hostId = team.hostId
+    next()
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const isMember = async (req, res, next) => {
+  let { id } = req.auth
+  let { teamId } = req.params
+  try {
+    let user_team = await sequelize.query(
+      "SELECT * FROM users_teams " +
+      "WHERE userId = :id AND teamId = :teamId",
+      {
+        replacements: {
+          id,
+          teamId
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    if (user_team.length > 0) {
+      console.log(user_team)
+      next()
+    } else {
+      throw `You aren't a member of this team`
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+module.exports = {
+  signin, requireSignin, isAdmin,
+  isMember
+}
