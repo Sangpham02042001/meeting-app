@@ -1,0 +1,51 @@
+.teamlist-container {
+  padding: 10px 0;
+  border-right: 1px solid rgb(236, 235, 235);
+  height: 100%;
+  overflow-y: auto;
+}
+
+.back-to-teams-link {
+  color: #000;
+  text-decoration: none;
+  padding: 5px;
+  display: block;
+}
+
+.back-to-teams-link:hover {
+  color: gray;
+  transition: color 0.4s ease;
+}
+
+.teamlist-link {
+  display: flex;
+  color: #000;
+  text-decoration: none;
+  padding: 5px;
+  border-radius: 10px;
+  align-items: center;
+}
+
+.teamlist-link.current-team {
+  background-color: rgb(236, 235, 235);
+}
+
+.teamlist-link.current-team:hover {
+  background-color: rgb(236, 235, 235);
+}
+
+.teamlist-link:hover {
+  color: #000;
+  background-color: rgb(236, 235, 235);
+  transition: background-color 0.4s ease;
+}
+
+.team-list-coverphoto {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin-right: 5px;
+}

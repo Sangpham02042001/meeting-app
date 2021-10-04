@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
-import { Container, Modal, Button, Image } from 'react-bootstrap'
+import { Container, Modal, Button, Row, Col, Form } from 'react-bootstrap'
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
   confirmInvitations
@@ -10,6 +10,7 @@ import { baseURL } from '../../utils'
 import Loading from '../../components/Loading'
 import './team.css'
 import TeamHeader from '../../components/TeamHeader'
+import TeamList from '../../components/TeamList'
 
 export default function Team(props) {
   const { teamId } = useParams()
@@ -17,6 +18,7 @@ export default function Team(props) {
   const user = useSelector(state => state.userReducer.user)
   const dispatch = useDispatch()
   const history = useHistory()
+  const [input, setInput] = useState('')
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
   const [isRequestModalShow, setRequestModalShow] = useState(false)
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
@@ -104,29 +106,46 @@ export default function Team(props) {
   return (
     teamReducer.loading ? <Loading />
       :
-      <Container fluid style={{ padding: 0 }}>
-        <TeamHeader showTeamInfo={showTeamInfo} />
-        <div className="team-container">
-          <div className="team-body" style={{ width: isTeamInfoShow ? '80%' : '100%' }}>Team</div>
-          {isTeamInfoShow && <div className="team-info-container">
-            <strong>About</strong>
-            <p>{teamReducer.team.name}</p>
+      <Container fluid>
+        <Row>
+          <Col sm={2} style={{ padding: 0 }}>
+            <TeamList />
+          </Col>
+          <Col style={{ padding: 0 }}>
+            <TeamHeader showTeamInfo={showTeamInfo} />
+            <div className="team-container">
+              <div className="team-body" style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
+                <Form style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
+                  <Form.Group className="search-team-box" controlId="formUsers">
+                    <Form.Control type="text" placeholder="Chat"
+                      value={input} onChange={e => setInput(e.target.value)} />
+                    <i className="fas fa-search" style={{ cursor: 'pointer' }}></i>
+                  </Form.Group>
+                </Form>
+              </div>
+              {isTeamInfoShow && <div className="team-info-container">
+                <strong>About</strong>
+                <p>{teamReducer.team.name}</p>
 
-            <strong>Members ({teamReducer.team.members.length})</strong>
-            {teamReducer.team.members.slice(0, 5).map(member => (
-              <span key={`member ${member.id}`}
-                style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <div className='team-info-user-avatar'
-                  style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${member.id}")` }}>
-                </div>
-                <p style={{ marginBottom: 0 }}>{member.userName}</p>
-              </span>
-            ))}
-            {teamReducer.team.members.length > 5 && <Link to="#">
-              See all members
-            </Link>}
-          </div>}
-        </div>
+                <strong>Members ({teamReducer.team.members.length})</strong>
+                {teamReducer.team.members.slice(0, 5).map(member => (
+                  <span key={`member ${member.id}`}
+                    style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                    <div className='team-info-user-avatar'
+                      style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${member.id}")` }}>
+                    </div>
+                    <p style={{ marginBottom: 0 }}>{member.userName}</p>
+                  </span>
+                ))}
+                {teamReducer.team.members.length > 5 && <Link to="#">
+                  See all members
+                </Link>}
+              </div>}
+            </div>
+          </Col>
+        </Row>
+
+
         <Modal show={isInvitedModalShow} onHide={handleCloseInvitedModal}>
           <Modal.Body>You are invited to join this team</Modal.Body>
           <Modal.Footer>
