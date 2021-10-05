@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
 import {
@@ -10,7 +10,7 @@ import {
   confirmInvitations, getTeamMessages, cleanTeamState,
   sendMessage
 } from '../../store/reducers/team.reducer'
-import { baseURL } from '../../utils'
+import { baseURL, socketClient } from '../../utils'
 import Loading from '../../components/Loading'
 import './team.css'
 import TeamHeader from '../../components/TeamHeader'
@@ -20,7 +20,7 @@ import Message from '../../components/Message'
 export default function Team(props) {
   const { teamId } = useParams()
   const teamReducer = useSelector(state => state.teamReducer)
-  const numOfMessages = useSelector(state => state.teamReducer.team.numOfMessages)
+  const currentNumOfMessages = useSelector(state => state.teamReducer.team.messages.length)
   const user = useSelector(state => state.userReducer.user)
   const dispatch = useDispatch()
   const history = useHistory()
@@ -30,15 +30,20 @@ export default function Team(props) {
   const [isRequestModalShow, setRequestModalShow] = useState(false)
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
   const [isTeamInfoShow, setTeamInfoShow] = useState(true)
+  const messageList = useRef()
+  const teamBody = useRef()
 
   useEffect(() => {
+    // socketClient.join(`team ${teamId}`)
     dispatch(getTeamInfo({ teamId }))
     dispatch(getTeamMessages({
       teamId,
       offset: offsetMessages,
       num: 10
     }))
+    console.log(teamBody.current.offsetHeight)
     return () => {
+      // socketClient.leave(`team ${teamId}`)
       dispatch(cleanTeamState())
     }
   }, [teamId])
@@ -62,6 +67,7 @@ export default function Team(props) {
         // }
         // setNotMemmberModalShow(true)
       }
+      messageList.current && messageList.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [teamReducer.teamLoaded])
 
@@ -118,10 +124,18 @@ export default function Team(props) {
     setRequestModalShow(false)
   }
 
-  const sendMessage = e => {
+  const handleSendMessage = e => {
     e.preventDefault()
     console.log(input)
+    dispatch(sendMessage({
+      content: input,
+      teamId
+    }))
     setInput('')
+  }
+
+  const handleMessageScroll = e => {
+    // console.log(e)
   }
 
   return (
@@ -135,29 +149,34 @@ export default function Team(props) {
           <Col style={{ padding: 0 }}>
             <TeamHeader showTeamInfo={showTeamInfo} />
             <div className="team-container">
-              <div className="team-body" style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
-                {<div className='team-message-list'>
-                  {numOfMessages && teamReducer.team.messages.slice(0, numOfMessages - 1)
+              <div className="team-body" ref={teamBody}
+                style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
+                {currentNumOfMessages && <div className='team-message-list' onScroll={handleMessageScroll}
+                  ref={messageList} style={{
+                    height: teamBody.current && teamBody.current.offsetHeight ? teamBody.current.offsetHeight : 'auto'
+                  }}>
+                  {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
                     .map((message, idx) => (
                       <Message message={message} key={message.id}
                         logInUserId={user.id}
                         hasAvatar={message.userId != teamReducer.team.messages[idx + 1].userId} />
                     ))}
-                  {numOfMessages && <Message message={teamReducer.team.messages[numOfMessages - 1]}
-                    key={"fdafads"}
+                  {currentNumOfMessages && <Message message={teamReducer.team.messages[currentNumOfMessages - 1]}
                     logInUserId={user.id}
-                    hasAvatar={true} />}
+                    hasAvatar={true} lastMessage={true} />}
                 </div>}
-                <Form onSubmit={sendMessage}
-                  style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
-                  <Form.Group className="search-team-box" controlId="formUsers">
-                    <Form.Control type="text" placeholder="Chat"
-                      className='team-message-input' name='message'
-                      autoComplete="off"
-                      value={input} onChange={e => setInput(e.target.value)} />
-                    <i className="fas fa-search" style={{ cursor: 'pointer' }}></i>
-                  </Form.Group>
-                </Form>
+                <div className="team-body-inner">
+                  <Form onSubmit={handleSendMessage}
+                    style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
+                    <Form.Group className="search-team-box" controlId="formUsers">
+                      <Form.Control type="text" placeholder="Chat"
+                        className='team-message-input' name='message'
+                        autoComplete="off"
+                        value={input} onChange={e => setInput(e.target.value)} />
+                      <i className="fas fa-search" style={{ cursor: 'pointer' }}></i>
+                    </Form.Group>
+                  </Form>
+                </div>
               </div>
               {isTeamInfoShow && <div className="team-info-container">
                 <strong>About</strong>

@@ -26,6 +26,10 @@
   margin-left: 30px;
 }
 
-.team-message > p.team-last-message {
+.team-message > p.user-last-message {
   margin-left: 0;
+}
+
+.team-last-message {
+  margin-bottom: 30px;
 }

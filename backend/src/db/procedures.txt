@@ -224,7 +224,7 @@ BEGIN
         FROM messages m
         WHERE m.teamId = teamId
         ORDER BY m.createdAt DESC
-        LIMIT 10;
+        LIMIT 15;
     ELSE
 		SELECT m.id, m.content, m.photo, m.createdAt, m.userId
         FROM messages m

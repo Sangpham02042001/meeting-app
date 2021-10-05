@@ -4,11 +4,12 @@
 
 .team-container > div {
   height: calc(100vh - 120px);
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
-.team-body {
+.team-b ody {
   /* background-color: #ebebeb; */
+  position: relative;
 }
 
 .team-info-container {
@@ -47,4 +48,11 @@
 .team-message-list {
   overflow-y: auto;
   padding: 10px;
+  position: relative;
+  height: auto;
+}
+
+.team-body-inner {
+  position: relative;
+  height: auto;
 }

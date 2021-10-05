@@ -145,7 +145,32 @@ export const getTeamMessages = createAsyncThunk('teams/getMessages', async ({ te
     }
     return error
   }
+})
 
+export const sendMessage = createAsyncThunk('teams/sendMessage', async ({ teamId, content }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.post(`/api/teams/${teamId}/messages`, {
+      content
+    })
+    if (response.status == 201) {
+      let { message } = response.data
+      return {
+        message: {
+          id: message.id,
+          content: message.content,
+          teamId: message.teamId,
+          createdAt: message.createdAt,
+          userId: message.userId
+        }
+      }
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
 })
 
 export const deleteTeam = createAsyncThunk('teams/delete', async ({ teamId }, { rejectWithValue }) => {
@@ -267,7 +292,7 @@ export const teamSlice = createSlice({
       state.loading = false
     },
     [updateBasicTeamInfo.rejected]: (state, action) => {
-      console.log(action.payload)
+      // console.log(action.payload)
       state.error = action.payload.error
       state.loading = false
     },
@@ -304,13 +329,26 @@ export const teamSlice = createSlice({
     },
     [getTeamMessages.fulfilled]: (state, action) => {
       state.loading = false;
-      state.team.messages.unshift(...action.payload.messages)
+      if (state.team.messages.length === 0) {
+        state.team.messages.push(...action.payload.messages.sort((team1, team2) => team1.id - team2.id))
+      }
       if (action.payload.numOfMessages) {
         state.team.numOfMessages = action.payload.numOfMessages
       }
     },
     [getTeamMessages.rejected]: (state, action) => {
       console.log(action.payload.error)
+    },
+    [sendMessage.pending]: (state) => {
+      console.log('send message pending')
+    },
+    [sendMessage.fulfilled]: (state, action) => {
+      let { message } = action.payload
+      state.team.messages.push(message)
+      state.team.numOfMessages += 1
+    },
+    [sendMessage.rejected]: (state, action) => {
+      state.error = action.payload.error
     }
   }
 })
