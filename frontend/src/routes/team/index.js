@@ -1,31 +1,46 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
-import { Container, Modal, Button, Row, Col, Form } from 'react-bootstrap'
+import {
+  Container, Modal, Button, Row, Col,
+  Form, Tooltip, OverlayTrigger
+} from 'react-bootstrap'
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
-  confirmInvitations
+  confirmInvitations, getTeamMessages, cleanTeamState,
+  sendMessage
 } from '../../store/reducers/team.reducer'
 import { baseURL } from '../../utils'
 import Loading from '../../components/Loading'
 import './team.css'
 import TeamHeader from '../../components/TeamHeader'
 import TeamList from '../../components/TeamList'
+import Message from '../../components/Message'
 
 export default function Team(props) {
   const { teamId } = useParams()
   const teamReducer = useSelector(state => state.teamReducer)
+  const numOfMessages = useSelector(state => state.teamReducer.team.numOfMessages)
   const user = useSelector(state => state.userReducer.user)
   const dispatch = useDispatch()
   const history = useHistory()
   const [input, setInput] = useState('')
+  const [offsetMessages, setOffsetMessages] = useState(0)
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
   const [isRequestModalShow, setRequestModalShow] = useState(false)
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
-  const [isTeamInfoShow, setTeamInfoShow] = useState(false)
+  const [isTeamInfoShow, setTeamInfoShow] = useState(true)
 
   useEffect(() => {
     dispatch(getTeamInfo({ teamId }))
+    dispatch(getTeamMessages({
+      teamId,
+      offset: offsetMessages,
+      num: 10
+    }))
+    return () => {
+      dispatch(cleanTeamState())
+    }
   }, [teamId])
 
   useEffect(() => {
@@ -103,6 +118,12 @@ export default function Team(props) {
     setRequestModalShow(false)
   }
 
+  const sendMessage = e => {
+    e.preventDefault()
+    console.log(input)
+    setInput('')
+  }
+
   return (
     teamReducer.loading ? <Loading />
       :
@@ -115,10 +136,24 @@ export default function Team(props) {
             <TeamHeader showTeamInfo={showTeamInfo} />
             <div className="team-container">
               <div className="team-body" style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
-                <Form style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
+                {<div className='team-message-list'>
+                  {numOfMessages && teamReducer.team.messages.slice(0, numOfMessages - 1)
+                    .map((message, idx) => (
+                      <Message message={message} key={message.id}
+                        logInUserId={user.id}
+                        hasAvatar={message.userId != teamReducer.team.messages[idx + 1].userId} />
+                    ))}
+                  {numOfMessages && <Message message={teamReducer.team.messages[numOfMessages - 1]}
+                    key={"fdafads"}
+                    logInUserId={user.id}
+                    hasAvatar={true} />}
+                </div>}
+                <Form onSubmit={sendMessage}
+                  style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
                   <Form.Group className="search-team-box" controlId="formUsers">
                     <Form.Control type="text" placeholder="Chat"
-                      className='team-message-input'
+                      className='team-message-input' name='message'
+                      autoComplete="off"
                       value={input} onChange={e => setInput(e.target.value)} />
                     <i className="fas fa-search" style={{ cursor: 'pointer' }}></i>
                   </Form.Group>

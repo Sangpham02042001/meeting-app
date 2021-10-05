@@ -9,7 +9,8 @@ const initialState = {
   team: {
     members: [],
     invitedUsers: [],
-    requestUsers: []
+    requestUsers: [],
+    messages: []
   },
   joinedTeamLoaded: false,
   teamLoaded: false,
@@ -130,6 +131,23 @@ export const inviteUsers = createAsyncThunk('teams/inviteUsers', async ({ teamId
   }
 })
 
+export const getTeamMessages = createAsyncThunk('teams/getMessages', async ({ teamId, offset, num }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.get(`/api/teams/${teamId}/messages?offset=${offset}&?num=${num}`)
+    return {
+      messages: response.data.messages,
+      numOfMessages: response.data.numOfMessages
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+
+})
+
 export const deleteTeam = createAsyncThunk('teams/delete', async ({ teamId }, { rejectWithValue }) => {
   try {
     let response = await axiosAuth.delete(`/api/teams/${teamId}`)
@@ -157,6 +175,14 @@ export const teamSlice = createSlice({
       state.joinedTeams.push({
         id, hostId, name
       })
+    },
+    cleanTeamState: (state) => {
+      state.team = {
+        members: [],
+        invitedUsers: [],
+        requestUsers: [],
+        messages: []
+      }
     }
   },
   extraReducers: {
@@ -272,10 +298,23 @@ export const teamSlice = createSlice({
     [deleteTeam.rejected]: (state, action) => {
       state.loading = false
       state.error = action.payload.error
+    },
+    [getTeamMessages.pending]: (state) => {
+      state.loading = true;
+    },
+    [getTeamMessages.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.team.messages.unshift(...action.payload.messages)
+      if (action.payload.numOfMessages) {
+        state.team.numOfMessages = action.payload.numOfMessages
+      }
+    },
+    [getTeamMessages.rejected]: (state, action) => {
+      console.log(action.payload.error)
     }
   }
 })
 
-export const { createNewTeam } = teamSlice.actions;
+export const { createNewTeam, cleanTeamState } = teamSlice.actions;
 
 export default teamSlice.reducer

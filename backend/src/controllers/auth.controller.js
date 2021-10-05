@@ -101,7 +101,6 @@ const isMember = async (req, res, next) => {
       }
     )
     if (user_team.length > 0) {
-      console.log(user_team)
       next()
     } else {
       throw `You aren't a member of this team`
