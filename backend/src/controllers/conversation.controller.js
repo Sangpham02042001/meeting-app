@@ -4,11 +4,11 @@ const Message = require('../models/message')
 const sequelize = require('../models');
 const { Op } = require("sequelize");
 
-const getConversationsOfUser = async (req, res) => {
+const getConversations = async (req, res) => {
     try {
         const { userId } = req.params;
         const conversations = await sequelize.query(
-            "SELECT conversationId FROM users_conversations WHERE userId = :userId",
+            "SELECT conversationId, userId as participantId FROM users_conversations WHERE conversationId IN (SELECT conversationId FROM users_conversations where userId = :userId) AND userId not like :userId ORDER BY createdAt DESC",
             {
                 replacements: {
                     userId
@@ -22,6 +22,9 @@ const getConversationsOfUser = async (req, res) => {
             return next(err);
         }
 
+
+        console.log(conversations[0])
+
         return res.status(200).json({ conversations: conversations[0] });
     } catch (error) {
         return next(error);
@@ -31,7 +34,7 @@ const getConversationsOfUser = async (req, res) => {
 const getParticipantInfo = async (req, res, next) => {
     const { conversationId, userId } = req.params;
     try {
-        const participantId = await sequelize.query(
+        const participant = await sequelize.query(
             "SELECT userId FROM users_conversations WHERE conversationId = :conversationId AND userId NOT LIKE :userId",
             {
                 replacements: {
@@ -41,23 +44,25 @@ const getParticipantInfo = async (req, res, next) => {
             }
         )
 
-        if (!participantId) {
+        if (!participant[0].length) {
             err = new Error('ParticipantId could not find!')
             err.status = 403;
             return next(err);
         }
+
+        console.log(participant);
 
         const participantInfo = await sequelize.query(
 
             "SELECT CONCAT(u.firstName, ' ', u.lastName) as userName, u.id, u.email  FROM users u WHERE id = :userId",
             {
                 replacements: {
-                    userId: participantId[0][0].userId
+                    userId: participant[0][0].userId
                 }
             }
         )
 
-        if (!participantInfo) {
+        if (!participantInfo[0].length) {
             err = new Error('ParticipantInfo could not find!')
             err.status = 403;
             return next(err);
@@ -70,31 +75,32 @@ const getParticipantInfo = async (req, res, next) => {
     }
 }
 
-const getParticipantId = async ({ conversationId, userId }) => {
+const setConversation = async ({ senderId, receiverId, conversationId }) => {
     try {
-        const participantId = await sequelize.query(
-            "SELECT userId FROM users_conversations WHERE conversationId = :conversationId AND userId NOT LIKE :userId",
-            {
-                replacements: {
-                    conversationId,
-                    userId
+        const conversation = await Conversation.findByPk(conversationId);
+        if (!conversation) {
+            const newConversation = await Conversation.create({});
+            await sequelize.query(
+                "INSERT INTO users_conversations(createdAt, updatedAt, userId, conversationId) VALUES (NOW(), NOW(), :senderId, :cvId), (NOW(), NOW(), :receiverId, :cvId)",
+                {
+                    replacements: {
+                        cvId: newConversation.id,
+                        senderId,
+                        receiverId
+                    }
                 }
-            }
-        )
-
-        if (!participantId) {
-            console.log('Could not find participant id!!!');
-            return null;
+            )
+            return newConversation.id;
         }
-
-        return participantId[0][0].userId;
+        return conversationId;
     } catch (error) {
         console.log(error);
         return null;
     }
 }
 
-const getMessagesConversation = async (req, res, next) => {
+
+const getMessages = async (req, res, next) => {
     try {
         const { conversationId } = req.params;
 
@@ -148,4 +154,18 @@ const getLastMessage = async (req, res, next) => {
     }
 }
 
-module.exports = { getConversationsOfUser, getParticipantInfo, getMessagesConversation, getLastMessage, getParticipantId }
+const setMessage = async ({content, photo, conversationId, userId}) => {
+    try {
+        const message = await Message.create({content, photo, conversationId, userId});
+        if (!message) {
+            return null;
+        }
+        return message;
+    } catch(error) {
+        console.log(error)
+        return null;
+    }
+
+}
+
+module.exports = { getConversations, getParticipantInfo, getMessages, getLastMessage, setConversation, setMessage }

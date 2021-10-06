@@ -1,7 +1,7 @@
 const users = {};
 const socketToMeeting = {};
 
-const {getParticipantId} = require('../controllers/conversation.controller')
+const { setConversation, setMessage } = require('../controllers/conversation.controller')
 
 const socketServer = (socket) => {
     socket.on("join-meeting", meetingId => {
@@ -45,12 +45,22 @@ const socketServer = (socket) => {
 
     //conversation
 
-    socket.on('conversation-send-message', async ({ id, content, senderId, conversationId }) => {
+    socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId }) => {
+        const converId = await setConversation({ senderId, receiverId, conversationId });
+
+        const message = await setMessage({content, conversationId: converId, userId: senderId});
         
-        // check conversation ...
-        const participantId = await getParticipantId({conversationId, userId: senderId})
-        console.log('socket', participantId, content);
-        socket.to(participantId).emit('conversation-receive-message', {content, senderId, conversationId})
+        if (converId !== conversationId) {
+            socket.emit('set-conversation', {nConversationId: converId, oConversationId: conversationId});
+        }
+
+        if (message) {
+            socket.to(receiverId).emit('conversation-receiveMessage', { content, senderId, converId });
+        }
+
+        
+        
+        
     })
 
     //disconnect

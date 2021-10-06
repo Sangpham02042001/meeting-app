@@ -40,7 +40,7 @@ const signup = async (req, res) => {
 const getUserInfo = async (req, res) => {
   let userId = req.params.userId
   try {
-    let user = User.findOne({
+    let user = await User.findOne({
       where: {
         id: userId
       }
@@ -52,8 +52,7 @@ const getUserInfo = async (req, res) => {
     }
     user.hash_password = undefined
     user.avatar = undefined
-    console.log((await user).getFullName)
-    return res.status(200).json({ user })
+    return res.status(200).json({id: user.id, userName: user.getFullName(), email: user.email })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })

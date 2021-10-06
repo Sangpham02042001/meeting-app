@@ -68,36 +68,18 @@
   overflow-y: auto;
 }
 
-.conversation-message .content-message .my-message {
+.info-beginner-content {
+  margin: auto;
+  font-size: 36px;
+  padding-bottom: 30px;
   display: flex;
-  flex-direction: row-reverse;
-  margin-bottom: 2px;
-  height: auto;
-  word-break: break-all;
+  flex-direction: column;
+  align-items: center;
 }
 
-.conversation-message .content-message .user-message {
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 2px;
-  height: auto;
-  word-break: break-all;
-}
-
-.my-message .message-send {
-  background-color: #97b2e4;
-  border-radius: 12px;
-  border-style: none;
-  padding: 5px;
-  max-width: 65%;
-}
-
-.user-message .message-send {
-  background-color: #aaadb6;
-  border-radius: 12px;
-  border-style: none;
-  padding: 5px;
-  max-width: 65%;
+.bottom-message {
+  width: 100%;
+  padding: 30px;
 }
 
 .conversation-message .input-message {
@@ -110,6 +92,7 @@
   border-radius: 8px;
   overflow-y: hidden;
   width: 95%;
+  margin: auto;
 }
 
 .conversation-message .input-message .input-box {
