@@ -1,6 +1,8 @@
 const users = {};
 const socketToMeeting = {};
 
+const {getParticipantId} = require('../controllers/conversation.controller')
+
 const socketServer = (socket) => {
     socket.on("join-meeting", meetingId => {
         if (users[meetingId]) {
@@ -33,14 +35,6 @@ const socketServer = (socket) => {
 
     });
 
-    socket.on('join-team', ({ teamId }) => {
-        socket.join(`team ${teamId}`)
-    })
-
-    socket.emit('out-team', ({ teamId }) => {
-        socket.leave(`team ${teamId}`)
-    })
-
     socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
         socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
     })
@@ -49,8 +43,17 @@ const socketServer = (socket) => {
         socket.to(callerID).emit('receiving-returned-signal', { signal, userId: socket.id });
     });
 
+    //conversation
 
+    socket.on('conversation-send-message', async ({ id, content, senderId, conversationId }) => {
+        
+        // check conversation ...
+        const participantId = await getParticipantId({conversationId, userId: senderId})
+        console.log('socket', participantId, content);
+        socket.to(participantId).emit('conversation-receive-message', {content, senderId, conversationId})
+    })
 
+    //disconnect
     socket.on('disconnect', () => {
         const meetingId = socketToMeeting[socket.id];
         let room = users[meetingId];

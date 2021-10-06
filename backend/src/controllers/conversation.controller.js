@@ -70,6 +70,30 @@ const getParticipantInfo = async (req, res, next) => {
     }
 }
 
+const getParticipantId = async ({ conversationId, userId }) => {
+    try {
+        const participantId = await sequelize.query(
+            "SELECT userId FROM users_conversations WHERE conversationId = :conversationId AND userId NOT LIKE :userId",
+            {
+                replacements: {
+                    conversationId,
+                    userId
+                }
+            }
+        )
+
+        if (!participantId) {
+            console.log('Could not find participant id!!!');
+            return null;
+        }
+
+        return participantId[0][0].userId;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
 const getMessagesConversation = async (req, res, next) => {
     try {
         const { conversationId } = req.params;
@@ -124,4 +148,4 @@ const getLastMessage = async (req, res, next) => {
     }
 }
 
-module.exports = { getConversationsOfUser, getParticipantInfo, getMessagesConversation, getLastMessage }
+module.exports = { getConversationsOfUser, getParticipantInfo, getMessagesConversation, getLastMessage, getParticipantId }

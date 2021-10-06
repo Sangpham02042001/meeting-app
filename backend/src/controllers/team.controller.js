@@ -33,6 +33,7 @@ const createTeam = async (req, res) => {
   form.keepExtensions = true
   form.parse(req, async (err, fields, files) => {
     if (err) {
+      console.log(err);
       return res.status(400).json({ error: err })
     }
     let { name } = fields
@@ -70,6 +71,7 @@ const createTeam = async (req, res) => {
       team.coverPhoto = undefined
       return res.status(201).json({ team })
     } catch (error) {
+      console.log('sfsdfsdfad')
       console.log(error)
       return res.status(400).json({ error })
     }

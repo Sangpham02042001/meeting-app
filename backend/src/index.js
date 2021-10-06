@@ -18,7 +18,7 @@ const notificationRoutes = require('./routes/notification.routes')
 
 sequelize.sync()
 
-const socketServer = require('./socket.server');
+const socketServer = require('./socket');
 
 
 const PORT = process.env.PORT || 3001

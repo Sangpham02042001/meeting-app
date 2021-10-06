@@ -44,13 +44,13 @@ export const conversationSlice = createSlice({
     }
   },
   reducers: {
-    sendMessage: (state, action) => {
+    saveMessage: (state, action) => {
       const {id, content, userId, conversationId} = action.payload;
       state.messages.push({id, content, userId, conversationId});
     }
   }
 })
 
-export const {sendMessage} = conversationSlice.actions;
+export const {saveMessage} = conversationSlice.actions;
 
 export default conversationSlice.reducer

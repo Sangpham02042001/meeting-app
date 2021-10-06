@@ -3,10 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import Avatar from '../Avatar';
+import Message from '../Message';
 import { socketClient } from '../../utils';
-import { sendMessage, getMessagesConversation } from '../../store/reducers/conversation.reducer';
+import { saveMessage, getMessagesConversation } from '../../store/reducers/conversation.reducer';
 import './userChatList.css';
-import {v1 as uuid} from 'uuid';
+import { v1 as uuid } from 'uuid';
 
 export default function UserChat({ conversationId, user, participant }) {
     const [message, setMessage] = useState('');
@@ -19,6 +20,13 @@ export default function UserChat({ conversationId, user, participant }) {
     const dispatch = useDispatch();
 
     useEffect(() => {
+    
+        socketClient.on('conversation-receive-message', ({ content, senderId, conversationId }) => {
+            const id = uuid()
+            dispatch(saveMessage({ id, content, userId: senderId, conversationId }));
+            console.log('receive message', content, user.id);
+        })
+
         dispatch(getMessagesConversation({ conversationId }))
     }, [])
 
@@ -56,15 +64,17 @@ export default function UserChat({ conversationId, user, participant }) {
 
     const handleSendMessage = (event) => {
         if (message !== '') {
-            const userId = user.id;
             const id = uuid()
-            socketClient.emit('conversation-send-message', {id, content: message, userId, conversationId: conversationId });
-            dispatch(sendMessage({id, content: message, userId, conversationId: null }));
+            socketClient.emit('conversation-send-message', { id, content: message, senderId: user.id, conversationId });
+            dispatch(saveMessage({ id, content: message, userId: user.id, conversationId }));
             setMessage('');
             setRows(minRows);
         }
-
     }
+
+
+
+
     return (
         <>
             <div className="conversation-message">
@@ -85,7 +95,7 @@ export default function UserChat({ conversationId, user, participant }) {
                     </div>
                 </div>
                 <div className="content-message" onChange={onScrollChange}>
-                    {messages.map((message) => {
+                    {/* {messages.map((message) => {
                         return (
                             <div key={message.id} className={message.userId === user.id ? "my-message" : "user-message"}>
                                 <div className='message-send'>
@@ -93,7 +103,20 @@ export default function UserChat({ conversationId, user, participant }) {
                                 </div>
                             </div>
                         )
-                    })}
+                    })} */}
+
+                    {messages.length > 0 && messages.slice(0, messages.length - 1)
+                        .map((message, idx) => {
+                            return (
+                                <Message message={message} key={message.id}
+                                    logInUserId={user.id}
+                                    hasAvatar={message.userId != messages[idx + 1].userId} />
+                            )
+                        })}
+                    {messages.length > 0 && <Message message={messages[messages.length - 1]}
+                        logInUserId={user.id}
+                        hasAvatar={true} lastMessage={true} />}
+
                 </div>
                 <div className="input-message">
                     <textarea className="input-box"
