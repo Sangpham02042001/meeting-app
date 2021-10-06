@@ -42,7 +42,7 @@ export const userSlice = createSlice({
   },
   reducers: {
     isAuthenticated: state => {
-      const user = JSON.parse(localStorage.getItem('user'))
+      const user = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user'))
       if (user) {
         state.user = user
         state.loading = false
@@ -51,6 +51,10 @@ export const userSlice = createSlice({
         socketClient.connect();
       }
       state.loaded = true
+    },
+    cleanUser: state => {
+      state.user = {}
+      state.authenticated = false
     }
   },
   extraReducers: {
@@ -72,6 +76,6 @@ export const userSlice = createSlice({
   }
 })
 
-export const { isAuthenticated } = userSlice.actions;
+export const { isAuthenticated, cleanUser } = userSlice.actions;
 
 export default userSlice.reducer

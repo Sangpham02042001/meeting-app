@@ -207,8 +207,8 @@ const getRequestingTeams = async (req, res) => {
 }
 
 const outTeam = async (req, res) => {
-  let { userId, teamId } = req.params
   try {
+    let { userId, teamId } = req.params
     let team = await Team.findOne({
       where: {
         id: teamId
@@ -216,19 +216,12 @@ const outTeam = async (req, res) => {
       attributes: ['hostId', 'name']
     })
     if (team) {
-      let members = await team.getMembers({
-        attributes: ['id']
-      })
-      if (members.map(member => member.id).indexOf(userId) < 0) {
-        throw `You are not the member of this group`
-      }
       await sequelize.query(
-        "DELETE FROM users_teams WHERE teamId = :teamId AND userId = :userId",
+        "DELETE FROM users_teams ut WHERE ut.teamId = :teamId AND ut.userId = :userId",
         {
           replacements: {
-            teamId, userId
-          },
-          type: QueryTypes.DELETE
+            teamId: teamId, userId
+          }
         }
       )
       return res.status(200).json({

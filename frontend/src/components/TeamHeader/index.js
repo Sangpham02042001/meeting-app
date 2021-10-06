@@ -5,7 +5,7 @@ import { Button, Modal } from 'react-bootstrap'
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import Dropdown from '../Dropdown'
-import { deleteTeam } from '../../store/reducers/team.reducer'
+import { deleteTeam, outTeam } from '../../store/reducers/team.reducer'
 
 export default function TeamHeader({ showTeamInfo }) {
   const { teamId } = useParams()
@@ -14,6 +14,7 @@ export default function TeamHeader({ showTeamInfo }) {
   const teamReducer = useSelector(state => state.teamReducer)
   const user = useSelector(state => state.userReducer.user)
   const [isDeleteModalShow, setDeleteModalShow] = useState(false)
+  const [isOutModalShow, setOutModalShow] = useState(false)
 
   const handleDeleteTeam = async () => {
     console.log('delete team')
@@ -24,8 +25,21 @@ export default function TeamHeader({ showTeamInfo }) {
     history.push('/teams')
   }
 
+  const handleOutTeam = async () => {
+    dispatch(outTeam({
+      userId: user.id,
+      teamId: Number(teamId)
+    }))
+    setOutModalShow(false)
+    history.push('/teams')
+  }
+
   const handleCloseDeleteModal = () => {
     setDeleteModalShow(false)
+  }
+
+  const handleCloseOutModal = () => {
+    setOutModalShow(false)
   }
 
   return (
@@ -63,9 +77,13 @@ export default function TeamHeader({ showTeamInfo }) {
                 }}>
                   <i className="fas fa-trash-alt"></i> Delete Team
                 </span>}
-              {teamReducer.team.hostId !== user.id && <span style={{ padding: '12px 16px' }}>
-                <i className="fas fa-sign-out-alt"></i> Leave Team
-              </span>}
+              {teamReducer.team.hostId !== user.id &&
+                <span style={{ padding: '12px 16px', cursor: 'pointer' }} onClick={e => {
+                  e.preventDefault()
+                  setOutModalShow(true)
+                }}>
+                  <i className="fas fa-sign-out-alt"></i> Leave Team
+                </span>}
             </div>
           </Dropdown>
           {/* <div className="dropdown" style={{ marginRight: '5px' }}>
@@ -93,6 +111,18 @@ export default function TeamHeader({ showTeamInfo }) {
                 Cancel
               </Button>
               <Button onClick={handleDeleteTeam}>Delete</Button>
+            </Modal.Footer>
+          </Modal>
+
+          <Modal show={isOutModalShow} centered onHide={handleCloseOutModal}>
+            <Modal.Header closeButton>
+              <h4>Confirm out this team</h4>
+            </Modal.Header>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseOutModal}>
+                Cancel
+              </Button>
+              <Button onClick={handleOutTeam}>Out</Button>
             </Modal.Footer>
           </Modal>
         </div>

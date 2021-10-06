@@ -1,16 +1,28 @@
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { Container, Navbar as Nav, Col, Row } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { baseURL } from '../../utils'
 import Dropdown from '../Dropdown'
 import './navbar.css'
+import { cleanTeamState } from '../../store/reducers/team.reducer'
+import { cleanUser } from '../../store/reducers/user.reducer'
 
 export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
+  const dispatch = useDispatch()
+  const history = useHistory()
   const [isDropdown, setIsDropdown] = useState(false);
 
   let notifications = useSelector(state => state.notificationReducer.notifications)
+
+  const handleLogout = e => {
+    e.preventDefault()
+    window.localStorage.removeItem('user')
+    history.push('/login')
+    dispatch(cleanTeamState())
+    dispatch(cleanUser())
+  }
 
   return (
     <Nav bg="dark" variant="dark" className="navbar">
@@ -68,7 +80,7 @@ export default function Navbar() {
           <div className="dropdown-content">
             <Link to="/profile">Profile</Link>
             <a href="#">Link 2</a>
-            <a href="#">Logout</a>
+            <span onClick={handleLogout}>Logout</span>
           </div>
         </div>
 

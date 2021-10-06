@@ -181,6 +181,25 @@ export const deleteTeam = createAsyncThunk('teams/delete', async ({ teamId }, { 
         message: response.data.message,
         teamId
       }
+    } else {
+      throw `Something wrong`
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
+export const outTeam = createAsyncThunk('teams/out', async ({ userId, teamId }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.delete(`/api/users/${userId}/teams/${teamId}`)
+    if (response.status == 200) {
+      return {
+        teamId
+      }
     }
   } catch (error) {
     let { data } = error.response
@@ -348,6 +367,19 @@ export const teamSlice = createSlice({
       state.team.numOfMessages += 1
     },
     [sendMessage.rejected]: (state, action) => {
+      state.error = action.payload.error
+    },
+    [outTeam.pending]: (state) => {
+      state.loading = true
+    },
+    [outTeam.fulfilled]: (state, action) => {
+      let { teamId } = action.payload
+      let idx = state.joinedTeams.map(team => team.id).indexOf(teamId)
+      state.joinedTeams.splice(idx, 1)
+      state.loading = false
+    },
+    [outTeam.rejected]: (state, action) => {
+      state.loading = false
       state.error = action.payload.error
     }
   }
