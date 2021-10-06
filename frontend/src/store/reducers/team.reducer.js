@@ -133,7 +133,7 @@ export const inviteUsers = createAsyncThunk('teams/inviteUsers', async ({ teamId
 
 export const getTeamMessages = createAsyncThunk('teams/getMessages', async ({ teamId, offset, num }, { rejectWithValue }) => {
   try {
-    let response = await axiosAuth.get(`/api/teams/${teamId}/messages?offset=${offset}&?num=${num}`)
+    let response = await axiosAuth.get(`/api/teams/${teamId}/messages?offset=${offset}&num=${num}`)
     return {
       messages: response.data.messages,
       numOfMessages: response.data.numOfMessages
@@ -344,12 +344,14 @@ export const teamSlice = createSlice({
       state.error = action.payload.error
     },
     [getTeamMessages.pending]: (state) => {
-      state.loading = true;
+      // state.loading = true;
     },
     [getTeamMessages.fulfilled]: (state, action) => {
-      state.loading = false;
+      // state.loading = false;
       if (state.team.messages.length === 0) {
         state.team.messages.push(...action.payload.messages.sort((team1, team2) => team1.id - team2.id))
+      } else {
+        state.team.messages.unshift(...action.payload.messages.sort((team1, team2) => team1.id - team2.id))
       }
       if (action.payload.numOfMessages) {
         state.team.numOfMessages = action.payload.numOfMessages

@@ -432,8 +432,9 @@ const sendMessage = async (req, res) => {
 const getTeamMessages = async (req, res) => {
   let { offset, num } = req.query
   let { teamId } = req.params
+  console.log(offset, num)
   try {
-    if (isNaN(offset) || isNaN(num)) {
+    if (offset == 0) {
       let numOfMessages = await sequelize.query(
         "SELECT COUNT(*) as num FROM messages m WHERE m.teamId = :teamId",
         {
@@ -444,7 +445,7 @@ const getTeamMessages = async (req, res) => {
         }
       )
       let messages = await sequelize.query(
-        "CALL getTeamMessages(:teamId, 0, 0)",
+        "CALL getTeamMessages(:teamId, 0, 15)",
         {
           replacements: {
             teamId
@@ -456,7 +457,6 @@ const getTeamMessages = async (req, res) => {
         messages
       })
     } else {
-      console.log('call here')
       let messages = await sequelize.query(
         "CALL getTeamMessages(:teamId, :offset, :num)",
         {

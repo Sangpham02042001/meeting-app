@@ -7,7 +7,7 @@
   /* overflow-y: auto; */
 }
 
-.team-b ody {
+.team-body {
   /* background-color: #ebebeb; */
   position: relative;
 }
@@ -48,11 +48,5 @@
 .team-message-list {
   overflow-y: auto;
   padding: 10px;
-  position: relative;
-  height: auto;
-}
-
-.team-body-inner {
-  position: relative;
-  height: auto;
+  width: 100%;
 }

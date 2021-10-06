@@ -25,6 +25,7 @@ export default function Team(props) {
   const dispatch = useDispatch()
   const history = useHistory()
   const [input, setInput] = useState('')
+  const [scrollThreshold, setScrollThreshold] = useState(0)
   const [offsetMessages, setOffsetMessages] = useState(0)
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
   const [isRequestModalShow, setRequestModalShow] = useState(false)
@@ -39,14 +40,14 @@ export default function Team(props) {
     dispatch(getTeamMessages({
       teamId,
       offset: offsetMessages,
-      num: 10
+      num: 15
     }))
-    console.log(teamBody.current.offsetHeight)
     socketClient.emit('join-team', { teamId })
     return () => {
       // socketClient.leave(`team ${teamId}`)
       socketClient.emit('out-team', { teamId })
       dispatch(cleanTeamState())
+      setOffsetMessages(0)
     }
   }, [teamId])
 
@@ -70,6 +71,7 @@ export default function Team(props) {
         // setNotMemmberModalShow(true)
       }
       messageList.current && messageList.current.scrollIntoView({ behavior: "smooth" })
+      teamBody.current && teamBody.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [teamReducer.teamLoaded])
 
@@ -128,8 +130,7 @@ export default function Team(props) {
 
   const handleSendMessage = e => {
     e.preventDefault()
-    console.log(input)
-    dispatch(sendMessage({
+    input && dispatch(sendMessage({
       content: input,
       teamId
     }))
@@ -137,7 +138,14 @@ export default function Team(props) {
   }
 
   const handleMessageScroll = e => {
-    // console.log(e)
+    if (teamReducer.team.numOfMessages > currentNumOfMessages && e.target.scrollTop === 0) {
+      dispatch(getTeamMessages({
+        teamId,
+        offset: offsetMessages + 15,
+        num: 15
+      }))
+      setOffsetMessages(offsetMessages + 15)
+    }
   }
 
   return (
@@ -155,7 +163,7 @@ export default function Team(props) {
                 style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
                 {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
                   ref={messageList} style={{
-                    height: teamBody.current && teamBody.current.offsetHeight ? teamBody.current.offsetHeight : 'auto'
+                    maxHeight: teamBody.current && teamBody.current.offsetHeight ? teamBody.current.offsetHeight : '600px'
                   }}>
                   {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
                     .map((message, idx) => (
@@ -167,21 +175,16 @@ export default function Team(props) {
                     logInUserId={user.id}
                     hasAvatar={true} lastMessage={true} />}
                 </div>}
-                <div className="team-body-inner" style={{
-                  height: teamBody.current && teamBody.current.offsetHeight && currentNumOfMessages === 0
-                    ? teamBody.current.offsetHeight : 'auto'
-                }}>
-                  <Form onSubmit={handleSendMessage}
-                    style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
-                    <Form.Group className="search-team-box" controlId="formUsers">
-                      <Form.Control type="text" placeholder="Chat"
-                        className='team-message-input' name='message'
-                        autoComplete="off"
-                        value={input} onChange={e => setInput(e.target.value)} />
-                      <i className="fas fa-search" style={{ cursor: 'pointer' }}></i>
-                    </Form.Group>
-                  </Form>
-                </div>
+                <Form onSubmit={handleSendMessage}
+                  style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
+                  <Form.Group className="search-team-box" controlId="formUsers">
+                    <Form.Control type="text" placeholder="Chat"
+                      className='team-message-input' name='message'
+                      autoComplete="off" required
+                      value={input} onChange={e => setInput(e.target.value)} />
+                    <i className="fas fa-search" style={{ cursor: 'pointer' }}></i>
+                  </Form.Group>
+                </Form>
               </div>
               {isTeamInfoShow && <div className="team-info-container">
                 <strong>About</strong>
