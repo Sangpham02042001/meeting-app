@@ -1,6 +1,7 @@
 const bcrpyt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
+const Team = require('../models/team')
 const sequelize = require('../models')
 const { QueryTypes } = require('sequelize')
 

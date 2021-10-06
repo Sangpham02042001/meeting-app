@@ -1,35 +1,37 @@
-.own-team-message {
+.own-message {
   display: flex;
   justify-content: flex-end;
 }
 
-.own-team-message > p {
+.own-message > p {
   max-width: 300px;
   border-radius: 10px;
   padding: 5px 7px;
-  background-color: #000;
+  background-color: #97b2e4;
   color: white;
   margin-bottom: 5px;
+  word-break: break-all;
 }
 
-.team-message {
+.message {
   display: flex;
 }
 
-.team-message > p {
-  max-width: 300px;
+.message > p {
+  max-width: 150px;
   border-radius: 10px;
   padding: 5px 7px;
-  background-color: #000;
+  background-color: #aaadb6;
   color: white;
   margin-bottom: 5px;
   margin-left: 30px;
+  word-break: break-all;
 }
 
-.team-message > p.user-last-message {
+.message > p.user-last-message {
   margin-left: 0;
 }
 
-.team-last-message {
+.last-message {
   margin-bottom: 30px;
 }

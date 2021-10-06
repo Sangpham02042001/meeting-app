@@ -33,6 +33,14 @@ const socketServer = (socket) => {
 
     });
 
+    socket.on('join-team', ({ teamId }) => {
+        socket.join(`team ${teamId}`)
+    })
+
+    socket.emit('out-team', ({ teamId }) => {
+        socket.leave(`team ${teamId}`)
+    })
+
     socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
         socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
     })

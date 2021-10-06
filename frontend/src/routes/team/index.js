@@ -42,8 +42,10 @@ export default function Team(props) {
       num: 10
     }))
     console.log(teamBody.current.offsetHeight)
+    socketClient.emit('join-team', { teamId })
     return () => {
       // socketClient.leave(`team ${teamId}`)
+      socketClient.emit('out-team', { teamId })
       dispatch(cleanTeamState())
     }
   }, [teamId])
@@ -151,7 +153,7 @@ export default function Team(props) {
             <div className="team-container">
               <div className="team-body" ref={teamBody}
                 style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
-                {currentNumOfMessages && <div className='team-message-list' onScroll={handleMessageScroll}
+                {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
                   ref={messageList} style={{
                     height: teamBody.current && teamBody.current.offsetHeight ? teamBody.current.offsetHeight : 'auto'
                   }}>
@@ -165,7 +167,10 @@ export default function Team(props) {
                     logInUserId={user.id}
                     hasAvatar={true} lastMessage={true} />}
                 </div>}
-                <div className="team-body-inner">
+                <div className="team-body-inner" style={{
+                  height: teamBody.current && teamBody.current.offsetHeight && currentNumOfMessages === 0
+                    ? teamBody.current.offsetHeight : 'auto'
+                }}>
                   <Form onSubmit={handleSendMessage}
                     style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
                     <Form.Group className="search-team-box" controlId="formUsers">

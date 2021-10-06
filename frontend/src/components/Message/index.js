@@ -8,12 +8,12 @@ import './style.css'
 
 export default function Message({ message, logInUserId, hasAvatar, lastMessage }) {
   return (message.userId === logInUserId ?
-    <div className={`own-team-message ${lastMessage ? 'team-last-message' : ''}`}>
+    <div className={`own-message ${lastMessage ? 'last-message' : ''}`}>
       <p>
         {message.content}
       </p>
     </div> :
-    <div className={`team-message  ${lastMessage ? 'team-last-message' : ''}`}>
+    <div className={`message  ${lastMessage ? 'last-message' : ''}`}>
       {hasAvatar && <Avatar width="30px" height="30px" userId={message.userId} />}
       <p className={hasAvatar ? 'user-last-message' : ''}>
         {message.content}
