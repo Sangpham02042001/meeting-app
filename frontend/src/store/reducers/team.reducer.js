@@ -220,7 +220,15 @@ export const teamSlice = createSlice({
         id, hostId, name
       })
     },
-    cleanTeamState: (state) => {
+    cleanTeamState: (state, action) => {
+      const removeAll = action.payload && action.payload.removeAll
+      if (removeAll) {
+        state.joinedTeams = []
+        state.requestingTeams = []
+        state.invitedTeams = []
+        state.joinedTeamLoaded = false
+        state.teamLoaded = false
+      }
       state.team = {
         members: [],
         invitedUsers: [],

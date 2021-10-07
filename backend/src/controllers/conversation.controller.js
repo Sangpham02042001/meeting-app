@@ -154,14 +154,14 @@ const getLastMessage = async (req, res, next) => {
     }
 }
 
-const setMessage = async ({content, photo, conversationId, userId}) => {
+const setMessage = async ({ content, photo, conversationId, userId }) => {
     try {
-        const message = await Message.create({content, photo, conversationId, userId});
+        const message = await Message.create({ content, photo, conversationId, userId });
         if (!message) {
             return null;
         }
         return message;
-    } catch(error) {
+    } catch (error) {
         console.log(error)
         return null;
     }

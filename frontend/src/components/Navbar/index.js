@@ -20,7 +20,9 @@ export default function Navbar() {
     e.preventDefault()
     window.localStorage.removeItem('user')
     history.push('/login')
-    dispatch(cleanTeamState())
+    dispatch(cleanTeamState({
+      removeAll: true
+    }))
     dispatch(cleanUser())
   }
 

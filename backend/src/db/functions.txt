@@ -21,3 +21,37 @@ BEGIN
 	RETURN "";
 END $$
 DELIMITER ;
+
+DROP FUNCTION IF EXISTS createMessageNotification;
+DELIMITER $$
+CREATE FUNCTION createMessageNotification(
+	content VARCHAR(255),
+    relativeLink VARCHAR(255),
+    userId INT,
+    createdBy INT,
+    teamId INT,
+    conversationId INT
+)
+RETURNS VARCHAR(5)
+DETERMINISTIC
+BEGIN 
+	DECLARE _createdBy INT;
+	IF conversationId IS NOT NULL THEN 
+		SELECT n.createdBy INTO _createdBy
+        FROM notifications n WHERE n.conversationId = conversationId;
+        IF createdBy = _createdBy THEN
+			UPDATE notifications n
+            SET n.createdAt = NOW();
+		ELSE 
+			INSERT INTO notifications
+             SET content = content,
+				 relativeLink = relativeLink,
+				userId = userId,
+				createdAt = NOW(),
+				updatedAt = NOW(),
+				createdBy = createdBy;
+        END IF;
+    END IF;
+    RETURN "";
+END $$
+DELIMITER ;

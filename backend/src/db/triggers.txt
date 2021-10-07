@@ -71,3 +71,29 @@ BEGIN
     SET tmp = createTeamNotification(@content, @relativeLink, hostId, NEW.teamId, NEW.requestUserId);
 END $$ 
 DELIMITER ;
+
+DROP TRIGGER IF EXISTS after_create_message;
+DELIMITER $$
+CREATE TRIGGER after_create_message
+AFTER INSERT ON messages FOR EACH ROW
+BEGIN 
+	DECLARE userName VARCHAR(255);
+    DECLARE teamName VARCHAR(255);
+    DECLARE _userId INT;
+    DECLARE tmp VARCHAR(5);
+    IF NEW.conversationId IS NOT NULL THEN
+		SELECT CONCAT(u.firstName, ' ', u.lastName) INTO userName 
+        FROM users_conversations uc
+        INNER JOIN users u ON uc.userId  = u.id
+        WHERE u.id = NEW.userId AND uc.conversationId = NEW.conversationId;
+        
+        SELECT us.userId INTO _userId
+        FROM users_conversations us
+        WHERE us.conversationId = NEW.conversationId AND us.userId != NEW.userId;
+        
+        SET @content = CONCAT(userName, ' sent message to you');
+        SET @relativeLink = CONCAT('/conversations/', NEW.conversationId);
+        SET tmp = createMessageNotification(@content, @relativeLink, _userId, NEW.userId, null, NEW.conversationId);
+    END IF;
+END $$
+DELIMITER ;
