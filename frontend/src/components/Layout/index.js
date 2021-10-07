@@ -6,12 +6,8 @@ import Navbar from '../Navbar'
 import './layout.css'
 
 export default function Layout({ children }) {
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
   
-  useEffect(() => {
-    dispatch(getNotifs())
-  }, [])
-
   return (
     <>
       <Navbar />

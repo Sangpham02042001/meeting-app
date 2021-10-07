@@ -9,9 +9,9 @@ const initialState = {
     loaded: false
 }
 
-export const getNotifs = createAsyncThunk('user/getNotifs', async () => {
+export const getNotifs = createAsyncThunk('user/getNotifs', async (offset, {rejectWithValue}) => {
     let { token, id } = JSON.parse(window.localStorage.getItem('user'))
-    let response = await axios.get(`${baseURL}/api/users/${id}/notifications`, {
+    let response = await axios.get(`${baseURL}/api/users/${id}/notifications?offset=${offset}&num=10`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -30,7 +30,7 @@ export const notificationSlice = createSlice({
         [getNotifs.fulfilled]: (state, action) => {
             let notifications = action.payload.notifications
             state.loading = false
-            state.notifications = notifications
+            state.notifications = state.notifications.concat(notifications)
             // window.localStorage.setItem('notifications', JSON.stringify(notifications))
         },
         [getNotifs.rejected]: (state,action) => {

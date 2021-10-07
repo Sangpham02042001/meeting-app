@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Container, Navbar as Nav, Col, Row } from 'react-bootstrap'
 import { Link, useHistory } from 'react-router-dom'
@@ -7,6 +7,7 @@ import Dropdown from '../Dropdown'
 import './navbar.css'
 import { cleanTeamState } from '../../store/reducers/team.reducer'
 import { cleanUser } from '../../store/reducers/user.reducer'
+import { getNotifs } from '../../store/reducers/notification.reducer'
 
 export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
@@ -15,6 +16,10 @@ export default function Navbar() {
   const [isDropdown, setIsDropdown] = useState(false);
 
   let notifications = useSelector(state => state.notificationReducer.notifications)
+
+  useEffect(() => {
+    dispatch(getNotifs(0))
+  }, [])
 
   const handleLogout = e => {
     e.preventDefault()
@@ -26,12 +31,16 @@ export default function Navbar() {
     dispatch(cleanUser())
   }
 
+  const handleNotif = e => {
+    e.preventDefault()
+    dispatch(getNotifs(notifications.length))
+  }
+
   return (
     <Nav bg="dark" variant="dark" className="navbar">
       <Nav.Brand href="/" className="nav-brand">
         MEETING APP
       </Nav.Brand>
-
       <div className="navbar-btn">
         {/* <Dropdown
           style={{ marginRight: '30px' }}
@@ -64,12 +73,28 @@ export default function Navbar() {
           </button>
           <div className="dropdown-content" style={{ minWidth: '300px' }}>
             {notifications.map((notification) => {
+              let imgSrc = `${baseURL}/api/user/avatar/${notification.createdBy}`
+              let style = {}
+              let color = "#85C1E9"
+              if (notification.isRead == 1) {
+                style = {
+                  'borderLeft': "4px solid var(--white)",
+                }
+              } else if (notification.isRead == 0) {
+                style = {
+                  'borderLeft': "4px solid #85C1E9",
+                }
+              }
+              // let teamId = notification.teamId
               return (
-                <Link to={notification.relativeLink} key={notification.id}>
+                <Link to={notification.relativeLink} key={notification.id} style={style}>
+                  <div/>
+                  <img className="notificationImg" src={imgSrc} />
                   {notification.content}
                 </Link>
               )
             })}
+            <a href='#' onClick={handleNotif}>Older notifications...</a>
           </div>
         </div>
 

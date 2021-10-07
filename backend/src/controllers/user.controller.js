@@ -335,7 +335,7 @@ const getNotifications = async (req, res) => {
   try {
     if (isNaN(offset) || isNaN(num)) {
       let notifications = await sequelize.query(
-        "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt ASC;",
+        "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt DESC;",
         {
           replacements: {
             id
