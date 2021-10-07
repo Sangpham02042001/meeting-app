@@ -31,8 +31,12 @@ export default function Team(props) {
   const [isRequestModalShow, setRequestModalShow] = useState(false)
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
   const [isTeamInfoShow, setTeamInfoShow] = useState(true)
-  const messageList = useRef()
   const teamBody = useRef()
+  const scrollRef = useRef(null);
+
+  // useEffect(() => {
+  //   if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  // }, [currentNumOfMessages])
 
   useEffect(() => {
     // socketClient.join(`team ${teamId}`)
@@ -49,6 +53,7 @@ export default function Team(props) {
       dispatch(cleanTeamState())
       setOffsetMessages(0)
     }
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [teamId])
 
   useEffect(() => {
@@ -70,7 +75,6 @@ export default function Team(props) {
         // }
         // setNotMemmberModalShow(true)
       }
-      messageList.current && messageList.current.scrollIntoView({ behavior: "smooth" })
       teamBody.current && teamBody.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [teamReducer.teamLoaded])
@@ -162,7 +166,7 @@ export default function Team(props) {
               <div className="team-body" ref={teamBody}
                 style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
                 {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
-                  ref={messageList} style={{
+                  ref={scrollRef} style={{
                     maxHeight: teamBody.current && teamBody.current.offsetHeight ? teamBody.current.offsetHeight : '600px'
                   }}>
                   {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)

@@ -164,8 +164,8 @@ BEGIN
 END$$
 DELIMITER ;
 
-DELIMITER $$
 DROP PROCEDURE IF EXISTS searchUsers;
+DELIMITER $$
 CREATE PROCEDURE searchUsers(
 	IN userId INT,
     IN text VARCHAR(255)
@@ -175,7 +175,7 @@ BEGIN
 	SELECT CONCAT(u.firstName, ' ', u.lastName) as userName,
 			u.id, u.email
     FROM users u
-    WHERE u.id != userId AND (u.email LIKE my_text OR CONCAT(u.firstName, ' ', u.lastName) LIKE my_text);
+    WHERE u.id != userId AND CONCAT(u.firstName, ' ', u.lastName) LIKE my_text;
 END $$
 DELIMITER ;
 
