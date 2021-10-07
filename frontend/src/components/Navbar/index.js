@@ -7,7 +7,7 @@ import Dropdown from '../Dropdown'
 import './navbar.css'
 import { cleanTeamState } from '../../store/reducers/team.reducer'
 import { cleanUser } from '../../store/reducers/user.reducer'
-import { getNotifs } from '../../store/reducers/notification.reducer'
+import { getNotifs, cleanNotificationState } from '../../store/reducers/notification.reducer'
 
 export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
@@ -16,9 +16,10 @@ export default function Navbar() {
   const [isDropdown, setIsDropdown] = useState(false);
 
   let notifications = useSelector(state => state.notificationReducer.notifications)
-
+  let numOf_UnReadNotifications = useSelector(state => state.notificationReducer.numOf_UnReadNotifications)
   useEffect(() => {
     dispatch(getNotifs(0))
+    dispatch(cleanNotificationState)
   }, [])
 
   const handleLogout = e => {
@@ -70,6 +71,7 @@ export default function Navbar() {
         <div className="dropdown" >
           <button className="dropdown-btn" style={{ color: "white" }} >
             <i className="fas fa-bell"></i>
+            <span className="position-absolute top-3 start-100 translate-middle badge rounded-pill bg-danger">{numOf_UnReadNotifications}</span>
           </button>
           <div className="dropdown-content" style={{ minWidth: '300px' }}>
             {notifications.map((notification) => {

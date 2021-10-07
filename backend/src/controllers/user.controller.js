@@ -333,6 +333,16 @@ const getNotifications = async (req, res) => {
   let { offset, num } = req.query
   console.log(!isNaN(offset))
   try {
+    let numOf_UnReadNotifications = await sequelize.query(
+      "SELECT COUNT(*) as numOf_UnReadNotifications FROM notifications WHERE userid = :id AND isRead = 0;",
+      {
+        replacements: {
+          id
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    numOf_UnReadNotifications = numOf_UnReadNotifications[0]['numOf_UnReadNotifications']
     if (isNaN(offset) || isNaN(num)) {
       let notifications = await sequelize.query(
         "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt DESC;",
@@ -358,7 +368,7 @@ const getNotifications = async (req, res) => {
         notifications = notifications.slice(0, 10),
           fragFlag = true
       }
-      return res.status(200).json({ notifications, numOfNotifications })
+      return res.status(200).json({ notifications, numOfNotifications, numOf_UnReadNotifications})
     } else {
       let notifications = await sequelize.query(
         "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt ASC LIMIT :offset, :num;",
@@ -369,13 +379,28 @@ const getNotifications = async (req, res) => {
           type: QueryTypes.SELECT
         }
       )
-      return res.status(200).json({ notifications })
+      return res.status(200).json({ notifications, numOf_UnReadNotifications})
     }
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
   }
 }
+
+// const unReadNotification = async (req, res) => {
+//   let { id } = req.auth
+//   try {
+//     let numOf_UnReadNotifications = await sequelize.query(
+//       "SELECT COUNT(*) as numOfNotifications FROM notifications WHERE userid = :id AND isRead = 0;",
+//       {
+//         replacements: {
+//           id
+//         },
+//         type: QueryTypes.SELECT
+//       }
+//     )
+//   }
+// }
 
 const searchUsers = async (req, res) => {
   let { id } = req.auth

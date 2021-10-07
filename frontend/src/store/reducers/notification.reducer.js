@@ -4,6 +4,7 @@ import axios from "axios";
 
 const initialState = {
     notifications: [],
+    numOf_UnReadNotifications: null,
     error: null,
     loading: false,
     loaded: false
@@ -16,8 +17,8 @@ export const getNotifs = createAsyncThunk('user/getNotifs', async (offset, {reje
             Authorization: `Bearer ${token}`
         }
     })
-    let { notifications } = response.data
-    return { notifications }
+    let { notifications, numOf_UnReadNotifications } = response.data
+    return { notifications, numOf_UnReadNotifications}
 })
 
 export const notificationSlice = createSlice({
@@ -31,6 +32,7 @@ export const notificationSlice = createSlice({
             let notifications = action.payload.notifications
             state.loading = false
             state.notifications = state.notifications.concat(notifications)
+            state.numOf_UnReadNotifications = action.payload.numOf_UnReadNotifications
             // window.localStorage.setItem('notifications', JSON.stringify(notifications))
         },
         [getNotifs.rejected]: (state,action) => {
@@ -38,7 +40,14 @@ export const notificationSlice = createSlice({
             state.loading = false
             console.log(state.error) // 
         }
+    },
+    reducers: {
+        cleanNotificationState: state => {
+            state.notifications = []
+            state.numOf_UnReadNotifications = 0
+        }
     }
 })
 
+export const { cleanNotificationState } = notificationSlice.actions;
 export default notificationSlice.reducer
