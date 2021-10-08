@@ -30,6 +30,7 @@
 
 .message > p.user-last-message {
   margin-left: 6px;
+  margin-bottom: 15px;
 }
 
 .last-message {

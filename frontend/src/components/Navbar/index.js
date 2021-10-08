@@ -19,7 +19,7 @@ export default function Navbar() {
   let numOf_UnReadNotifications = useSelector(state => state.notificationReducer.numOf_UnReadNotifications)
   useEffect(() => {
     dispatch(getNotifs(0))
-    dispatch(cleanNotificationState)
+    // dispatch(cleanNotificationState)
   }, [])
 
   const handleLogout = e => {
@@ -30,6 +30,7 @@ export default function Navbar() {
       removeAll: true
     }))
     dispatch(cleanUser())
+    dispatch(cleanNotificationState())
   }
 
   const handleNotif = e => {
@@ -71,7 +72,7 @@ export default function Navbar() {
         <div className="dropdown" >
           <button className="dropdown-btn" style={{ color: "white" }} >
             <i className="fas fa-bell"></i>
-            <span className="position-absolute top-3 start-100 translate-middle badge rounded-pill bg-danger">{numOf_UnReadNotifications}</span>
+            {numOf_UnReadNotifications > 0 && <span className="position-absolute top-3 start-100 translate-middle badge rounded-pill bg-danger">{numOf_UnReadNotifications}</span>}
           </button>
           <div className="dropdown-content" style={{ minWidth: '300px' }}>
             {notifications.map((notification) => {
@@ -90,7 +91,7 @@ export default function Navbar() {
               // let teamId = notification.teamId
               return (
                 <Link to={notification.relativeLink} key={notification.id} style={style}>
-                  <div/>
+                  <div />
                   <img className="notificationImg" src={imgSrc} />
                   {notification.content}
                 </Link>

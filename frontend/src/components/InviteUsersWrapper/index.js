@@ -92,6 +92,7 @@ export default function InviteUsersWrapper({ users }) {
           <Form onSubmit={handleSearchUser}>
             <Form.Group className="mb-3 search-team-box" controlId="formUsers">
               <Form.Control type="text" placeholder="Enter user name or email"
+                autoComplete='off'
                 value={searchUserName} onChange={e => setSearchUserName(e.target.value)} />
               {searchUsers.length <= 0 ?
                 <i className="fas fa-search" style={{ cursor: 'pointer' }}
