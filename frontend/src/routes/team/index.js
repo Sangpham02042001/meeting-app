@@ -167,11 +167,11 @@ export default function Team(props) {
                 style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
                 {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
                   ref={scrollRef} style={{
-                    maxHeight: teamBody.current && teamBody.current.offsetHeight ? teamBody.current.offsetHeight : '600px'
+                    maxHeight: teamBody.current && teamBody.current.offsetHeight ? teamBody.current.offsetHeight - 40 : '560px'
                   }}>
                   {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
                     .map((message, idx) => (
-                      <Message message={message} key={message.id}
+                      <Message message={message} key={'message' + message.id}
                         logInUserId={user.id}
                         hasAvatar={message.userId != teamReducer.team.messages[idx + 1].userId} />
                     ))}
@@ -186,7 +186,14 @@ export default function Team(props) {
                       className='team-message-input' name='message'
                       autoComplete="off" required
                       value={input} onChange={e => setInput(e.target.value)} />
-                    <i className="fas fa-search" style={{ cursor: 'pointer' }}></i>
+                    <div className="input-list-btn">
+                      <Button variant="outline-light" onClick={handleSendMessage}>
+                        <i style={{ color: "#69B00B" }} className="fas fa-image"></i>
+                      </Button>
+                      <Button variant="outline-light" onClick={handleSendMessage}>
+                        <i style={{ color: "#1A73E8" }} className="fas fa-thumbs-up"></i>
+                      </Button>
+                    </div>
                   </Form.Group>
                 </Form>
               </div>

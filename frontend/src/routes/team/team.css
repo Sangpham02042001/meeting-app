@@ -17,7 +17,7 @@
   /* background-color: #ebebeb; */
   width: 20%;
   border-left: 1px solid #cecccc;
-  min-width: 200px;
+  min-width: 250px;
 }
 
 .team-info-user-avatar {
@@ -41,6 +41,7 @@
 }
 
 .team-message-input:focus {
+  width: 100%;
   box-shadow: 0 0 0 1px var(--gray-shadow);
   border-color: transparent;
 }
@@ -49,5 +50,15 @@
   overflow-y: auto;
   padding: 10px;
   width: 100%;
-  padding-bottom: 30px;
+}
+
+.input-list-btn {
+  display: flex;
+  position: absolute;
+  right: 0;
+}
+
+.input-list-btn > button {
+  background-color: transparent !important;
+  border: none;
 }

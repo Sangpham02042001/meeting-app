@@ -10,7 +10,8 @@ const initialState = {
     members: [],
     invitedUsers: [],
     requestUsers: [],
-    messages: []
+    messages: [],
+    messagesLoaded: false
   },
   joinedTeamLoaded: false,
   teamLoaded: false,
@@ -233,7 +234,8 @@ export const teamSlice = createSlice({
         members: [],
         invitedUsers: [],
         requestUsers: [],
-        messages: []
+        messages: [],
+        messagesLoaded: false
       }
     }
   },
@@ -353,6 +355,7 @@ export const teamSlice = createSlice({
     },
     [getTeamMessages.pending]: (state) => {
       // state.loading = true;
+      state.team.messagesLoaded = false
     },
     [getTeamMessages.fulfilled]: (state, action) => {
       // state.loading = false;
@@ -364,9 +367,11 @@ export const teamSlice = createSlice({
       if (action.payload.numOfMessages) {
         state.team.numOfMessages = action.payload.numOfMessages
       }
+      state.team.messagesLoaded = true
     },
     [getTeamMessages.rejected]: (state, action) => {
       console.log(action.payload.error)
+      state.team.messagesLoaded = true
     },
     [sendMessage.pending]: (state) => {
       console.log('send message pending')
