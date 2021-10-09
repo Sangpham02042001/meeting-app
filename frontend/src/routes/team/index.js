@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
 import {
   Container, Modal, Button, Row, Col,
-  Form, Tooltip, OverlayTrigger
+  Form, Tooltip, OverlayTrigger, Image
 } from 'react-bootstrap'
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
@@ -25,6 +25,8 @@ export default function Team(props) {
   const dispatch = useDispatch()
   const history = useHistory()
   const [input, setInput] = useState('')
+  const [image, setImage] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
   const [scrollThreshold, setScrollThreshold] = useState(0)
   const [offsetMessages, setOffsetMessages] = useState(0)
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
@@ -52,8 +54,9 @@ export default function Team(props) {
       socketClient.emit('out-team', { teamId })
       dispatch(cleanTeamState())
       setOffsetMessages(0)
+      setImageUrl('')
+      setImage('')
     }
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [teamId])
 
   useEffect(() => {
@@ -152,6 +155,16 @@ export default function Team(props) {
     }
   }
 
+  const handleImageInputChange = e => {
+    e.preventDefault()
+    setImage(e.target.files[0])
+    let reader = new FileReader()
+    let url = reader.readAsDataURL(e.target.files[0])
+    reader.onloadend = e => {
+      setImageUrl(reader.result)
+    }
+  }
+
   return (
     teamReducer.loading ? <Loading />
       :
@@ -167,7 +180,8 @@ export default function Team(props) {
                 style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
                 {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
                   ref={scrollRef} style={{
-                    maxHeight: teamBody.current && teamBody.current.offsetHeight ? teamBody.current.offsetHeight - 40 : '560px'
+                    maxHeight: teamBody.current && teamBody.current.offsetHeight ?
+                      teamBody.current.offsetHeight - (imageUrl ? 160 : 40) : '560px'
                   }}>
                   {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
                     .map((message, idx) => (
@@ -181,20 +195,38 @@ export default function Team(props) {
                 </div>}
                 <Form onSubmit={handleSendMessage}
                   style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
+                  {imageUrl && <div className='image-message-upload'>
+                    <div style={{
+                      backgroundImage: `url("${imageUrl}")`
+                    }}>
+                    </div>
+                    <i className="far fa-times-circle remove-image-btn"
+                      onClick={e => {
+                        e.preventDefault()
+                        setImageUrl('')
+                      }}></i>
+                  </div>}
                   <Form.Group className="search-team-box" controlId="formUsers">
                     <Form.Control type="text" placeholder="Chat"
                       className='team-message-input' name='message'
                       autoComplete="off" required
                       value={input} onChange={e => setInput(e.target.value)} />
-                    <div className="input-list-btn">
-                      <Button variant="outline-light" onClick={handleSendMessage}>
-                        <i style={{ color: "#69B00B" }} className="fas fa-image"></i>
-                      </Button>
-                      <Button variant="outline-light" onClick={handleSendMessage}>
-                        <i style={{ color: "#1A73E8" }} className="fas fa-thumbs-up"></i>
-                      </Button>
-                    </div>
                   </Form.Group>
+                  <div className="input-list-btn" style={{
+                    top: imageUrl ? '120px' : 0
+                  }}>
+                    <label htmlFor="images" className='send-image-label'>
+                      <i style={{ color: "#69B00B" }} className="fas fa-image"></i>
+                    </label>
+                    <input type="file" accept='image/*'
+                      onChange={handleImageInputChange}
+                      id="images" style={{
+                        display: 'none'
+                      }} />
+                    <Button variant="outline-light" onClick={handleSendMessage}>
+                      <i style={{ color: "#1A73E8" }} className="fas fa-thumbs-up"></i>
+                    </Button>
+                  </div>
                 </Form>
               </div>
               {isTeamInfoShow && <div className="team-info-container">
