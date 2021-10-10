@@ -34,14 +34,14 @@ export default function Team(props) {
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
   const [isTeamInfoShow, setTeamInfoShow] = useState(true)
   const teamBody = useRef()
-  const scrollRef = useRef(null);
+  const scrollRef = useRef(null)
+  const inputRef = useRef(null)
 
   // useEffect(() => {
   //   if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   // }, [currentNumOfMessages])
 
   useEffect(() => {
-    // socketClient.join(`team ${teamId}`)
     dispatch(getTeamInfo({ teamId }))
     dispatch(getTeamMessages({
       teamId,
@@ -49,6 +49,22 @@ export default function Team(props) {
       num: 15
     }))
     socketClient.emit('join-team', { teamId })
+    window.addEventListener('paste', e => {
+      if (document.activeElement == inputRef.current) {
+        if (e.clipboardData.files.length > 0) {
+          let file = e.clipboardData.files[0]
+          let regex = /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i
+          if (regex.test(file.name)) {
+            setImage(file)
+            let reader = new FileReader()
+            let url = reader.readAsDataURL(file)
+            reader.onloadend = e => {
+              setImageUrl(reader.result)
+            }
+          }
+        }
+      }
+    })
     return () => {
       // socketClient.leave(`team ${teamId}`)
       socketClient.emit('out-team', { teamId })
@@ -56,6 +72,9 @@ export default function Team(props) {
       setOffsetMessages(0)
       setImageUrl('')
       setImage('')
+      window.removeEventListener('paste', () => {
+        console.log('remove events')
+      })
     }
   }, [teamId])
 
@@ -137,11 +156,19 @@ export default function Team(props) {
 
   const handleSendMessage = e => {
     e.preventDefault()
-    input && dispatch(sendMessage({
-      content: input,
+    if (!input && !image) {
+      return
+    }
+    let formData = new FormData()
+    input && formData.append('content', input)
+    image && formData.append('photo', image)
+    dispatch(sendMessage({
+      data: formData,
       teamId
     }))
     setInput('')
+    setImageUrl('')
+    setImage('')
   }
 
   const handleMessageScroll = e => {
@@ -209,7 +236,8 @@ export default function Team(props) {
                   <Form.Group className="search-team-box" controlId="formUsers">
                     <Form.Control type="text" placeholder="Chat"
                       className='team-message-input' name='message'
-                      autoComplete="off" required
+                      autoComplete="off"
+                      ref={inputRef}
                       value={input} onChange={e => setInput(e.target.value)} />
                   </Form.Group>
                   <div className="input-list-btn" style={{

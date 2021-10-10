@@ -9,12 +9,14 @@ const io = require('socket.io')(server, {
     cors: '*'
 })
 
+//routes
 const authRoutes = require('./routes/auth.routes')
 const userRoutes = require('./routes/user.routes')
 const teamRoutes = require('./routes/team.routes')
 const conversationRoutes = require('./routes/conversation.routes')
 const meetingRoutes = require('./routes/meeting.routes')
 const notificationRoutes = require('./routes/notification.routes')
+const messageRoutes = require('./routes/message.routes')
 
 sequelize.sync()
 
@@ -35,6 +37,7 @@ app.use('/', teamRoutes)
 app.use('/', conversationRoutes)
 app.use('/', meetingRoutes)
 app.use('/', notificationRoutes)
+app.use('/', messageRoutes)
 
 io.use((socket, next) => {
     const userID = socket.handshake.auth.userId;

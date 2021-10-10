@@ -148,11 +148,9 @@ export const getTeamMessages = createAsyncThunk('teams/getMessages', async ({ te
   }
 })
 
-export const sendMessage = createAsyncThunk('teams/sendMessage', async ({ teamId, content }, { rejectWithValue }) => {
+export const sendMessage = createAsyncThunk('teams/sendMessage', async ({ teamId, data }, { rejectWithValue }) => {
   try {
-    let response = await axiosAuth.post(`/api/teams/${teamId}/messages`, {
-      content
-    })
+    let response = await axiosAuth.post(`/api/teams/${teamId}/messages`, data)
     if (response.status == 201) {
       let { message } = response.data
       return {
@@ -161,7 +159,8 @@ export const sendMessage = createAsyncThunk('teams/sendMessage', async ({ teamId
           content: message.content,
           teamId: message.teamId,
           createdAt: message.createdAt,
-          userId: message.userId
+          userId: message.userId,
+          photo: message.photo
         }
       }
     }
