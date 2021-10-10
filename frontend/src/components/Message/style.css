@@ -3,7 +3,13 @@
   justify-content: flex-end;
 }
 
-.own-message > p {
+.own-message > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.own-message > div > p {
   max-width: 300px;
   border-radius: 10px;
   padding: 5px 7px;
@@ -15,9 +21,15 @@
 
 .message {
   display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
 }
 
-.message > p {
+.message > div {
+  display: flex;
+}
+
+.message > div > p {
   max-width: 150px;
   border-radius: 10px;
   padding: 5px 7px;
@@ -28,9 +40,45 @@
   word-break: break-all;
 }
 
-.message > p.user-last-message {
+.message-with-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.message-with-photo > div {
+  margin-left: 36px;
+}
+
+.message-with-photo > div.photo-last-message {
   margin-left: 6px;
-  margin-bottom: 15px;
+}
+
+.last-message > .message-with-photo > p {
+  margin-left: 6px;
+}
+
+.message-with-photo > p {
+  margin-left: 6px;
+}
+
+.message > div > p.user-last-message {
+  margin-left: 6px;
+}
+
+.message-photo {
+  width: 250px;
+  height: 200px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+.avatar-message {
+  position: relative;
+  bottom: 5px;
 }
 
 /* .last-message {

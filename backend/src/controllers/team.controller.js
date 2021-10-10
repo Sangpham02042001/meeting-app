@@ -412,21 +412,34 @@ const updateBasicTeamInfo = async (req, res) => {
 }
 
 const sendMessage = async (req, res) => {
-  let { content } = req.body
   let { id } = req.auth
   let { teamId } = req.params
-
-  try {
-    const message = await Message.create({
-      content,
-      userId: id,
-      teamId
-    })
-    return res.status(201).json({ message })
-  } catch (error) {
-    console.log(error)
-    return res.status(400).json({ error })
-  }
+  const form = formidable.IncomingForm()
+  form.keepExtensions = true
+  form.parse(req, async (err, fields, files) => {
+    let content = fields.content || null
+    let photo
+    if (files.photo) {
+      let fileType = files.photo.path.split('.')[files.photo.path.split('.').length - 1]
+      photo = `${v4()}.${fileType}`
+      let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photo}`)
+      fs.createReadStream(files.photo.path).pipe(writeStream)
+    } else {
+      photo = null
+    }
+    try {
+      const message = await Message.create({
+        content,
+        userId: id,
+        teamId,
+        photo
+      })
+      return res.status(201).json({ message })
+    } catch (error) {
+      console.log(error)
+      return res.status(400).json({ error })
+    }
+  })
 }
 
 const getTeamMessages = async (req, res) => {
