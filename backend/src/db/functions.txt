@@ -43,7 +43,8 @@ BEGIN
         WHERE n.conversationId = conversationId AND n.userId = userId;
         IF createdBy = _createdBy THEN
 			UPDATE notifications n
-            SET n.createdAt = NOW()
+            SET n.createdAt = NOW(),
+				n.isRead = false
             WHERE n.conversationId = conversationId AND n.createdBy = createdBy;
 		ELSE 
 			INSERT INTO notifications
@@ -63,7 +64,7 @@ BEGIN
         WHERE n.teamId = teamId AND n.userId = userId;
         IF _createdBy = createdBy THEN
 			UPDATE notifications n
-            SET n.createdAt = NOW()
+            SET n.createdAt = NOW(), n.isRead = false
             WHERE n.teamId = teamId AND n.userId = userId;
         ELSEIF _createdBy IS NOT NULL THEN
 			UPDATE notifications n
