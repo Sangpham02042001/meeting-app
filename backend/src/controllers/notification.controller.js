@@ -1,3 +1,7 @@
 const Notification = require('../models/notification')
 
-module.exports = {}
+const updateRead = async (req, res) => {
+
+}
+
+module.exports = { updateRead }

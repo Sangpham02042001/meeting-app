@@ -193,6 +193,26 @@ export const deleteTeam = createAsyncThunk('teams/delete', async ({ teamId }, { 
   }
 })
 
+export const createNewTeam = createAsyncThunk('teams/create', async ({ formData }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.post('/api/teams', formData);
+    if (response.status == 201) {
+      let { team } = response.data
+      return {
+        id: team.id,
+        name: team.name,
+        hostId: team.hostId
+      }
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
 export const outTeam = createAsyncThunk('teams/out', async ({ userId, teamId }, { rejectWithValue }) => {
   try {
     let response = await axiosAuth.delete(`/api/users/${userId}/teams/${teamId}`)
@@ -214,12 +234,6 @@ export const teamSlice = createSlice({
   name: 'Team',
   initialState,
   reducers: {
-    createNewTeam: (state, action) => {
-      let { id, hostId, name } = action.payload
-      state.joinedTeams.push({
-        id, hostId, name
-      })
-    },
     cleanTeamState: (state, action) => {
       const removeAll = action.payload && action.payload.removeAll
       if (removeAll) {
@@ -395,10 +409,22 @@ export const teamSlice = createSlice({
     [outTeam.rejected]: (state, action) => {
       state.loading = false
       state.error = action.payload.error
+    },
+    [createNewTeam.pending]: (state) => {
+      console.log('create team pending');
+    },
+    [createNewTeam.fulfilled]: (state, action) => {
+      let { id, hostId, name } = action.payload
+      state.joinedTeams.push({
+        id, hostId, name
+      })
+    },
+    [createNewTeam.rejected]: (state, action) => {
+      state.error = action.payload.error
     }
   }
 })
 
-export const { createNewTeam, cleanTeamState } = teamSlice.actions;
+export const { cleanTeamState } = teamSlice.actions;
 
 export default teamSlice.reducer

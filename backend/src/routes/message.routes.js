@@ -5,5 +5,6 @@ const router = Router()
 router.route('/api/messages/:messageId/image')
   .get(getImageMessage)
 
+// router.route('/api/messages/:messageId')
 
 module.exports = router

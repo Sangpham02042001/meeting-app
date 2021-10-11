@@ -11,8 +11,10 @@ import { createNewTeam, requestJoinTeam } from '../../store/reducers/team.reduce
 
 export default function TeamDiscover() {
   const user = useSelector(state => state.userReducer.user)
+  const teamReducer = useSelector(state => state.teamReducer)
   const dispatch = useDispatch()
   const history = useHistory()
+  const [createTeamError, setCreateTeamError] = useState('')
   const [teamName, setTeamName] = useState('')
   const [searchTeamName, setSearchTeamName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -34,11 +36,32 @@ export default function TeamDiscover() {
     }
   }, [])
 
+  useEffect(() => {
+    if (teamReducer.error) {
+      setLoading(false)
+      setCreateTeamError(teamReducer.error)
+    }
+  }, [teamReducer.error])
+
+  useEffect(() => {
+    if (loading) {
+      setLoading(false)
+      handleCreateModalClose()
+      setInviteModalShow(true)
+      let length = teamReducer.joinedTeams.length
+      let team = teamReducer.joinedTeams[length - 1]
+      setNewTeamId(team.id)
+    }
+    // console.log(response.data)
+    // setNewTeamId(response.data.team.id)
+  }, [teamReducer.joinedTeams.length])
+
   const handleCreateModalClose = () => {
     setCreateModalShow(false)
     setTeamName('')
     setPublicTeam(true)
     setTeamCoverPhoto('')
+    setCreateTeamError('')
   }
 
   const handleCreateTeam = () => {
@@ -96,20 +119,23 @@ export default function TeamDiscover() {
     formData.append('coverPhoto', teamCoverPhoto)
     formData.append('teamType', isPublicTeam ? 'public' : 'private')
     setLoading(true)
-    let response = await axiosAuth.post('/api/teams', formData);
-    setLoading(false)
-    if (response.status == 201) {
-      handleCreateModalClose()
-      setInviteModalShow(true)
-      console.log(response.data)
-      let { team } = response.data
-      dispatch(createNewTeam({
-        id: team.id,
-        name: team.name,
-        hostId: team.hostId
-      }))
-      setNewTeamId(response.data.team.id)
-    }
+    dispatch(createNewTeam({
+      formData
+    }))
+    // let response = await axiosAuth.post('/api/teams', formData);
+    // setLoading(false)
+    // if (response.status == 201) {
+    //   handleCreateModalClose()
+    //   setInviteModalShow(true)
+    //   console.log(response.data)
+    //   let { team } = response.data
+    //   dispatch(createNewTeam({
+    //     id: team.id,
+    //     name: team.name,
+    //     hostId: team.hostId
+    //   }))
+    //   setNewTeamId(response.data.team.id)
+    // }
   }
 
   const handleSearchTeams = async (e) => {
@@ -220,6 +246,7 @@ export default function TeamDiscover() {
             <Form.Control type="text" placeholder="Enter you team's name"
               value={teamName} onChange={e => setTeamName(e.target.value)} />
           </Form.Group>
+          {createTeamError && <p style={{ color: 'red' }}>{createTeamError}</p>}
 
           <Form.Group className="mb-3" controlId="formTeamPrivacy">
             <Form.Label>Privacy</Form.Label>
@@ -261,6 +288,7 @@ export default function TeamDiscover() {
           <Form onSubmit={handleSearchUser}>
             <Form.Group className="mb-3 search-team-box" controlId="formUsers">
               <Form.Control type="text" placeholder="Enter user name or email"
+                autoComplete='off'
                 value={searchUserName} onChange={e => setSearchUserName(e.target.value)} />
               {searchUsers.length <= 0 ?
                 <i className="fas fa-search" style={{ cursor: 'pointer' }}

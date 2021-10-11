@@ -58,7 +58,7 @@ const createTeam = async (req, res) => {
         let check = teams.some(team => team.name === name)
         if (check) {
           return res.status(400).json({
-            error: `Team with name ${name} has been created by you, please choose other name`
+            error: `Team with name ${name} has been created by you, please choose other name.`
           })
         }
       }
