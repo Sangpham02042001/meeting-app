@@ -12,7 +12,7 @@ const initialState = {
 
 export const getNotifs = createAsyncThunk('user/getNotifs', async (offset, {rejectWithValue}) => {
     let { token, id } = JSON.parse(window.localStorage.getItem('user'))
-    let response = await axios.get(`${baseURL}/api/users/${id}/notifications?offset=${offset}&num=10`, {
+    let response = await axios.get(`${baseURL}/api/users/${id}/notifications?offset=${offset}&num=3`, {
         headers: {
             Authorization: `Bearer ${token}`
         }

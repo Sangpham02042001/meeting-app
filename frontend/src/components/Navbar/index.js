@@ -8,6 +8,8 @@ import './navbar.css'
 import { cleanTeamState } from '../../store/reducers/team.reducer'
 import { cleanUser } from '../../store/reducers/user.reducer'
 import { getNotifs, cleanNotificationState } from '../../store/reducers/notification.reducer'
+import InfiniteScroll from 'react-infinite-scroll-component'
+import Loading from '../Loading'
 
 export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
@@ -34,8 +36,10 @@ export default function Navbar() {
   }
 
   const handleNotif = e => {
-    e.preventDefault()
-    dispatch(getNotifs(notifications.length))
+    // e.preventDefault()
+    setTimeout(() => {
+      dispatch(getNotifs(notifications.length))
+    }, 1500)
   }
 
   return (
@@ -74,11 +78,16 @@ export default function Navbar() {
             <i className="fas fa-bell"></i>
             {numOf_UnReadNotifications > 0 && <span className="position-absolute top-3 start-100 translate-middle badge rounded-pill bg-danger">{numOf_UnReadNotifications}</span>}
           </button>
-          <div className="dropdown-content" style={{ minWidth: '300px' }}>
+          <div className="dropdown-content" id="dropdown-content" style={{ minWidth: '300px' }}>
+            <InfiniteScroll 
+            dataLength={notifications.length} 
+            next={handleNotif}
+            hasMore={true}
+            loader={<div className="notification justify-content-center"><img src="/loading.gif" className="loadingNotification" /></div>}
+            scrollableTarget="dropdown-content">
             {notifications.map((notification) => {
               let imgSrc = `${baseURL}/api/user/avatar/${notification.createdBy}`
               let style = {}
-              let color = "#85C1E9"
               if (notification.isRead == 1) {
                 style = {
                   'borderLeft': "4px solid var(--white)",
@@ -88,16 +97,15 @@ export default function Navbar() {
                   'borderLeft': "4px solid #85C1E9",
                 }
               }
-              // let teamId = notification.teamId
               return (
-                <Link to={notification.relativeLink} key={notification.id} style={style}>
+                <Link className="notification" to={notification.relativeLink} key={notification.id} style={style}>
                   <div />
                   <img className="notificationImg" src={imgSrc} />
                   {notification.content}
                 </Link>
               )
             })}
-            <a href='#' onClick={handleNotif}>Older notifications...</a>
+            </InfiniteScroll>
           </div>
         </div>
 
