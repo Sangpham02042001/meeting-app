@@ -1,20 +1,68 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button, InputGroup, FormControl } from 'react-bootstrap';
 import './meetingChatBox.css';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { saveMessage } from '../../store/reducers/meeting.reducer';
+import {
+    getTeamMessages,
+    sendMessage
+} from '../../store/reducers/team.reducer'
 import { socketClient } from '../../utils';
+import Message from '../Message';
 
 export default function ChatBox({ chatVisible }) {
+    const { teamId } = useParams()
     const dispatch = useDispatch();
     const [message, setMessage] = useState('');
     const messages = useSelector(state => state.meetingReducer.messages);
+    const userReducer = useSelector(state => state.userReducer)
+    const user = userReducer.user
+    const teamReducer = useSelector(state => state.teamReducer)
+    const [offsetMessages, setOffsetMessages] = useState(15);
+    const [image, setImage] = useState('')
+    const [imageUrl, setImageUrl] = useState('')
+    const currentNumOfMessages = useSelector(state => state.teamReducer.team.messages.length)
+    const scrollRef = useRef(null);
+    const inputRef = useRef(null);
 
     useEffect(() => {
         socketClient.on('receive-message-team', ({ message, userId }) => {
             dispatch(saveMessage({ message, userId }));
         })
+        window.addEventListener('paste', e => {
+            if (document.activeElement == inputRef.current) {
+                if (e.clipboardData.files.length > 0) {
+                    let file = e.clipboardData.files[0]
+                    let regex = /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i
+                    if (regex.test(file.name)) {
+                        setImage(file)
+                        let reader = new FileReader()
+                        let url = reader.readAsDataURL(file)
+                        reader.onloadend = e => {
+                            setImageUrl(reader.result)
+                        }
+                    }
+                }
+            }
+        })
+        return () => {
+            window.removeEventListener('paste', () => {
+                console.log('remove events')
+            })
+        }
     }, [])
+
+    const handleMessageScroll = e => {
+        if (teamReducer.team.numOfMessages > currentNumOfMessages && e.target.scrollTop === 0) {
+            dispatch(getTeamMessages({
+                teamId,
+                offset: offsetMessages + 15,
+                num: 15
+            }))
+            setOffsetMessages(offsetMessages + 15)
+        }
+    }
 
     const handleChangeMessage = (event) => {
         setMessage(event.target.value)
@@ -38,6 +86,15 @@ export default function ChatBox({ chatVisible }) {
 
     }
 
+    const handleImageInputChange = e => {
+        e.preventDefault()
+        setImage(e.target.files[0])
+        let reader = new FileReader()
+        let url = reader.readAsDataURL(e.target.files[0])
+        reader.onloadend = e => {
+            setImageUrl(reader.result)
+        }
+    }
 
     return (
         <div className="chatbox">
@@ -52,18 +109,49 @@ export default function ChatBox({ chatVisible }) {
                 </div>
             </div>
             <div className="chatbox-content">
-                {messages.map((message, idx) => {
-                    return <div key={idx}>
-                        {message.userId}
-                        <div>
-                            {message.message}
-                        </div>
+                <div className='chatbox-messages-container'>
+                    {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
+                        ref={scrollRef} style={{
+                            height: `calc(70vh - ${imageUrl ? 120 : 0}px)`
+                        }}>
+                        {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
+                            .map((message, idx) => (
+                                <Message message={message} key={'message' + message.id}
+                                    logInUserId={null}
+                                    hasAvatar={message.userId != teamReducer.team.messages[idx + 1].userId} />
+                            ))}
+                        {currentNumOfMessages && <Message message={teamReducer.team.messages[currentNumOfMessages - 1]}
+                            logInUserId={null}
+                            hasAvatar={true} lastMessage={true} />}
+                    </div>}
+                </div>
+                {imageUrl && <div className='image-message-upload'>
+                    <div style={{
+                        backgroundImage: `url("${imageUrl}")`
+                    }}>
                     </div>
-                })}
+                    <i className="far fa-times-circle remove-image-btn"
+                        onClick={e => {
+                            e.preventDefault()
+                            setImageUrl('')
+                        }}></i>
+                </div>}
             </div>
             <div className="chatbox-sender">
                 <InputGroup>
-                    <FormControl className="input-box" as="textarea" placeholder="Send message" onKeyDown={handleEnterSendMessage} onChange={handleChangeMessage} value={message} />
+                    <FormControl className="input-box" ref={inputRef} placeholder="Send message"
+                        style={{ paddingLeft: '15px' }}
+                        onKeyDown={handleEnterSendMessage} onChange={handleChangeMessage} value={message} />
+                    <Button variant="outline-light" style={{ cursor: 'pointer' }}>
+                        <label htmlFor="images" className='send-image-label'>
+                            <i style={{ color: "#69B00B", cursor: 'pointer' }} className="fas fa-image"></i>
+                        </label>
+                        <input type="file" accept='image/*'
+                            onChange={handleImageInputChange}
+                            id="images" style={{
+                                display: 'none'
+                            }} />
+                    </Button>
                     <Button type="submit" variant="outline-light" onClick={handleSendMessage}>
                         <i style={{ color: "#1A73E8" }} className="far fa-paper-plane"></i>
                     </Button>

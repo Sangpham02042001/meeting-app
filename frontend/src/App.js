@@ -19,7 +19,6 @@ function App() {
   return (
     <BrowserRouter>
       <Switch>
-        <Route path="/meeting/:meetingId" component={Meeting} />
         <Route exact path="/login" component={() => <Login />} />
         <Route exact path="/signup" component={() => <SignUp />} />
         <PrivateRoute exact path="/" >
@@ -31,6 +30,7 @@ function App() {
         <PrivateRoute path="/conversations" >
           <Conversations />
         </PrivateRoute>
+        <Route path="/teams/:teamId/meeting/:meetingId" component={Meeting} />
         <PrivateRoute path="/teams" >
           <Switch>
             <Route exact path="/teams">

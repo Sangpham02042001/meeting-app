@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useSelector, useDispatch } from 'react-redux';
+import { useParams, } from 'react-router-dom';
 import { socketClient } from "../../utils";
 import Peer from "simple-peer";
 import './meeting.css';
@@ -6,19 +8,37 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 import Video from "../../components/MeetingVideo";
 import MeetingChatBox from "../../components/MeetingChatBox";
 import MeetingUserList from "../../components/MeetingUserList";
-
+import { isAuthenticated } from '../../store/reducers/user.reducer';
+import {
+    getTeamMessages,
+    sendMessage
+} from '../../store/reducers/team.reducer'
 
 
 const Meeting = (props) => {
+    const { teamId } = useParams()
+    const dispatch = useDispatch()
+    const userReducer = useSelector(state => state.userReducer)
+    const teamReducer = useSelector(state => state.teamReducer)
     const [peers, setPeers] = useState([]);
     const [isVideoActive, setIsVideoActive] = useState(true);
     const userVideo = useRef();
     let peersRef = useRef([]);
+    const scrollRef = useRef(null);
     const meetingId = props.match.params.meetingId;
 
     console.log(peers);
 
     useEffect(() => {
+        if (!userReducer.loaded) {
+            dispatch(isAuthenticated())
+        }
+        console.log('call again')
+        dispatch(getTeamMessages({
+            teamId,
+            offset: 0,
+            num: 15
+        }))
         socketClient.connect();
         navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
             userVideo.current.srcObject = stream;

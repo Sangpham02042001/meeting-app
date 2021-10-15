@@ -38,10 +38,6 @@ export default function Team(props) {
   const scrollRef = useRef(null)
   const inputRef = useRef(null)
 
-  // useEffect(() => {
-  //   if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  // }, [currentNumOfMessages])
-
   useEffect(() => {
     dispatch(getTeamInfo({ teamId }))
     dispatch(getTeamMessages({

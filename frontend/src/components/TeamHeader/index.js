@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
 import { Button, Modal } from 'react-bootstrap'
@@ -6,6 +6,7 @@ import { baseURL } from '../../utils'
 import './teamheader.css'
 import Dropdown from '../Dropdown'
 import { deleteTeam, outTeam } from '../../store/reducers/team.reducer'
+import { current } from '@reduxjs/toolkit'
 
 export default function TeamHeader({ showTeamInfo }) {
   const { teamId } = useParams()
@@ -15,6 +16,23 @@ export default function TeamHeader({ showTeamInfo }) {
   const user = useSelector(state => state.userReducer.user)
   const [isDeleteModalShow, setDeleteModalShow] = useState(false)
   const [isOutModalShow, setOutModalShow] = useState(false)
+  const [isCreateMeetingShow, setShowCreateMeeting] = useState(false)
+  const [isVideoActive, setVideoActive] = useState(true)
+  const [isAudioActive, setAudioActive] = useState(true)
+  const [isMeeting, setIsMeeting] = useState(false)
+  const userVideo = useRef()
+
+  useEffect(() => {
+    if (isCreateMeetingShow) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+        userVideo.current.srcObject = stream;
+      })
+    } else {
+      userVideo.current && userVideo.current.srcObject.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
+  }, [isCreateMeetingShow])
 
   const handleDeleteTeam = async () => {
     console.log('delete team')
@@ -42,6 +60,27 @@ export default function TeamHeader({ showTeamInfo }) {
     setOutModalShow(false)
   }
 
+  const handleCloseCreateMeeting = () => {
+    setShowCreateMeeting(false)
+  }
+
+  const handleActiveVideo = () => {
+    let checkVideoActive = userVideo.current.srcObject.getVideoTracks()[0].enabled;
+    userVideo.current.srcObject.getVideoTracks()[0].enabled = !checkVideoActive;
+    setVideoActive(!checkVideoActive)
+  }
+
+  const handleActiveAudio = () => {
+    let checkAudioActive = userVideo.current.srcObject.getAudioTracks()[0].enabled;
+    userVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
+    setAudioActive(!isAudioActive)
+  }
+
+  const handleCreateMeeting = () => {
+    setShowCreateMeeting(false)
+    setIsMeeting(true)
+  }
+
   return (
     <div className='team-header'>
       <div style={{ display: 'flex' }}>
@@ -56,7 +95,12 @@ export default function TeamHeader({ showTeamInfo }) {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
         <i className="far fa-question-circle" onClick={showTeamInfo}></i>
-        <Button variant="light" className="meeting-btn">
+        <Button variant="light" className="meeting-btn"
+          disabled={isMeeting}
+          onClick={e => {
+            e.preventDefault()
+            setShowCreateMeeting(true)
+          }}>
           <i className="fas fa-video"></i> Meeting
         </Button>
         <div className="navbar-btn">
@@ -123,6 +167,37 @@ export default function TeamHeader({ showTeamInfo }) {
                 Cancel
               </Button>
               <Button onClick={handleOutTeam}>Out</Button>
+            </Modal.Footer>
+          </Modal>
+
+          <Modal show={isCreateMeetingShow} centered onHide={handleCloseCreateMeeting}>
+            <Modal.Header closeButton>
+              <h4>Create new meeting</h4>
+            </Modal.Header>
+            <Modal.Body>
+              <video width="100%" height="320px" muted ref={userVideo} autoPlay />
+              <div>
+                <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                  {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                </Button>
+                <span>Join with camera</span>
+              </div>
+
+              <div>
+                <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                  {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                </Button>
+                <span>Join with audio</span>
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseCreateMeeting}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateMeeting}>
+                <Link style={{ color: 'white', textDecoration: 'none' }}
+                  to={`/teams/${teamId}/meeting/312312`} target="_blank">Create</Link>
+              </Button>
             </Modal.Footer>
           </Modal>
         </div>
