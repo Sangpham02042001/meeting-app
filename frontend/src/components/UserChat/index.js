@@ -5,7 +5,7 @@ import Avatar from '../Avatar';
 import Message from '../Message';
 import { Button } from 'react-bootstrap';
 import { socketClient } from '../../utils';
-import { setMessage, getMessages, setConversation } from '../../store/reducers/conversation.reducer';
+import { getMessages } from '../../store/reducers/conversation.reducer';
 import './userChat.css';
 import { v1 as uuid } from 'uuid';
 

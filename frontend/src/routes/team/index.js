@@ -167,7 +167,6 @@ export default function Team(props) {
     // }))
 
     socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, image });
-    console.log('helo')
     setInput('')
     setImageUrl('')
     setImage('')

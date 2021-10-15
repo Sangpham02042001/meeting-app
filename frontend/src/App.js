@@ -30,7 +30,6 @@ function App() {
         <PrivateRoute path="/conversations" >
           <Conversations />
         </PrivateRoute>
-        <Route path="/teams/:teamId/meeting/:meetingId" component={Meeting} />
         <PrivateRoute path="/teams" >
           <Switch>
             <Route exact path="/teams">
@@ -44,6 +43,8 @@ function App() {
             </Route>
             <Route exact path="/teams/:teamId">
               <Team />
+            </Route>
+            <Route path="/teams/:teamId/meeting/:meetingId" component={Meeting} >
             </Route>
             <Route render={() => <Redirect to="/notfound" />}>
             </Route>

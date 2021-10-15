@@ -4,7 +4,7 @@ import { useParams, } from 'react-router-dom';
 import { socketClient } from "../../utils";
 import Peer from "simple-peer";
 import './meeting.css';
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Row, Col, Button } from "react-bootstrap";
 import Video from "../../components/MeetingVideo";
 import MeetingChatBox from "../../components/MeetingChatBox";
 import MeetingUserList from "../../components/MeetingUserList";
@@ -39,7 +39,7 @@ const Meeting = (props) => {
             offset: 0,
             num: 15
         }))
-        socketClient.connect();
+        // socketClient.connect();
         navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
             userVideo.current.srcObject = stream;
             socketClient.emit("join-meeting", meetingId);
@@ -87,6 +87,7 @@ const Meeting = (props) => {
                 setPeers(peers => {
                     return peers.filter(p => p.peerID !== userId);
                 })
+
             })
         })
     }, []);
@@ -181,7 +182,11 @@ const Meeting = (props) => {
         peers.map(peer => {
             peer.peer.destroy();
         })
-        userVideo.current.pause();
+        console.log(userVideo.current.srcObject)
+        userVideo.current.srcObject.getTracks().forEach((track) => {
+            console.log(track)
+            track.stop();
+        });
         socketClient.emit('disconnect-meeting');
     }
 
@@ -245,7 +250,7 @@ const Meeting = (props) => {
                         {!isMicroActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
                     </Button>
 
-                    <Button variant="danger" onClick={handleEndMeeting} href='/' style={{ borderRadius: "50%", margin: "10px" }}>
+                    <Button variant="danger" onClick={handleEndMeeting} style={{ borderRadius: "50%", margin: "10px" }}>
                         {/* <Link to="/"><i style={{ color: "white" }} className="fas fa-phone" ></i></Link> */}
                         <i style={{ color: "white" }} className="fas fa-phone" ></i>
                     </Button>

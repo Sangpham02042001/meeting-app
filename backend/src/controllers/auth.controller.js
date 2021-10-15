@@ -21,7 +21,7 @@ const signin = async (req, res) => {
       const token = jwt.sign({
         id: user.id,
         name: user.name,
-        password: password
+        company: 'SPICY_CODE'
       }, process.env.JWT_SECRET_KEY)
 
       user.avatar = undefined

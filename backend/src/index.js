@@ -27,8 +27,9 @@ const PORT = process.env.PORT || 3001
 const HOST = process.env.HOST || 'locahost'
 
 app.use(express.json())
-app.use(cors())
 app.use(express.urlencoded({ extended: true }))
+app.use(cors())
+
 
 //routes
 app.use('/', authRoutes)

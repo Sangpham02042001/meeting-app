@@ -27,7 +27,8 @@ export const conversationSlice = createSlice({
   initialState: {
     messages: [],
     conversations: [],
-    participant: null
+    participant: null,
+    messageChange: false,
 
   },
   extraReducers: {
@@ -53,11 +54,25 @@ export const conversationSlice = createSlice({
     }
   },
   reducers: {
-    setMessage: (state, action) => {
-      const { messageId, content, senderId, userId, conversationId, photo } = action.payload;
-      if (state.participant && senderId === state.participant.id || senderId === userId) {
-        state.messages.push({ id: messageId, content, userId, conversationId, photo });
+    sendMessageCv: (state,action) => {
+      const { messageId, content, senderId, receiverId, conversationId, photo, createdAt } = action.payload;
+      const conversation = state.conversations.find(conv => conv.participantId === receiverId);
+      conversation.conversationId = conversationId;
+      if (state.participant && receiverId === state.participant.id ) {
+        state.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
       }
+      state.messageChange = !state.messageChange;
+    },
+    receiveMessage: (state, action) => {
+      const { messageId, content, senderId, receiverId, conversationId, photo, createdAt } = action.payload;
+      const conversation = state.conversations.find(conv => conv.conversationId === conversationId);
+      if (!conversation) {
+        state.conversations.unshift({conversationId, participantId: senderId})
+      }
+      if (state.participant && senderId === state.participant.id ) {
+        state.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
+      }
+      state.messageChange = !state.messageChange;
     },
     createConversation: (state, action) => {
       const { conversationId, participantId } = action.payload;
@@ -69,16 +84,9 @@ export const conversationSlice = createSlice({
       console.log('create conversationid')
       state.conversations.unshift({ conversationId, participantId });
     },
-    setConversation: (state, action) => {
-      const { nConversationId, oConversationId } = action.payload;
-      const conversation = state.conversations.find(conv => conv.conversationId === oConversationId);
-      if (conversation) {
-        conversation.conversationId = nConversationId;
-      }
-    }
   }
 })
 
-export const { setMessage, createConversation, setConversation } = conversationSlice.actions;
+export const { createConversation, sendMessageCv, receiveMessage } = conversationSlice.actions;
 
 export default conversationSlice.reducer

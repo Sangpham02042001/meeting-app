@@ -5,27 +5,23 @@ import { getNotifs } from '../../store/reducers/notification.reducer'
 import Navbar from '../Navbar';
 import { v1 as uuid } from 'uuid';
 import { socketClient } from '../../utils';
-import { setMessage, setConversation } from '../../store/reducers/conversation.reducer';
+import { receiveMessage, sendMessageCv } from '../../store/reducers/conversation.reducer';
 import { sendMessage } from '../../store/reducers/team.reducer';
 import './layout.css'
 
 export default function Layout({ children }) {
   const dispatch = useDispatch();
-  const user = useSelector(state => state.userReducer.user);
   useEffect(() => {
-    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, conversationId, photo }) => {
-      dispatch(setMessage({ messageId, content, senderId, userId: user.id, conversationId, photo }));
+    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }) => {
+      dispatch(receiveMessage({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }));
     })
 
-    socketClient.on('conversation-sentMessage', ({messageId, content, senderId, conversationId, photo}) => {
-      dispatch(setMessage({ messageId, content, senderId, userId: user.id, conversationId, photo }));
-    })
-
-    socketClient.on('set-conversation', ({ nConversationId, oConversationId }) => {
-      dispatch(setConversation({ nConversationId, oConversationId }))
+    socketClient.on('conversation-sentMessage', ({messageId, content, senderId, receiverId, conversationId, photo, createdAt}) => {
+      dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }));
     })
 
     socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photo }) => {
+      console.log(content)
       dispatch(sendMessage({
         messageId, content, senderId, teamId, photo
       }))

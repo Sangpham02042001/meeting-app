@@ -43,9 +43,8 @@ const socketServer = (socket) => {
         let members = await getMembers({ teamId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, image })
-        console.log(message.content)
         socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, photo: message.photo })
-        
+        console.log('sent-message-team')
         for (let m of members) {
             socket.to(m.id).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photo: message.photo });
         }
@@ -64,16 +63,11 @@ const socketServer = (socket) => {
 
     socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, image }) => {
         const converId = await setConversation({ senderId, receiverId, conversationId });
-
         const message = await setMessage({ content, conversationId: converId, senderId, image });
 
-        if (converId !== conversationId) {
-            socket.emit('set-conversation', { nConversationId: converId, oConversationId: conversationId });
-        }
-    
         if (message) {
-            socket.emit('conversation-sentMessage',  { messageId: message.id, content, senderId, conversationId: converId, photo: message.photo })
-            socket.to(receiverId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, conversationId: converId, photo: message.photo });
+            socket.emit('conversation-sentMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt })
+            socket.to(receiverId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt });
         }
     })
 

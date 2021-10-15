@@ -15,21 +15,21 @@ export default function ChatBox({ chatVisible }) {
     const { teamId } = useParams()
     const dispatch = useDispatch();
     const [message, setMessage] = useState('');
-    const messages = useSelector(state => state.meetingReducer.messages);
+    // const messages = useSelector(state => state.meetingReducer.messages);
     const userReducer = useSelector(state => state.userReducer)
     const user = userReducer.user
     const teamReducer = useSelector(state => state.teamReducer)
     const [offsetMessages, setOffsetMessages] = useState(15);
-    const [image, setImage] = useState('')
+    const [image, setImage] = useState(null)
     const [imageUrl, setImageUrl] = useState('')
     const currentNumOfMessages = useSelector(state => state.teamReducer.team.messages.length)
     const scrollRef = useRef(null);
     const inputRef = useRef(null);
 
     useEffect(() => {
-        socketClient.on('receive-message-team', ({ message, userId }) => {
-            dispatch(saveMessage({ message, userId }));
-        })
+        // socketClient.on('receive-message-team', ({ message, userId }) => {
+        //     dispatch(saveMessage({ message, userId }));
+        // })
         window.addEventListener('paste', e => {
             if (document.activeElement == inputRef.current) {
                 if (e.clipboardData.files.length > 0) {
@@ -64,7 +64,7 @@ export default function ChatBox({ chatVisible }) {
         }
     }
 
-    const handleChangeMessage = (event) => {
+    const onChangeMessage = (event) => {
         setMessage(event.target.value)
     }
     const handleEnterSendMessage = (event) => {
@@ -78,9 +78,9 @@ export default function ChatBox({ chatVisible }) {
     const handleSendMessage = () => {
         console.log(message);
         let userId = socketClient.id;
-        if (message !== '') {
-            dispatch(saveMessage({ message, userId }));
-            socketClient.emit("send-message-team", ({ message, userId }));
+        if (message !== '' || image) {
+            // dispatch(saveMessage({ message, userId }));
+            socketClient.emit("send-message-team", { teamId, senderId: userId, content: message, image });
             setMessage('');
         }
 
@@ -141,7 +141,7 @@ export default function ChatBox({ chatVisible }) {
                 <InputGroup>
                     <FormControl className="input-box" ref={inputRef} placeholder="Send message"
                         style={{ paddingLeft: '15px' }}
-                        onKeyDown={handleEnterSendMessage} onChange={handleChangeMessage} value={message} />
+                        onKeyDown={handleEnterSendMessage} onChange={onChangeMessage} value={message} />
                     <Button variant="outline-light" style={{ cursor: 'pointer' }}>
                         <label htmlFor="images" className='send-image-label'>
                             <i style={{ color: "#69B00B", cursor: 'pointer' }} className="fas fa-image"></i>
