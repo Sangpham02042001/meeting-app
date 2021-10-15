@@ -1,11 +1,13 @@
 const formidable = require('formidable')
-const fs = require('fs')
-const { v4 } = require('uuid')
 const { QueryTypes } = require('sequelize')
 const sequelize = require('../models')
 const Team = require('../models/team')
 const User = require('../models/user')
 const Message = require('../models/message')
+
+const fs = require('fs')
+const { v4 } = require('uuid')
+const { Readable } = require('stream')
 
 const getTeamInfo = async (req, res) => {
   let { teamId } = req.params
@@ -411,35 +413,60 @@ const updateBasicTeamInfo = async (req, res) => {
   })
 }
 
-const sendMessage = async (req, res) => {
-  let { id } = req.auth
-  let { teamId } = req.params
-  const form = formidable.IncomingForm()
-  form.keepExtensions = true
-  form.parse(req, async (err, fields, files) => {
-    let content = fields.content || null
-    let photo
-    if (files.photo) {
-      let fileType = files.photo.path.split('.')[files.photo.path.split('.').length - 1]
-      photo = `${v4()}.${fileType}`
-      let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photo}`)
-      fs.createReadStream(files.photo.path).pipe(writeStream)
-    } else {
-      photo = null
+// const sendMessage = async (req, res) => {
+//   let { id } = req.auth
+//   let { teamId } = req.params
+//   const form = formidable.IncomingForm()
+//   form.keepExtensions = true
+//   form.parse(req, async (err, fields, files) => {
+//     let content = fields.content || null
+//     let photo
+//     if (files.photo) {
+//       let fileType = files.photo.path.split('.')[files.photo.path.split('.').length - 1]
+//       photo = `${v4()}.${fileType}`
+//       let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photo}`)
+//       fs.createReadStream(files.photo.path).pipe(writeStream)
+//     } else {
+//       photo = null
+//     }
+//     try {
+//       const message = await Message.create({
+//         content,
+//         userId: id,
+//         teamId,
+//         photo
+//       })
+//       return res.status(201).json({ message })
+//     } catch (error) {
+//       console.log(error)
+//       return res.status(400).json({ error })
+//     }
+//   })
+// }
+
+const sendMessage = async ({ teamId, senderId, content, image }) => {
+  try {
+    let photoName = null;
+    if (image) {
+      photoName = v4() + '.png';
+      let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
+      const imageStream = new Readable();
+      imageStream._read = () => { }
+      imageStream.push(image)
+      imageStream.pipe(writeStream)
     }
-    try {
-      const message = await Message.create({
-        content,
-        userId: id,
-        teamId,
-        photo
-      })
-      return res.status(201).json({ message })
-    } catch (error) {
-      console.log(error)
-      return res.status(400).json({ error })
-    }
-  })
+
+    const message = await Message.create({
+      content,
+      userId: senderId,
+      teamId,
+      photo: photoName
+    })
+    return message;
+  } catch (error) {
+    console.log(error)
+    return null;
+  }
 }
 
 const getTeamMessages = async (req, res) => {
@@ -488,11 +515,28 @@ const getTeamMessages = async (req, res) => {
   }
 }
 
+const getMembers = async ({ teamId }) => {
+  try {
+    const members = await sequelize.query(
+      "CALL getTeamMembers(:teamId)",
+      {
+        replacements: {
+          teamId
+        }
+      }
+    )
+    return members;
+  } catch (error) {
+    console.log(error)
+    return null;
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers,
   confirmUserRequests, removeUserRequests, removeMembers,
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
-  sendMessage, getTeamMessages
+  sendMessage, getTeamMessages, getMembers
 }

@@ -16,6 +16,7 @@ import './team.css'
 import TeamHeader from '../../components/TeamHeader'
 import TeamList from '../../components/TeamList'
 import Message from '../../components/Message'
+import { uniqueId } from 'lodash'
 
 export default function Team(props) {
   const { teamId } = useParams()
@@ -48,7 +49,9 @@ export default function Team(props) {
       offset: offsetMessages,
       num: 15
     }))
-    socketClient.emit('join-team', { teamId })
+    // socketClient.emit('join-team', { teamId })
+    // socketClient.on('')
+
     window.addEventListener('paste', e => {
       if (document.activeElement == inputRef.current) {
         if (e.clipboardData.files.length > 0) {
@@ -162,10 +165,13 @@ export default function Team(props) {
     let formData = new FormData()
     input && formData.append('content', input)
     image && formData.append('photo', image)
-    dispatch(sendMessage({
-      data: formData,
-      teamId
-    }))
+    // dispatch(sendMessage({
+    //   data: formData,
+    //   teamId
+    // }))
+
+    socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, image });
+    console.log('helo')
     setInput('')
     setImageUrl('')
     setImage('')
@@ -231,6 +237,7 @@ export default function Team(props) {
                       onClick={e => {
                         e.preventDefault()
                         setImageUrl('')
+                        setImage('');
                       }}></i>
                   </div>}
                   <Form.Group className="search-team-box" controlId="formUsers">
@@ -238,7 +245,8 @@ export default function Team(props) {
                       className='team-message-input' name='message'
                       autoComplete="off"
                       ref={inputRef}
-                      value={input} onChange={e => setInput(e.target.value)} />
+                      value={input}
+                      onChange={e => setInput(e.target.value)} />
                   </Form.Group>
                   <div className="input-list-btn" style={{
                     top: imageUrl ? '120px' : 0

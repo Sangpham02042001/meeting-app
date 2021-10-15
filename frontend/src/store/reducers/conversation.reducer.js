@@ -54,11 +54,19 @@ export const conversationSlice = createSlice({
   },
   reducers: {
     setMessage: (state, action) => {
-      const { id, content, userId, conversationId } = action.payload;
-      state.messages.push({ id, content, userId, conversationId });
+      const { messageId, content, senderId, userId, conversationId, photo } = action.payload;
+      if (state.participant && senderId === state.participant.id || senderId === userId) {
+        state.messages.push({ id: messageId, content, userId, conversationId, photo });
+      }
     },
     createConversation: (state, action) => {
       const { conversationId, participantId } = action.payload;
+      const pIdx = state.conversations.map(conv => conv.conversationId).indexOf(conversationId);
+      if (pIdx >= 0) {
+        console.log('tmptmptmp')
+        state.conversations.splice(pIdx, 1);
+      }
+      console.log('create conversationid')
       state.conversations.unshift({ conversationId, participantId });
     },
     setConversation: (state, action) => {
@@ -67,7 +75,6 @@ export const conversationSlice = createSlice({
       if (conversation) {
         conversation.conversationId = nConversationId;
       }
-
     }
   }
 })

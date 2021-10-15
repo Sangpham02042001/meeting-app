@@ -3,8 +3,11 @@ const User = require('../models/user');
 const Message = require('../models/message')
 const sequelize = require('../models');
 const { Op } = require("sequelize");
+const fs = require('fs');
+const { v4 } = require('uuid');
+const { Readable } = require('stream');
 
-const getConversations = async (req, res) => {
+const getConversations = async (req, res, next) => {
     try {
         const { userId } = req.params;
         const conversations = await sequelize.query(
@@ -26,50 +29,6 @@ const getConversations = async (req, res) => {
         console.log(conversations[0])
 
         return res.status(200).json({ conversations: conversations[0] });
-    } catch (error) {
-        return next(error);
-    }
-}
-
-const getParticipantInfo = async (req, res, next) => {
-    const { conversationId, userId } = req.params;
-    try {
-        const participant = await sequelize.query(
-            "SELECT userId FROM users_conversations WHERE conversationId = :conversationId AND userId NOT LIKE :userId",
-            {
-                replacements: {
-                    conversationId,
-                    userId
-                }
-            }
-        )
-
-        if (!participant[0].length) {
-            err = new Error('ParticipantId could not find!')
-            err.status = 403;
-            return next(err);
-        }
-
-        console.log(participant);
-
-        const participantInfo = await sequelize.query(
-
-            "SELECT CONCAT(u.firstName, ' ', u.lastName) as userName, u.id, u.email  FROM users u WHERE id = :userId",
-            {
-                replacements: {
-                    userId: participant[0][0].userId
-                }
-            }
-        )
-
-        if (!participantInfo[0].length) {
-            err = new Error('ParticipantInfo could not find!')
-            err.status = 403;
-            return next(err);
-        }
-
-
-        return res.status(200).json({ participant: participantInfo[0][0] })
     } catch (error) {
         return next(error);
     }
@@ -154,9 +113,18 @@ const getLastMessage = async (req, res, next) => {
     }
 }
 
-const setMessage = async ({ content, photo, conversationId, userId }) => {
+const setMessage = async ({ content, image, conversationId, senderId }) => {
     try {
-        const message = await Message.create({ content, photo, conversationId, userId });
+        let photoName = null;
+        if (image) {
+            photoName = v4() + '.png';
+            let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
+            const imageStream = new Readable();
+            imageStream._read = () => { }
+            imageStream.push(image)
+            imageStream.pipe(writeStream)
+        }
+        const message = await Message.create({ content, photo: photoName, conversationId, userId: senderId });
         if (!message) {
             return null;
         }
@@ -168,4 +136,4 @@ const setMessage = async ({ content, photo, conversationId, userId }) => {
 
 }
 
-module.exports = { getConversations, getParticipantInfo, getMessages, getLastMessage, setConversation, setMessage }
+module.exports = { getConversations, getMessages, getLastMessage, setConversation, setMessage }

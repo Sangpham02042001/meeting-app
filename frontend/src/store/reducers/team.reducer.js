@@ -148,30 +148,30 @@ export const getTeamMessages = createAsyncThunk('teams/getMessages', async ({ te
   }
 })
 
-export const sendMessage = createAsyncThunk('teams/sendMessage', async ({ teamId, data }, { rejectWithValue }) => {
-  try {
-    let response = await axiosAuth.post(`/api/teams/${teamId}/messages`, data)
-    if (response.status == 201) {
-      let { message } = response.data
-      return {
-        message: {
-          id: message.id,
-          content: message.content,
-          teamId: message.teamId,
-          createdAt: message.createdAt,
-          userId: message.userId,
-          photo: message.photo
-        }
-      }
-    }
-  } catch (error) {
-    let { data } = error.response
-    if (data && data.error) {
-      return rejectWithValue(data)
-    }
-    return error
-  }
-})
+// export const sendMessage = createAsyncThunk('teams/sendMessage', async ({ teamId, data }, { rejectWithValue }) => {
+//   try {
+//     let response = await axiosAuth.post(`/api/teams/${teamId}/messages`, data)
+//     if (response.status == 201) {
+//       let { message } = response.data
+//       return {
+//         message: {
+//           id: message.id,
+//           content: message.content,
+//           teamId: message.teamId,
+//           createdAt: message.createdAt,
+//           userId: message.userId,
+//           photo: message.photo
+//         }
+//       }
+//     }
+//   } catch (error) {
+//     let { data } = error.response
+//     if (data && data.error) {
+//       return rejectWithValue(data)
+//     }
+//     return error
+//   }
+// })
 
 export const deleteTeam = createAsyncThunk('teams/delete', async ({ teamId }, { rejectWithValue }) => {
   try {
@@ -250,6 +250,10 @@ export const teamSlice = createSlice({
         messages: [],
         messagesLoaded: false
       }
+    },
+    sendMessage: (state, action) => {
+      let { messageId, content, senderId, teamId, photo } = action.payload;
+      state.team.messages.push({id: messageId, content, userId: senderId, teamId, photo})
     }
   },
   extraReducers: {
@@ -386,17 +390,17 @@ export const teamSlice = createSlice({
       console.log(action.payload.error)
       state.team.messagesLoaded = true
     },
-    [sendMessage.pending]: (state) => {
-      console.log('send message pending')
-    },
-    [sendMessage.fulfilled]: (state, action) => {
-      let { message } = action.payload
-      state.team.messages.push(message)
-      state.team.numOfMessages += 1
-    },
-    [sendMessage.rejected]: (state, action) => {
-      state.error = action.payload.error
-    },
+    // [sendMessage.pending]: (state) => {
+    //   console.log('send message pending')
+    // },
+    // [sendMessage.fulfilled]: (state, action) => {
+    //   let { message } = action.payload
+    //   state.team.messages.push(message)
+    //   state.team.numOfMessages += 1
+    // },
+    // [sendMessage.rejected]: (state, action) => {
+    //   state.error = action.payload.error
+    // },
     [outTeam.pending]: (state) => {
       state.loading = true
     },
@@ -425,6 +429,6 @@ export const teamSlice = createSlice({
   }
 })
 
-export const { cleanTeamState } = teamSlice.actions;
+export const { cleanTeamState, sendMessage } = teamSlice.actions;
 
 export default teamSlice.reducer

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getParticipant } from '../../store/reducers/conversation.reducer'
 import Avatar from '../Avatar';
@@ -31,23 +31,19 @@ const UserChat = ({ conversationId, user, participant }) => {
     const minRows = 1;
     const maxRows = 5;
 
+    const [imageMessage, setImageMessage] = useState(null);
+    const [imageMessageUrl, setImageMessageUrl] = useState('');
+
     const messages = useSelector(state => state.conversationReducer.messages)
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        socketClient.on('conversation-receiveMessage', ({ content, senderId, conversationId }) => {
-            const id = uuid()
-            dispatch(setMessage({ id, content, userId: senderId, conversationId }));
-            console.log('receive message', content, user.id);
-        })
-
-        socketClient.on('set-conversation', ({ nConversationId, oConversationId }) => {
-            dispatch(setConversation({ nConversationId, oConversationId }))
-        })
-    }, [])
+    const scrollRef = useRef(null);
 
     useEffect(() => {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }, [messages.length])
 
+    useEffect(() => {
         dispatch(getMessages({ conversationId }))
     }, [conversationId])
 
@@ -70,12 +66,6 @@ const UserChat = ({ conversationId, user, participant }) => {
         setContent(event.target.value);
     }
 
-    const onScrollChange = (event) => {
-        console.log('aaaaaaaaaaaaaaaaaaaaaaaaa')
-        console.log(event.target.scrollHeight)
-        event.target.scrollTop = event.target.scrollHeight;
-    }
-
     const handleEnterMessage = (event) => {
         if (event.key === "Enter") {
             event.preventDefault();
@@ -85,22 +75,33 @@ const UserChat = ({ conversationId, user, participant }) => {
     }
 
     const handleSendMessage = (event) => {
-        if (content !== '') {
+        if (content !== '' || imageMessage) {
             const id = uuid();
-            socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId });
-            dispatch(setMessage({ id, content, userId: user.id, conversationId }));
+            socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage });
+            // dispatch(setMessage({ id, content, senderId: user.id, userId: user.id, conversationId }));
             setContent('');
+            setImageMessage(null);
+            setImageMessageUrl('');
             setRows(minRows);
         }
     }
 
+    const onImageInputChange = e => {
+        e.preventDefault()
+        setImageMessage(e.target.files[0])
+        let reader = new FileReader()
+        reader.readAsDataURL(e.target.files[0])
+        reader.onloadend = e => {
+            setImageMessageUrl(reader.result)
+        }
+    }
 
     return (
         <>
             <div className="conversation-message">
                 <div className="header-message">
                     <div className="header-name">
-                        <Avatar width="40px" height="40px" userId={user.id} />
+                        <Avatar width="40px" height="40px" userId={participant.id} />
                         <div style={{ margin: "auto 15px", fontSize: "17px", marginLeft: "15px" }}>
                             <div style={{ color: "black", textDecoration: "none" }}>{participant.userName}</div>
                         </div>
@@ -114,11 +115,9 @@ const UserChat = ({ conversationId, user, participant }) => {
                         </button>
                     </div>
                 </div>
-                <div className="content-message" onChange={onScrollChange}>
+                <div className="content-message" ref={scrollRef}>
                     <div className="info-beginner-content">
-                            <Avatar width="100px" height="100px" userId={participant.id} />
-
-
+                        <Avatar width="100px" height="100px" userId={participant.id} />
                         <div >
                             {participant.userName}
                         </div>
@@ -140,6 +139,18 @@ const UserChat = ({ conversationId, user, participant }) => {
 
                 </div>
                 <div className="bottom-message">
+                    {imageMessageUrl && <div className='image-message-upload'>
+                        <div style={{
+                            backgroundImage: `url("${imageMessageUrl}")`
+                        }}>
+                        </div>
+                        <i className="far fa-times-circle remove-image-btn"
+                            onClick={e => {
+                                e.preventDefault()
+                                setImageMessageUrl('')
+                                setImageMessage(null);
+                            }}></i>
+                    </div>}
                     <div className="input-message">
                         <textarea className="input-box"
                             placeholder="Send message"
@@ -152,10 +163,18 @@ const UserChat = ({ conversationId, user, participant }) => {
                             <Button variant="outline-light" onClick={handleSendMessage}>
                                 <i style={{ color: "#1A73E8" }} className="far fa-paper-plane"></i>
                             </Button>
-                            <Button variant="outline-light" onClick={handleSendMessage}>
-                                <i style={{ color: "#69B00B" }} className="fas fa-image"></i>
+                            <Button variant="outline-light">
+                                <label htmlFor="images">
+                                    <i style={{ color: "#69B00B", cursor: "pointer" }} className="fas fa-image"></i>
+                                </label>
+
+                                <input type="file" accept='image/*'
+                                    onChange={onImageInputChange}
+                                    id="images" style={{
+                                        display: 'none'
+                                    }} />
                             </Button>
-                            <Button variant="outline-light" onClick={handleSendMessage}>
+                            <Button variant="outline-light" >
                                 <i style={{ color: "#1A73E8" }} className="fas fa-thumbs-up"></i>
                             </Button>
                         </div>

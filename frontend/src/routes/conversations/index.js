@@ -7,12 +7,12 @@ import { Switch, Link, Route } from "react-router-dom";
 import { useHistory } from 'react-router';
 import Avatar from '../../components/Avatar';
 import UserChat from '../../components/UserChat';
-import { v1 as uuid } from 'uuid';
+
 
 export default function Conversations() {
     const [textSearch, setTextSearch] = useState('');
     const [searchUsers, setSearchUsers] = useState([]);
-    const [userFindList, setUserFindList] = useState([]);
+    const [userSearch, setUserSearch] = useState(null);
     const tempConversationId = "temp-conversation-id"
 
     const user = useSelector(state => state.userReducer.user);
@@ -39,24 +39,21 @@ export default function Conversations() {
         setSearchUsers([]);
     }
 
-    const handleChooseUser = (userFind, event) => {
+    const handleChooseUser = (userFind) => {
         setSearchUsers([]);
         setTextSearch('');
 
-        for (let userChat of userFindList) {
-            if (userChat.id === userFind.id) {
-                return;
-            }
+        if (userSearch && userFind.id === userSearch.id) {
+            return;
         }
-        setUserFindList(userFindList => {
-            userFindList.unshift(userFind)
-            return userFindList;
-        })
+
+        setUserSearch(userFind)
 
         const participant = conversations.find(conv => conv.participantId === userFind.id);
         if (!participant) {
             dispatch(createConversation({ conversationId: tempConversationId, participantId: userFind.id }));
         }
+
         history.push(`/conversations/${userFind.id}`);
 
     }
@@ -107,7 +104,7 @@ export default function Conversations() {
                     {
                         conversations.map(conver => {
                             return (
-                                <Route path={`/conversations/${conver.participantId}`} key={conver.conversationId}>
+                                <Route path={`/conversations/${conver.participantId}`} key={conver.participantId}>
                                     <UserChat
                                         conversation={conver}
                                         user={user}
@@ -144,7 +141,9 @@ const UserLink = ({ conversation, user, tempId }) => {
     return (
         <>
             {participantInfo &&
-                <Link to={`/conversations/${participantInfo.id}`} key={participantInfo.id} style={{ textDecoration: "none", color: "black", width: "100%", display: "flex", justifyContent: "center" }}>
+                <Link to={`/conversations/${participantInfo.id}`} 
+                        key={participantInfo.id} 
+                        style={{ textDecoration: "none", color: "black", width: "100%", display: "flex", justifyContent: "center" }}>
                     <div className="user-chat">
                         <Avatar width="40px" height="40px" userId={participantInfo.id} />
                         <div style={{ marginLeft: "15px" }}>
