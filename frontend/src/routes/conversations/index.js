@@ -123,8 +123,8 @@ export default function Conversations() {
 const UserLink = ({ conversation, user, tempCvId }) => {
     const [participantInfo, setParticipantInfo] = useState(null);
     const [lastMessage, setLastMessage] = useState(null);
-
-    const messageChange = useSelector(state => state.conversationReducer.messageChange)
+    const dispatch = useDispatch()
+    const lastMessageChange = useSelector(state => state.conversationReducer.lastMessageChange)
     useEffect(async () => {
         try {
             const participant = await axiosAuth.get(`/api/users/${conversation.participantId}`);
@@ -132,11 +132,12 @@ const UserLink = ({ conversation, user, tempCvId }) => {
             if (conversation.conversationId !== tempCvId) {
                 const response = await axiosAuth.get(`/api/conversations/${conversation.conversationId}/messages/lastMessage`);
                 setLastMessage(response.data.lastMessage);
+                
             }
         } catch (error) {
             console.log(error);
         }
-    }, [messageChange])
+    }, [lastMessageChange])
 
 
     return (

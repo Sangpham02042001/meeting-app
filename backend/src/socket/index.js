@@ -44,7 +44,7 @@ const socketServer = (socket) => {
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, image })
         socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, photo: message.photo })
-        console.log('sent-message-team')
+        console.log('sent-message-team', socket.id)
         for (let m of members) {
             socket.to(m.id).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photo: message.photo });
         }

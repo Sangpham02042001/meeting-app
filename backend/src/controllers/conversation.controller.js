@@ -96,11 +96,8 @@ const getLastMessage = async (req, res, next) => {
             },
             order: [['createdAt', 'DESC']],
         })
-
         if (!lastMessage) {
-            err = new Error('Last message could not find!')
-            err.status = 403;
-            return next(err);
+            return {lastMessage: {}};
         }
 
         lastMessage.teamId = undefined;

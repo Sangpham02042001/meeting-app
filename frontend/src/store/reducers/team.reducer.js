@@ -253,7 +253,10 @@ export const teamSlice = createSlice({
     },
     sendMessage: (state, action) => {
       let { messageId, content, senderId, teamId, photo } = action.payload;
-      state.team.messages.push({id: messageId, content, userId: senderId, teamId, photo})
+      console.log('aaaaaaaa', state.team.id, teamId)
+      if (state.team.id && state.team.id == teamId) {
+        state.team.messages.push({ id: messageId, content, userId: senderId, teamId, photo })
+      }
     }
   },
   extraReducers: {

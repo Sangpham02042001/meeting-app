@@ -10,13 +10,13 @@ import {
   confirmInvitations, getTeamMessages, cleanTeamState,
   sendMessage
 } from '../../store/reducers/team.reducer'
-import { baseURL, socketClient } from '../../utils'
+import { baseURL, broadcastLocal, socketClient } from '../../utils'
 import Loading from '../../components/Loading'
 import './team.css'
 import TeamHeader from '../../components/TeamHeader'
 import TeamList from '../../components/TeamList'
 import Message from '../../components/Message'
-import { uniqueId } from 'lodash'
+
 
 export default function Team(props) {
   const { teamId } = useParams()
@@ -26,7 +26,7 @@ export default function Team(props) {
   const dispatch = useDispatch()
   const history = useHistory()
   const [input, setInput] = useState('')
-  const [image, setImage] = useState('')
+  const [image, setImage] = useState(null)
   const [imageUrl, setImageUrl] = useState('')
   const [scrollThreshold, setScrollThreshold] = useState(0)
   const [offsetMessages, setOffsetMessages] = useState(0)
@@ -45,8 +45,7 @@ export default function Team(props) {
       offset: offsetMessages,
       num: 15
     }))
-    // socketClient.emit('join-team', { teamId })
-    // socketClient.on('')
+
 
     window.addEventListener('paste', e => {
       if (document.activeElement == inputRef.current) {
@@ -167,6 +166,7 @@ export default function Team(props) {
     // }))
 
     socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, image });
+    broadcastLocal.postMessage({ teamId, senderId: user.id, content: input, image })
     setInput('')
     setImageUrl('')
     setImage('')
@@ -184,7 +184,8 @@ export default function Team(props) {
   }
 
   const handleImageInputChange = e => {
-    e.preventDefault()
+    // e.preventDefault()
+    console.log(e.target.files[0])
     setImage(e.target.files[0])
     let reader = new FileReader()
     let url = reader.readAsDataURL(e.target.files[0])
@@ -232,7 +233,7 @@ export default function Team(props) {
                       onClick={e => {
                         e.preventDefault()
                         setImageUrl('')
-                        setImage('');
+                        setImage(null);
                       }}></i>
                   </div>}
                   <Form.Group className="search-team-box" controlId="formUsers">

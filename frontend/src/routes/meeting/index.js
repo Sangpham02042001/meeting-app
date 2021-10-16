@@ -11,7 +11,7 @@ import MeetingUserList from "../../components/MeetingUserList";
 import { isAuthenticated } from '../../store/reducers/user.reducer';
 import {
     getTeamMessages,
-    sendMessage
+    getTeamInfo,
 } from '../../store/reducers/team.reducer'
 
 
@@ -33,12 +33,15 @@ const Meeting = (props) => {
         if (!userReducer.loaded) {
             dispatch(isAuthenticated())
         }
-        console.log('call again')
+
+        dispatch(getTeamInfo({ teamId }))
         dispatch(getTeamMessages({
             teamId,
             offset: 0,
             num: 15
         }))
+
+        
         // socketClient.connect();
         navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
             userVideo.current.srcObject = stream;

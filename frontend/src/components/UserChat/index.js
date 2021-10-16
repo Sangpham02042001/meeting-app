@@ -4,7 +4,7 @@ import { getParticipant } from '../../store/reducers/conversation.reducer'
 import Avatar from '../Avatar';
 import Message from '../Message';
 import { Button } from 'react-bootstrap';
-import { socketClient } from '../../utils';
+import { socketClient, broadcastLocal } from '../../utils';
 import { getMessages } from '../../store/reducers/conversation.reducer';
 import './userChat.css';
 import { v1 as uuid } from 'uuid';
@@ -78,7 +78,7 @@ const UserChat = ({ conversationId, user, participant }) => {
         if (content !== '' || imageMessage) {
             const id = uuid();
             socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage });
-            // dispatch(setMessage({ id, content, senderId: user.id, userId: user.id, conversationId }));
+            broadcastLocal.postMessage({ content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage })
             setContent('');
             setImageMessage(null);
             setImageMessageUrl('');

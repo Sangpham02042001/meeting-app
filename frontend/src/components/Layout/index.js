@@ -3,9 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, NavLink } from 'react-router-dom'
 import { getNotifs } from '../../store/reducers/notification.reducer'
 import Navbar from '../Navbar';
-import { v1 as uuid } from 'uuid';
-import { socketClient } from '../../utils';
-import { receiveMessage, sendMessageCv } from '../../store/reducers/conversation.reducer';
+import { socketClient, broadcastLocal } from '../../utils';
+import { receiveMessageCv, sendMessageCv } from '../../store/reducers/conversation.reducer';
 import { sendMessage } from '../../store/reducers/team.reducer';
 import './layout.css'
 
@@ -13,7 +12,8 @@ export default function Layout({ children }) {
   const dispatch = useDispatch();
   useEffect(() => {
     socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }) => {
-      dispatch(receiveMessage({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }));
+      dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }));
+      broadcastLocal.postMessage({ messageId, content, senderId, receiverId, conversationId, photo, createdAt })
     })
 
     socketClient.on('conversation-sentMessage', ({messageId, content, senderId, receiverId, conversationId, photo, createdAt}) => {
@@ -21,7 +21,6 @@ export default function Layout({ children }) {
     })
 
     socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photo }) => {
-      console.log(content)
       dispatch(sendMessage({
         messageId, content, senderId, teamId, photo
       }))
@@ -35,6 +34,15 @@ export default function Layout({ children }) {
       console.log('team receive message', content);
     })
 
+    broadcastLocal.onmessage = (message) => { 
+      console.log(message);
+      if (message.data.conversationId) {
+        dispatch(sendMessageCv(message.data))
+      } else if (message.data.teamId) {
+        dispatch(sendMessage(message.data))
+      }
+      
+    }
 
     socketClient.on("disconnect", () => {
       socketClient.connect();

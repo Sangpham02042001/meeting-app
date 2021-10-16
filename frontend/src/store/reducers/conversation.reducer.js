@@ -28,7 +28,7 @@ export const conversationSlice = createSlice({
     messages: [],
     conversations: [],
     participant: null,
-    messageChange: false,
+    lastMessageChange: false,
 
   },
   extraReducers: {
@@ -56,14 +56,30 @@ export const conversationSlice = createSlice({
   reducers: {
     sendMessageCv: (state,action) => {
       const { messageId, content, senderId, receiverId, conversationId, photo, createdAt } = action.payload;
-      const conversation = state.conversations.find(conv => conv.participantId === receiverId);
-      conversation.conversationId = conversationId;
-      if (state.participant && receiverId === state.participant.id ) {
+      let conversation = state.conversations.find(conv => conv.participantId === receiverId);
+      if (conversation) {
+        conversation.conversationId = conversationId;
+      }
+      conversation = state.conversations.find(conv => conv.conversationId === conversationId);
+      if (!conversation) {
+        state.conversations.unshift({conversationId, participantId: senderId})
+      }
+
+      if (state.participant && (receiverId === state.participant.id || senderId === state.participant.id)) {
         state.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
       }
-      state.messageChange = !state.messageChange;
+
+      const pIdx = state.conversations.map(conv => conv.conversationId).indexOf(conversationId);
+      if (pIdx >= 0) {
+        conversation = state.conversations[pIdx]
+        state.conversations.splice(pIdx, 1);
+        console.log(conversation);
+        state.conversations.unshift({ conversationId: conversation.conversationId, participantId: conversation.participantId });
+      }
+
+      state.lastMessageChange = !state.lastMessageChange;
     },
-    receiveMessage: (state, action) => {
+    receiveMessageCv: (state, action) => {
       const { messageId, content, senderId, receiverId, conversationId, photo, createdAt } = action.payload;
       const conversation = state.conversations.find(conv => conv.conversationId === conversationId);
       if (!conversation) {
@@ -72,21 +88,29 @@ export const conversationSlice = createSlice({
       if (state.participant && senderId === state.participant.id ) {
         state.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
       }
-      state.messageChange = !state.messageChange;
+      state.lastMessageChange = !state.lastMessageChange;
     },
     createConversation: (state, action) => {
       const { conversationId, participantId } = action.payload;
       const pIdx = state.conversations.map(conv => conv.conversationId).indexOf(conversationId);
       if (pIdx >= 0) {
-        console.log('tmptmptmp')
         state.conversations.splice(pIdx, 1);
       }
-      console.log('create conversationid')
       state.conversations.unshift({ conversationId, participantId });
     },
+    changeConversation: (state, action) => {
+      const { conversationId, participantId } = action.payload;
+      const pIdx = state.conversations.map(conv => conv.conversationId).indexOf(conversationId);
+      if (pIdx >= 0) {
+        console.log('a')
+        state.conversations.splice(pIdx, 1);
+        state.conversations.unshift({ conversationId, participantId });
+      }
+      
+    }
   }
 })
 
-export const { createConversation, sendMessageCv, receiveMessage } = conversationSlice.actions;
+export const { createConversation, sendMessageCv, receiveMessageCv, changeConversation } = conversationSlice.actions;
 
 export default conversationSlice.reducer

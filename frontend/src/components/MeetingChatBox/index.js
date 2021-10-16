@@ -8,7 +8,7 @@ import {
     getTeamMessages,
     sendMessage
 } from '../../store/reducers/team.reducer'
-import { socketClient } from '../../utils';
+import { socketClient, broadcastLocal } from '../../utils';
 import Message from '../Message';
 
 export default function ChatBox({ chatVisible }) {
@@ -46,6 +46,7 @@ export default function ChatBox({ chatVisible }) {
                 }
             }
         })
+
         return () => {
             window.removeEventListener('paste', () => {
                 console.log('remove events')
@@ -81,6 +82,7 @@ export default function ChatBox({ chatVisible }) {
         if (message !== '' || image) {
             // dispatch(saveMessage({ message, userId }));
             socketClient.emit("send-message-team", { teamId, senderId: userId, content: message, image });
+            broadcastLocal.postMessage({ teamId, senderId: user.id, content: message, image })
             setMessage('');
         }
 
