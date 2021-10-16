@@ -84,6 +84,8 @@ export default function ChatBox({ chatVisible }) {
             socketClient.emit("send-message-team", { teamId, senderId: userId, content: message, image });
             broadcastLocal.postMessage({ teamId, senderId: user.id, content: message, image })
             setMessage('');
+            setImageUrl('');
+            setImage('');
         }
 
     }

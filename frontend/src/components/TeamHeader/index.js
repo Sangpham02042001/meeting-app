@@ -24,7 +24,7 @@ export default function TeamHeader({ showTeamInfo }) {
 
   useEffect(() => {
     if (isCreateMeetingShow) {
-      navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
         userVideo.current.srcObject = stream;
       })
     } else {
