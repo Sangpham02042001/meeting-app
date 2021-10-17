@@ -379,6 +379,10 @@ const getNotifications = async (req, res) => {
           type: QueryTypes.SELECT
         }
       )
+      console.log(notifications)
+      if (notifications.length == 0) {
+        return res.status(400).json({error})
+      }
       return res.status(200).json({ notifications, numOf_UnReadNotifications})
     }
   } catch (error) {
