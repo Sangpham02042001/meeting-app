@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { baseURL, axiosAuth } from '../../utils';
 
-export const createMeeting = createAsyncThunk('/meeing/create', async ({ teamId }, { rejectWithValue }) => {
+export const createTeamMeeting = createAsyncThunk('/createTeamMeeting', async ({ teamId }, { rejectWithValue }) => {
   try {
     let response = await axiosAuth.post(`${baseURL}/api/meetings`, {
       teamId
@@ -24,17 +24,20 @@ export const meetingSlice = createSlice({
   name: 'Meeting',
   initialState: {
     messages: [],
-    meeting: {},
+    meetings: {
+      teams: [],
+      conversations: []
+    },
     error: null
   },
   extraReducers: {
-    [createMeeting.pending]: (state, action) => {
+    [createTeamMeeting.pending]: (state, action) => {
       console.log('create meeting pending')
     },
-    [createMeeting.fulfilled]: (state, action) => {
-      state.meeting = action.payload.meeting
+    [createTeamMeeting.fulfilled]: (state, action) => {
+      state.meetings.teams.push(action.payload.meeting)
     },
-    [createMeeting.rejected]: (state, action) => {
+    [createTeamMeeting.rejected]: (state, action) => {
       state.error = action.payload.error
     }
   },

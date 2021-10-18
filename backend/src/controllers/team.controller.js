@@ -532,11 +532,32 @@ const getMembers = async ({ teamId }) => {
   }
 }
 
+const getMeetings = async (req, res) => {
+  let { teamId } = req.params
+  try {
+    const meetings = await sequelize.query(
+      "SELECT * FROM meetings WHERE teamId = :teamId",
+      {
+        replacements: {
+          teamId
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    console.log(meetings)
+    return res.status(200).json({ meetings });
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers,
   confirmUserRequests, removeUserRequests, removeMembers,
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
-  sendMessage, getTeamMessages, getMembers
+  sendMessage, getTeamMessages, getMembers,
+  getMeetings
 }

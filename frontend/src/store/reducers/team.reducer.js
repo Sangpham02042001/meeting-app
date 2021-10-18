@@ -11,7 +11,9 @@ const initialState = {
     invitedUsers: [],
     requestUsers: [],
     messages: [],
-    messagesLoaded: false
+    messagesLoaded: false,
+    meetings: [],
+    meetingActive: null
   },
   joinedTeamLoaded: false,
   teamLoaded: false,
@@ -45,6 +47,10 @@ export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId
   response = await axiosAuth.get(`/api/teams/${teamId}/requestusers`)
   let { requestUsers } = response.data
   team.requestUsers = requestUsers
+  response = await axiosAuth.get(`/api/teams/${teamId}/meetings`)
+  let { meetings } = response.data
+  team.meetings = meetings
+  team.meetingActive = meetings.filter(meeting => meeting.active)[0] || null
   return { team }
 })
 

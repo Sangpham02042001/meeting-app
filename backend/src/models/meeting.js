@@ -12,6 +12,10 @@ Meeting.init({
   },
   time: {
     type: DataTypes.INTEGER,
+  },
+  active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   }
 }, {
   sequelize,

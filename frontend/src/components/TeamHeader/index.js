@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams, Link, useHistory, Redirect } from 'react-router-dom'
+import { useParams, Link, useHistory } from 'react-router-dom'
 import { Button, Modal } from 'react-bootstrap'
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import Dropdown from '../Dropdown'
 import { deleteTeam, outTeam } from '../../store/reducers/team.reducer'
-import { createMeeting } from '../../store/reducers/meeting.reducer'
+import { createTeamMeeting } from '../../store/reducers/meeting.reducer'
 
 export default function TeamHeader({ showTeamInfo }) {
-  const { teamId } = useParams()
+  // const { teamId } = useParams()
+  const params = useParams()
+  const teamId = Number(params.teamId)
   const dispatch = useDispatch()
   const history = useHistory()
   const teamReducer = useSelector(state => state.teamReducer)
@@ -36,10 +38,18 @@ export default function TeamHeader({ showTeamInfo }) {
   }, [isCreateMeetingShow])
 
   useEffect(() => {
-    if (meetingReducer.meeting.id) {
-      window.open(`/teams/${teamId}/meeting/${meetingReducer.meeting.id}`)
+    if (teamReducer.team.meetings.length) {
+
+      let meetingActive = teamReducer.team.meetingActive
+      if (meetingActive && meetingActive.teamId === teamId) {
+        setIsMeeting(true)
+      }
     }
-  }, [meetingReducer.meeting.id])
+    // if (meetingReducer.meetings.id) {
+    //   window.open(`/teams/${teamId}/meeting/${meetingReducer.meeting.id}`, '_blank')
+    // }
+    // setIsMeeting(meetingReducer.meeting.active)
+  }, [teamReducer.team.meetings.length])
 
   const handleDeleteTeam = async () => {
     console.log('delete team')
@@ -85,10 +95,9 @@ export default function TeamHeader({ showTeamInfo }) {
 
   const handleCreateMeeting = () => {
     setShowCreateMeeting(false)
-    dispatch(createMeeting({
+    dispatch(createTeamMeeting({
       teamId
     }))
-    setIsMeeting(true)
   }
 
   return (
@@ -104,6 +113,16 @@ export default function TeamHeader({ showTeamInfo }) {
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
+        {
+          isMeeting && teamReducer.team.meetingActive
+          && <Button variant='success' className='join-meeting-btn'>
+            <Link
+              target="_blank"
+              to={`/teams/${teamId}/meeting/${teamReducer.team.meetingActive.id}`} >
+              Join Meeting
+            </Link>
+          </Button>
+        }
         <i className="far fa-question-circle" onClick={showTeamInfo}></i>
         <Button variant="light" className="meeting-btn"
           disabled={isMeeting}

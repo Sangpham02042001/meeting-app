@@ -14,7 +14,7 @@ export default function PrivateRoute({ children, ...rest }) {
       dispatch(isAuthenticated())
 
     }
-    
+
   }, [])
 
   return (
@@ -23,10 +23,10 @@ export default function PrivateRoute({ children, ...rest }) {
         {...rest}
         render={
           () => (
-            
+
             userReducer.authenticated ? <Layout>
               {children}
-              
+
             </Layout> : (
               rest.path === '/' ? <Welcome /> : <Redirect to='/login' />
             )
