@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams, Link, useHistory } from 'react-router-dom'
+import { useParams, Link, useHistory, Redirect } from 'react-router-dom'
 import { Button, Modal } from 'react-bootstrap'
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import Dropdown from '../Dropdown'
 import { deleteTeam, outTeam } from '../../store/reducers/team.reducer'
-import { current } from '@reduxjs/toolkit'
+import { createMeeting } from '../../store/reducers/meeting.reducer'
 
 export default function TeamHeader({ showTeamInfo }) {
   const { teamId } = useParams()
   const dispatch = useDispatch()
   const history = useHistory()
   const teamReducer = useSelector(state => state.teamReducer)
+  const meetingReducer = useSelector(state => state.meetingReducer)
   const user = useSelector(state => state.userReducer.user)
   const [isDeleteModalShow, setDeleteModalShow] = useState(false)
   const [isOutModalShow, setOutModalShow] = useState(false)
@@ -33,6 +34,12 @@ export default function TeamHeader({ showTeamInfo }) {
       });
     }
   }, [isCreateMeetingShow])
+
+  useEffect(() => {
+    if (meetingReducer.meeting.id) {
+      window.open(`/teams/${teamId}/meeting/${meetingReducer.meeting.id}`)
+    }
+  }, [meetingReducer.meeting.id])
 
   const handleDeleteTeam = async () => {
     console.log('delete team')
@@ -78,6 +85,9 @@ export default function TeamHeader({ showTeamInfo }) {
 
   const handleCreateMeeting = () => {
     setShowCreateMeeting(false)
+    dispatch(createMeeting({
+      teamId
+    }))
     setIsMeeting(true)
   }
 
@@ -87,7 +97,7 @@ export default function TeamHeader({ showTeamInfo }) {
         <div className='team-header-coverphoto'
           style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${teamId}")` }}>
         </div>
-        <span style={{ marginLeft: '15px' }}>
+        <span style={{ marginLeft: '15px', padding: 0 }}>
           <h5 style={{ marginBottom: '5px' }}>{teamReducer.team.name}</h5>
           {teamReducer.team.numOfMembers && teamReducer.team.numOfMembers.length === 1
             ? `${teamReducer.team.numOfMembers} member` : `${teamReducer.team.numOfMembers} members`}
@@ -177,14 +187,14 @@ export default function TeamHeader({ showTeamInfo }) {
             </Modal.Header>
             <Modal.Body>
               <video width="100%" height="320px" muted ref={userVideo} autoPlay />
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
                 <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
                   {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
                 </Button>
                 <span>Join with camera</span>
               </div>
 
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
                 <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
                   {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
                 </Button>
@@ -196,8 +206,10 @@ export default function TeamHeader({ showTeamInfo }) {
                 Cancel
               </Button>
               <Button onClick={handleCreateMeeting}>
-                <Link style={{ color: 'white', textDecoration: 'none' }}
-                  to={`/teams/${teamId}/meeting/312312`} target="_blank">Create</Link>
+                {/* <Link style={{ color: 'white', textDecoration: 'none' }}
+                  to={`/teams/${teamId}/meeting/312312`} target="_blank"> */}
+                Create
+                {/* </Link> */}
               </Button>
             </Modal.Footer>
           </Modal>

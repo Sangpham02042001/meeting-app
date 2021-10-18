@@ -126,3 +126,28 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+DROP TRIGGER IF EXISTS before_delete_meeting;
+DELIMITER $$
+CREATE TRIGGER before_delete_meeting
+BEFORE DELETE ON meetings
+FOR EACH ROW
+BEGIN
+	DELETE FROM users_meetings ut
+    WHERE ut.meetingId = OLD.id;
+END $$
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS after_create_meeting;
+DELIMITER $$
+CREATE TRIGGER after_create_meeting
+AFTER INSERT ON meetings
+FOR EACH ROW
+BEGIN 
+	INSERT INTO users_meetings
+    SET userId = NEW.hostId,
+		meetingId = NEW.id,
+        createdAt = NOW(),
+        updatedAt = NOW();
+END $$
+DELIMITER ;

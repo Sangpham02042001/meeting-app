@@ -265,7 +265,10 @@ export const teamSlice = createSlice({
       state.loading = true
     },
     [getJoinedTeams.fulfilled]: (state, action) => {
-      state.joinedTeams = action.payload.teams
+      state.joinedTeams = action.payload.teams.map(team => ({
+        ...team,
+        isMeeting: false
+      }))
       state.loading = false
       state.joinedTeamLoaded = true
     },
