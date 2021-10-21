@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { socketClient } from "../../utils";
 import Peer from "simple-peer";
 import './meeting.css';
@@ -21,18 +21,20 @@ function useQuery() {
 
 const Meeting = (props) => {
     let query = useQuery()
-    const { teamId } = useParams()
+    const history = useHistory()
+    const { teamId, meetingId } = useParams()
     const dispatch = useDispatch()
     const userReducer = useSelector(state => state.userReducer)
     const teamReducer = useSelector(state => state.teamReducer)
     const [peers, setPeers] = useState([]);
     const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
     const [isAudioActive, setIsAudioActive] = useState(query.get('audio') == 'true' || false);
-    const [isEnableVideo, setIsEnableVideo] = useState(false)
+    const [isEnableVideo, setIsEnableVideo] = useState(false);
+    const [isMeetingEnd, setIsMeetingEnd] = useState(false);
     const userVideo = useRef();
     let peersRef = useRef([]);
     const scrollRef = useRef(null);
-    const meetingId = props.match.params.meetingId;
+    // const meetingId = props.match.params.meetingId;
 
     console.log(peers);
 
@@ -60,77 +62,98 @@ const Meeting = (props) => {
                 num: 15
             }))
 
-            getConnectedDevices('videoinput', cameras => {
-                console.log('Cameras found', cameras)
-                setIsEnableVideo(cameras.length > 0)
-                // setIsVideoActive(cameras.length > 0)
-                // socketClient.connect();
-                navigator.mediaDevices.getUserMedia({ video: cameras.length > 0, audio: isAudioActive })
-                    .then(stream => {
-                        userVideo.current.srcObject = stream;
-                        socketClient.emit("join-meeting", meetingId);
-                        socketClient.on("all-users", users => {
-                            console.log(users);
-                            const peers = [];
-                            users.forEach(userID => {
-                                const peer = createPeer(userID, socketClient.id, stream);
+            let members = teamReducer.team.members
+            if (localStorage.getItem('user')) {
+                let userId = JSON.parse(localStorage.getItem('user')).id
+                let member = members.find(member => member.id === userId)
+                if (!member) {
+                    history.push('/notfound')
+                }
+            } else {
+                history.push('/notfound')
+            }
+
+            let meetings = teamReducer.team.meetings
+            let meeting = meetings.find(meeting => meeting.id == meetingId)
+            if (!meeting) {
+                history.push(`/notfound`)
+            }
+            if (!meeting.active) {
+                setIsMeetingEnd(true)
+            }
+
+            if (meeting.active) {
+                getConnectedDevices('videoinput', cameras => {
+                    console.log('Cameras found', cameras)
+                    setIsEnableVideo(cameras.length > 0)
+                    // setIsVideoActive(cameras.length > 0)
+                    // socketClient.connect();
+                    navigator.mediaDevices.getUserMedia({ video: cameras.length > 0, audio: isAudioActive })
+                        .then(stream => {
+                            userVideo.current.srcObject = stream;
+                            socketClient.emit("join-meeting", meetingId);
+                            socketClient.on("all-users", users => {
+                                console.log(users);
+                                const peers = [];
+                                users.forEach(userID => {
+                                    const peer = createPeer(userID, socketClient.id, stream);
+                                    peersRef.current.push({
+                                        peerID: userID,
+                                        peer,
+                                    })
+                                    peers.push({
+                                        peerID: userID,
+                                        peer,
+                                    });
+                                })
+                                setPeers(peers);
+                            })
+
+                            socketClient.on("joined-meeting", ({ signal, callerID }) => {
+                                const peer = addPeer(signal, callerID, stream);
                                 peersRef.current.push({
-                                    peerID: userID,
+                                    peerID: callerID,
                                     peer,
                                 })
-                                peers.push({
-                                    peerID: userID,
+                                setPeers(peers => [...peers, {
+                                    peerID: callerID,
                                     peer,
-                                });
+                                }]);
+                            });
+
+                            socketClient.on("receiving-returned-signal", ({ signal, callerID, userId }) => {
+                                const item = peersRef.current.find(p => p.peerID === userId);
+                                item.peer.signal(signal);
+                            });
+
+
+
+                            socketClient.on("disconnected-meeting", userId => {
+                                console.log('disssconneccctteee')
+                                const item = peersRef.current.find(p => p.peerID === userId);
+                                item.peer.destroy()
+                                console.log(item);
+                                setPeers(peers => {
+                                    return peers.filter(p => p.peerID !== userId);
+                                })
+
                             })
-                            setPeers(peers);
                         })
-
-                        socketClient.on("joined-meeting", ({ signal, callerID }) => {
-                            const peer = addPeer(signal, callerID, stream);
-                            peersRef.current.push({
-                                peerID: callerID,
-                                peer,
-                            })
-                            setPeers(peers => [...peers, {
-                                peerID: callerID,
-                                peer,
-                            }]);
-                        });
-
-                        socketClient.on("receiving-returned-signal", ({ signal, callerID, userId }) => {
-                            const item = peersRef.current.find(p => p.peerID === userId);
-                            item.peer.signal(signal);
-                        });
-
-
-
-                        socketClient.on("disconnected-meeting", userId => {
-                            console.log('disssconneccctteee')
-                            const item = peersRef.current.find(p => p.peerID === userId);
-                            item.peer.destroy()
-                            console.log(item);
-                            setPeers(peers => {
-                                return peers.filter(p => p.peerID !== userId);
-                            })
-
+                        .catch(error => {
+                            console.error('Error accessing media devices.', error);
                         })
-                    })
-                    .catch(error => {
-                        console.error('Error accessing media devices.', error);
-                    })
-                    .finally(() => {
-                        if (!isVideoActive) {
-                            console.log('fadfdasfdsafdas')
-                            console.log(userVideo.current)
-                            userVideo.current.srcObject.getVideoTracks().forEach(track => {
-                                track.enabled = false
-                            })
-                            setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "none" }))
-                        }
-                    })
-
-            });
+                        .finally(() => {
+                            if (!isVideoActive) {
+                                console.log('fadfdasfdsafdas')
+                                console.log(userVideo.current)
+                                userVideo.current.srcObject.getVideoTracks().forEach(track => {
+                                    track.enabled = false
+                                })
+                                setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "none" }))
+                            }
+                        })
+                });
+            }
         }
     }, [teamReducer.teamLoaded])
 
@@ -243,7 +266,7 @@ const Meeting = (props) => {
     const [isMicroActive, setIsMicroActive] = useState(true);
 
     return (
-        <div className="room-meeting">
+        !isMeetingEnd ? <div className="room-meeting">
             <div className="room-content">
                 <div className="users-content">
                     <div className="user-frame">
@@ -314,10 +337,27 @@ const Meeting = (props) => {
                         {isOpenChat ? <i className="fas fa-comment-dots"></i> : <i className="far fa-comment-dots"></i>}
                     </Button>
                 </Col>
-
             </Row>
-
-
+        </div> : <div style={{
+            background: "#202124",
+            width: '100vw',
+            height: '100vh',
+            position: 'absolute',
+            top: 0,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column'
+        }}>
+            <h1 style={{ color: '#fff' }}>Meeting has already ended</h1>
+            <div>
+                <Button variant="primary" onClick={e => {
+                    e.preventDefault()
+                    window.open("", "_self").close();
+                }}>
+                    Close
+                </Button>
+            </div>
         </div>
     );
 };

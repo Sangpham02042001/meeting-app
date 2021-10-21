@@ -38,6 +38,12 @@ export default function Team(props) {
   const scrollRef = useRef(null)
   const inputRef = useRef(null)
 
+  // useEffect(() => {
+  //   if (scrollRef.current) {
+  //     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  //   }
+  // }, [offsetMessages])
+
   useEffect(() => {
     dispatch(getTeamInfo({ teamId }))
     dispatch(getTeamMessages({
@@ -45,7 +51,7 @@ export default function Team(props) {
       offset: offsetMessages,
       num: 15
     }))
-
+    setOffsetMessages(15)
 
     window.addEventListener('paste', e => {
       if (document.activeElement == inputRef.current) {
@@ -77,6 +83,9 @@ export default function Team(props) {
   }, [teamId])
 
   useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
     if (teamReducer.teamLoaded) {
       if (!teamReducer.team.name) {
         history.push('/notfound')
@@ -209,7 +218,7 @@ export default function Team(props) {
                 style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
                 {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
                   ref={scrollRef} style={{
-                    maxHeight: teamBody.current && teamBody.current.offsetHeight ?
+                    height: teamBody.current && teamBody.current.offsetHeight ?
                       teamBody.current.offsetHeight - (imageUrl ? 160 : 40) : '560px'
                   }}>
                   {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
