@@ -20,6 +20,7 @@ export default function TeamHeader({ showTeamInfo }) {
   const [isDeleteModalShow, setDeleteModalShow] = useState(false)
   const [isOutModalShow, setOutModalShow] = useState(false)
   const [isCreateMeetingShow, setShowCreateMeeting] = useState(false)
+  const [isJoinMeetingShow, setShowJoinMeeting] = useState(false)
   const [isVideoActive, setVideoActive] = useState(true)
   const [isAudioActive, setAudioActive] = useState(true)
   const [isMeeting, setIsMeeting] = useState(false)
@@ -36,6 +37,18 @@ export default function TeamHeader({ showTeamInfo }) {
       });
     }
   }, [isCreateMeetingShow])
+
+  useEffect(() => {
+    if (isJoinMeetingShow) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+        userVideo.current.srcObject = stream;
+      })
+    } else {
+      userVideo.current && userVideo.current.srcObject.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
+  }, [isJoinMeetingShow])
 
   useEffect(() => {
     if (teamReducer.team.meetings.length) {
@@ -100,6 +113,14 @@ export default function TeamHeader({ showTeamInfo }) {
     }))
   }
 
+  const handleJoinMeeting = () => {
+    setShowJoinMeeting(true)
+  }
+
+  const handleCloseJoinMeeting = () => {
+    setShowJoinMeeting(false)
+  }
+
   return (
     <div className='team-header'>
       <div style={{ display: 'flex' }}>
@@ -115,12 +136,9 @@ export default function TeamHeader({ showTeamInfo }) {
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
         {
           isMeeting && teamReducer.team.meetingActive
-          && <Button variant='success' className='join-meeting-btn'>
-            <Link
-              target="_blank"
-              to={`/teams/${teamId}/meeting/${teamReducer.team.meetingActive.id}`} >
-              Join Meeting
-            </Link>
+          && <Button variant='success'
+            className='join-meeting-btn' onClick={handleJoinMeeting}>
+            Join Meeting
           </Button>
         }
         <i className="far fa-question-circle" onClick={showTeamInfo}></i>
@@ -229,6 +247,43 @@ export default function TeamHeader({ showTeamInfo }) {
                   to={`/teams/${teamId}/meeting/312312`} target="_blank"> */}
                 Create
                 {/* </Link> */}
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          <Modal show={isJoinMeetingShow} centered onHide={handleCloseJoinMeeting}>
+            <Modal.Header closeButton>
+              <h4>Create new meeting</h4>
+            </Modal.Header>
+            <Modal.Body>
+              <video width="100%" height="320px" muted ref={userVideo} autoPlay />
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                  {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                </Button>
+                <span>Join with camera</span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                  {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                </Button>
+                <span>Join with audio</span>
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseJoinMeeting}>
+                Cancel
+              </Button>
+              <Button>
+                {isMeeting && teamReducer.team.meetingActive
+                  && <Link target="_blank" style={{ zIndex: 10 }}
+                    onClick={e => {
+                      setShowJoinMeeting(false)
+                    }}
+                    to={`/teams/${teamId}/meeting/${teamReducer.team.meetingActive.id}?video=${isVideoActive}&audio=${isAudioActive}`}>
+                    Join
+                  </Link>}
               </Button>
             </Modal.Footer>
           </Modal>

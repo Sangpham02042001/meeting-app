@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import { useParams, } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { socketClient } from "../../utils";
 import Peer from "simple-peer";
 import './meeting.css';
@@ -14,14 +14,21 @@ import {
     getTeamInfo,
 } from '../../store/reducers/team.reducer'
 
+function useQuery() {
+    return new URLSearchParams(useLocation().search);
+}
+
 
 const Meeting = (props) => {
+    let query = useQuery()
     const { teamId } = useParams()
     const dispatch = useDispatch()
     const userReducer = useSelector(state => state.userReducer)
     const teamReducer = useSelector(state => state.teamReducer)
     const [peers, setPeers] = useState([]);
-    const [isVideoActive, setIsVideoActive] = useState(true);
+    const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
+    const [isAudioActive, setIsAudioActive] = useState(query.get('audio') == 'true' || false);
+    const [isEnableVideo, setIsEnableVideo] = useState(false)
     const userVideo = useRef();
     let peersRef = useRef([]);
     const scrollRef = useRef(null);
@@ -29,71 +36,103 @@ const Meeting = (props) => {
 
     console.log(peers);
 
+    function getConnectedDevices(type, callback) {
+        navigator.mediaDevices.enumerateDevices()
+            .then(devices => {
+                const filtered = devices.filter(device => device.kind === type);
+                callback(filtered);
+            });
+    }
+
     useEffect(() => {
         if (!userReducer.loaded) {
             dispatch(isAuthenticated())
         }
 
         dispatch(getTeamInfo({ teamId }))
-        dispatch(getTeamMessages({
-            teamId,
-            offset: 0,
-            num: 15
-        }))
-
-        
-        // socketClient.connect();
-        navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
-            userVideo.current.srcObject = stream;
-            socketClient.emit("join-meeting", meetingId);
-            socketClient.on("all-users", users => {
-                console.log(users);
-                const peers = [];
-                users.forEach(userID => {
-                    const peer = createPeer(userID, socketClient.id, stream);
-                    peersRef.current.push({
-                        peerID: userID,
-                        peer,
-                    })
-                    peers.push({
-                        peerID: userID,
-                        peer,
-                    });
-                })
-                setPeers(peers);
-            })
-
-            socketClient.on("joined-meeting", ({ signal, callerID }) => {
-                const peer = addPeer(signal, callerID, stream);
-                peersRef.current.push({
-                    peerID: callerID,
-                    peer,
-                })
-                setPeers(peers => [...peers, {
-                    peerID: callerID,
-                    peer,
-                }]);
-            });
-
-            socketClient.on("receiving-returned-signal", ({ signal, callerID, userId }) => {
-                const item = peersRef.current.find(p => p.peerID === userId);
-                item.peer.signal(signal);
-            });
-
-
-
-            socketClient.on("disconnected-meeting", userId => {
-                console.log('disssconneccctteee')
-                const item = peersRef.current.find(p => p.peerID === userId);
-                item.peer.destroy()
-                console.log(item);
-                setPeers(peers => {
-                    return peers.filter(p => p.peerID !== userId);
-                })
-
-            })
-        })
     }, []);
+
+    useEffect(() => {
+        if (teamReducer.teamLoaded) {
+            dispatch(getTeamMessages({
+                teamId,
+                offset: 0,
+                num: 15
+            }))
+
+            getConnectedDevices('videoinput', cameras => {
+                console.log('Cameras found', cameras)
+                setIsEnableVideo(cameras.length > 0)
+                // setIsVideoActive(cameras.length > 0)
+                // socketClient.connect();
+                navigator.mediaDevices.getUserMedia({ video: cameras.length > 0, audio: isAudioActive })
+                    .then(stream => {
+                        userVideo.current.srcObject = stream;
+                        socketClient.emit("join-meeting", meetingId);
+                        socketClient.on("all-users", users => {
+                            console.log(users);
+                            const peers = [];
+                            users.forEach(userID => {
+                                const peer = createPeer(userID, socketClient.id, stream);
+                                peersRef.current.push({
+                                    peerID: userID,
+                                    peer,
+                                })
+                                peers.push({
+                                    peerID: userID,
+                                    peer,
+                                });
+                            })
+                            setPeers(peers);
+                        })
+
+                        socketClient.on("joined-meeting", ({ signal, callerID }) => {
+                            const peer = addPeer(signal, callerID, stream);
+                            peersRef.current.push({
+                                peerID: callerID,
+                                peer,
+                            })
+                            setPeers(peers => [...peers, {
+                                peerID: callerID,
+                                peer,
+                            }]);
+                        });
+
+                        socketClient.on("receiving-returned-signal", ({ signal, callerID, userId }) => {
+                            const item = peersRef.current.find(p => p.peerID === userId);
+                            item.peer.signal(signal);
+                        });
+
+
+
+                        socketClient.on("disconnected-meeting", userId => {
+                            console.log('disssconneccctteee')
+                            const item = peersRef.current.find(p => p.peerID === userId);
+                            item.peer.destroy()
+                            console.log(item);
+                            setPeers(peers => {
+                                return peers.filter(p => p.peerID !== userId);
+                            })
+
+                        })
+                    })
+                    .catch(error => {
+                        console.error('Error accessing media devices.', error);
+                    })
+                    .finally(() => {
+                        if (!isVideoActive) {
+                            console.log('fadfdasfdsafdas')
+                            console.log(userVideo.current)
+                            userVideo.current.srcObject.getVideoTracks().forEach(track => {
+                                track.enabled = false
+                            })
+                            setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "none" }))
+                        }
+                    })
+
+            });
+        }
+    }, [teamReducer.teamLoaded])
 
     const createPeer = (userToSignal, callerID, stream) => {
         const peer = new Peer({
@@ -127,18 +166,16 @@ const Meeting = (props) => {
     }
 
     const handleActiveVideo = () => {
+        userVideo.current.srcObject.getVideoTracks().forEach(track => {
+            track.enabled = !track.enabled
+        })
 
-        let checkVideoActive = userVideo.current.srcObject.getVideoTracks()[0].enabled;
-        userVideo.current.srcObject.getVideoTracks()[0].enabled = !checkVideoActive;
-
-        if (checkVideoActive) {
-            setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "none" }))
-
-        } else {
+        if (myVideoStyle.display) {
             setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "" }))
+        } else {
+            setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "none" }))
         }
-        setIsVideoActive(!checkVideoActive);
-
+        setIsVideoActive(!isVideoActive);
     }
 
     const handleActiveAudio = () => {
@@ -191,6 +228,7 @@ const Meeting = (props) => {
             track.stop();
         });
         socketClient.emit('disconnect-meeting');
+        window.open("", "_self").close();
     }
 
     const [isOpenInfo, setIsOpenInfo] = useState(false);
@@ -245,7 +283,9 @@ const Meeting = (props) => {
             </div>
             <Row >
                 <Col md={{ span: 3, offset: 5 }} >
-                    <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px" }}>
+                    <Button variant="outline-light" onClick={handleActiveVideo}
+                        disabled={!isEnableVideo}
+                        style={{ borderRadius: "50%", margin: "10px" }}>
                         {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
                     </Button>
 
