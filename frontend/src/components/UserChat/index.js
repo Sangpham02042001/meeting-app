@@ -33,6 +33,7 @@ const UserChat = ({ conversationId, user, participant }) => {
 
     const [imageMessage, setImageMessage] = useState(null);
     const [imageMessageUrl, setImageMessageUrl] = useState('');
+    const [showInfo, setShowInfo] = useState(true);
 
     const messages = useSelector(state => state.conversationReducer.messages)
     const dispatch = useDispatch();
@@ -98,7 +99,7 @@ const UserChat = ({ conversationId, user, participant }) => {
 
     return (
         <>
-            <div className="conversation-message">
+            <div className="conversation-message" style={{ width: !showInfo ? '100%' : '' }}>
                 <div className="header-message">
                     <div className="header-name">
                         <Avatar width="40px" height="40px" userId={participant.id} />
@@ -108,10 +109,13 @@ const UserChat = ({ conversationId, user, participant }) => {
                     </div>
                     <div className="header-btn-list">
                         <button className="header-btn">
-                            <i style={{ color: "#1A73E8", fontSize: "20px" }} className="fas fa-phone"></i>
+                            <i style={{ color: "#1A73E8", fontSize: "18px" }} className="fas fa-phone"></i>
                         </button>
                         <button className="header-btn">
-                            <i style={{ color: "#1A73E8", fontSize: "20px" }} className="fas fa-video"></i>
+                            <i style={{ color: "#1A73E8", fontSize: "18px" }} className="fas fa-video"></i>
+                        </button>
+                        <button className="header-btn" onClick={e => setShowInfo(!showInfo)}>
+                            <i style={{ color: "#1A73E8", fontSize: "18px" }} className="fas fa-info"></i>
                         </button>
                     </div>
                 </div>
@@ -180,16 +184,18 @@ const UserChat = ({ conversationId, user, participant }) => {
                         </div>
                     </div>
                 </div>
-
             </div>
-            <div className="conversation-custom">
-                <div className="custom-info">
-                    <Avatar width="100px" height="100px" userId={participant.id} />
-                    <div style={{ fontSize: "36px" }}>
-                        {participant.userName}
+            {showInfo &&
+                <div className="conversation-info">
+                    <div className="custom-info">
+                        <Avatar width="100px" height="100px" userId={participant.id} />
+                        <div style={{ fontSize: "36px" }}>
+                            {participant.userName}
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
+
         </>
     )
 }

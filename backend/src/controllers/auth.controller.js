@@ -45,18 +45,18 @@ const signin = async (req, res) => {
 const requireSignin = (req, res, next) => {
   if (req.headers.authorization) {
     const token = req.headers.authorization.split(' ')[1]
-    const user = jwt.verify(token, process.env.JWT_SECRET_KEY)
-    if (user) {
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+      if (err) {
+        return res.status(401).json({
+          error: 'Unauthorized'
+        })
+      }
       req.auth = user;
-      next()
-    } else {
-      return res.status(403).json({
-        error: 'User not found'
-      })
-    }
+      next();
+    })
   } else {
-    return res.status(403).json({
-      error: 'Not sign in'
+    return res.status(401).json({
+      error: 'Unauthorized'
     })
   }
 }

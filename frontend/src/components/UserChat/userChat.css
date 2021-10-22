@@ -1,4 +1,4 @@
-.conversation-custom {
+.conversation-info {
   width: 25%;
   height: 100%;
   background-color: #f0f0f0;
@@ -8,7 +8,7 @@
   align-items: center;
 }
 
-.conversation-custom .custom-info {
+.conversation-info .custom-info {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
@@ -51,12 +51,12 @@
   height: 36px;
   text-align: center;
   border-style: none;
-  border-radius: 50%;
+  border-radius: 100%;
   margin: 5px;
 }
 
 .header-btn:hover {
-  background-color: #b7bbc2;
+  background-color: #e6e9f0;
 }
 
 .conversation-message .content-message {

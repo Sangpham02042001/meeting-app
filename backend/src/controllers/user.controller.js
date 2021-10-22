@@ -381,7 +381,7 @@ const getNotifications = async (req, res) => {
       )
       console.log(notifications)
       if (notifications.length == 0) {
-        return res.status(400).json({error})
+        return res.status(400).json({error: 'error'})
       }
       return res.status(200).json({ notifications, numOf_UnReadNotifications})
     }

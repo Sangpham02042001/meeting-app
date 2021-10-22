@@ -4,7 +4,7 @@ import { Link, NavLink, useParams, useRouteMatch, useLocation } from 'react-rout
 import { getNotifs } from '../../store/reducers/notification.reducer'
 import Navbar from '../Navbar';
 import { socketClient, broadcastLocal } from '../../utils';
-import { receiveMessageCv, sendMessageCv } from '../../store/reducers/conversation.reducer';
+import {  sendMessageCv } from '../../store/reducers/conversation.reducer';
 import { sendMessage } from '../../store/reducers/team.reducer';
 import './layout.css'
 
@@ -12,6 +12,7 @@ export default function Layout({ children }) {
   const dispatch = useDispatch();
   const team = useSelector(state => state.teamReducer.team)
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
+  console.log(params);
   const meetingId = params && Number(params.meetingId)
   useEffect(() => {
     socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }) => {
@@ -50,6 +51,8 @@ export default function Layout({ children }) {
     socketClient.on("disconnect", () => {
       socketClient.connect();
     });
+
+    console.log('call layout')
 
     return () => {
       socketClient.disconnect();

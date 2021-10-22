@@ -13,6 +13,7 @@ import {
     getTeamMessages,
     getTeamInfo,
 } from '../../store/reducers/team.reducer'
+import { FaPhone } from 'react-icons/fa';
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
@@ -30,10 +31,10 @@ const Meeting = (props) => {
     const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
     const [isAudioActive, setIsAudioActive] = useState(query.get('audio') == 'true' || false);
     const [isEnableVideo, setIsEnableVideo] = useState(false);
+    const [isEnableAudio, setIsEnableAudio] = useState(false);
     const [isMeetingEnd, setIsMeetingEnd] = useState(false);
     const userVideo = useRef();
     let peersRef = useRef([]);
-    const scrollRef = useRef(null);
     // const meetingId = props.match.params.meetingId;
 
     console.log(peers);
@@ -50,8 +51,20 @@ const Meeting = (props) => {
         if (!userReducer.loaded) {
             dispatch(isAuthenticated())
         }
-
         dispatch(getTeamInfo({ teamId }))
+
+        getConnectedDevices('videoinput', (cameras) => {
+            if (cameras.length) setIsEnableVideo(true);
+        })
+
+        getConnectedDevices('audioinput', (audios) => {
+            if (audios.length) setIsEnableAudio(true);
+        })
+
+        return () => {
+            setIsEnableAudio(false);
+            setIsEnableVideo(false);
+        }
     }, []);
 
     useEffect(() => {
@@ -82,77 +95,75 @@ const Meeting = (props) => {
                 setIsMeetingEnd(true)
             }
 
+            console.log(meeting.active)
             if (meeting.active) {
-                getConnectedDevices('videoinput', cameras => {
-                    console.log('Cameras found', cameras)
-                    setIsEnableVideo(cameras.length > 0)
-                    // setIsVideoActive(cameras.length > 0)
-                    // socketClient.connect();
-                    navigator.mediaDevices.getUserMedia({ video: cameras.length > 0, audio: isAudioActive })
-                        .then(stream => {
-                            userVideo.current.srcObject = stream;
-                            socketClient.emit("join-meeting", meetingId);
-                            socketClient.on("all-users", users => {
-                                console.log(users);
-                                const peers = [];
-                                users.forEach(userID => {
-                                    const peer = createPeer(userID, socketClient.id, stream);
-                                    peersRef.current.push({
-                                        peerID: userID,
-                                        peer,
-                                    })
-                                    peers.push({
-                                        peerID: userID,
-                                        peer,
-                                    });
-                                })
-                                setPeers(peers);
-                            })
-
-                            socketClient.on("joined-meeting", ({ signal, callerID }) => {
-                                const peer = addPeer(signal, callerID, stream);
+                navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio })
+                    .then(stream => {
+                        console.log(stream)
+                        userVideo.current.srcObject = stream;
+                        socketClient.emit("join-meeting", meetingId);
+                        socketClient.on("all-users", users => {
+                            console.log(users);
+                            const peers = [];
+                            users.forEach(userID => {
+                                const peer = createPeer(userID, socketClient.id, stream);
                                 peersRef.current.push({
-                                    peerID: callerID,
+                                    peerID: userID,
                                     peer,
                                 })
-                                setPeers(peers => [...peers, {
-                                    peerID: callerID,
+                                peers.push({
+                                    peerID: userID,
                                     peer,
-                                }]);
-                            });
-
-                            socketClient.on("receiving-returned-signal", ({ signal, callerID, userId }) => {
-                                const item = peersRef.current.find(p => p.peerID === userId);
-                                item.peer.signal(signal);
-                            });
-
-
-
-                            socketClient.on("disconnected-meeting", userId => {
-                                console.log('disssconneccctteee')
-                                const item = peersRef.current.find(p => p.peerID === userId);
-                                item.peer.destroy()
-                                console.log(item);
-                                setPeers(peers => {
-                                    return peers.filter(p => p.peerID !== userId);
-                                })
-
+                                });
                             })
+                            setPeers(peers);
                         })
-                        .catch(error => {
-                            console.error('Error accessing media devices.', error);
+
+                        socketClient.on("joined-meeting", ({ signal, callerID }) => {
+                            const peer = addPeer(signal, callerID, stream);
+                            peersRef.current.push({
+                                peerID: callerID,
+                                peer,
+                            })
+                            setPeers(peers => [...peers, {
+                                peerID: callerID,
+                                peer,
+                            }]);
+                        });
+
+                        socketClient.on("receiving-returned-signal", ({ signal, callerID, userId }) => {
+                            const item = peersRef.current.find(p => p.peerID === userId);
+                            item.peer.signal(signal);
+                        });
+
+
+
+                        socketClient.on("disconnected-meeting", userId => {
+                            console.log('disssconneccctteee')
+                            const item = peersRef.current.find(p => p.peerID === userId);
+                            item.peer.destroy()
+                            console.log(item);
+                            setPeers(peers => {
+                                return peers.filter(p => p.peerID !== userId);
+                            })
+
                         })
-                        .finally(() => {
-                            if (!isVideoActive) {
-                                console.log('fadfdasfdsafdas')
-                                console.log(userVideo.current)
-                                userVideo.current.srcObject.getVideoTracks().forEach(track => {
-                                    track.enabled = false
-                                })
-                                setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "none" }))
-                            }
-                        })
-                });
+                    })
+                    .catch(error => {
+                        console.error('Error accessing media devices.', error);
+                    })
+                    .finally(() => {
+                        if (!isVideoActive) {
+                            console.log('fadfdasfdsafdas')
+                            console.log(userVideo.current)
+                            userVideo.current.srcObject.getVideoTracks().forEach(track => {
+                                track.enabled = false
+                            })
+                        }
+                    })
+
+
+                // });
             }
         }
     }, [teamReducer.teamLoaded])
@@ -193,11 +204,6 @@ const Meeting = (props) => {
             track.enabled = !track.enabled
         })
 
-        if (myVideoStyle.display) {
-            setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "" }))
-        } else {
-            setMyVideoStyle(Object.assign({}, myVideoStyle, { display: "none" }))
-        }
         setIsVideoActive(!isVideoActive);
     }
 
@@ -260,9 +266,6 @@ const Meeting = (props) => {
 
     const [isOpenChat, setIsOpenChat] = useState(false);
 
-    const [myVideoStyle, setMyVideoStyle] = useState({
-        display: ""
-    })
     const [isMicroActive, setIsMicroActive] = useState(true);
 
     return (
@@ -270,8 +273,8 @@ const Meeting = (props) => {
             <div className="room-content">
                 <div className="users-content">
                     <div className="user-frame">
-                        <video width="100%" height="100%" style={myVideoStyle} muted ref={userVideo} autoPlay />
-                        {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white", textAlign: "center" }}>{socketClient.id}</div>}
+                        <video width="100%" height="100%"  ref={userVideo} muted autoPlay />
+                        {/* {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white", textAlign: "center" }}>{socketClient.id}</div>} */}
                     </div>
 
                     {peers.length > 0 && peers.map((peerObj) => {
@@ -304,36 +307,49 @@ const Meeting = (props) => {
                 }
 
             </div>
-            <Row >
+            <Row className="btn-list">
                 <Col md={{ span: 3, offset: 5 }} >
-                    <Button variant="outline-light" onClick={handleActiveVideo}
-                        disabled={!isEnableVideo}
-                        style={{ borderRadius: "50%", margin: "10px" }}>
-                        {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
-                    </Button>
+                    {
+                        !isEnableVideo ?
+                            <Button variant="outline-light" onClick={handleActiveVideo}
+                                disabled={!isEnableVideo}
+                            >
+                                <i className="fas fa-video-slash"></i>
+                            </Button>
+                            :
+                            <Button variant="outline-light" onClick={handleActiveVideo}>
+                                {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                            </Button>
+                    }
 
-                    <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px" }}>
-                        {!isMicroActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
-                    </Button>
+                    {
+                        !isEnableAudio ?
+                            <Button variant="outline-light" disabled={!isEnableAudio} onClick={handleActiveAudio}>
+                                <i className="fas fa-microphone-slash"></i>
+                            </Button>
+                            :
+                            <Button variant="outline-light" onClick={handleActiveAudio}>
+                                {!isMicroActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                            </Button>
+                    }
 
-                    <Button variant="danger" onClick={handleEndMeeting} style={{ borderRadius: "50%", margin: "10px" }}>
+                    <Button variant="danger" onClick={handleEndMeeting}>
                         {/* <Link to="/"><i style={{ color: "white" }} className="fas fa-phone" ></i></Link> */}
                         <i style={{ color: "white" }} className="fas fa-phone" ></i>
                     </Button>
                 </Col>
 
                 <Col md={{ span: 2, offset: 2 }} >
-                    <Button variant="outline-light" onClick={handleVisibleInfo} style={{ borderRadius: "50%", margin: "10px" }}>
-
+                    <Button variant="outline-light" onClick={handleVisibleInfo} >
                         {isOpenInfo ? <i className="fas fa-question-circle"></i> : <i className="far fa-question-circle"></i>}
                     </Button>
 
-                    <Button variant="outline-light" onClick={handleVisibleUsers} style={{ borderRadius: "50%", margin: "10px" }}>
+                    <Button variant="outline-light" onClick={handleVisibleUsers} >
 
                         {isOpenUsers ? <i className="fas fa-user"></i> : <i className="far fa-user"></i>}
                     </Button>
 
-                    <Button variant="outline-light" onClick={handleVisibleChat} style={{ borderRadius: "50%", margin: "10px" }}>
+                    <Button variant="outline-light" onClick={handleVisibleChat}>
                         {isOpenChat ? <i className="fas fa-comment-dots"></i> : <i className="far fa-comment-dots"></i>}
                     </Button>
                 </Col>

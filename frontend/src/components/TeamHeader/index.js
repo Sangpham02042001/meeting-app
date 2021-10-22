@@ -21,16 +21,46 @@ export default function TeamHeader({ showTeamInfo }) {
   const [isOutModalShow, setOutModalShow] = useState(false)
   const [isCreateMeetingShow, setShowCreateMeeting] = useState(false)
   const [isJoinMeetingShow, setShowJoinMeeting] = useState(false)
-  const [isVideoActive, setVideoActive] = useState(true)
-  const [isAudioActive, setAudioActive] = useState(true)
+  const [isVideoActive, setVideoActive] = useState(false)
+  const [isAudioActive, setAudioActive] = useState(false)
+  const [isEnableVideo, setIsEnableVideo] = useState(false)
+  const [isEnableAudio, setIsEnableAudio] = useState(false)
   const [isMeeting, setIsMeeting] = useState(false)
   const userVideo = useRef()
 
+  function getConnectedDevices(type, callback) {
+    navigator.mediaDevices.enumerateDevices()
+      .then(devices => {
+        const filtered = devices.filter(device => device.kind === type);
+        callback(filtered);
+      });
+  }
+
+  useEffect(() => {
+    getConnectedDevices('videoinput', (cameras) => {
+      if (cameras.length) setIsEnableVideo(true);
+    })
+
+    getConnectedDevices('audioinput', (audios) => {
+      if (audios.length) setIsEnableAudio(true);
+
+    })
+
+    return () => {
+      setIsEnableAudio(false);
+      setIsEnableVideo(false);
+    }
+
+  }, [])
+
+
   useEffect(() => {
     if (isCreateMeetingShow) {
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+      navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio }).then(stream => {
         userVideo.current.srcObject = stream;
-      })
+      }).catch(error => {
+        console.error('Error accessing media devices.', error);
+      });
     } else {
       userVideo.current && userVideo.current.srcObject.getTracks().forEach((track) => {
         track.stop();
@@ -40,7 +70,7 @@ export default function TeamHeader({ showTeamInfo }) {
 
   useEffect(() => {
     if (isJoinMeetingShow) {
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+      navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio }).then(stream => {
         userVideo.current.srcObject = stream;
       })
     } else {
@@ -98,12 +128,16 @@ export default function TeamHeader({ showTeamInfo }) {
     let checkVideoActive = userVideo.current.srcObject.getVideoTracks()[0].enabled;
     userVideo.current.srcObject.getVideoTracks()[0].enabled = !checkVideoActive;
     setVideoActive(!checkVideoActive)
+
+
   }
 
   const handleActiveAudio = () => {
     let checkAudioActive = userVideo.current.srcObject.getAudioTracks()[0].enabled;
     userVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
     setAudioActive(!isAudioActive)
+
+
   }
 
   const handleCreateMeeting = () => {
@@ -225,16 +259,30 @@ export default function TeamHeader({ showTeamInfo }) {
             <Modal.Body>
               <video width="100%" height="320px" muted ref={userVideo} autoPlay />
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
-                  {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
-                </Button>
+                {
+                  !isEnableVideo ?
+                    <Button variant="outline-light" disabled={!isEnableVideo} onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                      <i className="fas fa-video-slash"></i>
+                    </Button>
+                    :
+                    <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                      {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                    </Button>
+                }
                 <span>Join with camera</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
-                  {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
-                </Button>
+                {
+                  !isEnableAudio ?
+                    <Button variant="outline-light" disabled={!isEnableAudio} onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                      <i className="fas fa-microphone-slash"></i>
+                    </Button>
+                    :
+                    <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                      {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                    </Button>
+                }
                 <span>Join with audio</span>
               </div>
             </Modal.Body>
@@ -258,16 +306,31 @@ export default function TeamHeader({ showTeamInfo }) {
             <Modal.Body>
               <video width="100%" height="320px" muted ref={userVideo} autoPlay />
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
-                  {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
-                </Button>
+                {
+                  !isEnableVideo ?
+                    <Button variant="outline-light" disabled={!isEnableVideo} onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                      <i className="fas fa-video-slash"></i>
+                    </Button>
+                    :
+                    <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                      {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                    </Button>
+                }
                 <span>Join with camera</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
-                  {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
-                </Button>
+                {
+                  !isEnableAudio ?
+                    <Button variant="outline-light" disabled={!isEnableAudio} onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                      <i className="fas fa-microphone-slash"></i>
+                    </Button>
+                    :
+                    <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                      {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                    </Button>
+                }
+
                 <span>Join with audio</span>
               </div>
             </Modal.Body>
