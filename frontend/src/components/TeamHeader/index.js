@@ -56,7 +56,7 @@ export default function TeamHeader({ showTeamInfo }) {
 
   useEffect(() => {
     if (isCreateMeetingShow) {
-      navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio }).then(stream => {
+      (isEnableVideo || isEnableAudio) && navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio }).then(stream => {
         userVideo.current.srcObject = stream;
       }).catch(error => {
         console.error('Error accessing media devices.', error);
@@ -70,7 +70,7 @@ export default function TeamHeader({ showTeamInfo }) {
 
   useEffect(() => {
     if (isJoinMeetingShow) {
-      navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio }).then(stream => {
+      (isEnableVideo || isEnableAudio) && navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio }).then(stream => {
         userVideo.current.srcObject = stream;
       })
     } else {

@@ -13,7 +13,6 @@ import {
     getTeamMessages,
     getTeamInfo,
 } from '../../store/reducers/team.reducer'
-import { FaPhone } from 'react-icons/fa';
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
@@ -37,8 +36,6 @@ const Meeting = (props) => {
     let peersRef = useRef([]);
     // const meetingId = props.match.params.meetingId;
 
-    console.log(peers);
-
     function getConnectedDevices(type, callback) {
         navigator.mediaDevices.enumerateDevices()
             .then(devices => {
@@ -52,6 +49,7 @@ const Meeting = (props) => {
             dispatch(isAuthenticated())
         }
         dispatch(getTeamInfo({ teamId }))
+
 
         getConnectedDevices('videoinput', (cameras) => {
             if (cameras.length) setIsEnableVideo(true);
@@ -94,12 +92,9 @@ const Meeting = (props) => {
             if (!meeting.active) {
                 setIsMeetingEnd(true)
             }
-
-            console.log(meeting.active)
             if (meeting.active) {
-                navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio })
+                (isEnableVideo || isEnableAudio) && navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio })
                     .then(stream => {
-                        console.log(stream)
                         userVideo.current.srcObject = stream;
                         socketClient.emit("join-meeting", meetingId);
                         socketClient.on("all-users", users => {
@@ -153,17 +148,17 @@ const Meeting = (props) => {
                         console.error('Error accessing media devices.', error);
                     })
                     .finally(() => {
-                        if (!isVideoActive) {
-                            console.log('fadfdasfdsafdas')
-                            console.log(userVideo.current)
-                            userVideo.current.srcObject.getVideoTracks().forEach(track => {
+                        if (isEnableVideo && !isVideoActive) {
+                            userVideo.current && userVideo.current.srcObject.getVideoTracks().forEach(track => {
+                                track.enabled = false
+                            })
+                        }
+                        if (isEnableAudio && !isAudioActive) {
+                            userVideo.current && userVideo.current.srcObject.getAudioTracks().forEach(track => {
                                 track.enabled = false
                             })
                         }
                     })
-
-
-                // });
             }
         }
     }, [teamReducer.teamLoaded])
@@ -208,10 +203,14 @@ const Meeting = (props) => {
     }
 
     const handleActiveAudio = () => {
+        userVideo.current.srcObject.getAudioTracks().forEach(track => {
+            track.enabled = !track.enabled
+        })
         let checkAudioActive = userVideo.current.srcObject.getAudioTracks()[0].enabled;
-        userVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
+        console.log(checkAudioActive);
+        // userVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
 
-        setIsMicroActive(!checkAudioActive);
+        setIsAudioActive(!isAudioActive);
     }
 
     const handleVisibleChat = () => {
@@ -266,14 +265,13 @@ const Meeting = (props) => {
 
     const [isOpenChat, setIsOpenChat] = useState(false);
 
-    const [isMicroActive, setIsMicroActive] = useState(true);
 
     return (
         !isMeetingEnd ? <div className="room-meeting">
             <div className="room-content">
                 <div className="users-content">
                     <div className="user-frame">
-                        <video width="100%" height="100%"  ref={userVideo} muted autoPlay />
+                        <video width="100%" height="100%" ref={userVideo} muted autoPlay />
                         {/* {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white", textAlign: "center" }}>{socketClient.id}</div>} */}
                     </div>
 
@@ -329,7 +327,7 @@ const Meeting = (props) => {
                             </Button>
                             :
                             <Button variant="outline-light" onClick={handleActiveAudio}>
-                                {!isMicroActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                                {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
                             </Button>
                     }
 
