@@ -49,14 +49,13 @@
 .conversation-message .header-message .header-btn {
   width: 36px;
   height: 36px;
-  text-align: center;
   border-style: none;
   border-radius: 100%;
   margin: 5px;
 }
 
 .header-btn:hover {
-  background-color: #e6e9f0;
+  background-color: #dfdfdf;
 }
 
 .conversation-message .content-message {

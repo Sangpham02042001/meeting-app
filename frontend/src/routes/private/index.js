@@ -23,13 +23,12 @@ export default function PrivateRoute({ children, ...rest }) {
         {...rest}
         render={
           () => (
-
-            userReducer.authenticated ? <Layout>
+            userReducer.authenticated ? 
+            <Layout>
               {children}
-
-            </Layout> : (
-              rest.path === '/' ? <Welcome /> : <Redirect to='/login' />
-            )
+            </Layout> 
+            : 
+            (rest.path === '/' ? <Welcome /> : <Redirect to='/login' />)
           )}
 
       />

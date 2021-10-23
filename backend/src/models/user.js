@@ -41,6 +41,11 @@ User.init({
   modelName: 'User'
 })
 
+const Users_Conversations = sequelize.define('Users_Conversations', {
+  isRead: { type: DataTypes.BOOLEAN, defaultValue: false }
+}, { timestamps: true });
+
+
 User.belongsToMany(Conversation, {
   through: 'Users_Conversations',
   as: 'userConversations',

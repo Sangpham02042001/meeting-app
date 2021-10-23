@@ -1,8 +1,8 @@
 const users = {};
 const socketToMeeting = {};
 
-const { getMembers, sendMessage } = require('../controllers/team.controller')
-
+const { getMemberTeam, sendMessage } = require('../controllers/team.controller');
+const {getMemberMeeting, addMemberMeeting} = require('../controllers/meeting.controller')
 const { setConversation, setMessage } = require('../controllers/conversation.controller');
 
 
@@ -40,7 +40,7 @@ const socketServer = (socket) => {
     //team
     socket.on('send-message-team', async ({ teamId, senderId, content, image }) => {
         console.log(image)
-        let members = await getMembers({ teamId });
+        let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, image })
         socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, photo: message.photo })
@@ -50,7 +50,23 @@ const socketServer = (socket) => {
         }
     })
 
+
     //meeting
+    socket.on("join-meeting", async ({ teamId, meetingId, userId }) => {
+        console.log(teamId, meetingId, userId);
+        let members = await getMemberMeeting({ meetingId });
+
+        const user = members.find(m => m.userId === userId)
+
+        if (!user) {
+            const newMember = await addMemberMeeting({meetingId, userId});
+        }
+        
+        console.log("members", members);
+        for (let m of members) {
+            socket.to(m.id).emit('user-join-meeting', { teamId, meetingId, userJoinId: userId });
+        }
+    })
     socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
         socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
     })
@@ -69,6 +85,10 @@ const socketServer = (socket) => {
             socket.emit('conversation-sentMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt })
             socket.to(receiverId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt });
         }
+    })
+
+    socket.on('conversation-call', ({ conversationId, participantId }) => {
+        socket.to(participantId).emit('conversation-calling', { conversationId, senderId, receiverId })
     })
 
     //disconnect

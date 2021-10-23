@@ -28,6 +28,7 @@ export const meetingSlice = createSlice({
       teams: [],
       conversations: []
     },
+    users: [],
     error: null
   },
   extraReducers: {
@@ -38,17 +39,25 @@ export const meetingSlice = createSlice({
       state.meetings.teams.push(action.payload.meeting)
     },
     [createTeamMeeting.rejected]: (state, action) => {
-      state.error = action.payload.error
+      state.error = action.payload.error;
     }
   },
   reducers: {
     saveMessage: (state, action) => {
       const { message, userId, userName } = action.payload;
       state.messages.push({ message, userId, userName });
+    },
+    userJoinMeeting: (state, action) => {
+      let {teamId, meetingId, userJoinId} = action.payload;
+      let user = state.users.find(user => user.userId === userJoinId);
+      if (!user) {
+        state.users.push({id: userJoinId});
+      }
+      
     }
   }
 })
 
-export const { saveMessage } = meetingSlice.actions;
+export const { saveMessage, userJoinMeeting } = meetingSlice.actions;
 
 export default meetingSlice.reducer

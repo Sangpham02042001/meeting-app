@@ -26,6 +26,7 @@ const Meeting = (props) => {
     const dispatch = useDispatch()
     const userReducer = useSelector(state => state.userReducer)
     const teamReducer = useSelector(state => state.teamReducer)
+    const meetingReducer = useSelector(state => state.meetingReducer)
     const [peers, setPeers] = useState([]);
     const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
     const [isAudioActive, setIsAudioActive] = useState(query.get('audio') == 'true' || false);
@@ -34,6 +35,7 @@ const Meeting = (props) => {
     const [isMeetingEnd, setIsMeetingEnd] = useState(false);
     const userVideo = useRef();
     let peersRef = useRef([]);
+    
     // const meetingId = props.match.params.meetingId;
 
     function getConnectedDevices(type, callback) {
@@ -50,6 +52,8 @@ const Meeting = (props) => {
         }
         dispatch(getTeamInfo({ teamId }))
 
+        console.log('meetingID', meetingId)
+        socketClient.emit("join-meeting", {teamId, meetingId, userId: userReducer.user.id})
 
         getConnectedDevices('videoinput', (cameras) => {
             if (cameras.length) setIsEnableVideo(true);
@@ -96,7 +100,7 @@ const Meeting = (props) => {
                 (isEnableVideo || isEnableAudio) && navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio })
                     .then(stream => {
                         userVideo.current.srcObject = stream;
-                        socketClient.emit("join-meeting", meetingId);
+                        // socketClient.emit("join-meeting", meetingId);
                         socketClient.on("all-users", users => {
                             console.log(users);
                             const peers = [];
@@ -286,7 +290,7 @@ const Meeting = (props) => {
                 </div>
                 {isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
-                {isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} />}
+                {isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} users={meetingReducer.users} />}
 
                 {isOpenInfo &&
                     <Col className="meeting-chatbox" md="4">

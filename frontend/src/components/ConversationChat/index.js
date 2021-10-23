@@ -5,9 +5,8 @@ import Avatar from '../Avatar';
 import Message from '../Message';
 import { Button } from 'react-bootstrap';
 import { socketClient, broadcastLocal } from '../../utils';
-import { getMessages } from '../../store/reducers/conversation.reducer';
-import './userChat.css';
-import { v1 as uuid } from 'uuid';
+import { getMessages, readConversation } from '../../store/reducers/conversation.reducer';
+import './conversationChat.css';
 
 export default function Index({ conversation, user }) {
     const participant = useSelector(state => state.conversationReducer.participant);
@@ -19,13 +18,13 @@ export default function Index({ conversation, user }) {
     return (
         <>
             {participant &&
-                <UserChat conversationId={conversation.conversationId} user={user} participant={participant} />
+                <ConversationChat conversationId={conversation.conversationId} user={user} participant={participant} />
             }
         </>
     )
 }
 
-const UserChat = ({ conversationId, user, participant }) => {
+const ConversationChat = ({ conversationId, user, participant }) => {
     const [content, setContent] = useState('');
     const [rows, setRows] = useState(1);
     const minRows = 1;
@@ -42,10 +41,14 @@ const UserChat = ({ conversationId, user, participant }) => {
 
     useEffect(() => {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      
     }, [messages.length])
 
     useEffect(() => {
-        dispatch(getMessages({ conversationId }))
+        if (conversationId) {
+            dispatch(getMessages({ conversationId }))
+            dispatch(readConversation({ conversationId }))
+        }
     }, [conversationId])
 
     const onWriteMessage = (event) => {
@@ -77,7 +80,6 @@ const UserChat = ({ conversationId, user, participant }) => {
 
     const handleSendMessage = (event) => {
         if (content !== '' || imageMessage) {
-            const id = uuid();
             socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage });
             broadcastLocal.postMessage({ content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage })
             setContent('');
@@ -85,6 +87,24 @@ const UserChat = ({ conversationId, user, participant }) => {
             setImageMessageUrl('');
             setRows(minRows);
         }
+    }
+
+    const handleSendIcon = () => {
+
+        // fetch('./public/logo152.png')
+        //     .then(res => res.arrayBuffer())
+        //     .then(data => {
+        //         console.log(data);
+        //         const file = new File(new Uint8Array(data), 'thumb.png');
+        //         console.log(file);
+        //         socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, image: file });
+        //         broadcastLocal.postMessage({ content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage })
+        //     })
+
+    }
+
+    const handleVoiceCall = () => {
+        socketClient.emit('conversation-call', { conversationId: conversationId, senderId: user.id, receiverId: participant.id });
     }
 
     const onImageInputChange = e => {
@@ -108,7 +128,7 @@ const UserChat = ({ conversationId, user, participant }) => {
                         </div>
                     </div>
                     <div className="header-btn-list">
-                        <button className="header-btn">
+                        <button className="header-btn" onClick={handleVoiceCall}>
                             <i style={{ color: "#1A73E8", fontSize: "18px" }} className="fas fa-phone"></i>
                         </button>
                         <button className="header-btn">
@@ -178,7 +198,7 @@ const UserChat = ({ conversationId, user, participant }) => {
                                         display: 'none'
                                     }} />
                             </Button>
-                            <Button variant="outline-light" >
+                            <Button variant="outline-light" onClick={handleSendIcon} >
                                 <i style={{ color: "#1A73E8" }} className="fas fa-thumbs-up"></i>
                             </Button>
                         </div>

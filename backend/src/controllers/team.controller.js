@@ -515,7 +515,7 @@ const getTeamMessages = async (req, res) => {
   }
 }
 
-const getMembers = async ({ teamId }) => {
+const getMemberTeam = async ({ teamId }) => {
   try {
     const members = await sequelize.query(
       "CALL getTeamMembers(:teamId)",
@@ -528,7 +528,7 @@ const getMembers = async ({ teamId }) => {
     return members;
   } catch (error) {
     console.log(error)
-    return null;
+    return [];
   }
 }
 
@@ -558,6 +558,6 @@ module.exports = {
   confirmUserRequests, removeUserRequests, removeMembers,
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
-  sendMessage, getTeamMessages, getMembers,
+  sendMessage, getTeamMessages, getMemberTeam,
   getMeetings
 }
