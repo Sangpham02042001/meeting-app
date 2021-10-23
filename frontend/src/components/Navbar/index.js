@@ -19,7 +19,7 @@ export default function Navbar() {
 
   let notifications = useSelector(state => state.notificationReducer.notifications)
   let numOf_UnReadNotifications = useSelector(state => state.notificationReducer.numOf_UnReadNotifications)
-  let hasMore = useSelector(state => state.notificationReducer.hasMore )
+  let hasMore = useSelector(state => state.notificationReducer.hasMore)
   useEffect(() => {
     dispatch(getNotifs(0))
     // dispatch(cleanNotificationState)
@@ -84,45 +84,45 @@ export default function Navbar() {
             <i className="fas fa-bell"></i>
             {numOf_UnReadNotifications > 0 && <span className="position-absolute top-3 start-100 translate-middle badge rounded-pill bg-danger">{numOf_UnReadNotifications}</span>}
           </button>
-          <div className="dropdown-notification dropdown-content" id="dropdown-notification" style={{ minWidth: '300px' }}>
-            <InfiniteScroll 
-            dataLength={notifications.length} 
-            next={handleNotif}
-            hasMore={hasMore}
-            loader={<div className="notification justify-content-center"><img src="/loading.gif" className="loadingNotification" /></div>}
-            scrollableTarget="dropdown-notification"
-            endMessage={<p style={{ textAlign: 'center' }}>
-                          <b>There is no more notification!</b>
-                        </p>}>
-            {notifications.map((notification) => {
-              let imgSrc = `${baseURL}/api/user/avatar/${notification.createdBy}`
-              let style = {}
-              if (notification.isRead == 1) {
-                style = {
-                  // 'borderLeft': "4px solid var(--white)",
-                  'position': "relative",
-                  'borderRadius': "5px",
-                  // 'fontWeight': "normal"
+          <div className="dropdown-notification dropdown-content" id="dropdown-notification">
+            <InfiniteScroll
+              dataLength={notifications.length}
+              next={handleNotif}
+              hasMore={hasMore}
+              loader={<div className="notification justify-content-center"><img src="/loading.gif" className="loadingNotification" /></div>}
+              scrollableTarget="dropdown-notification"
+              endMessage={<p style={{ textAlign: 'center' }}>
+                <b>There is no more notification!</b>
+              </p>}>
+              {notifications.map((notification) => {
+                let imgSrc = `${baseURL}/api/user/avatar/${notification.createdBy}`
+                let style = {}
+                if (notification.isRead == 1) {
+                  style = {
+                    // 'borderLeft': "4px solid var(--white)",
+                    'position': "relative",
+                    'borderRadius': "5px",
+                    // 'fontWeight': "normal"
+                  }
+                } else if (notification.isRead == 0) {
+                  style = {
+                    // 'borderLeft': "4px solid #85C1E9",
+                    'position': "relative",
+                    'borderRadius': "5px",
+                    // 'fontWeight': "bold"
+                  }
                 }
-              } else if (notification.isRead == 0) {
-                style = {
-                  // 'borderLeft': "4px solid #85C1E9",
-                  'position': "relative",
-                  'borderRadius': "5px",
-                  // 'fontWeight': "bold"
-                }
-              }
-              return (
-                <Link className="notification" onClick={() => handleReadNotif(event, notification.id)} to={notification.relativeLink} key={notification.id} style={style}>
-                  {notification.isRead ? null :(<i class="bi bi-circle-fill" style={{color: "rbg(0,312,255,1)", position: "absolute", top: "3px"}}></i>)}
-                  <img className="notificationImg" src={imgSrc}></img>
-                  {notification.content}
-                  <br/>
-                  <i style={{fontSize: '15px'}}>{timeDiff(notification.timeDifferent)}</i>
-                  <div />
-                </Link>
-              )
-            })}
+                return (
+                  <Link className="notification" onClick={() => handleReadNotif(event, notification.id)} to={notification.relativeLink} key={notification.id} style={style}>
+                    {notification.isRead ? null : (<i className="bi bi-circle-fill" style={{ color: "rbg(0,312,255,1)", position: "absolute", top: "3px" }}></i>)}
+                    <img className="notificationImg" src={imgSrc}></img>
+                    {notification.content}
+                    <br />
+                    <span style={{ fontSize: '15px' }}>{timeDiff(notification.timeDifferent)}</span>
+                    <div />
+                  </Link>
+                )
+              })}
             </InfiniteScroll>
           </div>
         </div>

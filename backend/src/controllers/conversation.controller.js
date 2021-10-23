@@ -104,7 +104,7 @@ const getLastMessage = async (req, res) => {
 
 const readConversation = async (req, res) => {
     try {
-        const {conversationId} = req.params;
+        const { conversationId } = req.params;
         await sequelize.query("UPDATE users_conversations SET isRead = 1 WHERE conversationId = :conversationId",
             {
                 replacements: {
