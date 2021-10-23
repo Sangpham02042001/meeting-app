@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Container, Navbar as Nav, Col, Row } from 'react-bootstrap'
 import { Link, useHistory } from 'react-router-dom'
-import { baseURL } from '../../utils'
+import { baseURL, timeDiff } from '../../utils'
 import Dropdown from '../Dropdown'
 import './navbar.css'
 import { cleanTeamState } from '../../store/reducers/team.reducer'
@@ -99,22 +99,27 @@ export default function Navbar() {
               let style = {}
               if (notification.isRead == 1) {
                 style = {
-                  'borderLeft': "4px solid var(--white)",
-                  'borderRadius': "5px"
+                  // 'borderLeft': "4px solid var(--white)",
+                  'position': "relative",
+                  'borderRadius': "5px",
+                  // 'fontWeight': "normal"
                 }
               } else if (notification.isRead == 0) {
                 style = {
-                  'borderLeft': "4px solid #85C1E9",
-                  'borderRadius': "5px"
+                  // 'borderLeft': "4px solid #85C1E9",
+                  'position': "relative",
+                  'borderRadius': "5px",
+                  // 'fontWeight': "bold"
                 }
               }
               return (
                 <Link className="notification" onClick={() => handleReadNotif(event, notification.id)} to={notification.relativeLink} key={notification.id} style={style}>
-                  <div />
-                  <img className="notificationImg" src={imgSrc} />
+                  {notification.isRead ? null :(<i class="bi bi-circle-fill" style={{color: "rbg(0,312,255,1)", position: "absolute", top: "3px"}}></i>)}
+                  <img className="notificationImg" src={imgSrc}></img>
                   {notification.content}
                   <br/>
-                  <i>{notification.createdAt}</i>
+                  <i style={{fontSize: '15px'}}>{timeDiff(notification.timeDifferent)}</i>
+                  <div />
                 </Link>
               )
             })}
