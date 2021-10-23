@@ -2,35 +2,30 @@ const Conversation = require('../models/conversation');
 const User = require('../models/user');
 const Message = require('../models/message')
 const sequelize = require('../models');
-const { Op } = require("sequelize");
+const { Op, QueryTypes } = require("sequelize");
 const fs = require('fs');
 const { v4 } = require('uuid');
 const { Readable } = require('stream');
 
-const getConversations = async (req, res, next) => {
+const getConversations = async (req, res) => {
     try {
         const { userId } = req.params;
         const conversations = await sequelize.query(
-            "SELECT conversationId, userId as participantId FROM users_conversations WHERE conversationId IN (SELECT conversationId FROM users_conversations where userId = :userId) AND userId not like :userId ORDER BY createdAt DESC",
+            "SELECT conversationId, userId as participantId, isRead FROM users_conversations WHERE conversationId IN (SELECT conversationId FROM users_conversations where userId = :userId) AND userId not like :userId ORDER BY updatedAt DESC",
             {
                 replacements: {
                     userId
-                }
+                },
+                type: QueryTypes.SELECT
             }
         )
 
-        if (!conversations) {
-            err = new Error('Conversations could not find')
-            err.status = 403;
-            return next(err);
-        }
 
-
-        console.log(conversations[0])
-
-        return res.status(200).json({ conversations: conversations[0] });
+        return res.status(200).json({ conversations });
     } catch (error) {
-        return next(error);
+        return res.status(403).json({
+            message: "Could not get conversations!"
+        })
     }
 }
 
@@ -59,7 +54,7 @@ const setConversation = async ({ senderId, receiverId, conversationId }) => {
 }
 
 
-const getMessages = async (req, res, next) => {
+const getMessages = async (req, res) => {
     try {
         const { conversationId } = req.params;
 
@@ -69,12 +64,6 @@ const getMessages = async (req, res, next) => {
             }
         })
 
-        if (!messages) {
-            err = new Error('Messages could not find!')
-            err.status = 403;
-            return next(err);
-        }
-
         messages = messages.map(mess => {
             mess.teamId = undefined;
             return mess;
@@ -83,30 +72,53 @@ const getMessages = async (req, res, next) => {
         return res.status(200).json({ messages })
 
     } catch (error) {
-        next(error);
+        return res.status(403).json({
+            message: "Could not get messages!"
+        })
     }
 }
 
-const getLastMessage = async (req, res, next) => {
+const getLastMessage = async (req, res) => {
     try {
         const { conversationId } = req.params;
-        const lastMessage = await Message.findOne({
+        let lastMessage = await Message.findOne({
             where: {
                 conversationId
             },
-            order: [['createdAt', 'DESC']],
+            order: [['updatedAt', 'DESC']],
         })
         if (!lastMessage) {
-            return {lastMessage: {}};
+            lastMessage = {};
         }
 
         lastMessage.teamId = undefined;
 
-
         return res.status(200).json({ lastMessage })
-
     } catch (error) {
-        next(error);
+        console.log(error)
+        return res.status(403).json({
+            message: "Could not get last message!"
+        })
+    }
+}
+
+const readConversation = async (req, res) => {
+    try {
+        const {conversationId} = req.params;
+        await sequelize.query("UPDATE users_conversations SET isRead = 1 WHERE conversationId = :conversationId",
+            {
+                replacements: {
+                    conversationId
+                }
+            }
+        )
+        return res.status(200).json({
+            conversationId
+        })
+    } catch (error) {
+        return res.status(403).json({
+            message: "Read message fail!"
+        })
     }
 }
 
@@ -122,6 +134,16 @@ const setMessage = async ({ content, image, conversationId, senderId }) => {
             imageStream.pipe(writeStream)
         }
         const message = await Message.create({ content, photo: photoName, conversationId, userId: senderId });
+
+        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 0 WHERE conversationId = :conversationId",
+            {
+                replacements: {
+                    conversationId
+                }
+            }
+        )
+
+
         if (!message) {
             return null;
         }
@@ -130,7 +152,8 @@ const setMessage = async ({ content, image, conversationId, senderId }) => {
         console.log(error)
         return null;
     }
-
 }
 
-module.exports = { getConversations, getMessages, getLastMessage, setConversation, setMessage }
+
+
+module.exports = { getConversations, getMessages, getLastMessage, setConversation, setMessage, readConversation }

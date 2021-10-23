@@ -35,12 +35,6 @@
   height: 320px;
 }
 
-.tool-bar {
-  position: relative;
-  text-align: center;
-  padding: 20px;
-}
-
 .btn-list button {
   width: 40px;
   height: 40px;

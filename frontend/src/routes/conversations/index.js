@@ -4,9 +4,9 @@ import './conversations.css';
 import { axiosAuth } from '../../utils';
 import { getConversations, createConversation } from '../../store/reducers/conversation.reducer';
 import { Switch, Link, Route } from "react-router-dom";
-import { useHistory } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 import Avatar from '../../components/Avatar';
-import UserChat from '../../components/UserChat';
+import ConversationChat from '../../components/ConversationChat';
 import { v4 } from 'uuid';
 
 
@@ -14,11 +14,9 @@ export default function Conversations() {
     const [textSearch, setTextSearch] = useState('');
     const [searchUsers, setSearchUsers] = useState([]);
     const [userSearch, setUserSearch] = useState(null);
-    const tempCvId = v4();
-
+    // const tmpConverId = v4();
     const user = useSelector(state => state.userReducer.user);
     const conversations = useSelector(state => state.conversationReducer.conversations);
-
     const dispatch = useDispatch();
     const history = useHistory();
     useEffect(() => {
@@ -52,7 +50,7 @@ export default function Conversations() {
 
         const participant = conversations.find(conv => conv.participantId === userFind.id);
         if (!participant) {
-            dispatch(createConversation({ conversationId: tempCvId, participantId: userFind.id }));
+            dispatch(createConversation({ conversationId: null, participantId: userFind.id }));
         }
 
         history.push(`/conversations/${userFind.id}`);
@@ -91,10 +89,10 @@ export default function Conversations() {
                 <div className="conversation-user">
                     {
                         conversations.map(conv => {
-                            return <UserLink key={conv.participantId}
+                            return <ConversationLink key={conv.participantId}
                                 conversation={conv}
                                 user={user}
-                                tempCvId={tempCvId}
+                                // tmpConverId={tmpConverId}
                             />
                         })
                     }
@@ -106,7 +104,7 @@ export default function Conversations() {
                         conversations.map(conver => {
                             return (
                                 <Route path={`/conversations/${conver.participantId}`} key={conver.participantId}>
-                                    <UserChat
+                                    <ConversationChat
                                         conversation={conver}
                                         user={user}
                                     />
@@ -120,16 +118,17 @@ export default function Conversations() {
     )
 }
 
-const UserLink = ({ conversation, user, tempCvId }) => {
-    const [participantInfo, setParticipantInfo] = useState(null);
+const ConversationLink = ({ conversation, user, tmpConverId }) => {
+    const [participant, setParticipant] = useState(null);
     const [lastMessage, setLastMessage] = useState(null);
-    const dispatch = useDispatch()
-    const lastMessageChange = useSelector(state => state.conversationReducer.lastMessageChange)
+    const lastMessageChange = useSelector(state => state.conversationReducer.lastMessageChange);
+    const curParticipant = useSelector(state => state.conversationReducer.participant);
+
     useEffect(async () => {
         try {
-            const participant = await axiosAuth.get(`/api/users/${conversation.participantId}`);
-            setParticipantInfo(participant.data);
-            if (conversation.conversationId !== tempCvId) {
+            const response = await axiosAuth.get(`/api/users/${conversation.participantId}`);
+            setParticipant(response.data);
+            if (conversation.conversationId ) {
                 const response = await axiosAuth.get(`/api/conversations/${conversation.conversationId}/messages/lastMessage`);
                 setLastMessage(response.data.lastMessage);
                 
@@ -142,15 +141,15 @@ const UserLink = ({ conversation, user, tempCvId }) => {
 
     return (
         <>
-            {participantInfo &&
-                <Link to={`/conversations/${participantInfo.id}`}
-                    key={participantInfo.id}
+            {participant &&
+                <Link to={`/conversations/${participant.id}`}
+                    key={participant.id}
                     style={{ textDecoration: "none", color: "black", width: "100%", display: "flex", justifyContent: "center" }}>
-                    <div className="user-chat">
-                        <Avatar width="40px" height="40px" userId={participantInfo.id} />
+                    <div className="user-chat" style={{backgroundColor: curParticipant && participant.id === curParticipant.id ? '#fff': ''}}>
+                        <Avatar width="40px" height="40px" userId={participant.id} />
                         <div style={{ marginLeft: "15px" }}>
-                            {participantInfo.userName}
-                            <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "120px", opacity: "0.6" }}>
+                            {participant.userName}
+                            <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "120px", opacity: conversation.isRead ? "0.6" : "1" }}>
                                 {lastMessage &&
                                     (lastMessage.userId === user.id ?
                                         <span>You: {lastMessage.content}</span>
