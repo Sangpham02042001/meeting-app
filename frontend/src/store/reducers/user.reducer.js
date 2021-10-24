@@ -52,10 +52,6 @@ export const userSlice = createSlice({
       }
       state.loaded = true
     },
-    cleanUser: state => {
-      state.user = {}
-      state.authenticated = false
-    }
   },
   extraReducers: {
     [signin.pending]: (state, action) => {
@@ -76,6 +72,6 @@ export const userSlice = createSlice({
   }
 })
 
-export const { isAuthenticated, cleanUser } = userSlice.actions;
+export const { isAuthenticated } = userSlice.actions;
 
 export default userSlice.reducer

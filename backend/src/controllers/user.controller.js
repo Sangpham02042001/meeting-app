@@ -18,7 +18,6 @@ const signup = async (req, res) => {
       }
     })
     if (user) {
-      console.log(user.toJSON())
       return res.status(400).json({ error: `${email} has already existed` })
     }
     bcrypt.hash(password, saltRounds, async (error, hash_password) => {
@@ -52,7 +51,7 @@ const getUserInfo = async (req, res) => {
     }
     user.hash_password = undefined
     user.avatar = undefined
-    return res.status(200).json({id: user.id, userName: user.getFullName(), email: user.email })
+    return res.status(200).json({ id: user.id, userName: user.getFullName(), email: user.email })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
@@ -238,7 +237,6 @@ const cancelJoinRequest = async (req, res) => {
   let { teams } = req.body
   let stringifyTeams = ''
   teams.forEach(teamId => stringifyTeams += `${teamId},`)
-  console.log(stringifyTeams)
   try {
     await sequelize.query(
       "DELETE FROM request_users_teams rut " +
@@ -263,7 +261,6 @@ const confirmInvitations = async (req, res) => {
   let { teams } = req.body
   let stringifyTeams = ''
   teams.forEach(teamId => stringifyTeams += `${teamId},`)
-  console.log(stringifyTeams)
   try {
     const messages = await sequelize.query(
       "CALL removeInvitations(:teams, :userId, :confirmFlag)",
@@ -275,7 +272,6 @@ const confirmInvitations = async (req, res) => {
         }
       }
     )
-    console.log(messages[0])
     if (messages[0]) {
       return res.status(200).json(messages[0])
     }
@@ -290,7 +286,6 @@ const removeInvitations = async (req, res) => {
   let { teams } = req.body
   let stringifyTeams = ''
   teams.forEach(teamId => stringifyTeams += `${teamId},`)
-  console.log(stringifyTeams)
   try {
     const messages = await sequelize.query(
       "CALL removeInvitations(:teams, :userId, :confirmFlag)",
@@ -302,7 +297,6 @@ const removeInvitations = async (req, res) => {
         }
       }
     )
-    console.log(messages[0])
     if (messages[0]) {
       return res.status(200).json(messages[0])
     }
@@ -331,7 +325,6 @@ const getInvitations = async (req, res) => {
 const getNotifications = async (req, res) => {
   let { id } = req.auth
   let { offset, num } = req.query
-  console.log(!isNaN(offset))
   try {
     let numOf_UnReadNotifications = await sequelize.query(
       "SELECT COUNT(*) as numOf_UnReadNotifications FROM notifications WHERE userid = :id AND isRead = 0;",
@@ -368,7 +361,7 @@ const getNotifications = async (req, res) => {
         notifications = notifications.slice(0, 10),
           fragFlag = true
       }
-      return res.status(200).json({ notifications, numOfNotifications, numOf_UnReadNotifications})
+      return res.status(200).json({ notifications, numOfNotifications, numOf_UnReadNotifications })
     } else {
       let notifications = await sequelize.query(
         "SELECT *, TIME_TO_SEC(TIMEDIFF(NOW(), createdAt)) AS timeDifferent FROM notifications WHERE userId = :id ORDER BY createdAt ASC LIMIT :offset, :num;",
@@ -379,11 +372,10 @@ const getNotifications = async (req, res) => {
           type: QueryTypes.SELECT
         }
       )
-      console.log(notifications)
       if (notifications.length == 0) {
-        return res.status(400).json({error: 'error'})
+        return res.status(400).json({ error: 'error' })
       }
-      return res.status(200).json({ notifications, numOf_UnReadNotifications})
+      return res.status(200).json({ notifications, numOf_UnReadNotifications })
     }
   } catch (error) {
     console.log(error)

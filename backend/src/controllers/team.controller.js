@@ -73,7 +73,6 @@ const createTeam = async (req, res) => {
       team.coverPhoto = undefined
       return res.status(201).json({ team })
     } catch (error) {
-      console.log('sfsdfsdfad')
       console.log(error)
       return res.status(400).json({ error })
     }
@@ -155,7 +154,6 @@ const confirmUserRequests = async (req, res) => {
   let { users } = req.body
   let stringifyUsers = ''
   users.forEach(userId => stringifyUsers += `${userId},`)
-  console.log(stringifyUsers)
   try {
     const messages = await sequelize.query(
       "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
@@ -167,7 +165,6 @@ const confirmUserRequests = async (req, res) => {
         }
       }
     )
-    console.log(messages[0])
     if (messages[0]) {
       return res.status(200).json(messages[0])
     } else {
@@ -187,7 +184,6 @@ const removeUserRequests = async (req, res) => {
   }
   let stringifyUsers = ''
   users.forEach(userId => stringifyUsers += `${userId},`)
-  console.log(stringifyUsers)
   try {
     const messages = await sequelize.query(
       "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
@@ -199,7 +195,6 @@ const removeUserRequests = async (req, res) => {
         }
       }
     )
-    console.log(messages[0])
     if (messages[0]) {
       return res.status(200).json(messages[0])
     }
@@ -214,7 +209,6 @@ const removeMembers = async (req, res) => {
   let { users } = req.body
   let stringifyUsers = ''
   users.forEach(userId => stringifyUsers += `${userId},`)
-  console.log(stringifyUsers)
   try {
     await sequelize.query(
       "DELETE FROM users_teams ut " +
@@ -272,7 +266,6 @@ const inviteUsers = async (req, res) => {
   let { teamId } = req.params
   let stringifyUsers = ''
   users.forEach(userId => stringifyUsers += `${userId},`)
-  console.log(stringifyUsers)
   try {
     const messages = await sequelize.query(
       "CALL inviteUsers(:teamId, :users)",
@@ -283,7 +276,6 @@ const inviteUsers = async (req, res) => {
         }
       }
     )
-    console.log(messages[0])
     if (messages[0]) {
       return res.status(200).json(messages[0])
     } else {
@@ -304,7 +296,6 @@ const removeInvitations = async (req, res) => {
     }
     let stringifyUsers = ''
     users.forEach(userId => stringifyUsers += `${userId},`)
-    console.log(stringifyUsers)
     await sequelize.query(
       "DELETE FROM invited_users_teams iut " +
       "WHERE iut.teamId = :teamId AND FIND_IN_SET(iut.invitedUserId, :users);",
@@ -544,7 +535,6 @@ const getMeetings = async (req, res) => {
         type: QueryTypes.SELECT
       }
     )
-    console.log(meetings)
     return res.status(200).json({ meetings });
   } catch (error) {
     console.log(error)

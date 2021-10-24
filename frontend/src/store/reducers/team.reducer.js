@@ -241,26 +241,17 @@ export const teamSlice = createSlice({
   initialState,
   reducers: {
     cleanTeamState: (state, action) => {
-      const removeAll = action.payload && action.payload.removeAll
-      if (removeAll) {
-        state.joinedTeams = []
-        state.requestingTeams = []
-        state.invitedTeams = []
-        state.joinedTeamLoaded = false
-        state.teamLoaded = false
-      }
       state.team = {
         members: [],
         invitedUsers: [],
         requestUsers: [],
         messages: [],
-        messagesLoaded: false
+        messagesLoaded: false,
+        meetings: []
       }
     },
     sendMessage: (state, action) => {
       let { messageId, content, senderId, teamId, photo } = action.payload;
-      console.log('aaaaaaaa', state.team.id, teamId)
-      console.log(messageId)
       if (state.team.id && state.team.id == teamId) {
         state.team.messages.push({ id: messageId, content, userId: senderId, teamId, photo })
       }
@@ -373,7 +364,8 @@ export const teamSlice = createSlice({
       state.team = {
         members: [],
         invitedUsers: [],
-        requestUsers: []
+        requestUsers: [],
+        meetings: []
       }
       let { teamId } = action.payload
       state.joinedTeams = state.joinedTeams.filter(team => team.id != teamId)

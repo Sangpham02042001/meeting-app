@@ -42,7 +42,6 @@ app.use('/', messageRoutes)
 
 io.use((socket, next) => {
     const userID = socket.handshake.auth.userId;
-    console.log(userID);
     if (!userID) {
         return next(new Error("invalid userId"));
     }

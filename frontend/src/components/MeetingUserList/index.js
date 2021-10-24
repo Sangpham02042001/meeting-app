@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import {Button} from 'react-bootstrap';
+import { useSelector } from 'react-redux'
+import { Button } from 'react-bootstrap';
+import Avatar from '../Avatar';
 import './meetingUserList.css';
 
 import { socketClient } from '../../utils';
 
-export default function MeetingUserList({usersVisible, users}) {
-    console.log(users);
+export default function MeetingUserList({ usersVisible, members }) {
+    let user = useSelector(state => state.userReducer.user)
     return (
         <div className="user-list">
             <div className="user-list-header">
                 <div className="user-list-title">
-                    User
+                    Participants
                 </div>
                 <div>
                     <Button variant="outline-light" onClick={usersVisible}>
@@ -18,10 +20,18 @@ export default function MeetingUserList({usersVisible, users}) {
                     </Button>
                 </div>
             </div>
-            <div className="user-name">
-                {socketClient.id}
-                {users.map(user => {
-                    return <div>{user.id}</div>
+            <div className="user-list-container">
+                {[...members].sort((a, b) => {
+                    if (a.userId === user.id) {
+                        return -1;
+                    }
+                }).map(member => {
+                    return (
+                        <div key={member.userId} className=''>
+                            <Avatar width='40px' height='40px' userId={member.userId} />
+                            <p>{member.userName} {member.userId === user.id && '(You)'}</p>
+                        </div>
+                    )
                 })}
             </div>
 

@@ -5,9 +5,8 @@ import { Link, useHistory } from 'react-router-dom'
 import { baseURL, timeDiff } from '../../utils'
 import Dropdown from '../Dropdown'
 import './navbar.css'
-import { cleanTeamState } from '../../store/reducers/team.reducer'
 import { cleanUser } from '../../store/reducers/user.reducer'
-import { getNotifs, readNotif, cleanNotificationState } from '../../store/reducers/notification.reducer'
+import { getNotifs, readNotif } from '../../store/reducers/notification.reducer'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import Loading from '../Loading'
 
@@ -29,11 +28,8 @@ export default function Navbar() {
     e.preventDefault()
     window.localStorage.removeItem('user')
     history.push('/login')
-    dispatch(cleanTeamState({
-      removeAll: true
-    }))
-    dispatch(cleanUser())
-    dispatch(cleanNotificationState())
+    // dispatch(cleanUser())
+    location.reload()
   }
 
   const handleNotif = e => {

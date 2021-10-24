@@ -12,14 +12,14 @@ const initialState = {
     loaded: true
 }
 
-export const getNotifs = createAsyncThunk('notification/getNotifs', async (offset, {rejectWithValue}) => {
+export const getNotifs = createAsyncThunk('notification/getNotifs', async (offset, { rejectWithValue }) => {
     let { token, id } = JSON.parse(window.localStorage.getItem('user'))
     let response = await axiosAuth.get(`${baseURL}/api/users/${id}/notifications?offset=${offset}&num=3`)
     let { notifications, numOf_UnReadNotifications } = response.data
-    return { notifications, numOf_UnReadNotifications}
+    return { notifications, numOf_UnReadNotifications }
 })
 
-export const readNotif = createAsyncThunk('notification/readNotif', async (notifId, {rejectWithValue}) => {
+export const readNotif = createAsyncThunk('notification/readNotif', async (notifId, { rejectWithValue }) => {
     let { token } = JSON.parse(window.localStorage.getItem('user'))
     let response = await axiosAuth.put(`${baseURL}/api/notifications/${notifId}`)
     return response.data
@@ -43,7 +43,7 @@ export const notificationSlice = createSlice({
             state.numOf_UnReadNotifications = action.payload.numOf_UnReadNotifications
             // window.localStorage.setItem('notifications', JSON.stringify(notifications))
         },
-        [getNotifs.rejected]: (state,action) => {
+        [getNotifs.rejected]: (state, action) => {
             state.error = action.error.message
             state.loading = false
             state.hasMore = false
@@ -59,12 +59,12 @@ export const notificationSlice = createSlice({
         }
     },
     reducers: {
-        cleanNotificationState: state => {
-            state.notifications = []
-            state.numOf_UnReadNotifications = 0
-        }
+        // cleanNotificationState: state => {
+        //     state.notifications = []
+        //     state.numOf_UnReadNotifications = 0
+        // }
     }
 })
 
-export const { cleanNotificationState } = notificationSlice.actions;
+// export const { cleanNotificationState } = notificationSlice.actions;
 export default notificationSlice.reducer

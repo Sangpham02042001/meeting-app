@@ -104,7 +104,7 @@ export default function ChatBox({ chatVisible }) {
         <div className="chatbox">
             <div className="chatbox-header">
                 <div className="chatbox-header-title">
-                    Message
+                    Messages
                 </div>
                 <div>
                     <Button variant="outline-light" onClick={chatVisible}>

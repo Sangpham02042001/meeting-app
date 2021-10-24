@@ -2,7 +2,8 @@ const users = {};
 const socketToMeeting = {};
 
 const { getMemberTeam, sendMessage } = require('../controllers/team.controller');
-const {getMemberMeeting, addMemberMeeting} = require('../controllers/meeting.controller')
+const { getMemberMeeting, addMemberMeeting,
+    joinMeeting, outMeeting, getUserMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage } = require('../controllers/conversation.controller');
 
 
@@ -53,27 +54,35 @@ const socketServer = (socket) => {
 
     //meeting
     socket.on("join-meeting", async ({ teamId, meetingId, userId }) => {
-        console.log(teamId, meetingId, userId);
-        let members = await getMemberMeeting({ meetingId });
-
-        const user = members.find(m => m.userId === userId)
-
+        let user = await getUserMeeting({ meetingId, userId })
         if (!user) {
-            const newMember = await addMemberMeeting({meetingId, userId});
+            user = await addMemberMeeting({ meetingId, userId });
+        } else {
+            if (!user.inMeeting) {
+                await joinMeeting({ meetingId, userId })
+            }
         }
-        
-        console.log("members", members);
+        let members = await getMemberMeeting({ meetingId }); // luon lay in Meeting
+        user = members.find(m => m.userId === user.userId)
+        socket.meetingId = meetingId
+
+        socket.emit('joined-meeting', { members, meetingId })
+
         for (let m of members) {
-            socket.to(m.id).emit('user-join-meeting', { teamId, meetingId, userJoinId: userId });
+            socket.to(m.userId).emit('user-join-meeting', { teamId, meetingId, user });
         }
-    })
-    socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
-        socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
+    });
+    socket.on('out-meeting', async ({ userId, meetingId }) => {
+        console.log(`out meeting ${userId} ${meetingId}`)
     })
 
-    socket.on("returning-signal", ({ signal, callerID }) => {
-        socket.to(callerID).emit('receiving-returned-signal', { signal, userId: socket.id });
-    });
+    // socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
+    //     socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
+    // })
+
+    // socket.on("returning-signal", ({ signal, callerID }) => {
+    //     socket.to(callerID).emit('receiving-returned-signal', { signal, userId: socket.id });
+    // });
 
     //conversation
 
@@ -92,13 +101,26 @@ const socketServer = (socket) => {
     })
 
     //disconnect
-    socket.on('disconnect', () => {
-        const meetingId = socketToMeeting[socket.id];
-        let room = users[meetingId];
-        if (room) {
-            room = room.filter(id => id !== socket.id);
-            users[meetingId] = room;
-            socket.broadcast.to(meetingId).emit('disconnected-meeting', socket.id);
+    socket.on('disconnect', async () => {
+        // const meetingId = socketToMeeting[socket.id];
+        // let room = users[meetingId];
+        // if (room) {
+        //     room = room.filter(id => id !== socket.id);
+        //     users[meetingId] = room;
+        //     socket.broadcast.to(meetingId).emit('disconnected-meeting', socket.id);
+        // }
+        console.log(`disconnect with meetingId: ${socket.meetingId} ${socket.id}`)
+        if (socket.meetingId) {
+            let { message } = await outMeeting({
+                meetingId: socket.meetingId,
+                userId: socket.id
+            })
+            if (message) {
+                let members = await getMemberMeeting({ meetingId: socket.meetingId });
+                for (let m of members) {
+                    socket.to(m.userId).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.id });
+                }
+            }
         }
     });
 }

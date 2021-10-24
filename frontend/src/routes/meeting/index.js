@@ -35,7 +35,7 @@ const Meeting = (props) => {
     const [isMeetingEnd, setIsMeetingEnd] = useState(false);
     const userVideo = useRef();
     let peersRef = useRef([]);
-    
+
     // const meetingId = props.match.params.meetingId;
 
     function getConnectedDevices(type, callback) {
@@ -52,8 +52,7 @@ const Meeting = (props) => {
         }
         dispatch(getTeamInfo({ teamId }))
 
-        console.log('meetingID', meetingId)
-        socketClient.emit("join-meeting", {teamId, meetingId, userId: userReducer.user.id})
+        socketClient.emit("join-meeting", { teamId, meetingId, userId: userReducer.user.id })
 
         getConnectedDevices('videoinput', (cameras) => {
             if (cameras.length) setIsEnableVideo(true);
@@ -62,6 +61,19 @@ const Meeting = (props) => {
         getConnectedDevices('audioinput', (audios) => {
             if (audios.length) setIsEnableAudio(true);
         })
+
+        // window.addEventListener('beforeunload', (ev) => {
+        //     ev.preventDefault();
+        //     console.log(meetingId, userReducer.user.id)
+        //     socketClient.connect()
+        //     //disconnect: true
+        //     socketClient.emit('out-meeting', {
+        //         userId: userReducer.user.id,
+        //         meetingId
+        //     })
+        //     // socketClient.disconnect()
+        //     return ev.returnValue = 'Are you sure you want to close?';
+        // })
 
         return () => {
             setIsEnableAudio(false);
@@ -118,17 +130,17 @@ const Meeting = (props) => {
                             setPeers(peers);
                         })
 
-                        socketClient.on("joined-meeting", ({ signal, callerID }) => {
-                            const peer = addPeer(signal, callerID, stream);
-                            peersRef.current.push({
-                                peerID: callerID,
-                                peer,
-                            })
-                            setPeers(peers => [...peers, {
-                                peerID: callerID,
-                                peer,
-                            }]);
-                        });
+                        // socketClient.on("joined-meeting", ({ signal, callerID }) => {
+                        //     const peer = addPeer(signal, callerID, stream);
+                        //     peersRef.current.push({
+                        //         peerID: callerID,
+                        //         peer,
+                        //     })
+                        //     setPeers(peers => [...peers, {
+                        //         peerID: callerID,
+                        //         peer,
+                        //     }]);
+                        // });
 
                         socketClient.on("receiving-returned-signal", ({ signal, callerID, userId }) => {
                             const item = peersRef.current.find(p => p.peerID === userId);
@@ -290,7 +302,7 @@ const Meeting = (props) => {
                 </div>
                 {isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
-                {isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} users={meetingReducer.users} />}
+                {isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} members={meetingReducer.meeting.members} />}
 
                 {isOpenInfo &&
                     <Col className="meeting-chatbox" md="4">

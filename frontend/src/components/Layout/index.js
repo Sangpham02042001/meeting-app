@@ -6,6 +6,7 @@ import Navbar from '../Navbar';
 import { socketClient, broadcastLocal } from '../../utils';
 import { sendMessageCv } from '../../store/reducers/conversation.reducer';
 import { sendMessage } from '../../store/reducers/team.reducer';
+import { getMeetingMembers, userJoinMeeting, userOutMeeting } from '../../store/reducers/meeting.reducer'
 import './layout.css'
 
 export default function Layout({ children }) {
@@ -14,6 +15,7 @@ export default function Layout({ children }) {
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
   useEffect(() => {
+    //conversations
     socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }) => {
       dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }));
       broadcastLocal.postMessage({ messageId, content, senderId, receiverId, conversationId, photo, createdAt })
@@ -27,6 +29,7 @@ export default function Layout({ children }) {
       //todo
     })
 
+    //teams
     socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photo }) => {
       dispatch(sendMessage({
         messageId, content, senderId, teamId, photo
@@ -39,8 +42,22 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('user-join-meeting', ({ teamId, meetingId, userJoinId }) => {
-      dispatch(userJoinMeeting({ teamId, meetingId, userJoinId }))
+    //meetings
+    socketClient.on('user-join-meeting', ({ teamId, meetingId, user }) => {
+      dispatch(userJoinMeeting({ teamId, meetingId, user }))
+    })
+
+    socketClient.on('joined-meeting', ({ members, meetingId }) => {
+      dispatch(getMeetingMembers({
+        members,
+        meetingId
+      }))
+    })
+
+    socketClient.on('user-out-meeting', ({ meetingId, userId }) => {
+      dispatch(userOutMeeting({
+        meetingId, userId
+      }))
     })
 
     broadcastLocal.onmessage = (message) => {

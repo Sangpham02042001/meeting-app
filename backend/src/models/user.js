@@ -45,6 +45,12 @@ const Users_Conversations = sequelize.define('Users_Conversations', {
   isRead: { type: DataTypes.BOOLEAN, defaultValue: false }
 }, { timestamps: true });
 
+const Users_Meetings = sequelize.define('Users_Meetings', {
+  inMeeting: {
+    type: DataTypes.BOOLEAN, defaultValue: true
+  }
+})
+
 
 User.belongsToMany(Conversation, {
   through: 'Users_Conversations',
