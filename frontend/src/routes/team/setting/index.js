@@ -24,7 +24,6 @@ export default function TeamSetting(props) {
 
   useEffect(() => {
     if (!teamReducer.teamLoaded) {
-      console.log('call in setting')
       dispatch(getTeamInfo({ teamId }))
     }
   }, [teamId])

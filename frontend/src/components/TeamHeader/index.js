@@ -192,6 +192,9 @@ export default function TeamHeader({ showTeamInfo }) {
             </button>
             }>
             <div style={{ display: 'flex', flexDirection: 'column', width: '160px' }}>
+              <Link to={`/teams/${teamId}/meetings`}>
+                <i className="fas fa-handshake"></i> Meetings
+              </Link>
               {teamReducer.team.hostId === user.id && <Link to={`/teams/${teamId}/setting`}>
                 <i className="fas fa-cog"></i> Manage Team
               </Link>}

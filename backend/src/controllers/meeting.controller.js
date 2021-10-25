@@ -138,6 +138,13 @@ const updateMeetingState = async ({ meetingId }) => {
     })
     meeting.active = false
     await meeting.save()
+    // await sequelize.query(
+    //   "UPDATE meetings m SET time = TIMESTAMPDIFF(SECOND, m.createdAt, NOW()) " +
+    //   "WHERE m.id = :meetingId", {
+    //   replacements: {
+    //     meetingId
+    //   }
+    // })
     let members = await sequelize.query(
       "SELECT ut.userId FROM users_meetings ut " +
       "INNER JOIN meetings m ON m.id = ut.meetingId " +

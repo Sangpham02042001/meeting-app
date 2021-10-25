@@ -131,3 +131,22 @@ span {
   margin: auto;
   display: block;
 }
+
+/* .logout-container {
+  padding: 15px 0;
+} */
+
+.logout-container > div {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.logout-container > div:hover {
+  background-color: rgb(202, 202, 202);
+  transition: background-color 0.3s ease;
+}
+
+.logout-container > div > a:hover {
+  color: #000;
+}

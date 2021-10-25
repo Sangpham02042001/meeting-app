@@ -129,10 +129,9 @@ export default function Navbar() {
               style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }} >
             </div>
           </button>
-          <div className="dropdown-content">
-            <Link to="/profile">Profile</Link>
-            <a href="#">Link 2</a>
-            <span onClick={handleLogout}>Logout</span>
+          <div className="dropdown-content logout-container">
+            <div><Link to="/profile">Profile</Link></div>
+            <div onClick={handleLogout}>Logout</div>
           </div>
         </div>
 
