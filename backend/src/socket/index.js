@@ -75,6 +75,16 @@ const socketServer = (socket) => {
         }
     });
 
+    socket.on('send-message-meeting', async ({ teamId, senderId, content, image, meetingId }) => {
+        let members = await getMemberMeeting({ meetingId });
+        members = members.filter(m => m.id !== senderId);
+        const message = await sendMessage({ teamId, senderId, content, image })
+        socket.emit('sent-message-meeting', { messageId: message.id, content, meetingId, senderId, photo: message.photo, teamId })
+        console.log('sent-message-meeting', socket.id)
+        for (let m of members) {
+            socket.to(m.id).emit('receive-message-meeting', { messageId: message.id, meetingId, teamId, senderId, content, photo: message.photo });
+        }
+    })
     // socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
     //     socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
     // })
@@ -108,7 +118,6 @@ const socketServer = (socket) => {
         //     users[meetingId] = room;
         //     socket.broadcast.to(meetingId).emit('disconnected-meeting', socket.id);
         // }
-        console.log(socket);
         console.log(`disconnect with meetingId: ${socket.meetingId} ${socket.id}`)
         if (socket.meetingId) {
             let { message } = await outMeeting({

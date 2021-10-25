@@ -5,8 +5,8 @@ import { Button, Modal } from 'react-bootstrap'
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import Dropdown from '../Dropdown'
-import { deleteTeam, outTeam } from '../../store/reducers/team.reducer'
-import { createTeamMeeting } from '../../store/reducers/meeting.reducer'
+import { deleteTeam, outTeam, createTeamMeeting } from '../../store/reducers/team.reducer'
+// import { createTeamMeeting } from '../../store/reducers/meeting.reducer'
 
 export default function TeamHeader({ showTeamInfo }) {
   // const { teamId } = useParams()

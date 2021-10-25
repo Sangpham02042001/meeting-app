@@ -3,7 +3,7 @@ import { Button, InputGroup, FormControl } from 'react-bootstrap';
 import './meetingChatBox.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { saveMessage } from '../../store/reducers/meeting.reducer';
+import { saveMessage, getMeetingMessages } from '../../store/reducers/meeting.reducer';
 import {
     getTeamMessages,
     sendMessage
@@ -15,13 +15,12 @@ export default function ChatBox({ chatVisible }) {
     const { teamId } = useParams()
     const dispatch = useDispatch();
     const [message, setMessage] = useState('');
-    // const messages = useSelector(state => state.meetingReducer.messages);
     const userReducer = useSelector(state => state.userReducer)
-    const teamReducer = useSelector(state => state.teamReducer)
+    const meetingReducer = useSelector(state => state.meetingReducer)
     const [offsetMessages, setOffsetMessages] = useState(15);
     const [image, setImage] = useState(null)
     const [imageUrl, setImageUrl] = useState('')
-    const currentNumOfMessages = useSelector(state => state.teamReducer.team.messages.length)
+    const currentNumOfMessages = meetingReducer.meeting.messages.length
     const scrollRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -53,9 +52,13 @@ export default function ChatBox({ chatVisible }) {
         }
     }, [])
 
+    useEffect(() => {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }, [meetingReducer.meeting.messages.length])
+
     const handleMessageScroll = e => {
-        if (teamReducer.team.numOfMessages > currentNumOfMessages && e.target.scrollTop === 0) {
-            dispatch(getTeamMessages({
+        if (meetingReducer.meeting.numOfMessages > currentNumOfMessages && e.target.scrollTop === 0) {
+            dispatch(getMeetingMessages({
                 teamId,
                 offset: offsetMessages + 15,
                 num: 15
@@ -75,12 +78,19 @@ export default function ChatBox({ chatVisible }) {
         }
     }
 
-    const handleSendMessage = () => {;
+    const handleSendMessage = () => {
+        ;
         let userId = socketClient.id;
         if (message !== '' || image) {
             // dispatch(saveMessage({ message, userId }));
-            socketClient.emit("send-message-team", { teamId, senderId: userId, content: message, image });
-            broadcastLocal.postMessage({ teamId, senderId: userReducer.user.id, content: message, image })
+            // socketClient.emit("send-message-team", { teamId, senderId: userId, content: message, image });
+            socketClient.emit('send-message-meeting', {
+                senderId: userId,
+                meetingId: meetingReducer.meeting.id,
+                content: message,
+                image,
+                teamId
+            })
             setMessage('');
             setImageUrl('');
             setImage('');
@@ -116,13 +126,13 @@ export default function ChatBox({ chatVisible }) {
                         ref={scrollRef} style={{
                             height: `calc(70vh - ${imageUrl ? 120 : 0}px)`
                         }}>
-                        {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
+                        {currentNumOfMessages && meetingReducer.meeting.messages.slice(0, currentNumOfMessages - 1)
                             .map((message, idx) => (
                                 <Message message={message} key={'message' + message.id}
                                     logInUserId={null}
-                                    hasAvatar={message.userId != teamReducer.team.messages[idx + 1].userId} />
+                                    hasAvatar={message.userId != meetingReducer.meeting.messages[idx + 1].userId} />
                             ))}
-                        {currentNumOfMessages && <Message message={teamReducer.team.messages[currentNumOfMessages - 1]}
+                        {currentNumOfMessages && <Message message={meetingReducer.meeting.messages[currentNumOfMessages - 1]}
                             logInUserId={null}
                             hasAvatar={true} lastMessage={true} />}
                     </div>}

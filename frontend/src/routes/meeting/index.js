@@ -13,6 +13,7 @@ import {
     getTeamMessages,
     getTeamInfo,
 } from '../../store/reducers/team.reducer'
+import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
@@ -83,7 +84,7 @@ const Meeting = (props) => {
 
     useEffect(() => {
         if (teamReducer.teamLoaded) {
-            dispatch(getTeamMessages({
+            dispatch(getMeetingMessages({
                 teamId,
                 offset: 0,
                 num: 15

@@ -20,18 +20,36 @@ export const createTeamMeeting = createAsyncThunk('/createTeamMeeting', async ({
   }
 })
 
+export const getMeetingMessages = createAsyncThunk('meeting/getMessages', async ({ teamId, offset, num }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.get(`/api/teams/${teamId}/messages?offset=${offset}&num=${num}`)
+    return {
+      messages: response.data.messages,
+      numOfMessages: response.data.numOfMessages
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
 export const meetingSlice = createSlice({
   name: 'Meeting',
   initialState: {
-    meetings: {
-      teams: [],
-      conversations: []
-    },
+    // meetings: {
+    //   teams: [],
+    //   conversations: []
+    // },
     meeting: {
       id: 0,
       members: [],
       messages: [],
+      numOfMessages: 0,
       teamId: 0,
+      messagesLoaded: false
     },
     error: null
   },
@@ -40,16 +58,43 @@ export const meetingSlice = createSlice({
       console.log('create meeting pending')
     },
     [createTeamMeeting.fulfilled]: (state, action) => {
-      state.meetings.teams.push(action.payload.meeting)
+      console.log(action.payload.meeting)
+      state.meeting = action.payload.meeting
     },
     [createTeamMeeting.rejected]: (state, action) => {
       state.error = action.payload.error;
-    }
+    },
+    [getMeetingMessages.pending]: (state) => {
+      // state.loading = true;
+      state.meeting.messagesLoaded = false
+    },
+    [getMeetingMessages.fulfilled]: (state, action) => {
+      // state.loading = false;
+      if (state.meeting.messages.length === 0) {
+        state.meeting.messages.push(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
+      } else {
+        state.meeting.messages.unshift(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
+      }
+      if (action.payload.numOfMessages) {
+        state.meeting.numOfMessages = action.payload.numOfMessages
+      }
+      state.meeting.messagesLoaded = true
+    },
+    [getMeetingMessages.rejected]: (state, action) => {
+      console.log(action.payload.error)
+      state.team.messagesLoaded = true
+    },
   },
   reducers: {
     saveMessage: (state, action) => {
       const { message, userId, userName } = action.payload;
       state.messages.push({ message, userId, userName });
+    },
+    sendMeetingMessage: (state, action) => {
+      let { messageId, content, senderId, meetingId, photo } = action.payload;
+      if (state.meeting.id && state.meeting.id == meetingId) {
+        state.meeting.messages.push({ id: messageId, content, userId: senderId, photo })
+      }
     },
     userJoinMeeting: (state, action) => {
       let { teamId, meetingId, user } = action.payload;
@@ -77,6 +122,7 @@ export const meetingSlice = createSlice({
   }
 })
 
-export const { saveMessage, userJoinMeeting, getMeetingMembers, userOutMeeting } = meetingSlice.actions;
+export const { saveMessage, userJoinMeeting, getMeetingMembers,
+  userOutMeeting, sendMeetingMessage } = meetingSlice.actions;
 
 export default meetingSlice.reducer

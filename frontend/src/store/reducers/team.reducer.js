@@ -38,15 +38,19 @@ export const getRequestTeams = createAsyncThunk('teams/getRequestTeams', async (
 export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId }, { rejectWithValue }) => {
   let response = await axiosAuth.get(`/api/teams/${teamId}`)
   let { team } = response.data
+  //get invited users
   response = await axiosAuth.get(`/api/teams/${teamId}/invited-users`)
   let { invitedUsers } = response.data
   team.invitedUsers = invitedUsers
+  //get members
   response = await axiosAuth.get(`/api/teams/${teamId}/members`)
   let { members } = response.data
   team.members = members
+  //get request users
   response = await axiosAuth.get(`/api/teams/${teamId}/requestusers`)
   let { requestUsers } = response.data
   team.requestUsers = requestUsers
+  //get meetings
   response = await axiosAuth.get(`/api/teams/${teamId}/meetings`)
   let { meetings } = response.data
   team.meetings = meetings
@@ -154,31 +158,6 @@ export const getTeamMessages = createAsyncThunk('teams/getMessages', async ({ te
   }
 })
 
-// export const sendMessage = createAsyncThunk('teams/sendMessage', async ({ teamId, data }, { rejectWithValue }) => {
-//   try {
-//     let response = await axiosAuth.post(`/api/teams/${teamId}/messages`, data)
-//     if (response.status == 201) {
-//       let { message } = response.data
-//       return {
-//         message: {
-//           id: message.id,
-//           content: message.content,
-//           teamId: message.teamId,
-//           createdAt: message.createdAt,
-//           userId: message.userId,
-//           photo: message.photo
-//         }
-//       }
-//     }
-//   } catch (error) {
-//     let { data } = error.response
-//     if (data && data.error) {
-//       return rejectWithValue(data)
-//     }
-//     return error
-//   }
-// })
-
 export const deleteTeam = createAsyncThunk('teams/delete', async ({ teamId }, { rejectWithValue }) => {
   try {
     let response = await axiosAuth.delete(`/api/teams/${teamId}`)
@@ -228,6 +207,25 @@ export const outTeam = createAsyncThunk('teams/out', async ({ userId, teamId }, 
       }
     }
   } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
+export const createTeamMeeting = createAsyncThunk('/createTeamMeeting', async ({ teamId }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.post(`/api/meetings`, {
+      teamId
+    })
+    if (response.status) {
+      let { meeting } = response.data
+      return { meeting }
+    }
+  } catch (error) {
+    console.log(error)
     let { data } = error.response
     if (data && data.error) {
       return rejectWithValue(data)
@@ -400,17 +398,6 @@ export const teamSlice = createSlice({
       console.log(action.payload.error)
       state.team.messagesLoaded = true
     },
-    // [sendMessage.pending]: (state) => {
-    //   console.log('send message pending')
-    // },
-    // [sendMessage.fulfilled]: (state, action) => {
-    //   let { message } = action.payload
-    //   state.team.messages.push(message)
-    //   state.team.numOfMessages += 1
-    // },
-    // [sendMessage.rejected]: (state, action) => {
-    //   state.error = action.payload.error
-    // },
     [outTeam.pending]: (state) => {
       state.loading = true
     },
@@ -435,6 +422,17 @@ export const teamSlice = createSlice({
     },
     [createNewTeam.rejected]: (state, action) => {
       state.error = action.payload.error
+    },
+    [createTeamMeeting.pending]: (state, action) => {
+      console.log('create meeting pending')
+    },
+    [createTeamMeeting.fulfilled]: (state, action) => {
+      console.log(action.payload.meeting)
+      state.team.meetingActive = action.payload.meeting
+      state.team.meetings.push(action.payload.meeting)
+    },
+    [createTeamMeeting.rejected]: (state, action) => {
+      state.error = action.payload.error;
     }
   }
 })
