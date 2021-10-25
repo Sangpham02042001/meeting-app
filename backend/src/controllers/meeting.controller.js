@@ -129,7 +129,35 @@ const getUserMeeting = async ({ meetingId, userId }) => {
   }
 }
 
+const updateMeetingState = async ({ meetingId }) => {
+  try {
+    const meeting = await Meeting.findOne({
+      where: {
+        id: meetingId
+      }
+    })
+    meeting.active = false
+    await meeting.save()
+    let members = await sequelize.query(
+      "SELECT ut.userId FROM users_meetings ut " +
+      "INNER JOIN meetings m ON m.id = ut.meetingId " +
+      "WHERE m.id = :meetingId;",
+      {
+        replacements: {
+          meetingId
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    return members;
+  } catch (error) {
+    console.log(error)
+    return []
+  }
+}
+
 module.exports = {
   getMeetingInfo, createMeeting, getMemberMeeting,
-  addMemberMeeting, outMeeting, joinMeeting, getUserMeeting
+  addMemberMeeting, outMeeting, joinMeeting,
+  getUserMeeting, updateMeetingState
 }

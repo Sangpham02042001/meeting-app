@@ -31,6 +31,7 @@ export const meetingSlice = createSlice({
       id: 0,
       members: [],
       messages: [],
+      teamId: 0,
     },
     error: null
   },
@@ -59,6 +60,7 @@ export const meetingSlice = createSlice({
     },
     userOutMeeting: (state, action) => {
       let { meetingId, userId } = action.payload;
+      console.log('on user out meeting', meetingId, userId)
       if (state.meeting.id === meetingId) {
         let idx = state.meeting.members.findIndex(m => m.userId === userId)
         if (idx >= 0) {
@@ -67,9 +69,10 @@ export const meetingSlice = createSlice({
       }
     },
     getMeetingMembers: (state, action) => {
-      let { members, meetingId } = action.payload
+      let { members, meetingId, teamId } = action.payload
       state.meeting.members = members
       state.meeting.id = meetingId
+      state.meeting.teamId = teamId
     }
   }
 })

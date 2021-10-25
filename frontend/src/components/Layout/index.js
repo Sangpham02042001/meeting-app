@@ -5,7 +5,7 @@ import { getNotifs } from '../../store/reducers/notification.reducer'
 import Navbar from '../Navbar';
 import { socketClient, broadcastLocal } from '../../utils';
 import { sendMessageCv } from '../../store/reducers/conversation.reducer';
-import { sendMessage } from '../../store/reducers/team.reducer';
+import { sendMessage, updateMeetingState } from '../../store/reducers/team.reducer';
 import { getMeetingMembers, userJoinMeeting, userOutMeeting } from '../../store/reducers/meeting.reducer'
 import './layout.css'
 
@@ -47,10 +47,11 @@ export default function Layout({ children }) {
       dispatch(userJoinMeeting({ teamId, meetingId, user }))
     })
 
-    socketClient.on('joined-meeting', ({ members, meetingId }) => {
+    socketClient.on('joined-meeting', ({ members, meetingId, teamId }) => {
       dispatch(getMeetingMembers({
         members,
-        meetingId
+        meetingId,
+        teamId
       }))
     })
 
@@ -60,9 +61,21 @@ export default function Layout({ children }) {
       }))
     })
 
+    socketClient.on('end-meeting', ({ meetingId }) => {
+      console.log(`end meeting with id, ${meetingId}`)
+      broadcastLocal.postMessage({
+        messageType: 'end-meeting',
+        meetingId
+      })
+    })
+
     broadcastLocal.onmessage = (message) => {
       console.log(message);
-      if (message.data.conversationId) {
+      if (message.messageType === 'end-meeting') {
+        dispatch(updateMeetingState({
+          meetingId
+        }))
+      } else if (message.data.conversationId) {
         dispatch(sendMessageCv(message.data))
       } else if (message.data.teamId) {
         dispatch(sendMessage(message.data))

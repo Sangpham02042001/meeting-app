@@ -255,6 +255,12 @@ export const teamSlice = createSlice({
       if (state.team.id && state.team.id == teamId) {
         state.team.messages.push({ id: messageId, content, userId: senderId, teamId, photo })
       }
+    },
+    updateMeetingState: (state, action) => {
+      let { meetingId } = action.payload
+      if (state.team.meetingActive && state.team.meetingActive.id == meetingId) {
+        state.team.meetingActive = null
+      }
     }
   },
   extraReducers: {
@@ -434,6 +440,6 @@ export const teamSlice = createSlice({
   }
 })
 
-export const { cleanTeamState, sendMessage } = teamSlice.actions;
+export const { cleanTeamState, sendMessage, updateMeetingState } = teamSlice.actions;
 
 export default teamSlice.reducer

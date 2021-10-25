@@ -3,7 +3,8 @@ const socketToMeeting = {};
 
 const { getMemberTeam, sendMessage } = require('../controllers/team.controller');
 const { getMemberMeeting, addMemberMeeting,
-    joinMeeting, outMeeting, getUserMeeting } = require('../controllers/meeting.controller')
+    joinMeeting, outMeeting, getUserMeeting,
+    updateMeetingState } = require('../controllers/meeting.controller')
 const { setConversation, setMessage } = require('../controllers/conversation.controller');
 
 
@@ -66,7 +67,7 @@ const socketServer = (socket) => {
         user = members.find(m => m.userId === user.userId)
         socket.meetingId = meetingId
 
-        socket.emit('joined-meeting', { members, meetingId })
+        socket.emit('joined-meeting', { members, meetingId, teamId })
 
         for (let m of members) {
             socket.to(m.userId).emit('user-join-meeting', { teamId, meetingId, user });
@@ -117,10 +118,22 @@ const socketServer = (socket) => {
             })
             if (message) {
                 let members = await getMemberMeeting({ meetingId: socket.meetingId });
-                for (let m of members) {
-                    socket.to(m.userId).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.id });
+                if (members.length === 0) {
+                    console.log('all out meeting')
+                    members = await updateMeetingState({ meetingId: socket.meetingId })
+                    console.log(members)
+                    for (let m of members) {
+                        socket.to(m.userId).emit('end-meeting', {
+                            meetingId: socket.meetingId
+                        })
+                    }
+                } else {
+                    for (let m of members) {
+                        socket.to(m.userId).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.id });
+                    }
                 }
             }
+            delete socket.meetingId;
         }
     });
 }
