@@ -4,17 +4,15 @@ import './conversations.css';
 import { axiosAuth } from '../../utils';
 import { getConversations, createConversation } from '../../store/reducers/conversation.reducer';
 import { Switch, Link, Route } from "react-router-dom";
-import { useHistory, useParams } from 'react-router';
+import { useHistory } from 'react-router';
 import Avatar from '../../components/Avatar';
 import ConversationChat from '../../components/ConversationChat';
-import { v4 } from 'uuid';
 
 
 export default function Conversations() {
     const [textSearch, setTextSearch] = useState('');
     const [searchUsers, setSearchUsers] = useState([]);
     const [userSearch, setUserSearch] = useState(null);
-    // const tmpConverId = v4();
     const user = useSelector(state => state.userReducer.user);
     const conversations = useSelector(state => state.conversationReducer.conversations);
     const dispatch = useDispatch();
@@ -92,7 +90,6 @@ export default function Conversations() {
                             return <ConversationLink key={conv.participantId}
                                 conversation={conv}
                                 user={user}
-                                // tmpConverId={tmpConverId}
                             />
                         })
                     }
@@ -118,7 +115,7 @@ export default function Conversations() {
     )
 }
 
-const ConversationLink = ({ conversation, user, tmpConverId }) => {
+const ConversationLink = ({ conversation, user }) => {
     const [participant, setParticipant] = useState(null);
     const [lastMessage, setLastMessage] = useState(null);
     const lastMessageChange = useSelector(state => state.conversationReducer.lastMessageChange);
@@ -128,10 +125,10 @@ const ConversationLink = ({ conversation, user, tmpConverId }) => {
         try {
             const response = await axiosAuth.get(`/api/users/${conversation.participantId}`);
             setParticipant(response.data);
-            if (conversation.conversationId ) {
+            if (conversation.conversationId) {
                 const response = await axiosAuth.get(`/api/conversations/${conversation.conversationId}/messages/lastMessage`);
                 setLastMessage(response.data.lastMessage);
-                
+
             }
         } catch (error) {
             console.log(error);
@@ -145,11 +142,13 @@ const ConversationLink = ({ conversation, user, tmpConverId }) => {
                 <Link to={`/conversations/${participant.id}`}
                     key={participant.id}
                     style={{ textDecoration: "none", color: "black", width: "100%", display: "flex", justifyContent: "center" }}>
-                    <div className="user-chat" style={{backgroundColor: curParticipant && participant.id === curParticipant.id ? '#fff': ''}}>
+                    <div className="conversation-link" style={{ backgroundColor: curParticipant && participant.id === curParticipant.id ? '#fff' : '' }}>
                         <Avatar width="40px" height="40px" userId={participant.id} />
-                        <div style={{ marginLeft: "15px" }}>
-                            {participant.userName}
-                            <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "120px", opacity: conversation.isRead ? "0.6" : "1" }}>
+                        <div className="link-content">
+                            <div className="link-name">
+                                {participant.userName}
+                            </div>
+                            <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
                                 {lastMessage &&
                                     (lastMessage.userId === user.id ?
                                         <span>You: {lastMessage.content}</span>

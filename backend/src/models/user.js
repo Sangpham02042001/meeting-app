@@ -115,7 +115,17 @@ User.belongsToMany(Meeting, {
 
 User.hasMany(Message, {
   as: 'messages',
-  foreignKey: 'userId'
+  foreignKey: {
+    name: 'userId',
+    allowNull: false,
+  }
+})
+
+Message.belongsTo(User, {
+  foreignKey: {
+    name: 'userId',
+    allowNull: false
+  }
 })
 
 module.exports = User

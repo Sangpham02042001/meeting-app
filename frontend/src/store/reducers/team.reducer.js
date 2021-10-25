@@ -348,7 +348,6 @@ export const teamSlice = createSlice({
       state.loading = false
     },
     [updateBasicTeamInfo.rejected]: (state, action) => {
-      // console.log(action.payload)
       state.error = action.payload.error
       state.loading = false
     },

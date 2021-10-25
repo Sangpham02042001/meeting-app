@@ -21,7 +21,7 @@ export const getParticipant = createAsyncThunk('conversations/getParticipant', a
 })
 
 export const readConversation = createAsyncThunk('conversations/readConversation', async ({ conversationId }) => {
-  const response = await axiosAuth.patch(`/api/conversations/${conversationId}`);
+  const response = await axiosAuth.patch(`/api/conversations/${conversationId}`, {conversationId});
   return response.data;
 })
 
@@ -59,7 +59,6 @@ export const conversationSlice = createSlice({
     [readConversation.fulfilled]: (state, action) => {
       const {conversationId} = action.payload;
       let conversation = state.conversations.find(conv => conv.conversationId === conversationId);
-      console.log(conversationId)
       if (conversation) {
         conversation.isRead = true;
       }

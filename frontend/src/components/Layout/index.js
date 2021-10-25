@@ -12,10 +12,14 @@ import './layout.css'
 export default function Layout({ children }) {
   const dispatch = useDispatch();
   const team = useSelector(state => state.teamReducer.team)
+  const userReducer = useSelector(state => state.userReducer)
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
   useEffect(() => {
-    //conversations
+    socketClient.auth = { userId: userReducer.user.id };
+    socketClient.connect();
+
+    //conversation
     socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }) => {
       dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }));
       broadcastLocal.postMessage({ messageId, content, senderId, receiverId, conversationId, photo, createdAt })
@@ -83,6 +87,7 @@ export default function Layout({ children }) {
     }
 
     socketClient.on("disconnect", () => {
+      console.log('disconnect', socketClient)
       socketClient.connect();
     });
 

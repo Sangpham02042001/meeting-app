@@ -104,7 +104,13 @@ const getLastMessage = async (req, res) => {
 
 const readConversation = async (req, res) => {
     try {
-        const { conversationId } = req.params;
+        const { conversationId } = req.body;
+        if (!conversationId) {
+            
+            return res.status(200).json({
+                conversationId: null
+            })
+        }
         await sequelize.query("UPDATE users_conversations SET isRead = 1 WHERE conversationId = :conversationId",
             {
                 replacements: {
@@ -116,6 +122,7 @@ const readConversation = async (req, res) => {
             conversationId
         })
     } catch (error) {
+        console.log(error)
         return res.status(403).json({
             message: "Read message fail!"
         })

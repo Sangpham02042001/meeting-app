@@ -47,8 +47,6 @@ export const userSlice = createSlice({
         state.user = user
         state.loading = false
         state.authenticated = true
-        socketClient.auth = { userId: user.id };
-        socketClient.connect();
       }
       state.loaded = true
     },

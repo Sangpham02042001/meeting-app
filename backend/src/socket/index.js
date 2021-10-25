@@ -41,7 +41,6 @@ const socketServer = (socket) => {
     // });
     //team
     socket.on('send-message-team', async ({ teamId, senderId, content, image }) => {
-        console.log(image)
         let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, image })
@@ -55,6 +54,8 @@ const socketServer = (socket) => {
 
     //meeting
     socket.on("join-meeting", async ({ teamId, meetingId, userId }) => {
+        socket.join(`meeting-${meetingId}`);
+        console.log('rooms', socket.rooms);
         let user = await getUserMeeting({ meetingId, userId })
         if (!user) {
             user = await addMemberMeeting({ meetingId, userId });
@@ -73,9 +74,6 @@ const socketServer = (socket) => {
             socket.to(m.userId).emit('user-join-meeting', { teamId, meetingId, user });
         }
     });
-    socket.on('out-meeting', async ({ userId, meetingId }) => {
-        console.log(`out meeting ${userId} ${meetingId}`)
-    })
 
     // socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
     //     socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
@@ -110,6 +108,7 @@ const socketServer = (socket) => {
         //     users[meetingId] = room;
         //     socket.broadcast.to(meetingId).emit('disconnected-meeting', socket.id);
         // }
+        console.log(socket);
         console.log(`disconnect with meetingId: ${socket.meetingId} ${socket.id}`)
         if (socket.meetingId) {
             let { message } = await outMeeting({
@@ -122,18 +121,24 @@ const socketServer = (socket) => {
                     console.log('all out meeting')
                     members = await updateMeetingState({ meetingId: socket.meetingId })
                     console.log(members)
-                    for (let m of members) {
-                        socket.to(m.userId).emit('end-meeting', {
-                            meetingId: socket.meetingId
-                        })
-                    }
+                    // for (let m of members) {
+                    //     socket.to(m.userId).emit('end-meeting', {
+                    //         meetingId: socket.meetingId
+                    //     })
+                    // }
+                    socket.to(`meeting-${socket.meetingId}`).emit('end-meeting', {
+                        meetingId: socket.meetingId
+                    })
                 } else {
-                    for (let m of members) {
-                        socket.to(m.userId).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.id });
-                    }
+                    // for (let m of members) {
+                    //     socket.to(m.userId).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.id });
+                    // }
+
+                    socket.to(`meeting-${socket.meetingId}`).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.id });
                 }
             }
             delete socket.meetingId;
+            socket.leave(`meeting-${socket.meetingId}`)
         }
     });
 }

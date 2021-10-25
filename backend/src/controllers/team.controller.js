@@ -463,7 +463,6 @@ const sendMessage = async ({ teamId, senderId, content, image }) => {
 const getTeamMessages = async (req, res) => {
   let { offset, num } = req.query
   let { teamId } = req.params
-  console.log(offset, num)
   try {
     if (offset == 0) {
       let numOfMessages = await sequelize.query(

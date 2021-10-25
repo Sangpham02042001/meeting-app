@@ -12,25 +12,25 @@ export default function PrivateRoute({ children, ...rest }) {
   useEffect(() => {
     if (!userReducer.loaded) {
       dispatch(isAuthenticated())
-
     }
 
   }, [])
 
   return (
-    !userReducer.loaded ? <Loading />
-      : <Route
+    !userReducer.loaded ?
+      <Loading />
+      :
+      <Route
         {...rest}
         render={
           () => (
-            userReducer.authenticated ? 
-            <Layout>
-              {children}
-            </Layout> 
-            : 
-            (rest.path === '/' ? <Welcome /> : <Redirect to='/login' />)
+            userReducer.authenticated ?
+              <Layout>
+                {children}
+              </Layout>
+              :
+              (rest.path === '/' ? <Welcome /> : <Redirect to='/login' />)
           )}
-
       />
   )
 }

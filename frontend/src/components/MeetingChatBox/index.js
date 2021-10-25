@@ -17,7 +17,6 @@ export default function ChatBox({ chatVisible }) {
     const [message, setMessage] = useState('');
     // const messages = useSelector(state => state.meetingReducer.messages);
     const userReducer = useSelector(state => state.userReducer)
-    const user = userReducer.user
     const teamReducer = useSelector(state => state.teamReducer)
     const [offsetMessages, setOffsetMessages] = useState(15);
     const [image, setImage] = useState(null)
@@ -76,13 +75,12 @@ export default function ChatBox({ chatVisible }) {
         }
     }
 
-    const handleSendMessage = () => {
-        console.log(message);
+    const handleSendMessage = () => {;
         let userId = socketClient.id;
         if (message !== '' || image) {
             // dispatch(saveMessage({ message, userId }));
             socketClient.emit("send-message-team", { teamId, senderId: userId, content: message, image });
-            broadcastLocal.postMessage({ teamId, senderId: user.id, content: message, image })
+            broadcastLocal.postMessage({ teamId, senderId: userReducer.user.id, content: message, image })
             setMessage('');
             setImageUrl('');
             setImage('');

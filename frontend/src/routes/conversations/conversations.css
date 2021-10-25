@@ -200,15 +200,41 @@
   justify-content: center;
 }
 
-.user-chat {
+.conversation-link {
   display: flex;
-  flex-direction: row;
   align-items: center;
   padding: 15px;
   width: 95%;
   border-radius: 5px;
 }
 
-.user-chat:hover {
+.conversation-link:hover {
   background-color: #ffffff;
+}
+
+.conversation-link .link-content {
+  margin-left: 25px;
+}
+
+.conversation-link .link-name {
+  font-size: 18px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.conversation-link .last-message {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 120px;
+  opacity: 0.6;
+}
+
+.conversation-link .last-message-unread {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 120px;
+  opacity: 1;
+  font-weight: 600;
 }

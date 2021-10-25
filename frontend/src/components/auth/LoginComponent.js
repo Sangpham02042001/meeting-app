@@ -18,7 +18,6 @@ export default function Login(...rest) {
             dispatch(isAuthenticated())
         } else {
             if (userReducer.authenticated) {
-                console.log('redirect')
                 history.push('/')
             } else if (userReducer.error) {
                 setLoginError(userReducer.error)

@@ -41,14 +41,11 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
     useEffect(() => {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      
     }, [messages.length])
 
     useEffect(() => {
-        if (conversationId) {
-            dispatch(getMessages({ conversationId }))
-            dispatch(readConversation({ conversationId }))
-        }
+        dispatch(getMessages({ conversationId }))
+        dispatch(readConversation({ conversationId }))
     }, [conversationId])
 
     const onWriteMessage = (event) => {
