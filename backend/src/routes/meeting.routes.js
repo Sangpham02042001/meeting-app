@@ -8,6 +8,6 @@ router.route('/api/meetings')
   .post(requireSignin, createMeeting)
 
 router.route('/api/meetings/:meetingId')
-  .get(getMeetingInfo)
+  .get(requireSignin, getMeetingInfo)
 
 module.exports = router

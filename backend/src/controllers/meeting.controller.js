@@ -3,8 +3,29 @@ const { sequelize } = require('../models/meeting')
 const Meeting = require('../models/meeting')
 const User = require('../models/user')
 
-const getMeetingInfo = async (req, res) => {
-
+const getMeetingInfo = async ({ meetingId }) => {
+  try {
+    let meeting = await Meeting.findByPk(meetingId)
+    if (!meeting) {
+      return res.status(200).json({
+        message: 'No meeting found'
+      })
+    }
+    let users = await meeting.getMembers()
+    users = users.map(user => {
+      return {
+        id: user.id,
+        userName: user.firstName + ' ' + user.lastName,
+        email: user.email
+      }
+    })
+    return {
+      ...meeting.dataValues,
+      members: users
+    };
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 const createMeeting = async (req, res) => {
@@ -23,7 +44,7 @@ const createMeeting = async (req, res) => {
 
 }
 
-const getMemberMeeting = async ({ meetingId, select }) => {
+const getActiveMemberMeeting = async ({ meetingId, select }) => {
   try {
     let members = await sequelize.query(
       "SELECT ut.userId, CONCAT(u.firstName, ' ', u.lastName) as userName FROM users_meetings ut " +
@@ -164,7 +185,7 @@ const updateMeetingState = async ({ meetingId }) => {
 }
 
 module.exports = {
-  getMeetingInfo, createMeeting, getMemberMeeting,
+  getMeetingInfo, createMeeting, getActiveMemberMeeting,
   addMemberMeeting, outMeeting, joinMeeting,
   getUserMeeting, updateMeetingState
 }

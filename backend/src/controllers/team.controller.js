@@ -4,6 +4,7 @@ const sequelize = require('../models')
 const Team = require('../models/team')
 const User = require('../models/user')
 const Message = require('../models/message')
+const { getMeetingInfo } = require('./meeting.controller')
 
 const fs = require('fs')
 const { v4 } = require('uuid')
@@ -507,7 +508,7 @@ const getTeamMessages = async (req, res) => {
 
 const getMemberTeam = async ({ teamId }) => {
   try {
-    const members = await sequelize.query(
+    let members = await sequelize.query(
       "CALL getTeamMembers(:teamId)",
       {
         replacements: {
@@ -525,7 +526,7 @@ const getMemberTeam = async ({ teamId }) => {
 const getMeetings = async (req, res) => {
   let { teamId } = req.params
   try {
-    const meetings = await sequelize.query(
+    let meetings = await sequelize.query(
       "SELECT * FROM meetings WHERE teamId = :teamId",
       {
         replacements: {
@@ -534,6 +535,10 @@ const getMeetings = async (req, res) => {
         type: QueryTypes.SELECT
       }
     )
+    meetings = meetings.map(meeting => {
+      return getMeetingInfo({ meetingId: meeting.id })
+    })
+    meetings = await Promise.all(meetings)
     return res.status(200).json({ meetings });
   } catch (error) {
     console.log(error)

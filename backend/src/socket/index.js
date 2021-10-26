@@ -2,7 +2,7 @@ const users = {};
 const socketToMeeting = {};
 
 const { getMemberTeam, sendMessage } = require('../controllers/team.controller');
-const { getMemberMeeting, addMemberMeeting,
+const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting,
     updateMeetingState } = require('../controllers/meeting.controller')
 const { setConversation, setMessage } = require('../controllers/conversation.controller');
@@ -64,7 +64,7 @@ const socketServer = (socket) => {
                 await joinMeeting({ meetingId, userId })
             }
         }
-        let members = await getMemberMeeting({ meetingId }); // luon lay in Meeting
+        let members = await getActiveMemberMeeting({ meetingId }); // luon lay in Meeting
         user = members.find(m => m.userId === user.userId)
         socket.meetingId = meetingId
 
@@ -76,7 +76,7 @@ const socketServer = (socket) => {
     });
 
     socket.on('send-message-meeting', async ({ teamId, senderId, content, image, meetingId }) => {
-        let members = await getMemberMeeting({ meetingId });
+        let members = await getActiveMemberMeeting({ meetingId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, image })
         socket.emit('sent-message-meeting', { messageId: message.id, content, meetingId, senderId, photo: message.photo, teamId })
@@ -125,7 +125,7 @@ const socketServer = (socket) => {
                 userId: socket.id
             })
             if (message) {
-                let members = await getMemberMeeting({ meetingId: socket.meetingId });
+                let members = await getActiveMemberMeeting({ meetingId: socket.meetingId });
                 if (members.length === 0) {
                     console.log('all out meeting')
                     members = await updateMeetingState({ meetingId: socket.meetingId })
