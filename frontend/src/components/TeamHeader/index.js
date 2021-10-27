@@ -5,7 +5,7 @@ import { Button, Modal } from 'react-bootstrap'
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import Dropdown from '../Dropdown'
-import { deleteTeam, outTeam, createTeamMeeting } from '../../store/reducers/team.reducer'
+import { deleteTeam, outTeam, createTeamMeeting, setMeetingJoined } from '../../store/reducers/team.reducer'
 // import { createTeamMeeting } from '../../store/reducers/meeting.reducer'
 
 export default function TeamHeader({ showTeamInfo }) {
@@ -25,7 +25,6 @@ export default function TeamHeader({ showTeamInfo }) {
   const [isAudioActive, setAudioActive] = useState(true)
   const [isEnableVideo, setIsEnableVideo] = useState(false)
   const [isEnableAudio, setIsEnableAudio] = useState(false)
-  const [isMeeting, setIsMeeting] = useState(false)
   const userVideo = useRef()
 
   function getConnectedDevices(type, callback) {
@@ -84,14 +83,10 @@ export default function TeamHeader({ showTeamInfo }) {
     if (teamReducer.team.meetings.length) {
 
       let meetingActive = teamReducer.team.meetingActive
-      if (meetingActive && meetingActive.teamId === teamId) {
-        setIsMeeting(true)
-      }
     }
     // if (meetingReducer.meetings.id) {
     //   window.open(`/teams/${teamId}/meeting/${meetingReducer.meeting.id}`, '_blank')
     // }
-    // setIsMeeting(meetingReducer.meeting.active)
   }, [teamReducer.team.meetings.length])
 
   const handleDeleteTeam = async () => {
@@ -169,15 +164,16 @@ export default function TeamHeader({ showTeamInfo }) {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
         {
-          isMeeting && teamReducer.team.meetingActive
+          teamReducer.team.meetingActive
           && <Button variant='success'
+            disabled={teamReducer.meetingJoined}
             className='join-meeting-btn' onClick={handleJoinMeeting}>
             Join Meeting
           </Button>
         }
         <i className="far fa-question-circle" onClick={showTeamInfo}></i>
         <Button variant="light" className="meeting-btn"
-          disabled={isMeeting}
+          disabled={teamReducer.team.meetingActive || teamReducer.meetingJoined}
           onClick={e => {
             e.preventDefault()
             setShowCreateMeeting(true)
@@ -342,10 +338,14 @@ export default function TeamHeader({ showTeamInfo }) {
                 Cancel
               </Button>
               <Button>
-                {isMeeting && teamReducer.team.meetingActive
+                {teamReducer.team.meetingActive
                   && <Link target="_blank" style={{ zIndex: 10 }}
                     onClick={e => {
                       setShowJoinMeeting(false)
+                      dispatch(setMeetingJoined({
+                        teamId,
+                        id: teamReducer.team.meetingActive.id
+                      }))
                     }}
                     to={`/teams/${teamId}/meeting/${teamReducer.team.meetingActive.id}?video=${isVideoActive}&audio=${isAudioActive}`}>
                     Join

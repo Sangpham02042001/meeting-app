@@ -17,7 +17,6 @@ export default function ChatBox({ chatVisible }) {
     const [message, setMessage] = useState('');
     const userReducer = useSelector(state => state.userReducer)
     const meetingReducer = useSelector(state => state.meetingReducer)
-    const [offsetMessages, setOffsetMessages] = useState(15);
     const [image, setImage] = useState(null)
     const [imageUrl, setImageUrl] = useState('')
     const currentNumOfMessages = meetingReducer.meeting.messages.length
@@ -53,19 +52,10 @@ export default function ChatBox({ chatVisible }) {
     }, [])
 
     useEffect(() => {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }, [meetingReducer.meeting.messages.length])
-
-    const handleMessageScroll = e => {
-        if (meetingReducer.meeting.numOfMessages > currentNumOfMessages && e.target.scrollTop === 0) {
-            dispatch(getMeetingMessages({
-                teamId,
-                offset: offsetMessages + 15,
-                num: 15
-            }))
-            setOffsetMessages(offsetMessages + 15)
+        if (currentNumOfMessages) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }
+    }, [currentNumOfMessages])
 
     const onChangeMessage = (event) => {
         setMessage(event.target.value)
@@ -122,7 +112,7 @@ export default function ChatBox({ chatVisible }) {
             </div>
             <div className="chatbox-content">
                 <div className='chatbox-messages-container'>
-                    {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
+                    {currentNumOfMessages !== 0 && <div className='team-message-list'
                         ref={scrollRef} style={{
                             height: `calc(70vh - ${imageUrl ? 120 : 0}px)`
                         }}>

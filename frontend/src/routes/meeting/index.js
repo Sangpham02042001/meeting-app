@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
-import { socketClient } from "../../utils";
+import { broadcastLocal, socketClient } from "../../utils";
 import Peer from "simple-peer";
 import './meeting.css';
 import { Row, Col, Button } from "react-bootstrap";
@@ -76,6 +76,11 @@ const Meeting = (props) => {
         //     return ev.returnValue = 'Are you sure you want to close?';
         // })
 
+        window.addEventListener('beforeunload', function (e) {
+            e.preventDefault()
+            broadcastLocal.postMessage('own-out-meeting')
+        });
+
         return () => {
             setIsEnableAudio(false);
             setIsEnableVideo(false);
@@ -85,9 +90,7 @@ const Meeting = (props) => {
     useEffect(() => {
         if (teamReducer.teamLoaded) {
             dispatch(getMeetingMessages({
-                teamId,
-                offset: 0,
-                num: 15
+                meetingId,
             }))
 
             let members = teamReducer.team.members

@@ -1,15 +1,26 @@
 const { QueryTypes } = require('sequelize')
 const { sequelize } = require('../models/meeting')
 const Meeting = require('../models/meeting')
+const Message = require('../models/message')
 const User = require('../models/user')
+const fs = require('fs')
+const { v4 } = require('uuid')
+
+const getMeetingById = async (req, res) => {
+  const { meetingId } = req.params
+  const meeting = await Meeting.findOne({
+    where: {
+      id: meetingId
+    }
+  })
+  return res.status(200).json({ meeting })
+}
 
 const getMeetingInfo = async ({ meetingId }) => {
   try {
     let meeting = await Meeting.findByPk(meetingId)
     if (!meeting) {
-      return res.status(200).json({
-        message: 'No meeting found'
-      })
+      return null
     }
     let users = await meeting.getMembers()
     users = users.map(user => {
@@ -184,8 +195,69 @@ const updateMeetingState = async ({ meetingId }) => {
   }
 }
 
+const sendMessageMeeting = async ({ senderId, content, image, meetingId }) => {
+  try {
+    let photoName = null;
+    if (image) {
+      photoName = v4() + '.png';
+      let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
+      const imageStream = new Readable();
+      imageStream._read = () => { }
+      imageStream.push(image)
+      imageStream.pipe(writeStream)
+    }
+
+    const message = await Message.create({
+      content,
+      userId: senderId,
+      meetingId,
+      photo: photoName
+    })
+    return message;
+  } catch (error) {
+    console.log(error)
+    return null;
+  }
+}
+
+const getMeetingMessages = async (req, res) => {
+  const { meetingId } = req.params
+  try {
+    const meeting = await Meeting.findByPk(meetingId)
+    const messages = await meeting.getMessages()
+    return res.status(200).json({
+      messages
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const getCurrentMeeting = async (req, res) => {
+  const { id } = req.auth
+  try {
+    const result = await sequelize.query(
+      "SELECT m.teamId, m.id FROM users_meetings ut " +
+      "INNER JOIN meetings m ON ut.meetingId = m.id " +
+      "WHERE userId = :id AND ut.inMeeting = true;",
+      {
+        replacements: {
+          id
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    return res.status(200).json({ meetingJoined: result[0] })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getMeetingInfo, createMeeting, getActiveMemberMeeting,
   addMemberMeeting, outMeeting, joinMeeting,
-  getUserMeeting, updateMeetingState
+  getUserMeeting, updateMeetingState, sendMessageMeeting,
+  getMeetingMessages, getCurrentMeeting, getMeetingById
 }

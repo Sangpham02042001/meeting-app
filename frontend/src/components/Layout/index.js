@@ -5,7 +5,7 @@ import { getNotifs } from '../../store/reducers/notification.reducer'
 import Navbar from '../Navbar';
 import { socketClient, broadcastLocal } from '../../utils';
 import { sendMessageCv } from '../../store/reducers/conversation.reducer';
-import { sendMessage, updateMeetingState } from '../../store/reducers/team.reducer';
+import { sendMessage, updateMeetingState, getCurrentMeeting, outJoinedMeeting } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
   sendMeetingMessage
@@ -41,7 +41,7 @@ export default function Layout({ children }) {
       dispatch(sendMessage({
         messageId, content, senderId, teamId, photo
       }))
-      broadcastLocal.postMessage({ messageId, teamId, senderId, content, photo })
+      // broadcastLocal.postMessage({ messageId, teamId, senderId, content, photo })
     })
 
     socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, photo }) => {
@@ -63,14 +63,14 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('sent-message-meeting', ({ messageId, meetingId, senderId, content, photo, teamId }) => {
+    socketClient.on('sent-message-meeting', ({ messageId, meetingId, senderId, content, photo }) => {
       dispatch(sendMeetingMessage({
         messageId, content, senderId, meetingId, photo
       }))
-      broadcastLocal.postMessage({ messageId, meetingId, senderId, content, photo, teamId })
+      // broadcastLocal.postMessage({ messageId, meetingId, senderId, content, photo, teamId })
     })
 
-    socketClient.on('receive-message-meeting', ({ messageId, meetingId, senderId, content, photo, teamId }) => {
+    socketClient.on('receive-message-meeting', ({ messageId, meetingId, senderId, content, photo }) => {
       dispatch(sendMeetingMessage({
         messageId, content, senderId, meetingId, photo
       }))
@@ -92,6 +92,11 @@ export default function Layout({ children }) {
 
     broadcastLocal.onmessage = (message) => {
       console.log(message);
+      if (message.data === 'own-out-meeting') {
+        setTimeout(() => {
+          dispatch(outJoinedMeeting({}))
+        }, 2000)
+      }
       if (message.messageType === 'end-meeting') {
         dispatch(updateMeetingState({
           meetingId
@@ -109,6 +114,8 @@ export default function Layout({ children }) {
     });
 
     console.log('call layout')
+
+    dispatch(getCurrentMeeting())
 
     return () => {
       socketClient.disconnect();

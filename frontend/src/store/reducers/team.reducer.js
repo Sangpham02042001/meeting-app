@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { create } from 'lodash'
 import extend from 'lodash/extend'
 import { axiosAuth } from '../../utils'
 
@@ -6,6 +7,7 @@ const initialState = {
   joinedTeams: [],
   requestingTeams: [],
   invitedTeams: [],
+  meetingJoined: null,
   team: {
     members: [],
     invitedUsers: [],
@@ -20,6 +22,11 @@ const initialState = {
   error: null,
   loading: false,
 }
+
+export const getCurrentMeeting = createAsyncThunk('teams/getCurrentMeeting', async () => {
+  let response = await axiosAuth.get(`/api/meetings/current-meeting`)
+  return response.data
+})
 
 export const getJoinedTeams = createAsyncThunk('teams/getJoinedTeams', async () => {
   let { id } = JSON.parse(window.localStorage.getItem('user'))
@@ -234,6 +241,17 @@ export const createTeamMeeting = createAsyncThunk('/createTeamMeeting', async ({
   }
 })
 
+export const outJoinedMeeting = createAsyncThunk('/outJoinedMeeting', async ({ }, { getState }) => {
+  const { teamReducer } = getState()
+  console.log(teamReducer)
+  const { meetingActive } = teamReducer.team
+  console.log(meetingActive)
+  if (meetingActive) {
+    let response = await axiosAuth.get(`/api/meetings/${meetingActive.id}`)
+    return response.data
+  }
+})
+
 export const teamSlice = createSlice({
   name: 'Team',
   initialState,
@@ -259,7 +277,14 @@ export const teamSlice = createSlice({
       if (state.team.meetingActive && state.team.meetingActive.id == meetingId) {
         state.team.meetingActive = null
       }
-    }
+    },
+    setMeetingJoined: (state, action) => {
+      let { teamId, id } = action.payload
+      state.meetingJoined = {
+        teamId,
+        id
+      }
+    },
   },
   extraReducers: {
     [getJoinedTeams.pending]: (state) => {
@@ -433,10 +458,41 @@ export const teamSlice = createSlice({
     },
     [createTeamMeeting.rejected]: (state, action) => {
       state.error = action.payload.error;
+    },
+    [getCurrentMeeting.pending]: () => {
+      console.log('get current meeting pending')
+    },
+    [getCurrentMeeting.fulfilled]: (state, action) => {
+      let { meetingJoined } = action.payload
+      if (meetingJoined) {
+        let { id, teamId } = meetingJoined
+        console.log(id, teamId)
+        if (id && teamId) {
+          state.meetingJoined = { id, teamId }
+        }
+      }
+    },
+    [getCurrentMeeting.rejected]: (state, action) => {
+      state.error = action.payload.error;
+    },
+    [outJoinedMeeting.pending]: () => {
+
+    },
+    [outJoinedMeeting.fulfilled]: (state, action) => {
+      let { meeting } = action.payload
+      console.log('after', meeting)
+      if (meeting && meeting.active === false) {
+        state.team.meetingActive = null
+      }
+      state.meetingJoined = null
+    },
+    [outJoinedMeeting.rejected]: (state, action) => {
+      console.log(action.payload)
     }
   }
 })
 
-export const { cleanTeamState, sendMessage, updateMeetingState } = teamSlice.actions;
+export const { cleanTeamState, sendMessage, updateMeetingState,
+  setMeetingJoined } = teamSlice.actions;
 
 export default teamSlice.reducer

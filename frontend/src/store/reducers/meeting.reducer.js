@@ -20,12 +20,11 @@ export const createTeamMeeting = createAsyncThunk('/createTeamMeeting', async ({
   }
 })
 
-export const getMeetingMessages = createAsyncThunk('meeting/getMessages', async ({ teamId, offset, num }, { rejectWithValue }) => {
+export const getMeetingMessages = createAsyncThunk('meeting/getMessages', async ({ meetingId }, { rejectWithValue }) => {
   try {
-    let response = await axiosAuth.get(`/api/teams/${teamId}/messages?offset=${offset}&num=${num}`)
+    let response = await axiosAuth.get(`/api/meetings/${meetingId}/messages`)
     return {
       messages: response.data.messages,
-      numOfMessages: response.data.numOfMessages
     }
   } catch (error) {
     let { data } = error.response
@@ -44,11 +43,10 @@ export const meetingSlice = createSlice({
     //   conversations: []
     // },
     meeting: {
-      id: 0,
+      id: null,
       members: [],
       messages: [],
-      numOfMessages: 0,
-      teamId: 0,
+      teamId: null,
       messagesLoaded: false
     },
     error: null
@@ -70,14 +68,11 @@ export const meetingSlice = createSlice({
     },
     [getMeetingMessages.fulfilled]: (state, action) => {
       // state.loading = false;
-      if (state.meeting.messages.length === 0) {
-        state.meeting.messages.push(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
-      } else {
-        state.meeting.messages.unshift(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
-      }
-      if (action.payload.numOfMessages) {
-        state.meeting.numOfMessages = action.payload.numOfMessages
-      }
+      // if (state.meeting.messages.length === 0) {
+      //   state.meeting.messages.push(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
+      // } else {
+      state.meeting.messages.unshift(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
+      // }
       state.meeting.messagesLoaded = true
     },
     [getMeetingMessages.rejected]: (state, action) => {
@@ -93,7 +88,7 @@ export const meetingSlice = createSlice({
     sendMeetingMessage: (state, action) => {
       let { messageId, content, senderId, meetingId, photo } = action.payload;
       if (state.meeting.id && state.meeting.id == meetingId) {
-        state.meeting.messages.push({ id: messageId, content, userId: senderId, photo })
+        state.meeting.messages.push({ id: messageId, content, userId: senderId, photo, meetingId })
       }
     },
     userJoinMeeting: (state, action) => {

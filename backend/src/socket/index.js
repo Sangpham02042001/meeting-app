@@ -4,7 +4,7 @@ const socketToMeeting = {};
 const { getMemberTeam, sendMessage } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting,
-    updateMeetingState } = require('../controllers/meeting.controller')
+    updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage } = require('../controllers/conversation.controller');
 
 
@@ -78,12 +78,15 @@ const socketServer = (socket) => {
     socket.on('send-message-meeting', async ({ teamId, senderId, content, image, meetingId }) => {
         let members = await getActiveMemberMeeting({ meetingId });
         members = members.filter(m => m.id !== senderId);
-        const message = await sendMessage({ teamId, senderId, content, image })
+        const message = await sendMessageMeeting({ senderId, content, image, meetingId })
         socket.emit('sent-message-meeting', { messageId: message.id, content, meetingId, senderId, photo: message.photo, teamId })
         console.log('sent-message-meeting', socket.id)
-        for (let m of members) {
-            socket.to(m.id).emit('receive-message-meeting', { messageId: message.id, meetingId, teamId, senderId, content, photo: message.photo });
-        }
+        // for (let m of members) {
+        //     socket.to(m.id).emit('receive-message-meeting', { messageId: message.id, meetingId, teamId, senderId, content, photo: message.photo });
+        // }
+        socket.to(`meeting-${meetingId}`).emit('receive-message-meeting', {
+            messageId: message.id, meetingId, senderId, content, photo: message.photo
+        })
     })
     // socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
     //     socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
