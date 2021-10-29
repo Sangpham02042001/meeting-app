@@ -9,7 +9,7 @@ import { getMessages, readConversation } from '../../store/reducers/conversation
 import './conversationChat.css';
 
 export default function Index({ conversation, user }) {
-    const participant = useSelector(state => state.conversationReducer.participant);
+    const participant = useSelector(state => state.conversationReducer.conversation.participant);
     const dispatch = useDispatch();
     useEffect(async () => {
         dispatch(getParticipant({ participantId: conversation.participantId }));
@@ -34,7 +34,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     const [imageMessageUrl, setImageMessageUrl] = useState('');
     const [showInfo, setShowInfo] = useState(true);
 
-    const messages = useSelector(state => state.conversationReducer.messages)
+    const messages = useSelector(state => state.conversationReducer.conversation.messages);
     const dispatch = useDispatch();
 
     const scrollRef = useRef(null);
@@ -45,7 +45,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
     useEffect(() => {
         dispatch(getMessages({ conversationId }))
-        dispatch(readConversation({ conversationId }))
+        dispatch(readConversation({ conversationId, userId: user.id }))
     }, [conversationId])
 
     const onWriteMessage = (event) => {
@@ -101,7 +101,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     }
 
     const handleVoiceCall = () => {
-        socketClient.emit('conversation-call', { conversationId: conversationId, senderId: user.id, receiverId: participant.id });
+        console.log(user);
+        socketClient.emit('conversation-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: participant.id });
     }
 
     const onImageInputChange = e => {

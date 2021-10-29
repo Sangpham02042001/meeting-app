@@ -14,11 +14,10 @@
 
 .navbar-username {
   white-space: nowrap;
-  width: 50px;
+  width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: #fff;
-  margin-right: 10px;
 }
 
 .dropdown {
@@ -97,10 +96,6 @@ span {
   display: block;
 }
 
-/* .dropdown-content > *:hover {
-  background-color: #f1f1f1;
-  color: #000;
-} */
 
 .dropdown > .dropdown-btn:hover {
   background-color: #8f8c8c9a;

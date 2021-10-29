@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import './conversations.css';
 import { axiosAuth } from '../../utils';
-import { getConversations, createConversation } from '../../store/reducers/conversation.reducer';
-import { Switch, Link, Route } from "react-router-dom";
+import { getConversations, createConversation, clearConversation } from '../../store/reducers/conversation.reducer';
+import { Switch, Route } from "react-router-dom";
 import { useHistory } from 'react-router';
 import Avatar from '../../components/Avatar';
 import ConversationChat from '../../components/ConversationChat';
@@ -19,6 +19,10 @@ export default function Conversations() {
     const history = useHistory();
     useEffect(() => {
         dispatch(getConversations({ userId: user.id }));
+
+        return () => {
+            dispatch(clearConversation())
+        }
     }, [])
 
 
@@ -52,7 +56,6 @@ export default function Conversations() {
         }
 
         history.push(`/conversations/${userFind.id}`);
-
     }
 
     return (
@@ -119,8 +122,8 @@ const ConversationLink = ({ conversation, user }) => {
     const [participant, setParticipant] = useState(null);
     const [lastMessage, setLastMessage] = useState(null);
     const lastMessageChange = useSelector(state => state.conversationReducer.lastMessageChange);
-    const curParticipant = useSelector(state => state.conversationReducer.participant);
-
+    const curParticipant = useSelector(state => state.conversationReducer.conversation.participant);
+    const history = useHistory();
     useEffect(async () => {
         try {
             const response = await axiosAuth.get(`/api/users/${conversation.participantId}`);
@@ -128,38 +131,37 @@ const ConversationLink = ({ conversation, user }) => {
             if (conversation.conversationId) {
                 const response = await axiosAuth.get(`/api/conversations/${conversation.conversationId}/messages/lastMessage`);
                 setLastMessage(response.data.lastMessage);
-
             }
         } catch (error) {
             console.log(error);
         }
     }, [lastMessageChange])
 
+    const changeConversation = () => {
+        history.push(`/conversations/${participant.id}`)
+    }
 
     return (
         <>
             {participant &&
-                <Link to={`/conversations/${participant.id}`}
-                    key={participant.id}
-                    style={{ textDecoration: "none", color: "black", width: "100%", display: "flex", justifyContent: "center" }}>
-                    <div className="conversation-link" style={{ backgroundColor: curParticipant && participant.id === curParticipant.id ? '#fff' : '' }}>
-                        <Avatar width="40px" height="40px" userId={participant.id} />
-                        <div className="link-content">
-                            <div className="link-name">
-                                {participant.userName}
-                            </div>
-                            <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
-                                {lastMessage &&
-                                    (lastMessage.userId === user.id ?
-                                        <span>You: {lastMessage.content}</span>
-                                        :
-                                        <span>{lastMessage.content}</span>
-                                    )
-                                }
-                            </div>
+                <div className="conversation-link" onClick={changeConversation} style={{ backgroundColor: curParticipant && participant.id === curParticipant.id ? '#fff' : '' }}>
+                    <Avatar width="40px" height="40px" userId={participant.id} />
+
+                    <div className="link-content">
+                        <div className="link-name">
+                            {participant.userName}
+                        </div>
+                        <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
+                            {lastMessage &&
+                                (lastMessage.userId === user.id ?
+                                    <span>You: {lastMessage.content}</span>
+                                    :
+                                    <span>{lastMessage.content}</span>
+                                )
+                            }
                         </div>
                     </div>
-                </Link>
+                </div>
             }
         </>
     )

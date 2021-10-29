@@ -3,11 +3,6 @@ import { Button, InputGroup, FormControl } from 'react-bootstrap';
 import './meetingChatBox.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { saveMessage, getMeetingMessages } from '../../store/reducers/meeting.reducer';
-import {
-    getTeamMessages,
-    sendMessage
-} from '../../store/reducers/team.reducer'
 import { socketClient, broadcastLocal } from '../../utils';
 import Message from '../Message';
 
@@ -24,9 +19,6 @@ export default function ChatBox({ chatVisible }) {
     const inputRef = useRef(null);
 
     useEffect(() => {
-        // socketClient.on('receive-message-team', ({ message, userId }) => {
-        //     dispatch(saveMessage({ message, userId }));
-        // })
         window.addEventListener('paste', e => {
             if (document.activeElement == inputRef.current) {
                 if (e.clipboardData.files.length > 0) {
@@ -72,8 +64,6 @@ export default function ChatBox({ chatVisible }) {
         ;
         let userId = socketClient.id;
         if (message !== '' || image) {
-            // dispatch(saveMessage({ message, userId }));
-            // socketClient.emit("send-message-team", { teamId, senderId: userId, content: message, image });
             socketClient.emit('send-message-meeting', {
                 senderId: userId,
                 meetingId: meetingReducer.meeting.id,

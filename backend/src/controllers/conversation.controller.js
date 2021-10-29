@@ -11,7 +11,11 @@ const getConversations = async (req, res) => {
     try {
         const { userId } = req.params;
         const conversations = await sequelize.query(
-            "SELECT conversationId, userId as participantId, isRead FROM users_conversations WHERE conversationId IN (SELECT conversationId FROM users_conversations where userId = :userId) AND userId not like :userId ORDER BY updatedAt DESC",
+            "SELECT conversationId, userId as participantId, tb1.isRead " +
+            "FROM users_conversations uc " +
+            "JOIN (SELECT conversationId, isRead FROM users_conversations WHERE userId = :userId) tb1 using(conversationId) "+
+            "WHERE uc.userId NOT LIKE :userId " +
+            "ORDER BY uc.updatedAt DESC;",
             {
                 replacements: {
                     userId
@@ -23,6 +27,7 @@ const getConversations = async (req, res) => {
 
         return res.status(200).json({ conversations });
     } catch (error) {
+        console.log(error)
         return res.status(403).json({
             message: "Could not get conversations!"
         })
@@ -104,17 +109,18 @@ const getLastMessage = async (req, res) => {
 
 const readConversation = async (req, res) => {
     try {
-        const { conversationId } = req.body;
-        if (!conversationId) {
+        const { conversationId, userId } = req.body;
+        if (!conversationId || !userId) {
             
             return res.status(200).json({
                 conversationId: null
             })
         }
-        await sequelize.query("UPDATE users_conversations SET isRead = 1 WHERE conversationId = :conversationId",
+        await sequelize.query("UPDATE users_conversations SET isRead = 1 WHERE conversationId = :conversationId AND userId = :userId",
             {
                 replacements: {
-                    conversationId
+                    conversationId,
+                    userId
                 }
             }
         )
@@ -142,14 +148,23 @@ const setMessage = async ({ content, image, conversationId, senderId }) => {
         }
         const message = await Message.create({ content, photo: photoName, conversationId, userId: senderId });
 
-        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 0 WHERE conversationId = :conversationId",
+        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 1 WHERE conversationId = :conversationId AND userId = :userId",
             {
                 replacements: {
-                    conversationId
+                    conversationId,
+                    userId: senderId
                 }
             }
         )
 
+        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 0 WHERE conversationId = :conversationId AND userId NOT LIKE :userId",
+            {
+                replacements: {
+                    conversationId,
+                    userId: senderId
+                }
+            }
+        )
 
         if (!message) {
             return null;

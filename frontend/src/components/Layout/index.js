@@ -1,16 +1,17 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, NavLink, useParams, useRouteMatch, useLocation } from 'react-router-dom'
-import { getNotifs } from '../../store/reducers/notification.reducer'
+import { NavLink, useRouteMatch } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { socketClient, broadcastLocal } from '../../utils';
-import { sendMessageCv } from '../../store/reducers/conversation.reducer';
-import { sendMessage, updateMeetingState, getCurrentMeeting, outJoinedMeeting } from '../../store/reducers/team.reducer';
+import { sendMessageCv, conversationCalling } from '../../store/reducers/conversation.reducer';
+import { sendMessage, updateMeetingState } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
   sendMeetingMessage
 } from '../../store/reducers/meeting.reducer'
 import './layout.css'
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import Avatar from '../Avatar/index'
 
 export default function Layout({ children }) {
   const dispatch = useDispatch();
@@ -18,6 +19,13 @@ export default function Layout({ children }) {
   const userReducer = useSelector(state => state.userReducer)
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
+  const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
+  const [openCall, setOpenCall] = React.useState(false);
+
+  const handleCloseCall = () => {
+    
+    setOpenCall(false);
+  };
   useEffect(() => {
     socketClient.auth = { userId: userReducer.user.id };
     socketClient.connect();
@@ -32,8 +40,11 @@ export default function Layout({ children }) {
       dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }));
     })
 
-    socketClient.on('conversation-calling', ({ conversationId, senderId, receiverId }) => {
+    socketClient.on('conversation-calling', ({ conversationId, senderId, senderName, receiverId }) => {
       //todo
+      console.log('converstation calling')
+      dispatch(conversationCalling({ conversationId, senderId, senderName, receiverId }))
+      setOpenCall(true);
     })
 
     //teams
@@ -41,7 +52,7 @@ export default function Layout({ children }) {
       dispatch(sendMessage({
         messageId, content, senderId, teamId, photo
       }))
-      // broadcastLocal.postMessage({ messageId, teamId, senderId, content, photo })
+      broadcastLocal.postMessage({ messageId, teamId, senderId, content, photo })
     })
 
     socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, photo }) => {
@@ -63,16 +74,16 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('sent-message-meeting', ({ messageId, meetingId, senderId, content, photo }) => {
+    socketClient.on('sent-message-meeting', ({ messageId, meetingId, senderId, content, photo, teamId }) => {
       dispatch(sendMeetingMessage({
         messageId, content, senderId, meetingId, photo
       }))
-      // broadcastLocal.postMessage({ messageId, meetingId, senderId, content, photo, teamId })
+      broadcastLocal.postMessage({ messageId, meetingId, senderId, content, photo, teamId })
     })
 
-    socketClient.on('receive-message-meeting', ({ messageId, meetingId, senderId, content, photo }) => {
+    socketClient.on('receive-message-meeting', ({ messageId, meetingId, senderId, content, photo, teamId }) => {
       dispatch(sendMeetingMessage({
-        messageId, content, senderId, meetingId, photo
+        messageId, content, senderId, meetingId, photo, teamId
       }))
     })
 
@@ -82,21 +93,16 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('end-meeting', ({ meetingId }) => {
-      console.log(`end meeting with id, ${meetingId}`)
-      broadcastLocal.postMessage({
-        messageType: 'end-meeting',
-        meetingId
-      })
-    })
+    // socketClient.on('end-meeting', ({ meetingId }) => {
+    //   console.log(`end meeting with id, ${meetingId}`)
+    //   broadcastLocal.postMessage({
+    //     messageType: 'end-meeting',
+    //     meetingId
+    //   })
+    // })
 
     broadcastLocal.onmessage = (message) => {
       console.log(message);
-      if (message.data === 'own-out-meeting') {
-        setTimeout(() => {
-          dispatch(outJoinedMeeting({}))
-        }, 2000)
-      }
       if (message.messageType === 'end-meeting') {
         dispatch(updateMeetingState({
           meetingId
@@ -115,8 +121,6 @@ export default function Layout({ children }) {
 
     console.log('call layout')
 
-    dispatch(getCurrentMeeting())
-
     return () => {
       socketClient.disconnect();
     }
@@ -132,11 +136,6 @@ export default function Layout({ children }) {
                 <button className="btn-default" ><i className="fas fa-home"></i></button>
               </NavLink>
             </div>
-            {/* <div className="btn-list-selection">
-              <NavLink to="/activities" activeClassName="btn-active">
-                <button className="btn-default" >Activity</button>
-              </NavLink>
-            </div> */}
             <div className="btn-list-selection">
               <NavLink to='/conversations' activeClassName="btn-active">
                 <button className="btn-default" ><i className="fas fa-comment-dots"></i></button>
@@ -157,6 +156,33 @@ export default function Layout({ children }) {
           <div className="content-layout">
             {children}
           </div>
+
+          <Dialog
+            fullWidth={true}
+            maxWidth="xs"
+            open={openCall}
+            onClose={handleCloseCall}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">
+              Calling...
+            </DialogTitle>
+            <DialogContent>
+              <div>
+                <Avatar width="36px" height="36px" userId={conversationCall.senderId} />
+                <span style={{ fontSize: '18px', fontWeight: 600 }}>{conversationCall.senderName}</span> is calling you...
+              </div>
+
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseCall} variant="contained" color="error">Reject</Button>
+              <Button onClick={handleCloseCall} variant="contained">
+                Agree
+              </Button>
+            </DialogActions>
+          </Dialog>
+
         </div>
       </> :
         <div>

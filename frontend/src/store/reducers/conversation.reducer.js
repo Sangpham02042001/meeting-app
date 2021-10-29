@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { axiosInstance, axiosAuth } from '../../utils';
+import { axiosAuth } from '../../utils';
 
 
 export const getConversations = createAsyncThunk('conversations/getUserConversations', async ({ userId }) => {
@@ -20,8 +20,8 @@ export const getParticipant = createAsyncThunk('conversations/getParticipant', a
   return response.data;
 })
 
-export const readConversation = createAsyncThunk('conversations/readConversation', async ({ conversationId }) => {
-  const response = await axiosAuth.patch(`/api/conversations/${conversationId}`, {conversationId});
+export const readConversation = createAsyncThunk('conversations/readConversation', async ({ conversationId, userId }) => {
+  const response = await axiosAuth.patch(`/api/conversations/${conversationId}`, { conversationId, userId });
   return response.data;
 })
 
@@ -29,11 +29,19 @@ export const readConversation = createAsyncThunk('conversations/readConversation
 export const conversationSlice = createSlice({
   name: 'Conversation',
   initialState: {
-    messages: [],
     conversations: [],
-    participant: null,
+    conversation: {
+      messages: [],
+      participant: null,
+    },
+    conversationCall: {
+      isCalling: false,
+      conversationId: null,
+      senderId: null,
+      senderName: null,
+      receiverId: null,
+    },
     lastMessageChange: false,
-
   },
   extraReducers: {
     [getConversations.fulfilled]: (state, action) => {
@@ -45,19 +53,19 @@ export const conversationSlice = createSlice({
     },
     [getMessages.fulfilled]: (state, action) => {
       console.log('Get messages successfully!')
-      state.messages = action.payload.messages;
+      state.conversation.messages = action.payload.messages;
     },
     [getMessages.rejected]: (state, action) => {
       console.log('Get messages of user fail!')
     },
     [getParticipant.fulfilled]: (state, action) => {
-      state.participant = action.payload;
+      state.conversation.participant = action.payload;
     },
     [getParticipant.rejected]: (state, action) => {
       console.log('Get participant info error!!');
     },
     [readConversation.fulfilled]: (state, action) => {
-      const {conversationId} = action.payload;
+      const { conversationId } = action.payload;
       let conversation = state.conversations.find(conv => conv.conversationId === conversationId);
       if (conversation) {
         conversation.isRead = true;
@@ -68,7 +76,7 @@ export const conversationSlice = createSlice({
     },
   },
   reducers: {
-    sendMessageCv: (state,action) => {
+    sendMessageCv: (state, action) => {
       const { messageId, content, senderId, receiverId, conversationId, photo, createdAt } = action.payload;
       let conversation = state.conversations.find(conv => conv.participantId === receiverId);
       if (conversation) {
@@ -76,18 +84,18 @@ export const conversationSlice = createSlice({
       }
       conversation = state.conversations.find(conv => conv.conversationId === conversationId);
       if (!conversation) {
-        state.conversations.unshift({conversationId, participantId: senderId, isRead: false})
+        state.conversations.unshift({ conversationId, participantId: senderId, isRead: false })
       }
 
-      if (state.participant && (receiverId === state.participant.id || senderId === state.participant.id)) {
-        state.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
+      if (state.conversation.participant && (receiverId === state.conversation.participant.id || senderId === state.conversation.participant.id)) {
+        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
       }
 
       const pIdx = state.conversations.map(conv => conv.conversationId).indexOf(conversationId);
       if (pIdx >= 0) {
         conversation = state.conversations[pIdx];
         conversation.isRead = true;
-        if (!state.participant || state.participant.id !== receiverId) {
+        if (!state.conversation.participant || state.conversation.participant.id !== receiverId) {
           conversation.isRead = false;
         }
         state.conversations.splice(pIdx, 1);
@@ -100,10 +108,10 @@ export const conversationSlice = createSlice({
       const { messageId, content, senderId, receiverId, conversationId, photo, createdAt } = action.payload;
       const conversation = state.conversations.find(conv => conv.conversationId === conversationId);
       if (!conversation) {
-        state.conversations.unshift({conversationId, participantId: senderId, isRead: false})
+        state.conversations.unshift({ conversationId, participantId: senderId, isRead: false })
       }
-      if (state.participant && senderId === state.participant.id ) {
-        state.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
+      if (state.conversation.participant && senderId === state.conversation.participant.id) {
+        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
       }
       state.lastMessageChange = !state.lastMessageChange;
     },
@@ -115,9 +123,16 @@ export const conversationSlice = createSlice({
       }
       state.conversations.unshift({ conversationId, participantId, isRead: true });
     },
+    conversationCalling: (state, action) => {
+      let { conversationId, senderId, receiverId, senderName } = action.payload;
+      state.conversationCall = { conversationId, senderId, receiverId, senderName, isCalling: true }
+    },
+    clearConversation: (state, action) => {
+      state.conversation.participant = null;
+    }
   }
 })
 
-export const { createConversation, sendMessageCv, receiveMessageCv } = conversationSlice.actions;
+export const { createConversation, sendMessageCv, receiveMessageCv, conversationCalling, clearConversation } = conversationSlice.actions;
 
 export default conversationSlice.reducer

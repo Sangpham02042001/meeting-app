@@ -420,7 +420,6 @@ export const teamSlice = createSlice({
       state.team.messagesLoaded = true
     },
     [getTeamMessages.rejected]: (state, action) => {
-      console.log(action.payload.error)
       state.team.messagesLoaded = true
     },
     [outTeam.pending]: (state) => {

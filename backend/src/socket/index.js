@@ -108,8 +108,9 @@ const socketServer = (socket) => {
         }
     })
 
-    socket.on('conversation-call', ({ conversationId, participantId }) => {
-        socket.to(participantId).emit('conversation-calling', { conversationId, senderId, receiverId })
+    socket.on('conversation-call', ({ conversationId, senderId, senderName, receiverId }) => {
+        console.log(senderName);
+        socket.to(receiverId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
     })
 
     //disconnect

@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Container, Navbar as Nav, Col, Row } from 'react-bootstrap'
+import { Navbar as Nav } from 'react-bootstrap'
 import { Link, useHistory } from 'react-router-dom'
 import { baseURL, timeDiff } from '../../utils'
-import Dropdown from '../Dropdown'
 import './navbar.css'
-import { cleanUser } from '../../store/reducers/user.reducer'
 import { getNotifs, readNotif } from '../../store/reducers/notification.reducer'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import Loading from '../Loading'
+import Avatar from '../Avatar/index'
 
 export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
   const dispatch = useDispatch()
   const history = useHistory()
-  const [isDropdown, setIsDropdown] = useState(false);
 
   let notifications = useSelector(state => state.notificationReducer.notifications)
   let numOf_UnReadNotifications = useSelector(state => state.notificationReducer.numOf_UnReadNotifications)
@@ -24,11 +22,15 @@ export default function Navbar() {
     // dispatch(cleanNotificationState)
   }, [])
 
+  const handleProfile = e => {
+    e.preventDefault()
+    history.push('/profile')
+  }
+
   const handleLogout = e => {
     e.preventDefault()
     window.localStorage.removeItem('user')
     history.push('/login')
-    // dispatch(cleanUser())
     location.reload()
   }
 
@@ -50,31 +52,6 @@ export default function Navbar() {
         MEETING APP
       </Nav.Brand>
       <div className="navbar-btn">
-        {/* <Dropdown
-          style={{ marginRight: '30px' }}
-          icon={
-            <i style={{ color: '#fff', cursor: 'pointer', fontSize: '20px' }} className="fas fa-bell"></i>
-          }
-        >
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {noti}
-          </div>
-        </Dropdown>
-
-        <Dropdown
-          style={{ marginRight: '20px' }}
-          icon={
-            <div className='nav-user-avatar'
-              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }}>
-            </div>
-          }
-        >
-
-          <Link to="/profile">Profile</Link>
-          <a href="#">Link 2</a>
-          <a href="#">Link 3</a>
-
-        </Dropdown> */}
         <div className="dropdown" >
           <button className="dropdown-btn" style={{ color: "white" }} >
             <i className="fas fa-bell"></i>
@@ -124,13 +101,11 @@ export default function Navbar() {
         </div>
 
         <div className="dropdown" >
-          <button className="dropdown-btn" style={{ color: "white", padding: 0 }}>
-            <div className='nav-user-avatar'
-              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }} >
-            </div>
+          <button className="dropdown-btn" style={{ color: "white", padding: 0, textAlign: 'center' }}>
+            <Avatar width="36px" height="36px" userId={user.id} />
           </button>
           <div className="dropdown-content logout-container">
-            <div><Link to="/profile">Profile</Link></div>
+            <div onClick={handleProfile}>Profile</div>
             <div onClick={handleLogout}>Logout</div>
           </div>
         </div>

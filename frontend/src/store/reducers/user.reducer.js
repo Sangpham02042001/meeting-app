@@ -45,6 +45,7 @@ export const userSlice = createSlice({
       const user = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user'))
       if (user) {
         state.user = user
+        state.user.userName = user.firstName.concat(user.lastName);
         state.loading = false
         state.authenticated = true
       }
