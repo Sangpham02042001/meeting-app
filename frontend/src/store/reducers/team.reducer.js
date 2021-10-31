@@ -18,6 +18,8 @@ const initialState = {
     meetingActive: null
   },
   joinedTeamLoaded: false,
+  requestTeamLoaded: false,
+  invitedTeamLoaded: false,
   teamLoaded: false,
   error: null,
   loading: false,
@@ -38,6 +40,13 @@ export const getJoinedTeams = createAsyncThunk('teams/getJoinedTeams', async () 
 export const getRequestTeams = createAsyncThunk('teams/getRequestTeams', async () => {
   let { id } = JSON.parse(window.localStorage.getItem('user'))
   let response = await axiosAuth.get(`/api/users/${id}/requesting-teams`)
+  let { teams } = response.data
+  return { teams }
+})
+
+export const getInvitedTeams = createAsyncThunk('teams/getInvitedTeams', async () => {
+  let { id } = JSON.parse(window.localStorage.getItem('user'))
+  let response = await axiosAuth.get(`/api/users/${id}/teams`)
   let { teams } = response.data
   return { teams }
 })
@@ -300,7 +309,7 @@ export const teamSlice = createSlice({
     },
     [getJoinedTeams.rejected]: (state, action) => {
       state.loading = false
-      state.joinedTeamLoaded = false
+      state.joinedTeamLoaded = true
       state.error = action.error.message
     },
     [getRequestTeams.pending]: (state) => {
@@ -309,10 +318,25 @@ export const teamSlice = createSlice({
     [getRequestTeams.fulfilled]: (state, action) => {
       state.requestingTeams = action.payload.teams
       state.loading = false
+      state.requestTeamLoaded = true
     },
     [getRequestTeams.rejected]: (state, action) => {
       state.loading = false
       state.error = action.error.message
+      state.requestTeamLoaded = true
+    },
+    [getInvitedTeams.pending]: () => {
+      state.loading = true
+    },
+    [getInvitedTeams.fulfilled]: (state, action) => {
+      let { teams } = action.payload
+      state.invitedTeams = teams
+      state.invitedTeamLoaded = true
+      state.loading = false
+    },
+    [getInvitedTeams.rejected]: (state, action) => {
+      state.invitedTeamLoaded = true
+      state.loading = false
     },
     [getTeamInfo.pending]: (state) => {
       state.loading = true

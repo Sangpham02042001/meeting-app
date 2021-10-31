@@ -100,7 +100,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="dropdown" >
+        <div className="dropdown" key={user.avatar}>
           <button className="dropdown-btn" style={{ color: "white", padding: 0, textAlign: 'center' }}>
             <Avatar width="36px" height="36px" userId={user.id} />
           </button>

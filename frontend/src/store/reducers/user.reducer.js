@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { axiosInstance } from '../../utils'
+import { axiosAuth, axiosInstance } from '../../utils'
 import extend from 'lodash/extend';
 import { socketClient } from '../../utils';
 
@@ -25,6 +25,24 @@ export const signin = createAsyncThunk('user/signin', async ({ email, password }
       }
     }
   } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+  }
+})
+
+export const updateBasicUserInfo = createAsyncThunk('user/updateBasicUserInfo', async ({ form, userId }, { rejectWithValue }) => {
+  try {
+    const response = await axiosAuth.put(`/api/users/${userId}`, form);
+    if (response.status === 200) {
+      return {
+        updatedUser: response.data.user,
+
+      }
+    }
+  } catch (error) {
+    console.log(error)
     let { data } = error.response
     if (data && data.error) {
       return rejectWithValue(data)
@@ -66,6 +84,25 @@ export const userSlice = createSlice({
       state.error = action.payload.error
       state.loading = false
     },
+    [updateBasicUserInfo.pending]: () => {
+      console.log('update user info pending')
+    },
+    [updateBasicUserInfo.fulfilled]: (state, action) => {
+      let { updatedUser } = action.payload
+      state.user = {
+        ...state.user,
+        ...updatedUser
+      }
+      let user = JSON.parse(localStorage.getItem('user'))
+      user = {
+        ...user,
+        ...updatedUser
+      }
+      localStorage.setItem('user', JSON.stringify(user))
+    },
+    [updateBasicUserInfo.rejected]: (state, action) => {
+      console.log(action.payload.error)
+    }
   }
 })
 

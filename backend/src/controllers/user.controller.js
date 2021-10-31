@@ -72,8 +72,6 @@ const updateUserInfo = async (req, res) => {
         avatar = `${v4()}.${fileType}`
         fs.createReadStream(files.avatar.path)
           .pipe(fs.createWriteStream(`./src/public/users-avatars/${avatar}`))
-      } else {
-        avatar = ''
       }
       let firstName = fields.firstName || ''
       let lastName = fields.lastName || ''
@@ -91,6 +89,9 @@ const updateUserInfo = async (req, res) => {
           }
         })
       }
+      if (!avatar) {
+        avatar = user.avatar
+      }
       const result = await sequelize.query(
         'CALL updateBasicUserInfo(:userId, :firstName, :lastName, :avatar)',
         {
@@ -103,7 +104,12 @@ const updateUserInfo = async (req, res) => {
         }
       )
       let updatedUser = result[0]
-      return res.status(200).json({ user: updatedUser })
+      return res.status(200).json({
+        user: {
+          ...updatedUser,
+          avatar
+        }
+      })
     } catch (error) {
       if (error.name === 'SequelizeDatabaseError') {
         if (error.parent.errno == 1406) {

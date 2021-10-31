@@ -10,7 +10,8 @@
 .profile-layout {
   display: flex;
   height: 80vh;
-  margin: auto;
+  margin-top: 10vh;
+  margin-left: 50px;
 }
 
 .profile-content {
