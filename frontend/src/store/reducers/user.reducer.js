@@ -18,7 +18,10 @@ export const signin = createAsyncThunk('user/signin', async ({ email, password }
     });
     if (response.status === 200) {
       return {
-        user: response.data
+        user: {
+          ...response.data,
+          email
+        }
       }
     }
   } catch (error) {
@@ -28,11 +31,6 @@ export const signin = createAsyncThunk('user/signin', async ({ email, password }
     }
   }
 })
-
-export const getAllUserInfo = createAsyncThunk('user/getAllUserInfo', async () => {
-  const response = await axiosInstance.get('/api/users')
-})
-
 
 export const userSlice = createSlice({
   name: 'User',
