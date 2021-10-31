@@ -1,0 +1,42 @@
+.container{
+    display: flex;
+    margin-left: 0px;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(245, 245, 245, 0.808);
+    flex-direction: row;
+}
+
+.profile-content{
+    float: left;
+    padding-left: 10px;
+    width: 50%;
+    
+}
+.teams{
+    float: left;
+    width: 50%;
+    margin-left: 50px;
+}
+.row{
+    margin-top: 20px;
+    border-bottom: 1px solid #aaa;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.info{
+    margin-top: 50px;
+    font-size: 125%;
+    display: block;
+}
+.input-info{
+    width: 70%;
+    border: none;
+    background-color: #f3f3f3;
+    outline: none;
+}
+.input-info:hover {
+    background-color: #e2e2e2;
+}
+.card-info{
+    width: 30%;
+}
