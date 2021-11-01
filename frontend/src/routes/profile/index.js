@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Tabs, Tab, Typography, Box, Avatar, TextField,
-	Button
+	Button, Dialog, DialogContent, DialogActions, DialogContentText,
+	DialogTitle
 } from '@mui/material';
 import { baseURL } from '../../utils';
 import { Link } from 'react-router-dom';
 import { updateBasicUserInfo } from '../../store/reducers/user.reducer'
-import { getJoinedTeams, getInvitedTeams, getRequestTeams } from '../../store/reducers/team.reducer'
+import {
+	getJoinedTeams, getInvitedTeams, getRequestTeams,
+	outTeam, deleteTeam
+} from '../../store/reducers/team.reducer'
 import './profile.css';
 
 function TabPanel(props) {
@@ -46,6 +50,9 @@ export default function Profile() {
 	const [lastName, setLastName] = useState('')
 	const [image, setImage] = useState('')
 	const [imageUrl, setImageUrl] = useState('')
+	const [selectedTeam, setSelectedTeam] = useState(0)
+	const [isOutTeamModelShow, setOutTeamModelShow] = useState(false)
+	const [isDeleteTeamModelShow, setDeleteTeamModelShow] = useState(false)
 
 	useEffect(() => {
 		setFirstName(userReducer.user.firstName)
@@ -91,6 +98,45 @@ export default function Profile() {
 			userId: userReducer.user.id
 		}))
 	}
+
+	//out team
+	const handleOutTeam = teamId => event => {
+		setSelectedTeam(teamId)
+		setOutTeamModelShow(true)
+	}
+
+	const handleCloseOutModel = () => {
+		setOutTeamModelShow(false)
+		setSelectedTeam(0)
+	}
+
+	const confirmOutTeam = () => {
+		dispatch(outTeam({
+			teamId: selectedTeam,
+			userId: userReducer.user.id
+		}))
+		handleCloseOutModel()
+	}
+	//out team
+
+	//delete team if is host
+	const handleDeleteTeam = teamId => event => {
+		setSelectedTeam(teamId)
+		setDeleteTeamModelShow(true)
+	}
+
+	const handleCloseDeleteModel = () => {
+		setDeleteTeamModelShow(false)
+		setSelectedTeam(0)
+	}
+
+	const confirmDeleteTeam = () => {
+		dispatch(deleteTeam({
+			teamId: selectedTeam
+		}))
+		handleCloseDeleteModel()
+	}
+	//delete team if is host
 
 	const isDisableSave = () => {
 		return firstName === userReducer.user.firstName && lastName === userReducer.user.lastName
@@ -142,13 +188,20 @@ export default function Profile() {
 					<div>
 						{teamReducer.joinedTeams.length > 0 ?
 							teamReducer.joinedTeams.map(team => {
-								return <Link key={team.id} style={{ margin: '10px', display: 'flex', alignItems: 'center' }}
-									to={`/teams/${team.id}`}>
-									<Avatar alt="team coverphoto"
-										src={`${baseURL}/api/team/coverphoto/${team.id}")`}
-										sx={{ width: 50, height: 50, }} />
-									<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
-								</Link>
+								return <div style={{ display: 'flex', alignItems: 'center' }} key={team.id}>
+									<Link style={{ margin: '10px', display: 'flex', alignItems: 'center' }}
+										to={`/teams/${team.id}`}>
+										<Avatar alt="team coverphoto"
+											src={`${baseURL}/api/team/coverphoto/${team.id}")`}
+											sx={{ width: 50, height: 50, }} />
+										<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
+									</Link>
+									{team.hostId !== userReducer.user.id ?
+										<Button className="team-action-btn" variant='secondary'
+											onClick={handleOutTeam(team.id)}>Out</Button> :
+										<Button className="team-action-btn" variant='secondary'
+											onClick={handleDeleteTeam(team.id)}>Delete team</Button>}
+								</div>
 							})
 							: <h1>No team for show</h1>}
 					</div>
@@ -184,6 +237,40 @@ export default function Profile() {
 					</div>
 				</TabPanel>
 			</div>
+
+			<Dialog
+				open={isOutTeamModelShow}
+				onClose={handleCloseOutModel}
+				aria-labelledby="alert-dialog-title"
+				aria-describedby="alert-dialog-description"
+			>
+				<DialogTitle id="alert-dialog-title">
+					{"Do you really want to out this team ?"}
+				</DialogTitle>
+				<DialogActions>
+					<Button onClick={handleCloseOutModel}>Cancel</Button>
+					<Button onClick={confirmOutTeam} autoFocus>
+						Confirm
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			<Dialog
+				open={isDeleteTeamModelShow}
+				onClose={handleCloseDeleteModel}
+				aria-labelledby="alert-dialog-title"
+				aria-describedby="alert-dialog-description"
+			>
+				<DialogTitle id="alert-dialog-title">
+					{"Do you really want to delete this team ?"}
+				</DialogTitle>
+				<DialogActions>
+					<Button onClick={handleCloseDeleteModel}>Cancel</Button>
+					<Button onClick={confirmDeleteTeam} autoFocus>
+						Confirm
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</div>
 	)
 }

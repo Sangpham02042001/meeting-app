@@ -331,7 +331,6 @@ export const teamSlice = createSlice({
       state.requestTeamLoaded = true
     },
     [getInvitedTeams.pending]: (state) => {
-      console.log('get invited teams pending')
       state.loading = true
     },
     [getInvitedTeams.fulfilled]: (state, action) => {

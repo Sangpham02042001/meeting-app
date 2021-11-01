@@ -63,3 +63,8 @@
   background-color: #f3f3f3;
   transition: background-color 0.5s ease;
 }
+
+.team-action-btn {
+  max-height: 40px;
+  margin: auto;
+}
