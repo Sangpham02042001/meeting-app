@@ -45,11 +45,16 @@ export const getRequestTeams = createAsyncThunk('teams/getRequestTeams', async (
 })
 
 export const getInvitedTeams = createAsyncThunk('teams/getInvitedTeams', async () => {
-  let { id } = JSON.parse(window.localStorage.getItem('user'))
-  let response = await axiosAuth.get(`/api/users/${id}/teams`)
-  let { teams } = response.data
-  return { teams }
+  try {
+    let { id } = JSON.parse(window.localStorage.getItem('user'))
+    let response = await axiosAuth.get(`/api/users/${id}/invitations`)
+    let { teams } = response.data
+    return { teams }
+  } catch (error) {
+    console.log(error)
+  }
 })
+
 
 export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId }, { rejectWithValue }) => {
   let response = await axiosAuth.get(`/api/teams/${teamId}`)
@@ -325,12 +330,12 @@ export const teamSlice = createSlice({
       state.error = action.error.message
       state.requestTeamLoaded = true
     },
-    [getInvitedTeams.pending]: () => {
+    [getInvitedTeams.pending]: (state) => {
+      console.log('get invited teams pending')
       state.loading = true
     },
     [getInvitedTeams.fulfilled]: (state, action) => {
-      let { teams } = action.payload
-      state.invitedTeams = teams
+      state.invitedTeams = action.payload.teams
       state.invitedTeamLoaded = true
       state.loading = false
     },

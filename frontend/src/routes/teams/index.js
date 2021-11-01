@@ -18,7 +18,7 @@ export default function Teams(props) {
 
 	return (
 		<>
-			<Container fluid style={{ padding: '0 20px' }}>
+			<Container fluid style={{ padding: '0 20px', backgroundColor: '#f0f0f0' }}>
 				<Row>
 					<Col className="teams-header" sm={12}>
 						<h3>Teams</h3>

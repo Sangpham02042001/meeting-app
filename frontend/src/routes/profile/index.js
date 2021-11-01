@@ -50,25 +50,16 @@ export default function Profile() {
 	useEffect(() => {
 		setFirstName(userReducer.user.firstName)
 		setLastName(userReducer.user.lastName)
-	}, [])
-
-	useEffect(() => {
 		if (!teamReducer.joinedTeamLoaded) {
 			dispatch(getJoinedTeams())
 		}
-	}, [teamReducer.joinedTeamLoaded])
-
-	useEffect(() => {
 		if (!teamReducer.requestTeamLoaded) {
 			dispatch(getRequestTeams())
 		}
-	}, [teamReducer.requestTeamLoaded])
-
-	useEffect(() => {
 		if (!teamReducer.invitedTeamLoaded) {
 			dispatch(getInvitedTeams())
 		}
-	}, [teamReducer.invitedTeamLoaded])
+	}, [])
 
 	const handleTabChange = (event, newValue) => {
 		setCurrentTab(newValue);
@@ -156,7 +147,7 @@ export default function Profile() {
 									<Avatar alt="team coverphoto"
 										src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 										sx={{ width: 50, height: 50, }} />
-									<h4 style={{ margin: 0, marginLeft: '10px' }}>{team.name}</h4>
+									<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
 								</Link>
 							})
 							: <h1>No team for show</h1>}
@@ -171,7 +162,7 @@ export default function Profile() {
 									<Avatar alt="team coverphoto"
 										src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 										sx={{ width: 50, height: 50, }} />
-									<h4 style={{ margin: 0, marginLeft: '10px' }}>{team.name}</h4>
+									<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
 								</Link>
 							})
 							: <h1>No invited team for show</h1>}
@@ -186,7 +177,7 @@ export default function Profile() {
 									<Avatar alt="team coverphoto"
 										src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 										sx={{ width: 50, height: 50, }} />
-									<h4 style={{ margin: 0, marginLeft: '10px' }}>{team.name}</h4>
+									<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
 								</Link>
 							})
 							: <h1>No request team for show</h1>}
