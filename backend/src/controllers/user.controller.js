@@ -245,7 +245,7 @@ const cancelJoinRequest = async (req, res) => {
   try {
     await sequelize.query(
       "DELETE FROM request_users_teams rut " +
-      "WHERE rut.requestUserId = :userId AND FIND_IN_SET(rut.teamId, ':teams')",
+      "WHERE rut.requestUserId = :userId AND FIND_IN_SET(rut.teamId, :teams)",
       {
         replacements: {
           userId,

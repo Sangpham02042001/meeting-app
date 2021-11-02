@@ -10,7 +10,8 @@ import { Link } from 'react-router-dom';
 import { updateBasicUserInfo } from '../../store/reducers/user.reducer'
 import {
 	getJoinedTeams, getInvitedTeams, getRequestTeams,
-	outTeam, deleteTeam
+	outTeam, deleteTeam, confirmInvitations,
+	refuseInvitations, cancelJoinRequest
 } from '../../store/reducers/team.reducer'
 import './profile.css';
 
@@ -53,6 +54,9 @@ export default function Profile() {
 	const [selectedTeam, setSelectedTeam] = useState(0)
 	const [isOutTeamModelShow, setOutTeamModelShow] = useState(false)
 	const [isDeleteTeamModelShow, setDeleteTeamModelShow] = useState(false)
+	const [isConfirmInvitationShow, setConfirmInvitationShow] = useState(false)
+	const [isRemoveInvitationShow, setRemoveInvitatonShow] = useState(false)
+	const [isCancelRequestShow, setCancelRequestShow] = useState(false)
 
 	useEffect(() => {
 		setFirstName(userReducer.user.firstName)
@@ -138,6 +142,68 @@ export default function Profile() {
 	}
 	//delete team if is host
 
+	//confirm invitations
+	const handleConfirmInvitation = teamId => e => {
+		console.log(teamId)
+		setSelectedTeam(teamId)
+		setConfirmInvitationShow(true)
+	}
+
+	const handleCloseConfirmInvitation = () => {
+		setSelectedTeam(0)
+		setConfirmInvitationShow(false)
+	}
+
+	const agreeInvitaton = () => {
+		console.log(selectedTeam)
+		dispatch(confirmInvitations({
+			teams: [selectedTeam]
+		}))
+		handleCloseConfirmInvitation()
+	}
+	//confirm invitations
+
+	//remove invitations
+	const handleRemoveInvitation = teamId => e => {
+		console.log(teamId)
+		setSelectedTeam(teamId)
+		setRemoveInvitatonShow(true)
+	}
+
+	const handleCloseRemoveInvitation = () => {
+		setSelectedTeam(0)
+		setRemoveInvitatonShow(false)
+	}
+
+	const disagreeInvitation = () => {
+		console.log(selectedTeam)
+		dispatch(refuseInvitations({
+			teams: [selectedTeam]
+		}))
+		handleCloseRemoveInvitation()
+	}
+	//remove invitations
+
+	//cancel request
+	const handleCancelRequest = teamId => e => {
+		setSelectedTeam(teamId)
+		setCancelRequestShow(true)
+	}
+
+	const handleCloseCancelRequest = () => {
+		setSelectedTeam(0)
+		setCancelRequestShow(false)
+	}
+
+	const cancelJoin = () => {
+		console.log(selectedTeam)
+		dispatch(cancelJoinRequest({
+			teamId: selectedTeam
+		}))
+		handleCloseCancelRequest()
+	}
+	//cancel request
+
 	const isDisableSave = () => {
 		return firstName === userReducer.user.firstName && lastName === userReducer.user.lastName
 			&& !imageUrl;
@@ -197,9 +263,9 @@ export default function Profile() {
 										<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
 									</Link>
 									{team.hostId !== userReducer.user.id ?
-										<Button className="team-action-btn" variant='secondary'
+										<Button className="team-action-btn" variant="contained"
 											onClick={handleOutTeam(team.id)}>Out</Button> :
-										<Button className="team-action-btn" variant='secondary'
+										<Button className="team-action-btn" variant="contained"
 											onClick={handleDeleteTeam(team.id)}>Delete team</Button>}
 								</div>
 							})
@@ -210,13 +276,19 @@ export default function Profile() {
 					<div>
 						{teamReducer.invitedTeams.length > 0 ?
 							teamReducer.invitedTeams.map(team => {
-								return <Link key={team.id} style={{ margin: '10px', display: 'flex', alignItems: 'center' }}
-									to={`/teams/${team.id}`}>
-									<Avatar alt="team coverphoto"
-										src={`${baseURL}/api/team/coverphoto/${team.id}")`}
-										sx={{ width: 50, height: 50, }} />
-									<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
-								</Link>
+								return <div style={{ display: 'flex', alignItems: 'center' }} key={team.id}>
+									<Link style={{ margin: '10px', display: 'flex', alignItems: 'center' }}
+										to={`/teams/${team.id}`}>
+										<Avatar alt="team coverphoto"
+											src={`${baseURL}/api/team/coverphoto/${team.id}")`}
+											sx={{ width: 50, height: 50, }} />
+										<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
+									</Link>
+									<Button className="team-action-btn" variant="contained"
+										onClick={handleConfirmInvitation(team.id)}>Agree</Button>
+									<Button className="team-action-btn" style={{ marginLeft: '20px' }} variant="contained"
+										onClick={(handleRemoveInvitation(team.id))}>Disagree</Button>
+								</div>
 							})
 							: <h1>No invited team for show</h1>}
 					</div>
@@ -225,13 +297,18 @@ export default function Profile() {
 					<div>
 						{teamReducer.requestingTeams.length > 0 ?
 							teamReducer.requestingTeams.map(team => {
-								return <Link key={team.id} style={{ margin: '10px', display: 'flex', alignItems: 'center' }}
-									to={`/teams/${team.id}`}>
-									<Avatar alt="team coverphoto"
-										src={`${baseURL}/api/team/coverphoto/${team.id}")`}
-										sx={{ width: 50, height: 50, }} />
-									<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
-								</Link>
+								return <div style={{ display: 'flex', alignItems: 'center' }} key={team.id}>
+									<span style={{ margin: '10px', display: 'flex', alignItems: 'center' }}
+										to={`/teams/${team.id}`}>
+										<Avatar alt="team coverphoto"
+											src={`${baseURL}/api/team/coverphoto/${team.id}")`}
+											sx={{ width: 50, height: 50, }} />
+										<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
+									</span>
+									<Button className="team-action-btn" style={{ marginLeft: '20px' }} variant="contained"
+										onClick={handleCancelRequest(team.id)}
+									>Cancel</Button>
+								</div>
 							})
 							: <h1>No request team for show</h1>}
 					</div>
@@ -268,6 +345,57 @@ export default function Profile() {
 					<Button onClick={handleCloseDeleteModel}>Cancel</Button>
 					<Button onClick={confirmDeleteTeam} autoFocus>
 						Confirm
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			<Dialog
+				open={isConfirmInvitationShow}
+				onClose={handleCloseConfirmInvitation}
+				aria-labelledby="alert-dialog-title"
+				aria-describedby="alert-dialog-description"
+			>
+				<DialogTitle id="alert-dialog-title">
+					{"Confirm to join this team ?"}
+				</DialogTitle>
+				<DialogActions>
+					<Button onClick={handleCloseConfirmInvitation}>Cancel</Button>
+					<Button onClick={agreeInvitaton} autoFocus>
+						Agree
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			<Dialog
+				open={isRemoveInvitationShow}
+				onClose={handleCloseRemoveInvitation}
+				aria-labelledby="alert-dialog-title"
+				aria-describedby="alert-dialog-description"
+			>
+				<DialogTitle id="alert-dialog-title">
+					{"Confirm to refuse invitation to join this team ?"}
+				</DialogTitle>
+				<DialogActions>
+					<Button onClick={handleCloseRemoveInvitation}>Cancel</Button>
+					<Button onClick={disagreeInvitation} autoFocus>
+						Disagree
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			<Dialog
+				open={isCancelRequestShow}
+				onClose={handleCloseCancelRequest}
+				aria-labelledby="alert-dialog-title"
+				aria-describedby="alert-dialog-description"
+			>
+				<DialogTitle id="alert-dialog-title">
+					{"Confirm to cancel request to join this team ?"}
+				</DialogTitle>
+				<DialogActions>
+					<Button onClick={handleCloseCancelRequest}>Cancel</Button>
+					<Button onClick={cancelJoin} autoFocus>
+						Agree
 					</Button>
 				</DialogActions>
 			</Dialog>

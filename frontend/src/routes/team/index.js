@@ -149,11 +149,7 @@ export default function Team(props) {
   const handleConfirmInvitation = () => {
     setInvitedModalShow(false)
     dispatch(confirmInvitations({
-      teams: [{
-        id: teamReducer.team.id,
-        name: teamReducer.team.name,
-        hostId: teamReducer.team.hostId
-      }]
+      teams: [teamReducer.team.id]
     }))
   }
 
