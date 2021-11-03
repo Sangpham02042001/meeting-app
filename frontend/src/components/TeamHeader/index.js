@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
-import { Button, Modal } from 'react-bootstrap'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
+import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import Dropdown from '../Dropdown'
@@ -52,20 +53,6 @@ export default function TeamHeader({ showTeamInfo }) {
 
   }, [])
 
-
-  useEffect(() => {
-    if (isCreateMeetingShow) {
-      (isEnableVideo || isEnableAudio) && navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio }).then(stream => {
-        userVideo.current.srcObject = stream;
-      }).catch(error => {
-        console.error('Error accessing media devices.', error);
-      });
-    } else {
-      userVideo.current && userVideo.current.srcObject.getTracks().forEach((track) => {
-        track.stop();
-      });
-    }
-  }, [isCreateMeetingShow])
 
   useEffect(() => {
     if (isJoinMeetingShow) {
@@ -165,20 +152,20 @@ export default function TeamHeader({ showTeamInfo }) {
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
         {
           teamReducer.team.meetingActive
-          && <Button variant='success'
+          && <Button variant="contained"
             disabled={teamReducer.meetingJoined}
             className='join-meeting-btn' onClick={handleJoinMeeting}>
             Join Meeting
           </Button>
         }
         <i className="far fa-question-circle" onClick={showTeamInfo}></i>
-        <Button variant="light" className="meeting-btn"
+        <Button variant="outlined" className="meeting-btn"
           disabled={teamReducer.team.meetingActive || teamReducer.meetingJoined}
+          startIcon={<VideoCameraFrontIcon />}
           onClick={e => {
             e.preventDefault()
             setShowCreateMeeting(true)
-          }}>
-          <i className="fas fa-video"></i> Meeting
+          }}> Meeting
         </Button>
         <div className="navbar-btn">
           <Dropdown
@@ -226,92 +213,58 @@ export default function TeamHeader({ showTeamInfo }) {
               </span>}
             </div>
           </div> */}
-          <Modal show={isDeleteModalShow} centered onHide={handleCloseDeleteModal}>
-            <Modal.Header closeButton>
-              <h4>Confirm delete this team</h4>
-            </Modal.Header>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseDeleteModal}>
+          <Dialog open={isDeleteModalShow} onClose={handleCloseDeleteModal}>
+            <DialogTitle>
+              Confirm delete this team
+            </DialogTitle>
+            <DialogActions>
+              <Button variant="text" onClick={handleCloseDeleteModal}>
                 Cancel
               </Button>
-              <Button onClick={handleDeleteTeam}>Delete</Button>
-            </Modal.Footer>
-          </Modal>
+              <Button variant="text" onClick={handleDeleteTeam}>Delete</Button>
+            </DialogActions>
+          </Dialog>
 
-          <Modal show={isOutModalShow} centered onHide={handleCloseOutModal}>
-            <Modal.Header closeButton>
+          <Dialog open={isOutModalShow} onClose={handleCloseOutModal}>
+            <DialogTitle>
               <h4>Confirm out this team</h4>
-            </Modal.Header>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseOutModal}>
+            </DialogTitle>
+            <DialogActions>
+              <Button variant="text" onClick={handleCloseOutModal}>
                 Cancel
               </Button>
-              <Button onClick={handleOutTeam}>Out</Button>
-            </Modal.Footer>
-          </Modal>
+              <Button variant="text" onClick={handleOutTeam}>Out</Button>
+            </DialogActions>
+          </Dialog>
 
           {/* Meeting here */}
-          <Modal show={isCreateMeetingShow} centered onHide={handleCloseCreateMeeting}>
-            <Modal.Header closeButton>
-              <h4>Create new meeting</h4>
-            </Modal.Header>
-            <Modal.Body>
-              <video width="100%" height="320px" muted ref={userVideo} autoPlay />
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {
-                  !isEnableVideo ?
-                    <Button variant="outline-light" disabled={!isEnableVideo} onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
-                      <i className="fas fa-video-slash"></i>
-                    </Button>
-                    :
-                    <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
-                      {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
-                    </Button>
-                }
-                <span>Join with camera</span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {
-                  !isEnableAudio ?
-                    <Button variant="outline-light" disabled={!isEnableAudio} onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
-                      <i className="fas fa-microphone-slash"></i>
-                    </Button>
-                    :
-                    <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
-                      {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
-                    </Button>
-                }
-                <span>Join with audio</span>
-              </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseCreateMeeting}>
+          <Dialog open={isCreateMeetingShow} onClose={handleCloseCreateMeeting}>
+            <DialogTitle>
+              Create new meeting
+            </DialogTitle>
+            <DialogActions>
+              <Button variant="text" onClick={handleCloseCreateMeeting}>
                 Cancel
               </Button>
-              <Button onClick={handleCreateMeeting}>
-                {/* <Link style={{ color: 'white', textDecoration: 'none' }}
-                  to={`/teams/${teamId}/meeting/312312`} target="_blank"> */}
+              <Button variant="text" onClick={handleCreateMeeting}>
                 Create
-                {/* </Link> */}
               </Button>
-            </Modal.Footer>
-          </Modal>
+            </DialogActions>
+          </Dialog>
 
-          <Modal show={isJoinMeetingShow} centered onHide={handleCloseJoinMeeting}>
-            <Modal.Header closeButton>
-              <h4>Create new meeting</h4>
-            </Modal.Header>
-            <Modal.Body>
+          <Dialog open={isJoinMeetingShow} centered onClose={handleCloseJoinMeeting}>
+            <DialogTitle>Join meeting
+            </DialogTitle>
+            <DialogContent>
               <video width="100%" height="320px" muted ref={userVideo} autoPlay />
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
                 {
                   !isEnableVideo ?
-                    <Button variant="outline-light" disabled={!isEnableVideo} onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                    <Button variant="outlined" disabled={!isEnableVideo} onClick={handleActiveVideo} style={{ border: 'none', color: '#000' }}>
                       <i className="fas fa-video-slash"></i>
                     </Button>
                     :
-                    <Button variant="outline-light" onClick={handleActiveVideo} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                    <Button variant="outlined" onClick={handleActiveVideo} style={{ border: 'none', color: '#000' }}>
                       {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
                     </Button>
                 }
@@ -321,23 +274,23 @@ export default function TeamHeader({ showTeamInfo }) {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {
                   !isEnableAudio ?
-                    <Button variant="outline-light" disabled={!isEnableAudio} onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                    <Button variant="outlined" disabled={!isEnableAudio} onClick={handleActiveAudio} style={{ border: 'none', color: '#000' }}>
                       <i className="fas fa-microphone-slash"></i>
                     </Button>
                     :
-                    <Button variant="outline-light" onClick={handleActiveAudio} style={{ borderRadius: "50%", margin: "10px", color: '#000' }}>
+                    <Button variant="outlined" onClick={handleActiveAudio} style={{ border: 'none', color: '#000' }}>
                       {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
                     </Button>
                 }
 
                 <span>Join with audio</span>
               </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseJoinMeeting}>
+            </DialogContent>
+            <DialogActions>
+              <Button variant="text" onClick={handleCloseJoinMeeting}>
                 Cancel
               </Button>
-              <Button>
+              <Button variant="text">
                 {teamReducer.team.meetingActive
                   && <Link target="_blank" style={{ zIndex: 10 }}
                     onClick={e => {
@@ -351,8 +304,8 @@ export default function TeamHeader({ showTeamInfo }) {
                     Join
                   </Link>}
               </Button>
-            </Modal.Footer>
-          </Modal>
+            </DialogActions>
+          </Dialog>
         </div>
       </div>
     </div>

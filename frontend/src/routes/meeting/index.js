@@ -4,6 +4,8 @@ import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { broadcastLocal, socketClient } from "../../utils";
 import './meeting.css';
 import { Row, Col, Button } from "react-bootstrap";
+import { Avatar } from '@mui/material';
+import { deepOrange, deepPurple } from '@mui/material/colors';
 import Video from "../../components/MeetingVideo";
 import MeetingChatBox from "../../components/MeetingChatBox";
 import MeetingUserList from "../../components/MeetingUserList";
@@ -38,7 +40,8 @@ const Meeting = (props) => {
     //******************janus************
     let janus = null;
     const opaqueId = "videoroomtest-" + Janus.randomString(12)
-    let sfutest = null;
+    // const [sfuRef, setSfutest] = useState(null);
+    const sfuRef = useRef()
 
     // const meetingId = props.match.params.meetingId;
 
@@ -50,46 +53,31 @@ const Meeting = (props) => {
             });
     }
 
-    function publishOwnFeed(useAudio) {
-        // Publish our stream
-        sfutest.createOffer(
+    const publishOwnFeed = (useAudio) => {
+        sfuRef.current && sfuRef.current.createOffer(
             {
-                // Add data:true here if you want to publish datachannels as well
-                media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true },	// Publishers are sendonly
-                // If you want to test simulcasting (Chrome and Firefox only), then
-                // pass a ?simulcast=true when opening this demo page: it will turn
-                // the following 'simulcast' property to pass to janus.js to true
+                media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true },
                 // simulcast: doSimulcast,
                 // simulcast2: doSimulcast2,
                 success: function (jsep) {
                     Janus.debug("Got publisher SDP!", jsep);
                     const publish = { request: "configure", audio: useAudio, video: true };
 
-                    // You can force a specific codec to use when publishing by using the
-                    // audiocodec and videocodec properties, for instance:
-                    // 		publish["audiocodec"] = "opus"
-                    // to force Opus as the audio codec to use, or:
-                    // 		publish["videocodec"] = "vp9"
-                    // to force VP9 as the videocodec to use. In both case, though, forcing
-                    // a codec will only work if: (1) the codec is actually in the SDP (and
-                    // so the browser supports it), and (2) the codec is in the list of
-                    // allowed codecs in a room. With respect to the point (2) above,
-                    // refer to the text in janus.plugin.videoroom.jcfg for more details.
-                    // We allow people to specify a codec via query string, for demo purposes
-
                     // if (acodec)
                     //     publish["audiocodec"] = acodec;
                     // if (vcodec)
                     //     publish["videocodec"] = vcodec;
-                    sfutest.send({ message: publish, jsep: jsep });
+                    sfuRef.current.send({ message: publish, jsep: jsep });
                 },
                 error: function (error) {
                     Janus.error("WebRTC error:", error);
+                    console.log(error)
                     if (useAudio) {
                         publishOwnFeed(false);
+                        // if ()
                     } else {
-                        bootbox.alert("WebRTC error... " + error.message);
-                        $('#publish').removeAttr('disabled').click(function () { publishOwnFeed(true); });
+                        alert('WebRTC Error')
+                        // $('#publish').removeAttr('disabled').click(function () { publishOwnFeed(true); });
                     }
                 }
             });
@@ -111,19 +99,6 @@ const Meeting = (props) => {
             if (audios.length) setIsEnableAudio(true);
         })
 
-        // window.addEventListener('beforeunload', (ev) => {
-        //     ev.preventDefault();
-        //     console.log(meetingId, userReducer.user.id)
-        //     socketClient.connect()
-        //     //disconnect: true
-        //     socketClient.emit('out-meeting', {
-        //         userId: userReducer.user.id,
-        //         meetingId
-        //     })
-        //     // socketClient.disconnect()
-        //     return ev.returnValue = 'Are you sure you want to close?';
-        // })
-
         Janus.init({
             debug: 'all', callback: () => {
                 janus = new Janus({
@@ -138,15 +113,14 @@ const Meeting = (props) => {
                             plugin: "janus.plugin.videoroom",
                             opaqueId,
                             success: (pluginHandle) => {
-                                console.log('attach success')
-                                sfutest = pluginHandle
+                                sfuRef.current = pluginHandle;
                                 const register = {
                                     request: "join",
                                     room: 1234,
                                     ptype: "publisher",
-                                    display: "Sang"
+                                    display: userReducer.user.firstName
                                 };
-                                sfutest.send({ message: register });
+                                pluginHandle.send({ message: register });
                             },
                             iceState: function (state) {
                                 console.log("ICE state changed to " + state);
@@ -210,48 +184,30 @@ const Meeting = (props) => {
             if (!meeting.active) {
                 setIsMeetingEnd(true)
             }
-            if (meeting.active) {
-                // (isEnableVideo || isEnableAudio) && navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio })
-                //     .then(stream => {
-                //         myVideo.current.srcObject = stream;
-                //     })
-                //     .catch(error => {
-                //         console.error('Error accessing media devices.', error);
-                //     })
-                //     .finally(() => {
-                //         if (isEnableVideo && !isVideoActive) {
-                //             myVideo.current && myVideo.current.srcObject.getVideoTracks().forEach(track => {
-                //                 track.enabled = false
-                //             })
-                //         }
-                //         if (isEnableAudio && !isAudioActive) {
-                //             myVideo.current && myVideo.current.srcObject.getAudioTracks().forEach(track => {
-                //                 track.enabled = false
-                //             })
-                //         }
-                //     })
-            }
         }
     }, [teamReducer.teamLoaded])
 
-
-    const handleActiveVideo = () => {
-        myVideo.current.srcObject.getVideoTracks().forEach(track => {
-            track.enabled = !track.enabled
-        })
-
-        setIsVideoActive(!isVideoActive);
+    const toggleAudio = () => {
+        let muted = sfuRef.current.isAudioMuted();
+        Janus.log((muted ? "Unmuting" : "Muting") + " local stream...");
+        if (muted)
+            sfuRef.current.unmuteAudio();
+        else
+            sfuRef.current.muteAudio();
+        muted = sfuRef.current.isAudioMuted();
+        setIsAudioActive(!isAudioActive);
     }
 
-    const handleActiveAudio = () => {
-        myVideo.current.srcObject.getAudioTracks().forEach(track => {
-            track.enabled = !track.enabled
-        })
-        let checkAudioActive = myVideo.current.srcObject.getAudioTracks()[0].enabled;
-        console.log(checkAudioActive);
-        // myVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
-
-        setIsAudioActive(!isAudioActive);
+    const toggleVideo = () => {
+        let muted = sfuRef.current.isVideoMuted();
+        Janus.log((muted ? "Unmuting" : "Muting") + " local stream...");
+        if (muted) {
+            sfuRef.current.unmuteVideo();
+        } else {
+            sfuRef.current.muteVideo();
+        }
+        muted = sfuRef.current.isVideoMuted();
+        setIsVideoActive(!isVideoActive);
     }
 
     const handleVisibleChat = () => {
@@ -288,12 +244,12 @@ const Meeting = (props) => {
     }
 
     const handleEndMeeting = () => {
-        console.log(myVideo.current.srcObject)
-        myVideo.current.srcObject.getTracks().forEach((track) => {
-            console.log(track)
-            track.stop();
-        });
-        socketClient.emit('disconnect-meeting');
+        // console.log(myVideo.current.srcObject)
+        // myVideo.current.srcObject.getTracks().forEach((track) => {
+        //     console.log(track)
+        //     track.stop();
+        // });
+        // socketClient.emit('disconnect-meeting');
         window.open("", "_self").close();
     }
 
@@ -310,7 +266,14 @@ const Meeting = (props) => {
                 <div className="users-content">
                     <div className="user-frame">
                         <video width="100%" height="100%" ref={myVideo} muted autoPlay />
-                        {/* {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white", textAlign: "center" }}>{socketClient.id}</div>} */}
+                        {sfuRef.current && (!sfuRef.current.isVideoMuted() && <Avatar
+                            sx={{
+                                bgcolor: deepOrange[500], position: 'absolute',
+                                top: '70px', left: '70px',
+                                width: 130, height: 130
+                            }}>
+                            {userReducer.user.firstName[0]}
+                        </Avatar>)}
                     </div>
 
                 </div>
@@ -339,24 +302,24 @@ const Meeting = (props) => {
                 <Col md={{ span: 3, offset: 5 }} >
                     {
                         !isEnableVideo ?
-                            <Button variant="outline-light" onClick={handleActiveVideo}
+                            <Button variant="outline-light" onClick={toggleVideo}
                                 disabled={!isEnableVideo}
                             >
                                 <i className="fas fa-video-slash"></i>
                             </Button>
                             :
-                            <Button variant="outline-light" onClick={handleActiveVideo}>
+                            <Button variant="outline-light" onClick={toggleVideo}>
                                 {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
                             </Button>
                     }
 
                     {
                         !isEnableAudio ?
-                            <Button variant="outline-light" disabled={!isEnableAudio} onClick={handleActiveAudio}>
+                            <Button variant="outline-light" disabled={!isEnableAudio} onClick={toggleAudio}>
                                 <i className="fas fa-microphone-slash"></i>
                             </Button>
                             :
-                            <Button variant="outline-light" onClick={handleActiveAudio}>
+                            <Button variant="outline-light" onClick={toggleAudio}>
                                 {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
                             </Button>
                     }

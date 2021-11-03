@@ -17,15 +17,7 @@
 }
 
 .team-header .meeting-btn {
-  border: 1px solid gray;
   margin-right: 10px;
-  padding: 5px 10px;
-  background-color: #fff;
-}
-
-.team-header .meeting-btn:hover {
-  background-color: rgb(238, 234, 234);
-  transition: background-color 0.4s ease;
 }
 
 .team-header .dropdown-content {
@@ -47,13 +39,13 @@
 
 .join-meeting-btn {
   color: #fff;
-  margin-right: 20px;
+  margin-right: 20px !important;
 }
-
+/* 
 .join-meeting-btn a {
   color: #fff;
 }
 
 .join-meeting-btn a:hover {
   color: #fff !important;
-}
+} */
