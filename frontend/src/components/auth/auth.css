@@ -1,3 +1,11 @@
+.loginPage {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  height: 100vh;
+}
+
 .form-container {
   display: flex;
   justify-content: center;
@@ -6,19 +14,27 @@
   margin: auto;
 }
 
-.form-container .error-message {
+.auth-form .error-message {
   color: red;
   margin-bottom: 5px;
 }
 
 .auth-form {
-  min-width: 500px;
+  width: 500px;
   padding: 20px;
   border-radius: 20px;
-  /* background-color: #000000; */
-  /* color: rgb(255, 255, 255); */
   box-shadow: 0 0 2px 2px var(--gray-shadow);
   overflow-y: auto;
+}
+
+.auth-form > div {
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.auth-form > div > div {
+  width: 100%;
 }
 
 .submit-btn {

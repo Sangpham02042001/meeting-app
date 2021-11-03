@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Form, Button, Modal } from "react-bootstrap";
+import {
+    TextField, Button, Dialog,
+    DialogTitle, DialogContent, DialogActions
+} from '@mui/material';
 import { Link, Redirect } from 'react-router-dom';
 import Loading from "../Loading";
 import { isAuthenticated } from "../../store/reducers/user.reducer";
@@ -24,7 +27,7 @@ export default function SignUp() {
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
     const [passwordError, setPasswordError] = useState('')
     const [passwordCfError, setPasswordCfError] = useState('')
-    const [isModalShow, setModalShow] = useState(false)
+    const [isDialogShow, setModalShow] = useState(false)
     const [signupError, setSignupError] = useState('')
 
     const handleChange = type => event => {
@@ -54,7 +57,7 @@ export default function SignUp() {
         }
     }
 
-    const handleCloseModal = () => {
+    const handleCloseDialog = () => {
         setModalShow(false)
     }
 
@@ -97,95 +100,79 @@ export default function SignUp() {
                 : <div style={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
                     <div className="form-container">
                         <h1 style={{ marginBottom: '30px' }}>Meeting App</h1>
-                        <Form onSubmit={handleSubmit} className="auth-form">
-                            <Form.Group className="mb-3">
-                                <Form.Label>First Name</Form.Label>
-                                <Form.Control
-                                    name="firstName"
-                                    placeholder="First Name"
-                                    value={firstName}
-                                    onChange={handleChange("firstName")}
-                                    required
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Last Name</Form.Label>
-                                <Form.Control
-                                    name="lastName"
-                                    placeholder="Last Name"
-                                    value={lastName}
-                                    onChange={handleChange("lastName")}
-                                    required
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Email</Form.Label>
-                                <Form.Control
-                                    type="email"
-                                    name="email"
-                                    placeholder="Email"
-                                    value={email}
-                                    onChange={handleChange("email")}
-                                    required
-                                />
-                            </Form.Group>
+                        <form onSubmit={handleSubmit} className="auth-form">
+                            <TextField
+                                name="firstName"
+                                label="First Name"
+                                value={firstName}
+                                onChange={handleChange("firstName")}
+                                variant="standard"
+                            />
+                            <TextField
+                                name="lastName"
+                                label="Last Name"
+                                value={lastName}
+                                onChange={handleChange("lastName")}
+                                variant="standard"
+                            />
+                            <TextField
+                                type="email"
+                                name="email"
+                                label="Email"
+                                value={email}
+                                onChange={handleChange("email")}
+                                variant="standard"
+                            />
                             {signupError && <p className="error-message">
                                 {signupError}
                             </p>}
-                            <Form.Group className="mb-3">
-                                <Form.Label>Password</Form.Label>
-                                <Form.Control
-                                    type="password"
-                                    name="password"
-                                    placeholder="Password"
-                                    value={password}
-                                    onChange={handleChange("password")}
-                                    required
-                                    autoComplete="off"
-                                />
-                            </Form.Group>
+                            <TextField
+                                type="password"
+                                name="password"
+                                label="Password"
+                                value={password}
+                                onChange={handleChange("password")}
+                                autoComplete="off"
+                                variant="standard"
+                            />
                             {passwordError && <p className="error-message">
                                 {passwordError}
                             </p>}
-                            <Form.Group className="mb-3">
-                                <Form.Label>Confirm Password</Form.Label>
-                                <Form.Control
-                                    type="password"
-                                    name="password"
-                                    placeholder="Confirm Password"
-                                    value={passwordConfirmation}
-                                    onChange={handleChange("passwordConfirmation")}
-                                    required
-                                    autoComplete="off"
-                                />
-                            </Form.Group>
+                            <TextField
+                                type="password"
+                                name="password"
+                                label="Confirm Password"
+                                value={passwordConfirmation}
+                                onChange={handleChange("passwordConfirmation")}
+                                variant="standard"
+                            />
                             {passwordCfError && <p className="error-message">
                                 {passwordCfError}
                             </p>}
-                            <div>
-                                <Button className="mb-3 submit-btn" type="submit">Sign up</Button> <br />
-                                <p style={{ textAlign: 'center', marginBottom: 0 }}>
-                                    Have account ? <Link to="/login">Sign in here</Link>
-                                </p>
+                            <div style={{ textAlign: 'right' }}>
+                                <Button variant="contained" type="submit">Sign up</Button> <br />
                             </div>
-                        </Form>
+                            <p style={{ textAlign: 'center', marginBottom: 0 }}>
+                                Have account ? <Link to="/login">Sign in here</Link>
+                            </p>
+                        </form>
                     </div>
-                    <Modal show={isModalShow} onHide={handleCloseModal}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Welcome to Meeting App</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>Sign up successfully.</Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={handleCloseModal}>
+                    <Dialog open={isDialogShow} onClose={handleCloseDialog}>
+                        <DialogTitle>Welcome to Meeting App</DialogTitle>
+                        <DialogContent>
+                            Sign up successfully.
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleCloseDialog}>
                                 Close
                             </Button>
-                            <Button variant="primary">
-                                <Link style={{ color: '#fff', textDecoration: 'none' }} to='/login'>
+                            <Button>
+                                <Link style={{ textDecoration: 'none' }} to='/login'>
                                     Log in now
                                 </Link>
                             </Button>
-                        </Modal.Footer>
-                    </Modal>
+                        </DialogActions>
+                    </Dialog>
                 </div>)
     )
 }

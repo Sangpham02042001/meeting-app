@@ -1,46 +1,15 @@
 :root {
   /* --main-color: linear-gradient(to right, #0d6efd 0%, #031633 100%); */
-  --gray-shadow: rgb(202, 197, 197);
+  --gray-shadow: rgb(219, 216, 216);
 }
 
 .App {
   position: relative;
 }
 
-/* .my-video {
-  position: absolute;
-  left: 0;
-  top: 0;
-} */
-
 .video-list {
   display: flex;
 }
-
-/* .btn-primary {
-  color: #fff;
-  background: var(--main-color);
-  border-color: rgb(0, 0, 0);
-}
-
-.btn-primary:hover {
-  background-color: rgb(69, 39, 124);
-} */
-
-/* .login {
-  background-color: #000000;
-  border-radius: 10%;
-  color: rgb(255, 255, 255);
-  width: 30em;
-  height: 30em;
-  font-family: 'Poppins'; */
-/* padding-top: 0px;
-} */
-
-/* @font-face {
-  font-family: 'Poppins';
-  src: url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLBT5Z11lFd2JQEl8qw.woff2) format('woff2');
-} */
 
 .otherLogin > * {
   margin-right: 20px;
@@ -57,15 +26,6 @@ button:disabled {
 .btn:disabled {
   pointer-events: all;
 }
-
-/* a {
-  color: #000000;
-  text-decoration: none;
-}
-
-a:hover {
-  color: #000000;
-} */
 
 ::-webkit-scrollbar {
   width: 10px;
