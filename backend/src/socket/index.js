@@ -10,35 +10,6 @@ const { setConversation, setMessage } = require('../controllers/conversation.con
 
 
 const socketServer = (socket) => {
-    // socket.on("join-meeting", meetingId => {
-    //     if (users[meetingId]) {
-
-    //         users[meetingId].push(socket.id);
-    //     } else {
-    //         users[meetingId] = [socket.id];
-    //     }
-    //     socket.join(meetingId);
-    //     socketToMeeting[socket.id] = meetingId;
-    //     const usersInThisRoom = users[meetingId].filter(id => id !== socket.id);
-    //     console.log(socket.id);
-    //     socket.emit("all-users", usersInThisRoom);
-
-
-
-    //     socket.on('disconnect-meeting', () => {
-    //         const meetingId = socketToMeeting[socket.id];
-    //         let room = users[meetingId];
-    //         if (room) {
-    //             room = room.filter(id => id !== socket.id);
-    //             users[meetingId] = room;
-    //             socket.broadcast.to(meetingId).emit('disconnected-meeting', socket.id);
-    //         }
-    //     })
-
-    //     socket.on('send-message-team', ({ message, userId }) => {
-    //         socket.broadcast.to(meetingId).emit('receive-message-team', { message, userId });
-    //     })
-    // });
     //team
     socket.on('send-message-team', async ({ teamId, senderId, content, image }) => {
         let members = await getMemberTeam({ teamId });
@@ -88,13 +59,6 @@ const socketServer = (socket) => {
             messageId: message.id, meetingId, senderId, content, photo: message.photo
         })
     })
-    // socket.on("sending-signal", ({ signal, callerID, userToSignal }) => {
-    //     socket.to(userToSignal).emit('joined-meeting', { signal, callerID });
-    // })
-
-    // socket.on("returning-signal", ({ signal, callerID }) => {
-    //     socket.to(callerID).emit('receiving-returned-signal', { signal, userId: socket.id });
-    // });
 
     //conversation
 
@@ -115,13 +79,6 @@ const socketServer = (socket) => {
 
     //disconnect
     socket.on('disconnect', async () => {
-        // const meetingId = socketToMeeting[socket.id];
-        // let room = users[meetingId];
-        // if (room) {
-        //     room = room.filter(id => id !== socket.id);
-        //     users[meetingId] = room;
-        //     socket.broadcast.to(meetingId).emit('disconnected-meeting', socket.id);
-        // }
         console.log(`disconnect with meetingId: ${socket.meetingId} ${socket.id}`)
         if (socket.meetingId) {
             let { message } = await outMeeting({

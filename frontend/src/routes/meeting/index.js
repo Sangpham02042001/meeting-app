@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { broadcastLocal, socketClient } from "../../utils";
-import Peer from "simple-peer";
 import './meeting.css';
 import { Row, Col, Button } from "react-bootstrap";
 import Video from "../../components/MeetingVideo";
@@ -14,6 +13,8 @@ import {
     getTeamInfo,
 } from '../../store/reducers/team.reducer'
 import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
+import Janus from '../../janus'
+import { janusServer } from '../../utils'
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
@@ -28,14 +29,16 @@ const Meeting = (props) => {
     const userReducer = useSelector(state => state.userReducer)
     const teamReducer = useSelector(state => state.teamReducer)
     const meetingReducer = useSelector(state => state.meetingReducer)
-    const [peers, setPeers] = useState([]);
     const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
     const [isAudioActive, setIsAudioActive] = useState(query.get('audio') == 'true' || false);
     const [isEnableVideo, setIsEnableVideo] = useState(false);
     const [isEnableAudio, setIsEnableAudio] = useState(false);
     const [isMeetingEnd, setIsMeetingEnd] = useState(false);
-    const userVideo = useRef();
-    let peersRef = useRef([]);
+    const myVideo = useRef();
+    //******************janus************
+    let janus = null;
+    const opaqueId = "videoroomtest-" + Janus.randomString(12)
+    let sfutest = null;
 
     // const meetingId = props.match.params.meetingId;
 
@@ -44,6 +47,51 @@ const Meeting = (props) => {
             .then(devices => {
                 const filtered = devices.filter(device => device.kind === type);
                 callback(filtered);
+            });
+    }
+
+    function publishOwnFeed(useAudio) {
+        // Publish our stream
+        sfutest.createOffer(
+            {
+                // Add data:true here if you want to publish datachannels as well
+                media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true },	// Publishers are sendonly
+                // If you want to test simulcasting (Chrome and Firefox only), then
+                // pass a ?simulcast=true when opening this demo page: it will turn
+                // the following 'simulcast' property to pass to janus.js to true
+                // simulcast: doSimulcast,
+                // simulcast2: doSimulcast2,
+                success: function (jsep) {
+                    Janus.debug("Got publisher SDP!", jsep);
+                    const publish = { request: "configure", audio: useAudio, video: true };
+
+                    // You can force a specific codec to use when publishing by using the
+                    // audiocodec and videocodec properties, for instance:
+                    // 		publish["audiocodec"] = "opus"
+                    // to force Opus as the audio codec to use, or:
+                    // 		publish["videocodec"] = "vp9"
+                    // to force VP9 as the videocodec to use. In both case, though, forcing
+                    // a codec will only work if: (1) the codec is actually in the SDP (and
+                    // so the browser supports it), and (2) the codec is in the list of
+                    // allowed codecs in a room. With respect to the point (2) above,
+                    // refer to the text in janus.plugin.videoroom.jcfg for more details.
+                    // We allow people to specify a codec via query string, for demo purposes
+
+                    // if (acodec)
+                    //     publish["audiocodec"] = acodec;
+                    // if (vcodec)
+                    //     publish["videocodec"] = vcodec;
+                    sfutest.send({ message: publish, jsep: jsep });
+                },
+                error: function (error) {
+                    Janus.error("WebRTC error:", error);
+                    if (useAudio) {
+                        publishOwnFeed(false);
+                    } else {
+                        bootbox.alert("WebRTC error... " + error.message);
+                        $('#publish').removeAttr('disabled').click(function () { publishOwnFeed(true); });
+                    }
+                }
             });
     }
 
@@ -75,6 +123,56 @@ const Meeting = (props) => {
         //     // socketClient.disconnect()
         //     return ev.returnValue = 'Are you sure you want to close?';
         // })
+
+        Janus.init({
+            debug: 'all', callback: () => {
+                janus = new Janus({
+                    server: janusServer,
+                    iceServers: [{
+                        url: 'turn:numb.viagenie.ca',
+                        credential: 'muazkh',
+                        username: 'webrtc@live.com'
+                    },],
+                    success: function () {
+                        janus.attach({
+                            plugin: "janus.plugin.videoroom",
+                            opaqueId,
+                            success: (pluginHandle) => {
+                                console.log('attach success')
+                                sfutest = pluginHandle
+                                const register = {
+                                    request: "join",
+                                    room: 1234,
+                                    ptype: "publisher",
+                                    display: "Sang"
+                                };
+                                sfutest.send({ message: register });
+                            },
+                            iceState: function (state) {
+                                console.log("ICE state changed to " + state);
+                            },
+                            mediaState: function (medium, on) {
+                                console.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
+                            },
+                            onmessage: (msg, jsep) => {
+                                const event = msg["videoroom"];
+                                if (event) {
+                                    if (event === 'joined') {
+                                        publishOwnFeed(true);
+                                    }
+                                }
+                            },
+                            onlocalstream: (stream) => {
+                                Janus.attachMediaStream(myVideo.current, stream)
+                            },
+                            error: (error) => {
+                                console.log(error)
+                            }
+                        })
+                    }
+                })
+            }
+        })
 
         window.addEventListener('beforeunload', function (e) {
             e.preventDefault()
@@ -113,109 +211,32 @@ const Meeting = (props) => {
                 setIsMeetingEnd(true)
             }
             if (meeting.active) {
-                (isEnableVideo || isEnableAudio) && navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio })
-                    .then(stream => {
-                        userVideo.current.srcObject = stream;
-                        // socketClient.emit("join-meeting", meetingId);
-                        socketClient.on("all-users", users => {
-                            console.log(users);
-                            const peers = [];
-                            users.forEach(userID => {
-                                const peer = createPeer(userID, socketClient.id, stream);
-                                peersRef.current.push({
-                                    peerID: userID,
-                                    peer,
-                                })
-                                peers.push({
-                                    peerID: userID,
-                                    peer,
-                                });
-                            })
-                            setPeers(peers);
-                        })
-
-                        // socketClient.on("joined-meeting", ({ signal, callerID }) => {
-                        //     const peer = addPeer(signal, callerID, stream);
-                        //     peersRef.current.push({
-                        //         peerID: callerID,
-                        //         peer,
-                        //     })
-                        //     setPeers(peers => [...peers, {
-                        //         peerID: callerID,
-                        //         peer,
-                        //     }]);
-                        // });
-
-                        socketClient.on("receiving-returned-signal", ({ signal, callerID, userId }) => {
-                            const item = peersRef.current.find(p => p.peerID === userId);
-                            item.peer.signal(signal);
-                        });
-
-
-
-                        socketClient.on("disconnected-meeting", userId => {
-                            console.log('disssconneccctteee')
-                            const item = peersRef.current.find(p => p.peerID === userId);
-                            item.peer.destroy()
-                            console.log(item);
-                            setPeers(peers => {
-                                return peers.filter(p => p.peerID !== userId);
-                            })
-
-                        })
-                    })
-                    .catch(error => {
-                        console.error('Error accessing media devices.', error);
-                    })
-                    .finally(() => {
-                        if (isEnableVideo && !isVideoActive) {
-                            userVideo.current && userVideo.current.srcObject.getVideoTracks().forEach(track => {
-                                track.enabled = false
-                            })
-                        }
-                        if (isEnableAudio && !isAudioActive) {
-                            userVideo.current && userVideo.current.srcObject.getAudioTracks().forEach(track => {
-                                track.enabled = false
-                            })
-                        }
-                    })
+                // (isEnableVideo || isEnableAudio) && navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio })
+                //     .then(stream => {
+                //         myVideo.current.srcObject = stream;
+                //     })
+                //     .catch(error => {
+                //         console.error('Error accessing media devices.', error);
+                //     })
+                //     .finally(() => {
+                //         if (isEnableVideo && !isVideoActive) {
+                //             myVideo.current && myVideo.current.srcObject.getVideoTracks().forEach(track => {
+                //                 track.enabled = false
+                //             })
+                //         }
+                //         if (isEnableAudio && !isAudioActive) {
+                //             myVideo.current && myVideo.current.srcObject.getAudioTracks().forEach(track => {
+                //                 track.enabled = false
+                //             })
+                //         }
+                //     })
             }
         }
     }, [teamReducer.teamLoaded])
 
-    const createPeer = (userToSignal, callerID, stream) => {
-        const peer = new Peer({
-            initiator: true,
-            trickle: false,
-            stream,
-        });
-
-        peer.on("signal", signal => {
-            //server emit user joined
-            socketClient.emit("sending-signal", { signal, callerID, userToSignal })
-        })
-
-        return peer;
-    }
-
-    const addPeer = (incomingSignal, callerID, stream) => {
-        const peer = new Peer({
-            initiator: false,
-            trickle: false,
-            stream,
-        })
-
-        peer.on("signal", signal => {
-            socketClient.emit("returning-signal", { signal, callerID })
-        })
-
-        peer.signal(incomingSignal);
-
-        return peer;
-    }
 
     const handleActiveVideo = () => {
-        userVideo.current.srcObject.getVideoTracks().forEach(track => {
+        myVideo.current.srcObject.getVideoTracks().forEach(track => {
             track.enabled = !track.enabled
         })
 
@@ -223,12 +244,12 @@ const Meeting = (props) => {
     }
 
     const handleActiveAudio = () => {
-        userVideo.current.srcObject.getAudioTracks().forEach(track => {
+        myVideo.current.srcObject.getAudioTracks().forEach(track => {
             track.enabled = !track.enabled
         })
-        let checkAudioActive = userVideo.current.srcObject.getAudioTracks()[0].enabled;
+        let checkAudioActive = myVideo.current.srcObject.getAudioTracks()[0].enabled;
         console.log(checkAudioActive);
-        // userVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
+        // myVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
 
         setIsAudioActive(!isAudioActive);
     }
@@ -267,11 +288,8 @@ const Meeting = (props) => {
     }
 
     const handleEndMeeting = () => {
-        peers.map(peer => {
-            peer.peer.destroy();
-        })
-        console.log(userVideo.current.srcObject)
-        userVideo.current.srcObject.getTracks().forEach((track) => {
+        console.log(myVideo.current.srcObject)
+        myVideo.current.srcObject.getTracks().forEach((track) => {
             console.log(track)
             track.stop();
         });
@@ -291,17 +309,9 @@ const Meeting = (props) => {
             <div className="room-content">
                 <div className="users-content">
                     <div className="user-frame">
-                        <video width="100%" height="100%" ref={userVideo} muted autoPlay />
+                        <video width="100%" height="100%" ref={myVideo} muted autoPlay />
                         {/* {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white", textAlign: "center" }}>{socketClient.id}</div>} */}
                     </div>
-
-                    {peers.length > 0 && peers.map((peerObj) => {
-                        return (
-                            <div key={peerObj.peerID} className="user-frame">
-                                <Video peer={peerObj.peer} peerId={peerObj.peerID} />
-                            </div>
-                        );
-                    })}
 
                 </div>
                 {isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
