@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router'
 import {
-  Col, Container, Image, Row, Button,
-  Modal, Form, Spinner
-} from 'react-bootstrap'
+  Button, Dialog, DialogContent, DialogTitle,
+  DialogActions, FormControl, InputLabel,
+  Input, InputAdornment, Avatar
+} from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search';
+import CircularProgress from '@mui/material/CircularProgress';
 import { inviteUsers } from '../../store/reducers/team.reducer'
 import { axiosAuth, baseURL } from '../../utils'
 
@@ -79,46 +82,49 @@ export default function InviteUsersWrapper({ users }) {
   return (
     <>
       <div style={{ textAlign: 'right' }}>
-        <Button variant="success" onClick={e => {
+        <Button variant="contained" onClick={e => {
           e.preventDefault()
           setShow(true)
         }}>Invite</Button>
       </div>
-      <Modal show={isShow} onHide={handleInviteModalClose} size="lg" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Invite users to join your team</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleSearchUser}>
-            <Form.Group className="mb-3 search-team-box" controlId="formUsers">
-              <Form.Control type="text" placeholder="Enter user name or email"
-                autoComplete='off'
-                value={searchUserName} onChange={e => setSearchUserName(e.target.value)} />
-              {searchUsers.length <= 0 ?
-                <i className="fas fa-search" style={{ cursor: 'pointer' }}
-                  onClick={handleSearchUser}></i>
-                : <i className="fas fa-times" style={{ cursor: 'pointer' }}
-                  onClick={cancelSearchUsers}>
-                </i>}
-            </Form.Group>
-          </Form>
+      <Dialog open={isShow} onClose={handleInviteModalClose} minWidth="sm" fullWidth={true}>
+        <DialogTitle>
+          Invite users to join your team
+        </DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSearchUser}>
+            <FormControl variant="outlined" style={{ margin: '15px 0', width: '100%' }}>
+              <InputLabel htmlFor="search-teams">
+                Enter user name or email
+              </InputLabel>
+              <Input
+                id="search-teams"
+                value={searchUserName}
+                onChange={e => setSearchUserName(e.target.value)}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <SearchIcon onClick={handleSearchUser} />
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
+          </form>
           <div style={{ minHeight: '300px' }}>
             {searchUserName && (
               (loading ? <div style={{ textAlign: 'center', padding: '10px' }}>
-                <Spinner animation="border" role="status">
-                </Spinner>
+                <CircularProgress />
               </div> : <div className="invited-user-list">
                 {searchUsers.filter(user => invitedUsers.map(u => u.id).indexOf(user.id) < 0)
                   .map(user => (
                     <div key={user.id} className="invited-user-item">
                       <span style={{ display: 'flex', alignItems: 'center' }}>
-                        <Image src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
-                        <span>
+                        <Avatar src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
+                        <span style={{ marginLeft: '10px' }}>
                           <p>{user.userName}</p>
                           <p>{user.email}</p>
                         </span>
                       </span>
-                      <Button variant="success" title="Add to the list of invited users"
+                      <Button variant="text" title="Add to the list of invited users"
                         onClick={handleAddInvitedUser(user)}>
                         Add
                       </Button>
@@ -134,13 +140,13 @@ export default function InviteUsersWrapper({ users }) {
               {invitedUsers.map(user => (
                 <div key={user.id} className="invited-user-item">
                   <span style={{ display: 'flex', alignItems: 'center' }}>
-                    <Image src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
-                    <span>
+                    <Avatar src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
+                    <span style={{ marginLeft: '10px' }}>
                       <p>{user.userName}</p>
                       <p>{user.email}</p>
                     </span>
                   </span>
-                  <Button variant="danger" title="Remove"
+                  <Button variant="text" title="Remove"
                     onClick={deleteUser(user)}>
                     Remove
                   </Button>
@@ -148,17 +154,17 @@ export default function InviteUsersWrapper({ users }) {
               ))}
             </div>}
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleInviteModalClose}>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={handleInviteModalClose}>
             Cancel
           </Button>
-          <Button variant="primary" disabled={!invitedUsers.length}
-            style={{ backgroundColor: '#364087' }} onClick={handleInviteAll}>
+          <Button variant="text" disabled={!invitedUsers.length}
+            onClick={handleInviteAll}>
             Invite
           </Button>
-        </Modal.Footer>
-      </Modal>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
