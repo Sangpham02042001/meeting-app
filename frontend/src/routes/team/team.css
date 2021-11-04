@@ -1,5 +1,6 @@
 .team-container {
   display: flex;
+  overflow-y: hidden;
 }
 
 .team-container > div {
@@ -40,6 +41,10 @@
   margin-bottom: 10px;
 }
 
+.team-message-input input {
+  padding: 5px;
+}
+
 .team-message-input:focus {
   width: 100%;
   box-shadow: 0 0 0 1px var(--gray-shadow);
@@ -58,6 +63,7 @@
   position: absolute;
   right: 0;
   top: 0;
+  height: 100%;
 }
 
 .input-list-btn > button {
@@ -66,7 +72,7 @@
 }
 
 .send-image-label {
-  padding: 6px 0;
+  padding-top: 2px;
 }
 
 .image-message-upload {

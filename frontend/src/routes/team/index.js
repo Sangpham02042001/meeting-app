@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
 import {
-  Container, Modal, Button, Row, Col,
-  Form, Tooltip, OverlayTrigger, Image
-} from 'react-bootstrap'
+  Grid, Button, Dialog, DialogActions,
+  DialogContent, TextField
+} from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
   confirmInvitations, getTeamMessages, cleanTeamState,
@@ -202,128 +204,128 @@ export default function Team(props) {
   return (
     teamReducer.loading ? <Loading />
       :
-      <Container fluid>
-        <Row>
-          <Col sm={2} style={{ padding: 0 }}>
-            <TeamList />
-          </Col>
-          <Col style={{ padding: 0 }}>
-            <TeamHeader showTeamInfo={showTeamInfo} />
-            <div className="team-container">
-              <div className="team-body" ref={teamBody}
-                style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
-                {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
-                  ref={scrollRef} style={{
-                    height: teamBody.current && teamBody.current.offsetHeight ?
-                      teamBody.current.offsetHeight - (imageUrl ? 160 : 40) : '560px'
+      <Grid container>
+        <Grid item sm={2} style={{ padding: 0 }}>
+          <TeamList />
+        </Grid>
+        <Grid item sm={10} style={{ padding: 0 }}>
+          <TeamHeader showTeamInfo={showTeamInfo} />
+          <div className="team-container">
+            <div className="team-body" ref={teamBody}
+              style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
+              {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
+                ref={scrollRef} style={{
+                  height: teamBody.current && teamBody.current.offsetHeight ?
+                    teamBody.current.offsetHeight - (imageUrl ? 160 : 40) : '560px'
+                }}>
+                {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
+                  .map((message, idx) => (
+                    <Message message={message} key={'message' + message.id}
+                      logInUserId={user.id}
+                      hasAvatar={message.userId != teamReducer.team.messages[idx + 1].userId} />
+                  ))}
+                {currentNumOfMessages && <Message message={teamReducer.team.messages[currentNumOfMessages - 1]}
+                  logInUserId={user.id}
+                  hasAvatar={true} lastMessage={true} />}
+              </div>}
+              <form onSubmit={handleSendMessage}
+                style={{ position: "absolute", left: 0, bottom: '2px', width: '100%' }}>
+                {imageUrl && <div className='image-message-upload'>
+                  <div style={{
+                    backgroundImage: `url("${imageUrl}")`
                   }}>
-                  {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
-                    .map((message, idx) => (
-                      <Message message={message} key={'message' + message.id}
-                        logInUserId={user.id}
-                        hasAvatar={message.userId != teamReducer.team.messages[idx + 1].userId} />
-                    ))}
-                  {currentNumOfMessages && <Message message={teamReducer.team.messages[currentNumOfMessages - 1]}
-                    logInUserId={user.id}
-                    hasAvatar={true} lastMessage={true} />}
+                  </div>
+                  <i className="far fa-times-circle remove-image-btn"
+                    onClick={e => {
+                      e.preventDefault()
+                      setImageUrl('')
+                      setImage(null);
+                    }}></i>
                 </div>}
-                <Form onSubmit={handleSendMessage}
-                  style={{ position: "absolute", left: 0, bottom: 0, width: '100%' }}>
-                  {imageUrl && <div className='image-message-upload'>
-                    <div style={{
-                      backgroundImage: `url("${imageUrl}")`
-                    }}>
-                    </div>
-                    <i className="far fa-times-circle remove-image-btn"
-                      onClick={e => {
-                        e.preventDefault()
-                        setImageUrl('')
-                        setImage(null);
-                      }}></i>
-                  </div>}
-                  <Form.Group className="search-team-box" controlId="formUsers">
-                    <Form.Control type="text" placeholder="Chat"
-                      className='team-message-input' name='message'
-                      autoComplete="off"
-                      ref={inputRef}
-                      value={input}
-                      onChange={e => setInput(e.target.value)} />
-                  </Form.Group>
-                  <div className="input-list-btn" style={{
-                    top: imageUrl ? '120px' : 0
-                  }}>
+                <div className="search-team-box">
+                  <TextField style={{ width: '100%' }}
+                    variant="outlined"
+                    type="text" placeholder="Chat"
+                    className='team-message-input' name='message'
+                    autoComplete="off"
+                    ref={inputRef}
+                    value={input}
+                    onChange={e => setInput(e.target.value)} />
+                  <div className="input-list-btn" >
                     <label htmlFor="images" className='send-image-label'>
-                      <i style={{ color: "#69B00B" }} className="fas fa-image"></i>
+                      <InsertPhotoIcon style={{ color: "#69B00B" }} />
+                      {/* <i style={{ color: "#69B00B" }} className="fas fa-image"></i> */}
                     </label>
                     <input type="file" accept='image/*'
                       onChange={handleImageInputChange}
                       id="images" style={{
                         display: 'none'
                       }} />
-                    <Button variant="outline-light" onClick={handleSendMessage}>
-                      <i style={{ color: "#1A73E8" }} className="fas fa-thumbs-up"></i>
+                    <Button variant="text" onClick={handleSendMessage}
+                      style={{ padding: 0 }}>
+                      <SendIcon style={{ color: "#1A73E8" }} />
                     </Button>
                   </div>
-                </Form>
-              </div>
-              {isTeamInfoShow && <div className="team-info-container">
-                <strong>About</strong>
-                <p>{teamReducer.team.name}</p>
-
-                <strong>Members ({teamReducer.team.members.length})</strong>
-                {teamReducer.team.members.slice(0, 5).map(member => (
-                  <span key={`member ${member.id}`}
-                    style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                    <div className='team-info-user-avatar'
-                      style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${member.id}")` }}>
-                    </div>
-                    <p style={{ marginBottom: 0 }}>{member.userName}</p>
-                  </span>
-                ))}
-                {teamReducer.team.members.length > 5 && <Link to="#">
-                  See all members
-                </Link>}
-              </div>}
+                </div>
+              </form>
             </div>
-          </Col>
-        </Row>
+            {isTeamInfoShow && <div className="team-info-container">
+              <strong>About</strong>
+              <p>{teamReducer.team.name}</p>
+
+              <strong>Members ({teamReducer.team.members.length})</strong>
+              {teamReducer.team.members.slice(0, 5).map(member => (
+                <span key={`member ${member.id}`}
+                  style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  <div className='team-info-user-avatar'
+                    style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${member.id}")` }}>
+                  </div>
+                  <p style={{ marginBottom: 0 }}>{member.userName}</p>
+                </span>
+              ))}
+              {teamReducer.team.members.length > 5 && <Link to="#">
+                See all members
+              </Link>}
+            </div>}
+          </div>
+        </Grid>
 
 
-        <Modal show={isInvitedModalShow} onHide={handleCloseInvitedModal}>
-          <Modal.Body>You are invited to join this team</Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleRefuseInvitation}>
+        <Dialog open={isInvitedModalShow} onClose={handleCloseInvitedModal}>
+          <DialogContent>You are invited to join this team</DialogContent>
+          <DialogActions>
+            <Button variant="text" onClick={handleRefuseInvitation}>
               Refuse
             </Button>
-            <Button variant="primary" onClick={handleConfirmInvitation}>
+            <Button variant="text" onClick={handleConfirmInvitation}>
               Agree
             </Button>
-          </Modal.Footer>
-        </Modal>
+          </DialogActions>
+        </Dialog>
 
-        <Modal show={isNotMemberModalShow}>
-          <Modal.Body>You aren't member of this team. Request to join this team ?</Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseNotMemberModal}>
+        <Dialog open={isNotMemberModalShow}>
+          <DialogContent>You aren't member of this team. Request to join this team ?</DialogContent>
+          <DialogActions>
+            <Button variant="text" onClick={handleCloseNotMemberModal}>
               No
             </Button>
-            <Button variant="primary" onClick={handleRequestJoin}>
+            <Button variant="text" onClick={handleRequestJoin}>
               Yes
             </Button>
-          </Modal.Footer>
-        </Modal>
+          </DialogActions>
+        </Dialog>
 
-        <Modal show={isRequestModalShow}>
-          <Modal.Body>You are requesting to join this team. Wait for the admin approve you request ?</Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCancelRequest}>
+        <Dialog open={isRequestModalShow}>
+          <DialogContent>You are requesting to join this team. Wait for the admin approve you request ?</DialogContent>
+          <DialogActions>
+            <Button variant="text" onClick={handleCancelRequest}>
               Cancel Request
             </Button>
-            <Button variant="primary" onClick={handleCloseRequestModal}>
+            <Button variant="text" onClick={handleCloseRequestModal}>
               Back to My teams
             </Button>
-          </Modal.Footer>
-        </Modal>
-      </Container>
+          </DialogActions>
+        </Dialog>
+      </Grid>
   )
 }

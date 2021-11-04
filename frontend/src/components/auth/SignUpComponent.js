@@ -149,12 +149,15 @@ export default function SignUp() {
                             {passwordCfError && <p className="error-message">
                                 {passwordCfError}
                             </p>}
-                            <div style={{ textAlign: 'right' }}>
-                                <Button variant="contained" type="submit">Sign up</Button> <br />
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <p style={{ marginBottom: 0 }}>
+                                    Have account ? <Link to="/login">Sign in here</Link>
+                                </p>
+                                <Button variant="contained" type="submit"
+                                    disabled={!email || !password || !email || !passwordConfirmation || !firstName || !lastName}>
+                                    Sign up
+                                </Button>
                             </div>
-                            <p style={{ textAlign: 'center', marginBottom: 0 }}>
-                                Have account ? <Link to="/login">Sign in here</Link>
-                            </p>
                         </form>
                     </div>
                     <Dialog open={isDialogShow} onClose={handleCloseDialog}>

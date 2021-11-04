@@ -59,8 +59,13 @@ export default function Login() {
                             variant="standard"
                             onChange={(e) => setPassword(e.target.value)} />
                         {loginError && <p className='error-message'>{loginError}</p>}
-                        <div style={{ textAlign: 'right' }}>
-                            <Button type="submit" variant="contained">Log in</Button>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <p style={{ marginBottom: 0 }}>
+                                Don't have account?{"\t"}
+                                <Link to="/signup" style={{ display: 'inline-block' }}>Sign up here</Link>
+                            </p>
+                            <Button type="submit" variant="contained"
+                                disabled={!email || !password}>Log in</Button>
                         </div>
                         {/* <div className="d-flex otherLogin mb-1">
                                     <div>Or log in with:</div>
@@ -68,10 +73,6 @@ export default function Login() {
                                     <a href="#" className="btn btn-info"><i className="bi bi-twitter"></i></a>
                                     <a href="#" className="btn btn-danger"><i className="bi bi-google"></i></a>
                                 </div> */}
-                        <p style={{ textAlign: 'center', marginBottom: 0 }}>
-                            Don't have account?{"\t"}
-                            <Link to="/signup" style={{ display: 'inline-block' }}>Sign up here</Link>
-                        </p>
                     </form> <br /> <br />
                 </div>
             )

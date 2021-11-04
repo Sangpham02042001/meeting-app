@@ -1,8 +1,5 @@
 import React from 'react'
-// import {
-//   Tooltip, OverlayTrigger, Popover, Image
-// } from 'react-bootstrap'
-import Avatar from '../Avatar'
+import { Avatar } from '@mui/material'
 import { convertDate, baseURL } from '../../utils'
 import './style.css'
 
@@ -24,7 +21,8 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage }
         marginBottom: hasAvatar ? '5px' : 0
       }}>
       {hasAvatar && <span className='avatar-message'>
-        <Avatar width="30px" height="30px" userId={message.userId} />
+        <Avatar sx={{ width: '30px', height: '30px' }}
+          src={`${baseURL}/api/user/avatar/${message.userId}`} />
       </span>}
       <div className={message.photo ? 'message-with-photo' : ''}>
         {message.content && <p className={hasAvatar ? 'user-last-message' : ''}>
