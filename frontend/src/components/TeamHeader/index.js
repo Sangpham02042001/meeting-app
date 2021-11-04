@@ -161,7 +161,7 @@ export default function TeamHeader({ showTeamInfo }) {
         <i className="far fa-question-circle" onClick={showTeamInfo}></i>
         <Button variant="outlined" className="meeting-btn"
           disabled={teamReducer.team.meetingActive || teamReducer.meetingJoined}
-          startIcon={<VideoCameraFrontIcon />}
+          startIcon={<VideoCameraFrontIcon style={{ color: 'rgb(25, 118, 210)' }} />}
           onClick={e => {
             e.preventDefault()
             setShowCreateMeeting(true)
