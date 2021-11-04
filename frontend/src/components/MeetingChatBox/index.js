@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Button, InputGroup, FormControl } from 'react-bootstrap';
+// import { InputGroup, FormControl } from 'react-bootstrap';
+import { Button, FormGroup, FormControl } from '@mui/material';
 import './meetingChatBox.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -130,7 +131,7 @@ export default function ChatBox({ chatVisible }) {
                 </div>}
             </div>
             <div className="chatbox-sender">
-                <InputGroup>
+                <FormGroup>
                     <FormControl className="input-box" ref={inputRef} placeholder="Send message"
                         style={{ paddingLeft: '15px' }}
                         onKeyDown={handleEnterSendMessage} onChange={onChangeMessage} value={message} />
@@ -147,7 +148,7 @@ export default function ChatBox({ chatVisible }) {
                     <Button type="submit" variant="outline-light" onClick={handleSendMessage}>
                         <i style={{ color: "#1A73E8" }} className="far fa-paper-plane"></i>
                     </Button>
-                </InputGroup>
+                </FormGroup>
             </div>
         </div>
     )

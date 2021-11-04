@@ -1,7 +1,7 @@
 import React from 'react'
-import {
-  Tooltip, OverlayTrigger, Popover, Image
-} from 'react-bootstrap'
+// import {
+//   Tooltip, OverlayTrigger, Popover, Image
+// } from 'react-bootstrap'
 import Avatar from '../Avatar'
 import { convertDate, baseURL } from '../../utils'
 import './style.css'

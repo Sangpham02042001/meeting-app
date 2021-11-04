@@ -8,6 +8,7 @@ import Profile from "./routes/profile";
 import TeamDiscover from './routes/teams/discover';
 import Login from './components/auth/LoginComponent';
 import SignUp from './components/auth/SignUpComponent';
+import Welcome from './components/Welcome';
 import Meeting from './routes/meeting'
 import './App.css'
 import PrivateRoute from './routes/private';
@@ -20,9 +21,10 @@ function App() {
   return (
     <BrowserRouter>
       <Switch>
+        <Route exact path="/" component={() => <Welcome />} />
         <Route exact path="/login" component={() => <Login />} />
         <Route exact path="/signup" component={() => <SignUp />} />
-        <PrivateRoute exact path="/" >
+        <PrivateRoute path="/home" >
           <Home />
         </PrivateRoute>
         <PrivateRoute path="/profile">

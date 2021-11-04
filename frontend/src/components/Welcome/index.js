@@ -1,14 +1,38 @@
-import React from 'react';
-import { Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import Loading from "../Loading";
+import { Link, Button } from '@mui/material';
+import { Redirect } from 'react-router-dom';
+import { isAuthenticated } from "../../store/reducers/user.reducer";
+import './welcome.css';
 
 export default function Welcome() {
+  const userReducer = useSelector(state => state.userReducer)
+  const dispatch = useDispatch()
+
+    useEffect(() => {
+        if (!userReducer.loaded) {
+            dispatch(isAuthenticated())
+        }
+    }, [])
+
   return (
-    <div>
-      <h1>Welcome</h1>
-      <Link to='/login'>
-        <Button variant="primary">Login</Button>
-      </Link>
-    </div>
-  )
+    !userReducer.loaded ? <Loading />
+            : (userReducer.authenticated ? <Redirect to="/home" />
+            :<div style={{"height": "100%"}}>
+              <nav className="top-nav">
+                <h3 class="brand">MEETING APP</h3>
+                <div className="authLink">
+                    <Button variant="text" href="/login">Login</Button>
+                    <Button variant="text" href="/signup">Sign Up</Button>
+                </div>
+              </nav>
+              <div id="home">
+                  <div class="landing-text">
+                      <h1>MEETING APP</h1>
+                      <Button variant="contained" href="/home">Get Started</Button>
+                  </div>
+              </div>
+            </div>
+  ))
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux'
-import { Button } from 'react-bootstrap';
+import { Button } from '@mui/material';
 import Avatar from '../Avatar';
 import './meetingUserList.css';
 

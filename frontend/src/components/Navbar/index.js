@@ -30,7 +30,7 @@ export default function Navbar() {
   const handleLogout = e => {
     e.preventDefault()
     window.localStorage.removeItem('user')
-    history.push('/login')
+    history.push('/')
     location.reload()
   }
 

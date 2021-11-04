@@ -18,7 +18,7 @@ export default function Login() {
             dispatch(isAuthenticated())
         } else {
             if (userReducer.authenticated) {
-                history.push('/')
+                history.push('/home')
             } else if (userReducer.error) {
                 setLoginError(userReducer.error)
             } else {
@@ -40,7 +40,7 @@ export default function Login() {
 
     return (
         !userReducer.loaded ? <Loading />
-            : (userReducer.authenticated ? <Redirect to="/" />
+            : (userReducer.authenticated ? <Redirect to="/home" />
                 : <div className="loginPage">
                     <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Meeting App</h1>
                     <form onSubmit={handleSubmit} className="auth-form">
