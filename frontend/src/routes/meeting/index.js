@@ -41,6 +41,8 @@ const Meeting = (props) => {
     const myVideo = useRef();
     //******************janus************
     let janus = null;
+    let myId = null;
+    let mypvtId = null;
     const opaqueId = "videoroomtest-" + Janus.randomString(12)
     // const [sfuRef, setSfutest] = useState(null);
     const sfuRef = useRef()
@@ -84,6 +86,45 @@ const Meeting = (props) => {
             });
     }
 
+    const newRemoteFeed = (id, display, audio, video) => {
+        let remoteFeed = null;
+        janus.attach({
+            plugin: "janus.plugin.videoroom",
+            opaqueId: opaqueId,
+            success: function (pluginHandle) {
+                remoteFeed = pluginHandle;
+                remoteFeed.simulcastStarted = false;
+                Janus.log("Plugin attached! (" + remoteFeed.getPlugin() + ", id=" + remoteFeed.getId() + ")");
+                Janus.log("  -- This is a subscriber");
+                let subscribe = {
+                    request: "join",
+                    room: myroom,
+                    ptype: "subscriber",
+                    feed: id,
+                    private_id: mypvtId
+                };
+                remoteFeed.videoCodec = video;
+                remoteFeed.send({ message: subscribe });
+            },
+            error: function (error) {
+                Janus.error("  -- Error attaching plugin...", error);
+                alert("Error attaching plugin... " + error);
+            },
+            onmessage: function (msg, jsep) {
+                let event = msg["videoroom"];
+                if (msg["error"]) {
+                    alert(msg["error"]);
+                } else if (event) {
+                    if (event === "attached") {
+                        console.log(msg)
+                    } else if (event === "event") {
+                        console.log(msg)
+                    }
+                }
+            }
+        })
+    }
+
     useEffect(() => {
         if (!userReducer.loaded) {
             dispatch(isAuthenticated())
@@ -117,12 +158,12 @@ const Meeting = (props) => {
                                 sfuRef.current = pluginHandle;
                                 const register = {
                                     request: "join",
-                                    room: 1234,
+                                    room: Number(teamId),
                                     ptype: "publisher",
                                     display: userReducer.user.firstName
                                 };
                                 sfuRef.current.send({ message: register });
-                                
+
                             },
                             iceState: function (state) {
                                 console.log("ICE state changed to " + state);
@@ -142,11 +183,25 @@ const Meeting = (props) => {
                                 const event = msg["videoroom"];
                                 if (event) {
                                     if (event === 'joined') {
+
+                                        myId = msg["id"];
+                                        mypvtId = msg["private_id"];
                                         publishOwnFeed(true);
+
+                                        if (msg["publishers"]) {
+                                            var list = msg["publishers"];
+                                            Janus.debug("Got a list of available publishers/feeds:", list);
+                                            for (var f in list) {
+                                                var id = list[f]["id"];
+                                                var display = list[f]["display"];
+                                                var audio = list[f]["audio_codec"];
+                                                var video = list[f]["video_codec"];
+                                                Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
+                                                newRemoteFeed(id, display, audio, video);
+                                            }
+                                        }
                                     }
                                 }
-
-
 
                                 if (jsep) {
                                     Janus.debug("Handling SDP as well...", jsep);
@@ -186,6 +241,9 @@ const Meeting = (props) => {
                                     myVideo.current = null;
                                     setIsEnableVideo(false)
                                 } else {
+                                    if (!isVideoActive) {
+                                        sfuRef.current.muteVideo();
+                                    }
                                 }
                             },
                             error: (error) => {
@@ -318,7 +376,7 @@ const Meeting = (props) => {
                 <div className="users-content">
                     <div className="user-frame">
                         <video width="100%" height="100%" ref={myVideo} muted autoPlay />
-                        {sfuRef.current && (!isEnableVideo && <Avatar
+                        {sfuRef.current && (!isVideoActive && <Avatar
                             sx={{
                                 bgcolor: deepOrange[500], position: 'absolute',
                                 top: '70px', left: '70px',
