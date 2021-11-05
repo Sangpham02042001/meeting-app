@@ -3,10 +3,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { broadcastLocal, socketClient } from "../../utils";
 import './meeting.css';
-import { Row, Col, Button } from "react-bootstrap";
-import { Avatar } from '@mui/material';
+import { Avatar, Button, Grid, IconButton } from '@mui/material';
 import { deepOrange, deepPurple } from '@mui/material/colors';
-import Video from "../../components/MeetingVideo";
+import CallIcon from '@mui/icons-material/Call';
+import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
 import MeetingChatBox from "../../components/MeetingChatBox";
 import MeetingUserList from "../../components/MeetingUserList";
 import { isAuthenticated } from '../../store/reducers/user.reducer';
@@ -22,8 +24,8 @@ function useQuery() {
     return new URLSearchParams(useLocation().search);
 }
 
-
 const Meeting = (props) => {
+    // const classes = useStyles();
     let query = useQuery()
     const history = useHistory()
     const { teamId, meetingId } = useParams()
@@ -282,69 +284,72 @@ const Meeting = (props) => {
                 {isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} members={meetingReducer.meeting.members} />}
 
                 {isOpenInfo &&
-                    <Col className="meeting-chatbox" md="4">
+                    <div className="meeting-chatbox" md="4">
                         <div className="chatbox-header">
                             Info
                             <span>
-                                <Button variant="outline-light" onClick={handleVisibleInfo}>
-                                    <i style={{ color: "black" }} className="fas fa-times"></i>
+                                <Button variant="outlined" onClick={handleVisibleInfo}>
+                                    <i style={{ color: "fff" }} className="fas fa-times"></i>
                                 </Button>
                             </span>
                         </div>
                         <div className="chatbox-content">
 
                         </div>
-                    </Col>
+                    </div>
                 }
 
             </div>
-            <Row className="btn-list">
-                <Col md={{ span: 3, offset: 5 }} >
+            <Grid container className="btn-list">
+                <div style={{ flex: 4, textAlign: 'center' }} >
                     {
                         !isEnableVideo ?
-                            <Button variant="outline-light" onClick={toggleVideo}
+                            <Button variant="outlined" onClick={toggleVideo}
                                 disabled={!isEnableVideo}
                             >
-                                <i className="fas fa-video-slash"></i>
+                                <i style={{ color: "white" }} className="fas fa-video-slash"></i>
                             </Button>
                             :
-                            <Button variant="outline-light" onClick={toggleVideo}>
-                                {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                            <Button variant="outlined" onClick={toggleVideo}>
+                                {!isVideoActive ? <i style={{ color: "white" }} className="fas fa-video-slash"></i> : <i style={{ color: "white" }} className="fas fa-video"></i>}
                             </Button>
                     }
 
                     {
                         !isEnableAudio ?
-                            <Button variant="outline-light" disabled={!isEnableAudio} onClick={toggleAudio}>
-                                <i className="fas fa-microphone-slash"></i>
+                            <Button variant="outlined" disabled={!isEnableAudio} onClick={toggleAudio}>
+                                <i style={{ color: "white" }} className="fas fa-microphone-slash"></i>
                             </Button>
                             :
-                            <Button variant="outline-light" onClick={toggleAudio}>
-                                {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                            <Button variant="outlined" onClick={toggleAudio}>
+                                {!isAudioActive ? <i style={{ color: "white" }} className="fas fa-microphone-slash"></i> : <i style={{ color: "white" }} className="fas fa-microphone"></i>}
                             </Button>
                     }
 
-                    <Button variant="danger" onClick={handleEndMeeting}>
+                    <Button variant="contained" color="error" onClick={handleEndMeeting}>
                         {/* <Link to="/"><i style={{ color: "white" }} className="fas fa-phone" ></i></Link> */}
                         <i style={{ color: "white" }} className="fas fa-phone" ></i>
                     </Button>
-                </Col>
+                </div>
 
-                <Col md={{ span: 2, offset: 2 }} >
-                    <Button variant="outline-light" onClick={handleVisibleInfo} >
-                        {isOpenInfo ? <i className="fas fa-question-circle"></i> : <i className="far fa-question-circle"></i>}
+                <div style={{ flex: 1, textAlign: 'center' }}>
+                    <Button variant="outlined" onClick={handleVisibleInfo} >
+                        {isOpenInfo ? <i style={{ color: "white" }} className="fas fa-question-circle"></i>
+                            : <i style={{ color: "white" }} className="far fa-question-circle"></i>}
                     </Button>
 
-                    <Button variant="outline-light" onClick={handleVisibleUsers} >
+                    <Button variant="outlined" onClick={handleVisibleUsers} >
 
-                        {isOpenUsers ? <i className="fas fa-user"></i> : <i className="far fa-user"></i>}
+                        {isOpenUsers ? <i style={{ color: "white" }} className="fas fa-user"></i> :
+                            <i style={{ color: "white" }} className="far fa-user"></i>}
                     </Button>
 
-                    <Button variant="outline-light" onClick={handleVisibleChat}>
-                        {isOpenChat ? <i className="fas fa-comment-dots"></i> : <i className="far fa-comment-dots"></i>}
+                    <Button variant="outlined" onClick={handleVisibleChat}>
+                        {isOpenChat ? <i style={{ color: "white" }} className="fas fa-comment-dots"></i> :
+                            <i style={{ color: "white" }} className="far fa-comment-dots"></i>}
                     </Button>
-                </Col>
-            </Row>
+                </div>
+            </Grid>
         </div> : <div style={{
             background: "#202124",
             width: '100vw',

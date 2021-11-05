@@ -23,7 +23,7 @@ export default function Layout({ children }) {
   const [openCall, setOpenCall] = React.useState(false);
 
   const handleCloseCall = () => {
-    
+
     setOpenCall(false);
   };
   useEffect(() => {
@@ -132,7 +132,7 @@ export default function Layout({ children }) {
         <div className="layout">
           <div className="list-selection">
             <div className="btn-list-selection">
-              <NavLink exact to='/' activeClassName="btn-active">
+              <NavLink exact to='/home' activeClassName="btn-active">
                 <button className="btn-default" ><i className="fas fa-home"></i></button>
               </NavLink>
             </div>

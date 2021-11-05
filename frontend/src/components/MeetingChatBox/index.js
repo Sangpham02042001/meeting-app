@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
-// import { InputGroup, FormControl } from 'react-bootstrap';
-import { Button, FormGroup, FormControl } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import './meetingChatBox.css';
+import SendIcon from '@mui/icons-material/Send';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { socketClient, broadcastLocal } from '../../utils';
@@ -131,24 +131,24 @@ export default function ChatBox({ chatVisible }) {
                 </div>}
             </div>
             <div className="chatbox-sender">
-                <FormGroup>
-                    <FormControl className="input-box" ref={inputRef} placeholder="Send message"
-                        style={{ paddingLeft: '15px' }}
-                        onKeyDown={handleEnterSendMessage} onChange={onChangeMessage} value={message} />
-                    <Button variant="outline-light" style={{ cursor: 'pointer' }}>
-                        <label htmlFor="images" className='send-image-label'>
-                            <i style={{ color: "#69B00B", cursor: 'pointer' }} className="fas fa-image"></i>
-                        </label>
-                        <input type="file" accept='image/*'
-                            onChange={handleImageInputChange}
-                            id="images" style={{
-                                display: 'none'
-                            }} />
-                    </Button>
-                    <Button type="submit" variant="outline-light" onClick={handleSendMessage}>
-                        <i style={{ color: "#1A73E8" }} className="far fa-paper-plane"></i>
-                    </Button>
-                </FormGroup>
+                {/* <FormControl className="input-box"> */}
+                <TextField variant='outlined' ref={inputRef} placeholder="Send message"
+                    style={{ border: 'none', outline: 'none' }}
+                    onKeyDown={handleEnterSendMessage} onChange={onChangeMessage} value={message} />
+                {/* </FormControl> */}
+                <Button variant="outline-light" style={{ cursor: 'pointer' }}>
+                    <label htmlFor="images" className='send-image-label'>
+                        <i style={{ color: "#69B00B", cursor: 'pointer' }} className="fas fa-image"></i>
+                    </label>
+                    <input type="file" accept='image/*'
+                        onChange={handleImageInputChange}
+                        id="images" style={{
+                            display: 'none'
+                        }} />
+                </Button>
+                <Button type="submit" variant="outline-light" onClick={handleSendMessage}>
+                    <SendIcon style={{ color: "#1A73E8" }} />
+                </Button>
             </div>
         </div>
     )

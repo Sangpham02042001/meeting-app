@@ -1,10 +1,14 @@
 .navbar {
   display: flex;
   justify-content: space-between;
+  background-color: #1962a7;
 }
 
 .navbar .nav-brand {
-  margin-left: 100px;
+  margin-left: 80px;
+  color: white;
+  text-decoration: none;
+  font-size: 24px;
 }
 
 .navbar-btn {

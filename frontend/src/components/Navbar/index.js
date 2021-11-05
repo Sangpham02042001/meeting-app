@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Navbar as Nav } from 'react-bootstrap'
 import { Link, useHistory } from 'react-router-dom'
 import { baseURL, timeDiff } from '../../utils'
 import './navbar.css'
@@ -47,13 +46,13 @@ export default function Navbar() {
   }
 
   return (
-    <Nav bg="dark" variant="dark" className="navbar">
-      <Nav.Brand href="/" className="nav-brand">
+    <nav className="navbar">
+      <Link to="/" className="nav-brand">
         MEETING APP
-      </Nav.Brand>
+      </Link>
       <div className="navbar-btn">
         <div className="dropdown" >
-          <button className="dropdown-btn" style={{ color: "white" }} >
+          <button className="dropdown-btn" style={{ color: "white", background: 'transparent' }} >
             <i className="fas fa-bell"></i>
             {numOf_UnReadNotifications > 0 && <span className="position-absolute top-3 start-100 translate-middle badge rounded-pill bg-danger">{numOf_UnReadNotifications}</span>}
           </button>
@@ -112,7 +111,7 @@ export default function Navbar() {
 
         <strong className="navbar-username">{user.firstName}</strong>
       </div>
-    </Nav >
+    </nav >
 
   )
 }

@@ -65,13 +65,16 @@
 .chatbox-sender {
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   background: #f1f3f4;
   border-radius: 25px;
   min-height: 36px;
   margin: 15px;
   margin-top: 0;
+}
+
+.chatbox-sender fieldset {
+  border: none;
 }
 
 .chatbox-messages-container {

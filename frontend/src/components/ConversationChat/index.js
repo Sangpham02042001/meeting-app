@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getParticipant } from '../../store/reducers/conversation.reducer'
-import Avatar from '../Avatar';
 import Message from '../Message';
-import { Button } from 'react-bootstrap';
-import { socketClient, broadcastLocal } from '../../utils';
+import { Button, Avatar } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import { socketClient, broadcastLocal, baseURL } from '../../utils';
 import { getMessages, readConversation } from '../../store/reducers/conversation.reducer';
 import './conversationChat.css';
 
@@ -120,7 +120,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             <div className="conversation-message" style={{ width: !showInfo ? '100%' : '' }}>
                 <div className="header-message">
                     <div className="header-name">
-                        <Avatar width="40px" height="40px" userId={participant.id} />
+                        <Avatar sx={{ width: '40px', height: '40px' }}
+                            src={`${baseURL}/api/user/avatar/${participant.id}`} />
                         <div style={{ margin: "auto 15px", fontSize: "17px", marginLeft: "15px" }}>
                             <div style={{ color: "black", textDecoration: "none" }}>{participant.userName}</div>
                         </div>
@@ -139,7 +140,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                 </div>
                 <div className="content-message" ref={scrollRef}>
                     <div className="info-beginner-content">
-                        <Avatar width="100px" height="100px" userId={participant.id} />
+                        <Avatar sx={{ width: '100px', height: '100px' }}
+                            src={`${baseURL}/api/user/avatar/${participant.id}`} />
                         <div >
                             {participant.userName}
                         </div>
@@ -182,9 +184,6 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                             value={content}
                         />
                         <div className="input-btn">
-                            <Button variant="outline-light" onClick={handleSendMessage}>
-                                <i style={{ color: "#1A73E8" }} className="far fa-paper-plane"></i>
-                            </Button>
                             <Button variant="outline-light">
                                 <label htmlFor="images">
                                     <i style={{ color: "#69B00B", cursor: "pointer" }} className="fas fa-image"></i>
@@ -196,9 +195,13 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                                         display: 'none'
                                     }} />
                             </Button>
-                            <Button variant="outline-light" onClick={handleSendIcon} >
-                                <i style={{ color: "#1A73E8" }} className="fas fa-thumbs-up"></i>
+                            <Button variant="outline-light" onClick={handleSendMessage}>
+                                <SendIcon style={{ color: "#1A73E8" }} />
+                                {/* <i style={{ color: "#1A73E8" }} className="far fa-paper-plane"></i> */}
                             </Button>
+                            {/* <Button variant="outline-light" onClick={handleSendIcon} >
+                                <i style={{ color: "#1A73E8" }} className="fas fa-thumbs-up"></i>
+                            </Button> */}
                         </div>
                     </div>
                 </div>
@@ -206,7 +209,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             {showInfo &&
                 <div className="conversation-info">
                     <div className="custom-info">
-                        <Avatar width="100px" height="100px" userId={participant.id} />
+                        <Avatar sx={{ width: "100px", height: "100px" }}
+                            src={`${baseURL}/api/user/avatar/${participant.id}`} />
                         <div style={{ fontSize: "36px" }}>
                             {participant.userName}
                         </div>

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { Route, Switch, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
-import { Col, Row } from 'react-bootstrap'
 import { Grid } from '@mui/material';
 import { Link } from 'react-router-dom'
 import { useHistory, useParams } from 'react-router'
