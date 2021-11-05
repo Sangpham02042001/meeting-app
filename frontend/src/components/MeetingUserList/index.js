@@ -4,8 +4,6 @@ import { Button } from '@mui/material';
 import Avatar from '../Avatar';
 import './meetingUserList.css';
 
-import { socketClient } from '../../utils';
-
 export default function MeetingUserList({ usersVisible, members }) {
     let user = useSelector(state => state.userReducer.user)
     return (

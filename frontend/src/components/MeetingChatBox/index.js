@@ -131,11 +131,9 @@ export default function ChatBox({ chatVisible }) {
                 </div>}
             </div>
             <div className="chatbox-sender">
-                {/* <FormControl className="input-box"> */}
                 <TextField variant='outlined' ref={inputRef} placeholder="Send message"
                     style={{ border: 'none', outline: 'none' }}
                     onKeyDown={handleEnterSendMessage} onChange={onChangeMessage} value={message} />
-                {/* </FormControl> */}
                 <Button variant="outline-light" style={{ cursor: 'pointer' }}>
                     <label htmlFor="images" className='send-image-label'>
                         <i style={{ color: "#69B00B", cursor: 'pointer' }} className="fas fa-image"></i>

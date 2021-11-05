@@ -8,10 +8,6 @@
   overflow: hidden;
 }
 
-.room-meeting button {
-  border-color: #fff;
-}
-
 .room-content {
   position: relative;
   display: flex;
@@ -40,8 +36,8 @@
   height: 320px;
 }
 
-.btn-list button {
-  border-radius: 100% !important;
-  margin: 10px;
-  padding: 10px;
+.room-meeting .btn-list button {
+  margin: 0px 15px;
+  border: 1px solid #fff;
+  color: #fff;
 }
