@@ -76,7 +76,6 @@ const Meeting = (props) => {
                     console.log(error)
                     if (useAudio) {
                         publishOwnFeed(false);
-                        // if ()
                     } else {
                         alert('WebRTC Error')
                         // $('#publish').removeAttr('disabled').click(function () { publishOwnFeed(true); });
@@ -122,7 +121,8 @@ const Meeting = (props) => {
                                     ptype: "publisher",
                                     display: userReducer.user.firstName
                                 };
-                                pluginHandle.send({ message: register });
+                                sfuRef.current.send({ message: register });
+                                
                             },
                             iceState: function (state) {
                                 console.log("ICE state changed to " + state);
@@ -130,19 +130,69 @@ const Meeting = (props) => {
                             mediaState: function (medium, on) {
                                 console.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
                             },
+                            webrtcState: function (on) {
+                                Janus.log("Janus says our WebRTC PeerConnection is " + (on ? "up" : "down") + " now");
+                                if (!on) {
+                                    console.log('no on')
+                                    return;
+                                }
+                            },
                             onmessage: (msg, jsep) => {
+                                console.log(jsep)
                                 const event = msg["videoroom"];
                                 if (event) {
                                     if (event === 'joined') {
                                         publishOwnFeed(true);
                                     }
                                 }
+
+
+
+                                if (jsep) {
+                                    Janus.debug("Handling SDP as well...", jsep);
+                                    sfuRef.current.handleRemoteJsep({ jsep: jsep });
+                                    // Check if any of the media we wanted to publish has
+                                    // been rejected (e.g., wrong or unsupported codec)
+                                    // var audio = msg["audio_codec"];
+                                    // if (mystream && mystream.getAudioTracks() && mystream.getAudioTracks().length > 0 && !audio) {
+                                    //     // Audio has been rejected
+                                    //     toastr.warning("Our audio stream has been rejected, viewers won't hear us");
+                                    // }
+                                    // var video = msg["video_codec"];
+                                    // if (mystream && mystream.getVideoTracks() && mystream.getVideoTracks().length > 0 && !video) {
+                                    //     // Video has been rejected
+                                    //     toastr.warning("Our video stream has been rejected, viewers won't see us");
+                                    //     // Hide the webcam video
+                                    //     $('#myvideo').hide();
+                                    //     $('#videolocal').append(
+                                    //         '<div class="no-video-container">' +
+                                    //         '<i class="fa fa-video-camera fa-5 no-video-icon" style="height: 100%;"></i>' +
+                                    //         '<span class="no-video-text" style="font-size: 16px;">Video rejected, no webcam</span>' +
+                                    //         '</div>');
+                                    // }
+                                }
                             },
                             onlocalstream: (stream) => {
-                                Janus.attachMediaStream(myVideo.current, stream)
+                                Janus.attachMediaStream(myVideo.current, stream);
+                                let videoTracks = stream.getVideoTracks();
+
+                                if (sfuRef.current.webrtcStuff.pc.iceConnectionState !== "completed" &&
+                                    sfuRef.current.webrtcStuff.pc.iceConnectionState !== "connected") {
+                                    alert("publishing...")
+                                }
+                                if (!videoTracks || videoTracks.length === 0) {
+                                    // No webcam
+                                    alert("no webcam")
+                                    myVideo.current = null;
+                                    setIsEnableVideo(false)
+                                } else {
+                                }
                             },
                             error: (error) => {
                                 console.log(error)
+                            },
+                            destroyed: function () {
+                                window.location.reload();
                             }
                         })
                     }
@@ -268,7 +318,7 @@ const Meeting = (props) => {
                 <div className="users-content">
                     <div className="user-frame">
                         <video width="100%" height="100%" ref={myVideo} muted autoPlay />
-                        {sfuRef.current && (!sfuRef.current.isVideoMuted() && <Avatar
+                        {sfuRef.current && (!isEnableVideo && <Avatar
                             sx={{
                                 bgcolor: deepOrange[500], position: 'absolute',
                                 top: '70px', left: '70px',
