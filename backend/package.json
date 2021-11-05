@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "set NODE_TLS_REJECT_UNAUTHORIZED='0' && nodemon ./src/index.js",
+    "dev": "NODE_TLS_REJECT_UNAUTHORIZED='0' nodemon ./src/index.js",
     "config": "npm config set strict-ssl=false"
   },
   "keywords": [],

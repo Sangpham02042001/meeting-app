@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { createRef, useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { broadcastLocal, socketClient } from "../../utils";
@@ -20,6 +20,7 @@ import {
 import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
 import Janus from '../../janus'
 import { janusServer } from '../../utils'
+import Video from "../../components/MeetingVideo";
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
@@ -47,6 +48,8 @@ const Meeting = (props) => {
     const opaqueId = "videoroomtest-" + Janus.randomString(12)
     // const [sfuRef, setSfutest] = useState(null);
     const sfuRef = useRef()
+    const feedRefs = useRef([])
+    const remoteStream = useRef([])
 
     // const meetingId = props.match.params.meetingId;
 
@@ -99,7 +102,7 @@ const Meeting = (props) => {
                 Janus.log("  -- This is a subscriber");
                 let subscribe = {
                     request: "join",
-                    room: myroom,
+                    room: Number(teamId),
                     ptype: "subscriber",
                     feed: id,
                     private_id: mypvtId
@@ -111,6 +114,12 @@ const Meeting = (props) => {
                 Janus.error("  -- Error attaching plugin...", error);
                 alert("Error attaching plugin... " + error);
             },
+            iceState: function (state) {
+                console.log("ICE state of this WebRTC PeerConnection (feed #" + remoteFeed.rfindex + ") changed to " + state);
+            },
+            webrtcState: function (on) {
+                console.log("Janus says this WebRTC PeerConnection (feed #" + remoteFeed.rfindex + ") is " + (on ? "up" : "down") + " now");
+            },
             onmessage: function (msg, jsep) {
                 let event = msg["videoroom"];
                 if (msg["error"]) {
@@ -118,9 +127,56 @@ const Meeting = (props) => {
                 } else if (event) {
                     if (event === "attached") {
                         console.log(msg)
+                        for (var i = 1; i < 6; i++) {
+                            if (!feedRefs.current[i]) {
+                                feedRefs.current[i] = remoteFeed;
+                                remoteFeed.rfindex = i;
+                                break;
+                            }
+                        }
+                        remoteFeed.rfid = msg["id"];
+                        remoteFeed.rfdisplay = msg["display"];
+                        console.log("Successfully attached to feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") in room " + msg["room"]);
                     } else if (event === "event") {
                         console.log(msg)
                     }
+                }
+                if (jsep) {
+                    console.log('jsep answer ')
+                    Janus.debug("Handling SDP as well...", jsep);
+                    var stereo = (jsep.sdp.indexOf("stereo=1") !== -1);
+                    // Answer and attach
+                    remoteFeed.createAnswer(
+                        {
+                            jsep: jsep,
+                            // Add data:true here if you want to subscribe to datachannels as well
+                            // (obviously only works if the publisher offered them in the first place)
+                            media: { audioSend: false, videoSend: false },	// We want recvonly audio/video
+                            customizeSdp: function (jsep) {
+                                if (stereo && jsep.sdp.indexOf("stereo=1") == -1) {
+                                    // Make sure that our offer contains stereo too
+                                    jsep.sdp = jsep.sdp.replace("useinbandfec=1", "useinbandfec=1;stereo=1");
+                                }
+                            },
+                            success: function (jsep) {
+                                Janus.debug("Got SDP!", jsep);
+                                var body = { request: "start", room: Number(teamId) };
+                                remoteFeed.send({ message: body, jsep: jsep });
+                            },
+                            error: function (error) {
+                                Janus.error("WebRTC error:", error);
+                                bootbox.alert("WebRTC error... " + error.message);
+                            }
+                        });
+                }
+            },
+            onremotestream: stream => {
+                remoteStream.current[remoteFeed.rfindex] = stream;
+                console.log(`new feed refs ${remoteStream.current}`)
+                var videoTracks = stream.getVideoTracks();
+                if (!videoTracks || videoTracks.length === 0) {
+                    // No remote video
+                    // feedRefs.current[remoteFeed.rfindex] = null
                 }
             }
         })
@@ -201,31 +257,53 @@ const Meeting = (props) => {
                                                 newRemoteFeed(id, display, audio, video);
                                             }
                                         }
+                                    } else if (event === 'event') {
+                                        if (msg["publishers"]) {
+                                            var list = msg["publishers"];
+                                            Janus.debug("Got a list of available publishers/feeds:", list);
+                                            for (var f in list) {
+                                                var id = list[f]["id"];
+                                                var display = list[f]["display"];
+                                                var audio = list[f]["audio_codec"];
+                                                var video = list[f]["video_codec"];
+                                                Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
+                                                newRemoteFeed(id, display, audio, video);
+                                            }
+                                        } else if (msg["leaving"]) {
+                                            // One of the publishers has gone away?
+                                            var leaving = msg["leaving"];
+                                            console.log("Publisher left: " + leaving);
+                                            // var remoteFeed = null;
+                                            // if(remoteFeed != null) {
+                                            //     console.log("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
+                                            //     remoteFeed.detach();
+                                            // }
+                                        }
                                     }
-                                }
 
-                                if (jsep) {
-                                    Janus.debug("Handling SDP as well...", jsep);
-                                    sfuRef.current.handleRemoteJsep({ jsep: jsep });
-                                    // Check if any of the media we wanted to publish has
-                                    // been rejected (e.g., wrong or unsupported codec)
-                                    // var audio = msg["audio_codec"];
-                                    // if (mystream && mystream.getAudioTracks() && mystream.getAudioTracks().length > 0 && !audio) {
-                                    //     // Audio has been rejected
-                                    //     toastr.warning("Our audio stream has been rejected, viewers won't hear us");
-                                    // }
-                                    // var video = msg["video_codec"];
-                                    // if (mystream && mystream.getVideoTracks() && mystream.getVideoTracks().length > 0 && !video) {
-                                    //     // Video has been rejected
-                                    //     toastr.warning("Our video stream has been rejected, viewers won't see us");
-                                    //     // Hide the webcam video
-                                    //     $('#myvideo').hide();
-                                    //     $('#videolocal').append(
-                                    //         '<div class="no-video-container">' +
-                                    //         '<i class="fa fa-video-camera fa-5 no-video-icon" style="height: 100%;"></i>' +
-                                    //         '<span class="no-video-text" style="font-size: 16px;">Video rejected, no webcam</span>' +
-                                    //         '</div>');
-                                    // }
+                                    if (jsep) {
+                                        Janus.debug("Handling SDP as well...", jsep);
+                                        sfuRef.current.handleRemoteJsep({ jsep: jsep });
+                                        // Check if any of the media we wanted to publish has
+                                        // been rejected (e.g., wrong or unsupported codec)
+                                        // var audio = msg["audio_codec"];
+                                        // if (mystream && mystream.getAudioTracks() && mystream.getAudioTracks().length > 0 && !audio) {
+                                        //     // Audio has been rejected
+                                        //     toastr.warning("Our audio stream has been rejected, viewers won't hear us");
+                                        // }
+                                        // var video = msg["video_codec"];
+                                        // if (mystream && mystream.getVideoTracks() && mystream.getVideoTracks().length > 0 && !video) {
+                                        //     // Video has been rejected
+                                        //     toastr.warning("Our video stream has been rejected, viewers won't see us");
+                                        //     // Hide the webcam video
+                                        //     $('#myvideo').hide();
+                                        //     $('#videolocal').append(
+                                        //         '<div class="no-video-container">' +
+                                        //         '<i class="fa fa-video-camera fa-5 no-video-icon" style="height: 100%;"></i>' +
+                                        //         '<span class="no-video-text" style="font-size: 16px;">Video rejected, no webcam</span>' +
+                                        //         '</div>');
+                                        // }
+                                    }
                                 }
                             },
                             onlocalstream: (stream) => {
@@ -386,7 +464,9 @@ const Meeting = (props) => {
                             {userReducer.user.firstName[0]}
                         </Avatar>)}
                     </div>
-
+                    {remoteStream.current.length && remoteStream.current.map(stream => {
+                        return <Video width="150px" height="150px" stream={stream} autoPlay />
+                    })}
                 </div>
                 {isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
@@ -398,12 +478,12 @@ const Meeting = (props) => {
                     {
                         !isEnableVideo ?
                             <IconButton >
-                                <i  className="fas fa-video-slash"></i>
+                                <i className="fas fa-video-slash"></i>
                             </IconButton>
                             :
-                            <IconButton  onClick={toggleVideo} >
+                            <IconButton onClick={toggleVideo} >
                                 {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
-                            </IconButton> 
+                            </IconButton>
                     }
 
                     {
@@ -417,19 +497,19 @@ const Meeting = (props) => {
                             </IconButton>
                     }
 
-                    <IconButton style={{backgroundColor: 'red', border: 'red'}} onClick={handleEndMeeting} >
+                    <IconButton style={{ backgroundColor: 'red', border: 'red' }} onClick={handleEndMeeting} >
                         <CallEndIcon />
                     </IconButton>
                 </div>
 
                 <div style={{ flex: 1, textAlign: 'center' }}>
                     <IconButton onClick={handleVisibleInfo} >
-                        {isOpenInfo ? <i  className="fas fa-question-circle"></i>
-                            : <i  className="far fa-question-circle"></i>}
+                        {isOpenInfo ? <i className="fas fa-question-circle"></i>
+                            : <i className="far fa-question-circle"></i>}
                     </IconButton>
 
                     <IconButton onClick={handleVisibleUsers} >
-                        {isOpenUsers ? <i  className="fas fa-user"></i> :
+                        {isOpenUsers ? <i className="fas fa-user"></i> :
                             <i className="far fa-user"></i>}
                     </IconButton>
 
