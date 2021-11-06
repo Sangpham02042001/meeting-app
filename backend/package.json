@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "NODE_TLS_REJECT_UNAUTHORIZED='0' nodemon ./src/index.js",
-    "config": "npm config set strict-ssl=false"
+    "dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED='0' nodemon ./src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -24,5 +23,8 @@
     "sequelize": "^6.6.5",
     "socket.io": "^4.2.0",
     "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }

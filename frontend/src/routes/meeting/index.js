@@ -2,14 +2,6 @@ import React, { createRef, useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { broadcastLocal, socketClient } from "../../utils";
-import './meeting.css';
-import { Avatar, Button, Grid, IconButton } from '@mui/material';
-import { deepOrange, deepPurple } from '@mui/material/colors';
-import CallEndIcon from '@mui/icons-material/CallEnd';
-import MicIcon from '@mui/icons-material/Mic';
-import MicOffIcon from '@mui/icons-material/MicOff';
-import MessageIcon from '@mui/icons-material/Message';
-import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 import MeetingChatBox from "../../components/MeetingChatBox";
 import MeetingUserList from "../../components/MeetingUserList";
 import { isAuthenticated } from '../../store/reducers/user.reducer';
@@ -21,13 +13,28 @@ import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
 import Janus from '../../janus'
 import { janusServer } from '../../utils'
 import Video from "../../components/MeetingVideo";
+import Avatar from '../../components/Avatar'
+
+// ***React Material***
+import './meeting.css';
+import { Button, Grid, IconButton, Tooltip, Paper, styled } from '@mui/material';
+import CallEndIcon from '@mui/icons-material/CallEnd';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InfoIcon from '@mui/icons-material/Info';
+import ChatIcon from '@mui/icons-material/Chat';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
+
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
 }
 
 const Meeting = (props) => {
-    // const classes = useStyles();
     let query = useQuery()
     const history = useHistory()
     const { teamId, meetingId } = useParams()
@@ -35,23 +42,25 @@ const Meeting = (props) => {
     const userReducer = useSelector(state => state.userReducer)
     const teamReducer = useSelector(state => state.teamReducer)
     const meetingReducer = useSelector(state => state.meetingReducer)
+    const [isOpenInfo, setIsOpenInfo] = useState(false);
+    const [isOpenUsers, setIsOpenUsers] = useState(false);
+    const [isOpenChat, setIsOpenChat] = useState(false);
     const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
     const [isAudioActive, setIsAudioActive] = useState(query.get('audio') == 'true' || false);
     const [isEnableVideo, setIsEnableVideo] = useState(false);
     const [isEnableAudio, setIsEnableAudio] = useState(false);
     const [isMeetingEnd, setIsMeetingEnd] = useState(false);
-    const myVideo = useRef();
+
     //******************janus************
     let janus = null;
     let myId = null;
     let mypvtId = null;
     const opaqueId = "videoroomtest-" + Janus.randomString(12)
-    // const [sfuRef, setSfutest] = useState(null);
+    const myVideo = useRef();
+    const myStream = useRef();
     const sfuRef = useRef()
     const feedRefs = useRef([])
-    const remoteStream = useRef([])
-
-    // const meetingId = props.match.params.meetingId;
+    const remoteRefs = useRef([])
 
     function getConnectedDevices(type, callback) {
         navigator.mediaDevices.enumerateDevices()
@@ -70,7 +79,6 @@ const Meeting = (props) => {
                 success: function (jsep) {
                     Janus.debug("Got publisher SDP!", jsep);
                     const publish = { request: "configure", audio: useAudio, video: true };
-
                     // if (acodec)
                     //     publish["audiocodec"] = acodec;
                     // if (vcodec)
@@ -79,7 +87,6 @@ const Meeting = (props) => {
                 },
                 error: function (error) {
                     Janus.error("WebRTC error:", error);
-                    console.log(error)
                     if (useAudio) {
                         publishOwnFeed(false);
                     } else {
@@ -112,7 +119,7 @@ const Meeting = (props) => {
             },
             error: function (error) {
                 Janus.error("  -- Error attaching plugin...", error);
-                alert("Error attaching plugin... " + error);
+                alert("Error attaching plugin... " + error.message);
             },
             iceState: function (state) {
                 console.log("ICE state of this WebRTC PeerConnection (feed #" + remoteFeed.rfindex + ") changed to " + state);
@@ -165,18 +172,19 @@ const Meeting = (props) => {
                             },
                             error: function (error) {
                                 Janus.error("WebRTC error:", error);
-                                bootbox.alert("WebRTC error... " + error.message);
+                                alert("WebRTC error... " + error.message);
                             }
                         });
                 }
             },
             onremotestream: stream => {
-                remoteStream.current[remoteFeed.rfindex] = stream;
-                console.log(`new feed refs ${remoteStream.current}`)
+                let remote = createRef();
+                Janus.attachMediaStream(remote.current, stream);
+                remoteRefs.current[remoteFeed.rfindex] = remote;
+                console.log(`new feed refs ${remoteRefs.current}`)
                 var videoTracks = stream.getVideoTracks();
                 if (!videoTracks || videoTracks.length === 0) {
-                    // No remote video
-                    // feedRefs.current[remoteFeed.rfindex] = null
+                    remoteRefs.current[remoteFeed.rfindex].current = null;
                 }
             }
         })
@@ -186,6 +194,7 @@ const Meeting = (props) => {
         if (!userReducer.loaded) {
             dispatch(isAuthenticated())
         }
+
         dispatch(getTeamInfo({ teamId }))
 
         socketClient.emit("join-meeting", { teamId, meetingId, userId: userReducer.user.id })
@@ -223,10 +232,10 @@ const Meeting = (props) => {
 
                             },
                             iceState: function (state) {
-                                console.log("ICE state changed to " + state);
+                                Janus.log("ICE state changed to " + state);
                             },
                             mediaState: function (medium, on) {
-                                console.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
+                                Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
                             },
                             webrtcState: function (on) {
                                 Janus.log("Janus says our WebRTC PeerConnection is " + (on ? "up" : "down") + " now");
@@ -236,7 +245,7 @@ const Meeting = (props) => {
                                 }
                             },
                             onmessage: (msg, jsep) => {
-                                console.log(jsep)
+                                console.log(msg);
                                 const event = msg["videoroom"];
                                 if (event) {
                                     if (event === 'joined') {
@@ -286,28 +295,24 @@ const Meeting = (props) => {
                                         sfuRef.current.handleRemoteJsep({ jsep: jsep });
                                         // Check if any of the media we wanted to publish has
                                         // been rejected (e.g., wrong or unsupported codec)
-                                        // var audio = msg["audio_codec"];
-                                        // if (mystream && mystream.getAudioTracks() && mystream.getAudioTracks().length > 0 && !audio) {
-                                        //     // Audio has been rejected
-                                        //     toastr.warning("Our audio stream has been rejected, viewers won't hear us");
-                                        // }
-                                        // var video = msg["video_codec"];
-                                        // if (mystream && mystream.getVideoTracks() && mystream.getVideoTracks().length > 0 && !video) {
-                                        //     // Video has been rejected
-                                        //     toastr.warning("Our video stream has been rejected, viewers won't see us");
-                                        //     // Hide the webcam video
-                                        //     $('#myvideo').hide();
-                                        //     $('#videolocal').append(
-                                        //         '<div class="no-video-container">' +
-                                        //         '<i class="fa fa-video-camera fa-5 no-video-icon" style="height: 100%;"></i>' +
-                                        //         '<span class="no-video-text" style="font-size: 16px;">Video rejected, no webcam</span>' +
-                                        //         '</div>');
-                                        // }
+                                        var audio = msg["audio_codec"];
+                                        if (myStream.current && myStream.current.getAudioTracks() && myStream.current.getAudioTracks().length > 0 && !audio) {
+                                            // Audio has been rejected
+                                            console.warning("Our audio stream has been rejected, viewers won't hear us");
+                                        }
+                                        var video = msg["video_codec"];
+                                        if (myStream.current && myStream.current.getVideoTracks() && myStream.current.getVideoTracks().length > 0 && !video) {
+                                            // Video has been rejected
+                                            console.warning("Our video stream has been rejected, viewers won't see us");
+                                            // Hide the webcam video
+                                            myVideo.current = null;
+                                        }
                                     }
                                 }
                             },
                             onlocalstream: (stream) => {
                                 Janus.attachMediaStream(myVideo.current, stream);
+                                myStream.current = stream;
                                 let videoTracks = stream.getVideoTracks();
 
                                 if (sfuRef.current.webrtcStuff.pc.iceConnectionState !== "completed" &&
@@ -442,30 +447,37 @@ const Meeting = (props) => {
         window.open("", "_self").close();
     }
 
-    const [isOpenInfo, setIsOpenInfo] = useState(false);
+    const getTimeInfo = () => {
 
-    const [isOpenUsers, setIsOpenUsers] = useState(false);
-
-    const [isOpenChat, setIsOpenChat] = useState(false);
-
+        return new Date().getHours() + ':' + new Date().getMinutes().toPrecision(2);
+    }
 
     return (
         !isMeetingEnd ? <div className="room-meeting">
             <div className="room-content">
-                <div className="users-content">
-                    <div className="user-frame">
+                <div className="video-content">
+                    <div className="my-video">
                         <video width="100%" height="100%" ref={myVideo} muted autoPlay />
-                        {sfuRef.current && (!isVideoActive && <Avatar
-                            sx={{
-                                bgcolor: deepOrange[500], position: 'absolute',
-                                top: '70px', left: '70px',
-                                width: 130, height: 130
-                            }}>
-                            {userReducer.user.firstName[0]}
-                        </Avatar>)}
+                        {(!isEnableVideo || !isVideoActive) &&
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: '20px', left: '70px',
+                                    color: '#fff',
+                                    textAlign: 'center',
+                                    fontSize: '24px'
+                                }}>
+                                {userReducer.user.firstName}
+                                <Avatar width="180px" height="180px"
+                                    userId={userReducer.user.id}
+                                    alt={userReducer.user.firstName} />
+
+                            </div>
+                        }
+
                     </div>
-                    {remoteStream.current.length && remoteStream.current.map(stream => {
-                        return <Video width="150px" height="150px" stream={stream} autoPlay />
+                    {remoteRefs.current.length && remoteRefs.current.map(ref => {
+                        return <video width="200px" height="200px" key={ref} ref={ref} autoPlay />
                     })}
                 </div>
                 {isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
@@ -473,73 +485,112 @@ const Meeting = (props) => {
                 {isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} members={meetingReducer.meeting.members} />}
 
             </div>
-            <Grid container className="btn-list">
-                <div style={{ flex: '4', textAlign: 'center' }} >
+            <div className="meeting-btn-list" >
+                <div style={{
+                    width: "30%",
+                    color: '#fff',
+                    fontSize: "18px",
+                    display: 'flex',
+                    alignItems: 'center'
+                }}>
+                    <strong>
+                        Time: {getTimeInfo()}
+                    </strong>
+                </div>
+                <div className="btn-mid" style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '40%'
+                }} >
                     {
                         !isEnableVideo ?
-                            <IconButton >
-                                <i className="fas fa-video-slash"></i>
-                            </IconButton>
+                            <Tooltip placement="top" title="No camera found">
+                                <div>
+                                    <IconButton aria-label="No camera" disabled>
+                                        <i className="fas fa-video-slash"></i>
+                                    </IconButton>
+                                </div>
+                            </Tooltip >
                             :
                             <IconButton onClick={toggleVideo} >
-                                {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                                {!isVideoActive ?
+                                    <Tooltip placement="top" title="Turn on camera">
+                                        <i className="fas fa-video-slash"></i>
+                                    </Tooltip>
+                                    :
+                                    <Tooltip placement="top" title="Turn off camera">
+                                        <i className="fas fa-video"></i>
+                                    </Tooltip>}
                             </IconButton>
                     }
-
                     {
                         !isEnableAudio ?
-                            <IconButton>
-                                <MicOffIcon />
-                            </IconButton>
+                            <Tooltip placement="top" title="No micro found">
+                                <div>
+                                    <IconButton disabled >
+                                        <MicOffIcon />
+                                    </IconButton>
+                                </div>
+                            </Tooltip>
                             :
-                            <IconButton onClick={toggleAudio} aria-label="upload picture" >
-                                {!isAudioActive ? <MicOffIcon /> : <MicIcon />}
+
+                            <IconButton onClick={toggleAudio} >
+                                {!isAudioActive ?
+                                    <Tooltip placement="top" title="Turn on mic">
+                                        <MicOffIcon />
+                                    </Tooltip>
+                                    :
+                                    <Tooltip placement="top" title="Turn off mic">
+                                        <MicIcon />
+                                    </Tooltip>}
                             </IconButton>
                     }
-
-                    <IconButton style={{ backgroundColor: 'red', border: 'red' }} onClick={handleEndMeeting} >
-                        <CallEndIcon />
-                    </IconButton>
+                    <Tooltip placement="top" title="End the call">
+                        <IconButton style={{ backgroundColor: 'red', border: 'red' }} onClick={handleEndMeeting} >
+                            <CallEndIcon />
+                        </IconButton>
+                    </Tooltip>
                 </div>
-
-                <div style={{ flex: 1, textAlign: 'center' }}>
-                    <IconButton onClick={handleVisibleInfo} >
-                        {isOpenInfo ? <i className="fas fa-question-circle"></i>
-                            : <i className="far fa-question-circle"></i>}
-                    </IconButton>
-
-                    <IconButton onClick={handleVisibleUsers} >
-                        {isOpenUsers ? <i className="fas fa-user"></i> :
-                            <i className="far fa-user"></i>}
-                    </IconButton>
-
-                    <IconButton onClick={handleVisibleChat}>
-                        {isOpenChat ? <i className="fas fa-comment-dots"></i> :
-                            <i className="far fa-comment-dots"></i>}
-                    </IconButton>
+                <div className="btn-right" style={{
+                    flex: '1',
+                    textAlign: 'right'
+                }}>
+                    <Tooltip placement="top" title="Meeting details">
+                        <IconButton onClick={handleVisibleInfo} >
+                            {isOpenInfo ?
+                                <InfoIcon /> : <InfoOutlinedIcon />}
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip placement="top" title="Show everyone">
+                        <IconButton onClick={handleVisibleUsers} >
+                            {isOpenUsers ? <PeopleAltIcon /> :
+                                <PeopleAltOutlinedIcon />}
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip placement="top" title="Go message">
+                        <IconButton onClick={handleVisibleChat}>
+                            {isOpenChat ? <ChatIcon /> :
+                                <ChatOutlinedIcon />}
+                        </IconButton>
+                    </Tooltip>
                 </div>
-            </Grid>
-        </div> : <div style={{
-            background: "#202124",
-            width: '100vw',
-            height: '100vh',
-            position: 'absolute',
-            top: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column'
-        }}>
-            <h1 style={{ color: '#fff' }}>Meeting has already ended</h1>
-            <div>
-                <Button variant="primary" onClick={e => {
+            </div>
+        </div >
+            :
+            <div className="room-meeting" style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column'
+            }}>
+                <h1 style={{ color: '#fff' }}>Meeting has already ended</h1>
+                <Button color="primary" variant="contained" onClick={e => {
                     e.preventDefault()
                     window.open("", "_self").close();
                 }}>
                     Close
                 </Button>
             </div>
-        </div>
     );
 };
 
