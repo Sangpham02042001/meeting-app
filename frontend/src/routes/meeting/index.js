@@ -178,7 +178,6 @@ const Meeting = (props) => {
                 }
             },
             onremotestream: stream => {
-                Janus.attachMediaStream(remote.current, stream);
                 remoteStreams.current[remoteFeed.rfindex] = stream;
                 console.log(`new feed refs ${remoteStreams.current}`)
                 var videoTracks = stream.getVideoTracks();

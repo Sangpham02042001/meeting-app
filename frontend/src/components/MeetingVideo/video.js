@@ -4,7 +4,7 @@ const Video = ({ stream }) => {
     const videoRef = useRef();
 
     useEffect(() => {
-        ref.current.srcObject = stream;
+        videoRef.current.srcObject = stream;
     }, []);
 
     return (
