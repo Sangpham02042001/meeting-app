@@ -1,0 +1,6 @@
+
+
+.meeting-video .remote-video {
+    display: flex;
+    flex-wrap: wrap;
+}

@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { broadcastLocal, socketClient } from "../../utils";
@@ -12,8 +12,8 @@ import {
 import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
 import Janus from '../../janus'
 import { janusServer } from '../../utils'
-import Video from "../../components/MeetingVideo";
 import Avatar from '../../components/Avatar'
+import MeetingVideo from "../../components/MeetingVideo";
 
 // ***React Material***
 import './meeting.css';
@@ -27,6 +27,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+
 
 
 function useQuery() {
@@ -59,7 +60,7 @@ const Meeting = (props) => {
     const myStream = useRef();
     const sfuRef = useRef()
     const feedRefs = useRef([])
-    const remoteRefs = useRef([])
+    const remoteStreams = useRef([])
 
     function getConnectedDevices(type, callback) {
         navigator.mediaDevices.enumerateDevices()
@@ -177,13 +178,12 @@ const Meeting = (props) => {
                 }
             },
             onremotestream: stream => {
-                let remote = createRef();
                 Janus.attachMediaStream(remote.current, stream);
-                remoteRefs.current[remoteFeed.rfindex] = remote;
-                console.log(`new feed refs ${remoteRefs.current}`)
+                remoteStreams.current[remoteFeed.rfindex] = stream;
+                console.log(`new feed refs ${remoteStreams.current}`)
                 var videoTracks = stream.getVideoTracks();
                 if (!videoTracks || videoTracks.length === 0) {
-                    remoteRefs.current[remoteFeed.rfindex].current = null;
+                    //No remote camera
                 }
             }
         })
@@ -473,9 +473,7 @@ const Meeting = (props) => {
                         }
 
                     </div>
-                    {remoteRefs.current.length && remoteRefs.current.map(ref => {
-                        return <video width="200px" height="200px" key={ref} ref={ref} autoPlay />
-                    })}
+                    <MeetingVideo remoteStreams={remoteStreams} />
                 </div>
                 {isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
@@ -562,8 +560,8 @@ const Meeting = (props) => {
 
                         <IconButton onClick={handleVisibleUsers} >
                             <Badge badgeContent={meetingReducer.meeting.members.length} color="info">
-                                {isOpenUsers ? <PeopleAltIcon style={{color: '#fff'}} /> :
-                                    <PeopleAltOutlinedIcon style={{color: '#fff'}} />}
+                                {isOpenUsers ? <PeopleAltIcon style={{ color: '#fff' }} /> :
+                                    <PeopleAltOutlinedIcon style={{ color: '#fff' }} />}
                             </Badge>
                         </IconButton>
 

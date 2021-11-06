@@ -1,19 +1,22 @@
 import React, { useEffect, useRef } from "react";
-import Janus from '../../janus'
+import Video from './video';
+import './meetingVideo.css'
 
-const Video = ({ stream }) => {
-  const ref = useRef();
-
-  useEffect(() => {
-    Janus.attachMediaStream(ref.current, stream);
-    // ref.current
-  }, []);
-
+const MeetingVideo = ({ remoteStreams }) => {
 
 
   return (
-    <video width="100%" height="100%" ref={ref} autoPlay />
+    <div className="meeting-video">
+      <div className="remote-video">
+        {
+          remoteStreams.current.length && remoteStreams.current.map(stream => {
+            return <Video key={stream} stream={stream} />
+          })
+        }
+      </div>
+
+    </div>
   );
 }
 
-export default Video;
+export default MeetingVideo;
