@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { NavLink, useRouteMatch } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { socketClient, broadcastLocal } from '../../utils';
-import { sendMessageCv, conversationCalling } from '../../store/reducers/conversation.reducer';
+import { sendMessageCv, conversationCalling, cancelCall } from '../../store/reducers/conversation.reducer';
 import { sendMessage, updateMeetingState } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
@@ -20,12 +20,8 @@ export default function Layout({ children }) {
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
-  const [openCall, setOpenCall] = React.useState(false);
 
-  const handleCloseCall = () => {
 
-    setOpenCall(false);
-  };
   useEffect(() => {
     socketClient.auth = { userId: userReducer.user.id };
     socketClient.connect();
@@ -40,11 +36,15 @@ export default function Layout({ children }) {
       dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }));
     })
 
+
     socketClient.on('conversation-calling', ({ conversationId, senderId, senderName, receiverId }) => {
       //todo
       console.log('converstation calling')
       dispatch(conversationCalling({ conversationId, senderId, senderName, receiverId }))
-      setOpenCall(true);
+    })
+
+    socketClient.on('cancel-call', ({ conversationId, senderId, receiverId }) => {
+      dispatch(cancelCall({ conversationId, senderId, receiverId }))
     })
 
     //teams
@@ -119,12 +119,29 @@ export default function Layout({ children }) {
       socketClient.connect();
     });
 
-    console.log('call layout')
+
 
     return () => {
       socketClient.disconnect();
     }
   }, [])
+
+  const handleCancelCall = () => {
+    dispatch(cancelCall({
+      conversationId: conversationCall.conversationId
+    }))
+    socketClient.emit('conversation-cancel-call', {
+      conversationId: conversationCall.conversationId,
+      senderId: userReducer.user.id, receiverId: conversationCall.senderId
+    })
+  };
+
+  const handleAcceptCall = () => {
+    dispatch(cancelCall({
+      conversationId: conversationCall.conversationId
+    }))
+  };
+
   return (
     <>
       {!meetingId ? <>
@@ -160,8 +177,7 @@ export default function Layout({ children }) {
           <Dialog
             fullWidth={true}
             maxWidth="xs"
-            open={openCall}
-            onClose={handleCloseCall}
+            open={conversationCall.isRinging}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
           >
@@ -176,9 +192,9 @@ export default function Layout({ children }) {
 
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleCloseCall} variant="contained" color="error">Reject</Button>
-              <Button onClick={handleCloseCall} variant="contained">
-                Agree
+              <Button onClick={handleCancelCall} variant="contained" color="error">Reject</Button>
+              <Button onClick={handleAcceptCall} variant="contained">
+                Accept
               </Button>
             </DialogActions>
           </Dialog>

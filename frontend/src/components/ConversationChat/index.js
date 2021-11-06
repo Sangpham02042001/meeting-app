@@ -1,11 +1,21 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getParticipant } from '../../store/reducers/conversation.reducer'
+import { cancelCall, getParticipant } from '../../store/reducers/conversation.reducer'
 import Message from '../Message';
-import { Button, Avatar } from '@mui/material';
+import Avatar from '../Avatar/index';
+import {
+    Button, IconButton, Tooltip, Dialog, DialogActions,
+    DialogContent, DialogContentText, DialogTitle, TextField
+} from '@mui/material';
+
 import SendIcon from '@mui/icons-material/Send';
+import PhoneIcon from '@mui/icons-material/Phone';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import ImageIcon from '@mui/icons-material/Image';
+import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
+import InfoIcon from '@mui/icons-material/Info';
 import { socketClient, broadcastLocal, baseURL } from '../../utils';
-import { getMessages, readConversation } from '../../store/reducers/conversation.reducer';
+import { getMessages, readConversation, startCall } from '../../store/reducers/conversation.reducer';
 import './conversationChat.css';
 
 export default function Index({ conversation, user }) {
@@ -33,7 +43,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     const [imageMessage, setImageMessage] = useState(null);
     const [imageMessageUrl, setImageMessageUrl] = useState('');
     const [showInfo, setShowInfo] = useState(true);
-
+    const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
     const messages = useSelector(state => state.conversationReducer.conversation.messages);
     const dispatch = useDispatch();
 
@@ -86,6 +96,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         }
     }
 
+
+
     const handleSendIcon = () => {
 
         // fetch('./public/logo152.png')
@@ -100,9 +112,15 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
     }
 
+
     const handleVoiceCall = () => {
-        console.log(user);
         socketClient.emit('conversation-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: participant.id });
+        dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: participant.id }))
+    }
+
+    const handleCancelCall = () => {
+        socketClient.emit('conversation-cancel-call', { conversationId, senderId: user.id, receiverId: participant.id })
+        dispatch(cancelCall({ conversationId }))
     }
 
     const onImageInputChange = e => {
@@ -119,29 +137,34 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         <>
             <div className="conversation-message" style={{ width: !showInfo ? '100%' : '' }}>
                 <div className="header-message">
-                    <div className="header-name">
-                        <Avatar sx={{ width: '40px', height: '40px' }}
-                            src={`${baseURL}/api/user/avatar/${participant.id}`} />
-                        <div style={{ margin: "auto 15px", fontSize: "17px", marginLeft: "15px" }}>
-                            <div style={{ color: "black", textDecoration: "none" }}>{participant.userName}</div>
-                        </div>
+                    <div className="header-left">
+                        <Avatar width='40px' height='40px'
+                            userId={participant.id} />
+                        <strong style={{ marginLeft: '15px', fontSize: '18px' }}>{participant.userName}</strong>
                     </div>
                     <div className="header-btn-list">
-                        <button className="header-btn" onClick={handleVoiceCall}>
-                            <i style={{ color: "#1A73E8", fontSize: "18px" }} className="fas fa-phone"></i>
-                        </button>
-                        <button className="header-btn">
-                            <i style={{ color: "#1A73E8", fontSize: "18px" }} className="fas fa-video"></i>
-                        </button>
-                        <button className="header-btn" onClick={e => setShowInfo(!showInfo)}>
-                            <i style={{ color: "#1A73E8", fontSize: "18px" }} className="fas fa-info"></i>
-                        </button>
+                        <Tooltip title="Start a voice call">
+                            <IconButton onClick={handleVoiceCall}>
+                                <PhoneIcon color='primary' />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Start a video call">
+                            <IconButton >
+                                <VideocamIcon color='primary' />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Conversation info">
+                            <IconButton onClick={e => setShowInfo(!showInfo)}>
+                                <InfoIcon color='primary' />
+                            </IconButton>
+                        </Tooltip>
+
                     </div>
                 </div>
                 <div className="content-message" ref={scrollRef}>
                     <div className="info-beginner-content">
-                        <Avatar sx={{ width: '100px', height: '100px' }}
-                            src={`${baseURL}/api/user/avatar/${participant.id}`} />
+                        <Avatar width='40px' height='40px'
+                            userId={participant.id} />
                         <div >
                             {participant.userName}
                         </div>
@@ -184,39 +207,64 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                             value={content}
                         />
                         <div className="input-btn">
-                            <Button variant="outline-light">
-                                <label htmlFor="images">
-                                    <i style={{ color: "#69B00B", cursor: "pointer" }} className="fas fa-image"></i>
-                                </label>
-
-                                <input type="file" accept='image/*'
-                                    onChange={onImageInputChange}
-                                    id="images" style={{
-                                        display: 'none'
-                                    }} />
-                            </Button>
-                            <Button variant="outline-light" onClick={handleSendMessage}>
-                                <SendIcon style={{ color: "#1A73E8" }} />
-                                {/* <i style={{ color: "#1A73E8" }} className="far fa-paper-plane"></i> */}
-                            </Button>
-                            {/* <Button variant="outline-light" onClick={handleSendIcon} >
-                                <i style={{ color: "#1A73E8" }} className="fas fa-thumbs-up"></i>
-                            </Button> */}
+                            <Tooltip title="Attach a photo">
+                                <Button >
+                                    <label style={{ cursor: 'pointer' }} htmlFor="images">
+                                        <ImageIcon color='success' />
+                                    </label>
+                                    <input type="file" accept='image/*'
+                                        onChange={onImageInputChange}
+                                        id="images" style={{
+                                            display: 'none'
+                                        }} />
+                                </Button>
+                            </Tooltip>
+                            <Tooltip title="Choose an emoji">
+                                <Button onClick={handleSendIcon} >
+                                    <InsertEmoticonIcon color='secondary' />
+                                </Button>
+                            </Tooltip>
+                            <Tooltip title="Send message">
+                                <Button onClick={handleSendMessage}>
+                                    <SendIcon style={{ color: "#1A73E8" }} />
+                                </Button>
+                            </Tooltip>
                         </div>
                     </div>
                 </div>
             </div>
-            {showInfo &&
+            {
+                showInfo &&
                 <div className="conversation-info">
                     <div className="custom-info">
-                        <Avatar sx={{ width: "100px", height: "100px" }}
-                            src={`${baseURL}/api/user/avatar/${participant.id}`} />
+                        <Avatar width='40px' height='40px'
+                            userId={participant.id} />
                         <div style={{ fontSize: "36px" }}>
                             {participant.userName}
                         </div>
                     </div>
                 </div>
             }
+
+            <Dialog
+                open={conversationCall.isCalling}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    <Avatar width='40px' height='40px'
+                        userId={participant.id} />
+                    {participant.userName}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Wait for the other party to pick up the phone ...
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCancelCall}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
 
         </>
     )

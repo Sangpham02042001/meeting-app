@@ -17,7 +17,7 @@ import Avatar from '../../components/Avatar'
 
 // ***React Material***
 import './meeting.css';
-import { Button, Grid, IconButton, Tooltip, Paper, styled } from '@mui/material';
+import { Button, IconButton, Tooltip, Paper, styled, Badge } from '@mui/material';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
@@ -27,7 +27,6 @@ import ChatIcon from '@mui/icons-material/Chat';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
-import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 
 
 function useQuery() {
@@ -37,7 +36,7 @@ function useQuery() {
 const Meeting = (props) => {
     let query = useQuery()
     const history = useHistory()
-    const { teamId, meetingId } = useParams()
+    const { teamId } = useParams()
     const dispatch = useDispatch()
     const userReducer = useSelector(state => state.userReducer)
     const teamReducer = useSelector(state => state.teamReducer)
@@ -194,10 +193,7 @@ const Meeting = (props) => {
         if (!userReducer.loaded) {
             dispatch(isAuthenticated())
         }
-
         dispatch(getTeamInfo({ teamId }))
-
-        socketClient.emit("join-meeting", { teamId, meetingId, userId: userReducer.user.id })
 
         getConnectedDevices('videoinput', (cameras) => {
             if (cameras.length) setIsEnableVideo(true);
@@ -355,11 +351,8 @@ const Meeting = (props) => {
 
     useEffect(() => {
         if (teamReducer.teamLoaded) {
-            dispatch(getMeetingMessages({
-                meetingId,
-            }))
-
-            let members = teamReducer.team.members
+            let members = teamReducer.team.members;
+            let meetingId = teamReducer.team.meetingActive && teamReducer.team.meetingActive.id;
             if (localStorage.getItem('user')) {
                 let userId = JSON.parse(localStorage.getItem('user')).id
                 let member = members.find(member => member.id === userId)
@@ -371,12 +364,17 @@ const Meeting = (props) => {
             }
 
             let meetings = teamReducer.team.meetings
-            let meeting = meetings.find(meeting => meeting.id == meetingId)
-            if (!meeting) {
-                history.push(`/notfound`)
-            }
-            if (!meeting.active) {
+            let meeting = teamReducer.team.meetingActive && meetings.find(meeting => meeting.id == meetingId)
+            // if (!meeting) {
+            //     history.push(`/notfound`)
+            // }
+            if (!meeting || !meeting.active) {
                 setIsMeetingEnd(true)
+            } else {
+                dispatch(getMeetingMessages({
+                    meetingId
+                }))
+                socketClient.emit("join-meeting", { teamId, meetingId, userId: userReducer.user.id })
             }
         }
     }, [teamReducer.teamLoaded])
@@ -467,11 +465,10 @@ const Meeting = (props) => {
                                     textAlign: 'center',
                                     fontSize: '24px'
                                 }}>
-                                {userReducer.user.firstName}
                                 <Avatar width="180px" height="180px"
                                     userId={userReducer.user.id}
                                     alt={userReducer.user.firstName} />
-
+                                <h3 style={{ marginTop: '15px' }}>You</h3>
                             </div>
                         }
 
@@ -533,7 +530,6 @@ const Meeting = (props) => {
                                 </div>
                             </Tooltip>
                             :
-
                             <IconButton onClick={toggleAudio} >
                                 {!isAudioActive ?
                                     <Tooltip placement="top" title="Turn on mic">
@@ -561,12 +557,18 @@ const Meeting = (props) => {
                                 <InfoIcon /> : <InfoOutlinedIcon />}
                         </IconButton>
                     </Tooltip>
+
                     <Tooltip placement="top" title="Show everyone">
+
                         <IconButton onClick={handleVisibleUsers} >
-                            {isOpenUsers ? <PeopleAltIcon /> :
-                                <PeopleAltOutlinedIcon />}
+                            <Badge badgeContent={meetingReducer.meeting.members.length} color="info">
+                                {isOpenUsers ? <PeopleAltIcon style={{color: '#fff'}} /> :
+                                    <PeopleAltOutlinedIcon style={{color: '#fff'}} />}
+                            </Badge>
                         </IconButton>
+
                     </Tooltip>
+
                     <Tooltip placement="top" title="Go message">
                         <IconButton onClick={handleVisibleChat}>
                             {isOpenChat ? <ChatIcon /> :

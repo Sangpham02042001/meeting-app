@@ -29,7 +29,7 @@
 }
 
 .my-video {
-  border: 1px solid #fff;
+  /* border: 1px solid #fff; */
   margin: 5px;
   position: relative;
   width: 320px;

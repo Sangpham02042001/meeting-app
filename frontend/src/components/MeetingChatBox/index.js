@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Button, TextField } from '@mui/material';
+import { Button, IconButton, TextField } from '@mui/material';
 import './meetingChatBox.css';
 import SendIcon from '@mui/icons-material/Send';
+import ImageIcon from '@mui/icons-material/Image';
+import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { socketClient, broadcastLocal } from '../../utils';
@@ -92,32 +94,30 @@ export default function ChatBox({ chatVisible }) {
     return (
         <div className="chatbox">
             <div className="chatbox-header">
-                <div className="chatbox-header-title">
+                <div>
                     Messages
                 </div>
                 <div>
-                    <Button variant="outline-light" onClick={chatVisible}>
-                        <i style={{ color: "black" }} className="fas fa-times"></i>
-                    </Button>
+                    <IconButton onClick={chatVisible}>
+                        <CloseIcon />
+                    </IconButton>
                 </div>
             </div>
             <div className="chatbox-content">
-                <div className='chatbox-messages-container'>
-                    {currentNumOfMessages !== 0 && <div className='team-message-list'
-                        ref={scrollRef} style={{
-                            height: `calc(70vh - ${imageUrl ? 120 : 0}px)`
-                        }}>
-                        {currentNumOfMessages && meetingReducer.meeting.messages.slice(0, currentNumOfMessages - 1)
-                            .map((message, idx) => (
-                                <Message message={message} key={'message' + message.id}
-                                    logInUserId={null}
-                                    hasAvatar={message.userId != meetingReducer.meeting.messages[idx + 1].userId} />
-                            ))}
-                        {currentNumOfMessages && <Message message={meetingReducer.meeting.messages[currentNumOfMessages - 1]}
-                            logInUserId={null}
-                            hasAvatar={true} lastMessage={true} />}
-                    </div>}
-                </div>
+                {currentNumOfMessages !== 0 && <div className='message-list'
+                    ref={scrollRef} style={{
+                        height: `calc(70vh - ${imageUrl ? 120 : 0}px)`
+                    }}>
+                    {currentNumOfMessages && meetingReducer.meeting.messages.slice(0, currentNumOfMessages - 1)
+                        .map((message, idx) => (
+                            <Message message={message} key={'message' + message.id}
+                                logInUserId={null}
+                                hasAvatar={message.userId != meetingReducer.meeting.messages[idx + 1].userId} />
+                        ))}
+                    {currentNumOfMessages && <Message message={meetingReducer.meeting.messages[currentNumOfMessages - 1]}
+                        logInUserId={null}
+                        hasAvatar={true} lastMessage={true} />}
+                </div>}
                 {imageUrl && <div className='image-message-upload'>
                     <div style={{
                         backgroundImage: `url("${imageUrl}")`
@@ -132,11 +132,10 @@ export default function ChatBox({ chatVisible }) {
             </div>
             <div className="chatbox-sender">
                 <TextField variant='outlined' ref={inputRef} placeholder="Send message"
-                    style={{ border: 'none', outline: 'none' }}
                     onKeyDown={handleEnterSendMessage} onChange={onChangeMessage} value={message} />
-                <Button variant="outline-light" style={{ cursor: 'pointer' }}>
-                    <label htmlFor="images" className='send-image-label'>
-                        <i style={{ color: "#69B00B", cursor: 'pointer' }} className="fas fa-image"></i>
+                <Button >
+                    <label htmlFor="images" style={{ cursor: 'pointer' }}>
+                        <ImageIcon color='success' />
                     </label>
                     <input type="file" accept='image/*'
                         onChange={handleImageInputChange}
@@ -144,9 +143,9 @@ export default function ChatBox({ chatVisible }) {
                             display: 'none'
                         }} />
                 </Button>
-                <Button type="submit" variant="outline-light" onClick={handleSendMessage}>
+                <IconButton onClick={handleSendMessage}>
                     <SendIcon style={{ color: "#1A73E8" }} />
-                </Button>
+                </IconButton>
             </div>
         </div>
     )

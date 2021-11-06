@@ -1,8 +1,7 @@
 .layout {
   position: relative;
   display: flex;
-  flex-direction: row;
-  height: calc(100% - 56px);
+  height: calc(100% - 52px);
 }
 
 .list-selection {
@@ -39,9 +38,9 @@
   position: absolute;
 }
 
-/* .btn-list-selection .btn-default:hover {
+.btn-list-selection .btn-default:hover {
   background-color: rgba(207, 209, 211, 0.212);
-} */
+}
 
 .btn-list-selection .btn-active button {
   pointer-events: none;

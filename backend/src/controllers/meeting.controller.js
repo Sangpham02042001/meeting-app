@@ -4,6 +4,7 @@ const Meeting = require('../models/meeting')
 const Message = require('../models/message')
 const User = require('../models/user')
 const fs = require('fs')
+const { Readable } = require('stream');
 const { v4 } = require('uuid')
 
 const getMeetingById = async (req, res) => {

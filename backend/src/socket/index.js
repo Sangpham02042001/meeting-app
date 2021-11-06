@@ -77,6 +77,10 @@ const socketServer = (socket) => {
         socket.to(receiverId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
     })
 
+    socket.on('conversation-cancel-call', ({conversationId, senderId, receiverId}) => {
+        socket.to(receiverId).emit('cancel-call', {conversationId, senderId, receiverId})
+    })
+
     //disconnect
     socket.on('disconnect', async () => {
         console.log(`disconnect with meetingId: ${socket.meetingId} ${socket.id}`)
