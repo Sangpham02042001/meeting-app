@@ -59,7 +59,7 @@ export default function Conversations() {
     }
 
     return (
-        <>
+        <div className="conversation-page">
             <div className="conversation-list">
                 <div className="search-user">
                     <input
@@ -114,7 +114,7 @@ export default function Conversations() {
                     }
                 </Switch>
             </div>
-        </>
+        </div>
     )
 }
 
@@ -144,7 +144,7 @@ const ConversationLink = ({ conversation, user }) => {
     return (
         <>
             {participant &&
-                <div className="conversation-link" onClick={changeConversation} style={{ backgroundColor: curParticipant && participant.id === curParticipant.id ? '#fff' : '' }}>
+                <div className={`conversation-link ${curParticipant && participant.id === curParticipant.id ? 'link-selected': ''}`} onClick={changeConversation}>
                     <Avatar width="40px" height="40px" userId={participant.id} />
 
                     <div className="link-content">

@@ -135,12 +135,12 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
     return (
         <>
-            <div className="conversation-message" style={{ width: !showInfo ? '100%' : '' }}>
+            <div className="conversation-message" style={{ width: !showInfo ? '100%' : '75%' }}>
                 <div className="header-message">
                     <div className="header-left">
                         <Avatar width='40px' height='40px'
                             userId={participant.id} />
-                        <strong style={{ marginLeft: '15px', fontSize: '18px' }}>{participant.userName}</strong>
+                        <span style={{ marginLeft: '15px', fontSize: '1.2em', fontWeight: '500' }}>{participant.userName}</span>
                     </div>
                     <div className="header-btn-list">
                         <Tooltip title="Start a voice call">
@@ -163,7 +163,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                 </div>
                 <div className="content-message" ref={scrollRef}>
                     <div className="info-beginner-content">
-                        <Avatar width='40px' height='40px'
+                        <Avatar width='80px' height='80px'
                             userId={participant.id} />
                         <div >
                             {participant.userName}

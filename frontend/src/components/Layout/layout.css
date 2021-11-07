@@ -1,7 +1,8 @@
 .layout {
   position: relative;
   display: flex;
-  height: calc(100% - 52px);
+  height: 100%;
+  /* height: calc(100% - 52px); */
 }
 
 .list-selection {
@@ -11,9 +12,10 @@
   top: 0;
   margin: 0;
   padding: 0;
-  background-color: #1962a7;
+  background-color: #99b3cc;
   height: 100%;
   text-align: center;
+  z-index: 10;
 }
 
 .btn-list-selection {
@@ -55,6 +57,5 @@
 .content-layout {
   position: relative;
   width: 100%;
-  height: 100%;
-  display: flex;
+  height: calc(100vh - 52px);
 }

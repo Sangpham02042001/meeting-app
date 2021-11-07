@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, NavLink, useRouteMatch } from 'react-router-dom'
+import { Link, NavLink, useRouteMatch, useHistory } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { Avatar } from '@mui/material';
-import { socketClient, broadcastLocal } from '../../utils';
+import { socketClient, broadcastLocal, baseURL } from '../../utils';
 import { sendMessageCv, conversationCalling, cancelCall } from '../../store/reducers/conversation.reducer';
 import { sendMessage, updateMeetingState, setMeetingActive } from '../../store/reducers/team.reducer';
 import {
@@ -12,6 +12,7 @@ import {
 } from '../../store/reducers/meeting.reducer'
 import './layout.css'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
 // import Avatar from '../Avatar/index'
 
 export default function Layout({ children }) {
@@ -133,6 +134,15 @@ export default function Layout({ children }) {
     }
   }, [])
 
+  const history = useHistory()
+
+  const handleLogout = e => {
+    e.preventDefault()
+    window.localStorage.removeItem('user')
+    history.push('/')
+    location.reload()
+  }
+
   const handleCancelCall = () => {
     dispatch(cancelCall({
       conversationId: conversationCall.conversationId
@@ -152,7 +162,7 @@ export default function Layout({ children }) {
   return (
     <>
       {!meetingId ? <>
-        <Navbar />
+
         <div className="layout">
           <div className="list-selection">
             <div>
@@ -185,10 +195,30 @@ export default function Layout({ children }) {
                 <button className="btn-default" ><i className="fas fa-cog"></i></button>
               </NavLink>
             </div>
+
+            {/* <div className="btn-list-selection">
+
+              <Button className="btn-default" onClick={handleLogout}><LogoutIcon /></Button>
+
+            </div>
+
+            <div>
+              <Avatar src={`${baseURL}/api/user/avatar/${userReducer.user.id}`}
+                alt="user avatar"
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  margin: 'auto'
+                }} />
+            </div> */}
           </div>
-          <div className="content-layout">
-            {children}
+          <div style={{width: '100%', height: '100%', position: 'relative'}}>
+            <Navbar />
+            <div className="content-layout">
+              {children}
+            </div>
           </div>
+
 
           <Dialog
             fullWidth={true}
@@ -202,7 +232,12 @@ export default function Layout({ children }) {
             </DialogTitle>
             <DialogContent>
               <div>
-                {/* <Avatar width="36px" height="36px" userId={conversationCall.senderId} /> */}
+                <Avatar src={`${baseURL}/api/user/avatar/${conversationCall.senderId}`}
+                  alt="user avatar"
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                  }} />
                 <span style={{ fontSize: '18px', fontWeight: 600 }}>{conversationCall.senderName}</span> is calling you...
               </div>
 
