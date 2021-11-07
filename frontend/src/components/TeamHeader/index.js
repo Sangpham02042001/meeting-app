@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
+import {
+  Button, Dialog, DialogActions, DialogContent,
+  DialogTitle, IconButton, Tooltip,
+} from '@mui/material'
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
+import InfoIcon from '@mui/icons-material/Info';
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import Dropdown from '../Dropdown'
@@ -158,7 +162,11 @@ export default function TeamHeader({ showTeamInfo }) {
             Join Meeting
           </Button>
         }
-        <i className="far fa-question-circle" onClick={showTeamInfo}></i>
+        <Tooltip title="Team info">
+          <IconButton onClick={showTeamInfo}>
+            <InfoIcon color='primary' />
+          </IconButton>
+        </Tooltip>
         <Button variant="outlined" className="meeting-btn"
           disabled={teamReducer.team.meetingActive || teamReducer.meetingJoined}
           startIcon={<VideoCameraFrontIcon style={{ color: 'rgb(25, 118, 210)' }} />}

@@ -5,7 +5,6 @@ const Team = require('../models/team')
 const User = require('../models/user')
 const Message = require('../models/message')
 const { getMeetingInfo } = require('./meeting.controller')
-const axios = require('axios')
 
 const fs = require('fs')
 const { v4 } = require('uuid')
@@ -73,33 +72,6 @@ const createTeam = async (req, res) => {
         hostId: id
       })
       team.coverPhoto = undefined
-
-      const janusServer = process.env.JANUS_SERVER
-
-      let response = await axios.post(`${janusServer}`, {
-        janus: 'create',
-        transaction: 'meeting_app',
-        id: Number(team.id)
-      })
-      if (response.data && response.data.janus === 'success') {
-        let sessionId = response.data.data.id
-        response = await axios.post(`${janusServer}/${sessionId}`, {
-          janus: 'attach',
-          transaction: 'meeting_app',
-          plugin: 'janus.plugin.videoroom'
-        })
-        _id = response.data.data.id
-        if (response.data && response.data.janus === 'success') {
-          response = await axios.post(`${janusServer}/${sessionId}/${_id}`, {
-            janus: 'message',
-            transaction: 'meeting_app',
-            body: {
-              request: 'create',
-              room: Number(team.id)
-            }
-          })
-        }
-      }
 
       return res.status(201).json({ team })
     } catch (error) {
@@ -553,6 +525,7 @@ const getMemberTeam = async ({ teamId }) => {
 }
 
 const getMeetings = async (req, res) => {
+  let { offset, num } = req.query
   let { teamId } = req.params
   try {
     let meetings = await sequelize.query(
@@ -575,6 +548,54 @@ const getMeetings = async (req, res) => {
   }
 }
 
+const getTeamMeetMess = async (req, res) => {
+  let { offset, num } = req.query
+  let { teamId } = req.params
+  try {
+    let meetings = await sequelize.query(
+      "SELECT * FROM meetings WHERE teamId = :teamId",
+      {
+        replacements: {
+          teamId
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    meetings = meetings.map(meeting => {
+      return getMeetingInfo({ meetingId: meeting.id })
+    })
+    meetings = await Promise.all(meetings)
+    meetings = meetings.map(meeting => ({
+      ...meeting,
+      isMeeting: true
+    }))
+    let messages = await sequelize.query(
+      "SELECT * FROM messages WHERE teamId = :teamId",
+      {
+        replacements: {
+          teamId
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    messages = messages.map(message => ({
+      ...message,
+      isMessage: true
+    }))
+    let conversations = [...messages, ...meetings].sort((item1, item2) => {
+      let time1 = new Date(item1.createdAt).getTime()
+      let time2 = new Date(item2.createdAt).getTime()
+      if (time1 > time2) {
+        return -1;
+      }
+    }).splice(offset, num)
+    return res.status(200).json({ conversations });
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers,
@@ -582,5 +603,5 @@ module.exports = {
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   sendMessage, getTeamMessages, getMemberTeam,
-  getMeetings
+  getTeamMeetMess, getMeetings
 }

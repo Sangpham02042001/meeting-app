@@ -24,6 +24,14 @@ const socketServer = (socket) => {
 
 
     //meeting
+    socket.on('new-meeting', async ({ meeting }) => {
+        let { teamId } = meeting
+        let members = await getMemberTeam({ teamId });
+        for (let m of members) {
+            socket.to(m.id).emit('new-meeting-created', { meeting });
+        }
+    })
+
     socket.on("join-meeting", async ({ teamId, meetingId, userId }) => {
         socket.join(`meeting-${meetingId}`);
         console.log('rooms', socket.rooms);
@@ -77,8 +85,8 @@ const socketServer = (socket) => {
         socket.to(receiverId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
     })
 
-    socket.on('conversation-cancel-call', ({conversationId, senderId, receiverId}) => {
-        socket.to(receiverId).emit('cancel-call', {conversationId, senderId, receiverId})
+    socket.on('conversation-cancel-call', ({ conversationId, senderId, receiverId }) => {
+        socket.to(receiverId).emit('cancel-call', { conversationId, senderId, receiverId })
     })
 
     //disconnect

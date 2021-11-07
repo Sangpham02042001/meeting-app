@@ -1,6 +1,19 @@
+.remote-videos {
+  display: flex;
+  flex-wrap: wrap;
+}
 
+.remote-video-item {
+  margin: 5px;
+  position: relative;
+  width: 250px;
+  height: 200px;
+}
 
-.meeting-video .remote-video {
-    display: flex;
-    flex-wrap: wrap;
+.remote-video-item > h4 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  color: #fff;
+  background-color: black;
 }

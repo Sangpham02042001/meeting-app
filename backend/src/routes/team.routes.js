@@ -39,6 +39,9 @@ router.route('/api/teams/:teamId/messages')
   .post(requireSignin, isMember, sendMessage)
   .get(requireSignin, isMember, getTeamMessages)
 
+// router.route('/api/teams/:teamId/meetmess')
+// .get(requireSignin, isMember, getTeamMeetMess)
+
 router.route('/api/teams/:teamId/remove-members')
   .put(requireSignin, isAdmin, removeMembers)
 

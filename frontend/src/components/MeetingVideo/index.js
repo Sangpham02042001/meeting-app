@@ -6,15 +6,12 @@ const MeetingVideo = ({ remoteStreams }) => {
 
 
   return (
-    <div className="meeting-video">
-      <div className="remote-video">
-        {
-          remoteStreams.current.length && remoteStreams.current.map(stream => {
-            return <Video key={stream} stream={stream} />
-          })
-        }
-      </div>
-
+    <div className="remote-videos">
+      {
+        remoteStreams.current.length && remoteStreams.current.map((remote, idx) => {
+          return <Video key={remote} stream={remote.stream} name={remote.name} />
+        })
+      }
     </div>
   );
 }

@@ -1,17 +1,18 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { NavLink, useRouteMatch } from 'react-router-dom'
+import { Link, NavLink, useRouteMatch } from 'react-router-dom'
 import Navbar from '../Navbar';
+import { Avatar } from '@mui/material';
 import { socketClient, broadcastLocal } from '../../utils';
 import { sendMessageCv, conversationCalling, cancelCall } from '../../store/reducers/conversation.reducer';
-import { sendMessage, updateMeetingState } from '../../store/reducers/team.reducer';
+import { sendMessage, updateMeetingState, setMeetingActive } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
   sendMeetingMessage
 } from '../../store/reducers/meeting.reducer'
 import './layout.css'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import Avatar from '../Avatar/index'
+// import Avatar from '../Avatar/index'
 
 export default function Layout({ children }) {
   const dispatch = useDispatch();
@@ -48,6 +49,12 @@ export default function Layout({ children }) {
     })
 
     //teams
+    socketClient.on('new-meeting-created', ({ meeting }) => {
+      dispatch(setMeetingActive({
+        meeting
+      }))
+    })
+
     socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photo }) => {
       dispatch(sendMessage({
         messageId, content, senderId, teamId, photo
@@ -148,6 +155,15 @@ export default function Layout({ children }) {
         <Navbar />
         <div className="layout">
           <div className="list-selection">
+            <div>
+              <Link to='/home'>
+                <Avatar src='/meeting-logo.png' style={{
+                  width: '40px',
+                  height: '40px',
+                  margin: 'auto'
+                }} />
+              </Link>
+            </div>
             <div className="btn-list-selection">
               <NavLink exact to='/home' activeClassName="btn-active">
                 <button className="btn-default" ><i className="fas fa-home"></i></button>
@@ -186,7 +202,7 @@ export default function Layout({ children }) {
             </DialogTitle>
             <DialogContent>
               <div>
-                <Avatar width="36px" height="36px" userId={conversationCall.senderId} />
+                {/* <Avatar width="36px" height="36px" userId={conversationCall.senderId} /> */}
                 <span style={{ fontSize: '18px', fontWeight: 600 }}>{conversationCall.senderName}</span> is calling you...
               </div>
 

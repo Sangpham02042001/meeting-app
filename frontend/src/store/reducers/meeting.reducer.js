@@ -38,29 +38,29 @@ export const getMeetingMessages = createAsyncThunk('meeting/getMessages', async 
 export const meetingSlice = createSlice({
   name: 'Meeting',
   initialState: {
-    // meetings: {
-    //   teams: [],
-    //   conversations: []
-    // },
     meeting: {
       id: null,
       members: [],
       messages: [],
       teamId: null,
-      messagesLoaded: false
+      messagesLoaded: false,
     },
+    loading: false,
     error: null
   },
   extraReducers: {
     [createTeamMeeting.pending]: (state, action) => {
       console.log('create meeting pending')
+      state.loading = true;
     },
     [createTeamMeeting.fulfilled]: (state, action) => {
       console.log(action.payload.meeting)
       state.meeting = action.payload.meeting
+      state.loading = false;
     },
     [createTeamMeeting.rejected]: (state, action) => {
       state.error = action.payload.error;
+      state.loading = false;
     },
     [getMeetingMessages.pending]: (state) => {
       // state.loading = true;

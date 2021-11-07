@@ -254,8 +254,8 @@ export default function Profile() {
 					<div>
 						{teamReducer.joinedTeams.length > 0 ?
 							teamReducer.joinedTeams.map(team => {
-								return <div style={{ display: 'flex', alignItems: 'center' }} key={team.id}>
-									<Link style={{ margin: '10px', display: 'flex', alignItems: 'center' }}
+								return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} key={team.id}>
+									<Link style={{ margin: '10px', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
 										to={`/teams/${team.id}`}>
 										<Avatar alt="team coverphoto"
 											src={`${baseURL}/api/team/coverphoto/${team.id}")`}
@@ -264,7 +264,7 @@ export default function Profile() {
 									</Link>
 									{team.hostId !== userReducer.user.id ?
 										<Button className="team-action-btn" variant="contained"
-											onClick={handleOutTeam(team.id)}>Out</Button> :
+											onClick={handleOutTeam(team.id)}>Out Team</Button> :
 										<Button className="team-action-btn" variant="contained"
 											onClick={handleDeleteTeam(team.id)}>Delete team</Button>}
 								</div>
@@ -276,18 +276,20 @@ export default function Profile() {
 					<div>
 						{teamReducer.invitedTeams.length > 0 ?
 							teamReducer.invitedTeams.map(team => {
-								return <div style={{ display: 'flex', alignItems: 'center' }} key={team.id}>
-									<Link style={{ margin: '10px', display: 'flex', alignItems: 'center' }}
+								return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} key={team.id}>
+									<Link style={{ margin: '10px', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
 										to={`/teams/${team.id}`}>
 										<Avatar alt="team coverphoto"
 											src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 											sx={{ width: 50, height: 50, }} />
 										<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
 									</Link>
-									<Button className="team-action-btn" variant="contained"
-										onClick={handleConfirmInvitation(team.id)}>Agree</Button>
-									<Button className="team-action-btn" style={{ marginLeft: '20px' }} variant="contained"
-										onClick={(handleRemoveInvitation(team.id))}>Disagree</Button>
+									<div>
+										<Button className="team-action-btn" variant="contained"
+											onClick={handleConfirmInvitation(team.id)}>Agree</Button>
+										<Button className="team-action-btn" style={{ marginLeft: '20px' }} variant="contained"
+											onClick={(handleRemoveInvitation(team.id))}>Disagree</Button>
+									</div>
 								</div>
 							})
 							: <h1>No invited team for show</h1>}
@@ -297,8 +299,8 @@ export default function Profile() {
 					<div>
 						{teamReducer.requestingTeams.length > 0 ?
 							teamReducer.requestingTeams.map(team => {
-								return <div style={{ display: 'flex', alignItems: 'center' }} key={team.id}>
-									<span style={{ margin: '10px', display: 'flex', alignItems: 'center' }}
+								return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} key={team.id}>
+									<span style={{ margin: '10px', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
 										to={`/teams/${team.id}`}>
 										<Avatar alt="team coverphoto"
 											src={`${baseURL}/api/team/coverphoto/${team.id}")`}

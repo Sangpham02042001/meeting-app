@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { create } from 'lodash'
 import extend from 'lodash/extend'
-import { axiosAuth } from '../../utils'
+import { axiosAuth, socketClient } from '../../utils'
 
 const initialState = {
   joinedTeams: [],
@@ -319,6 +319,16 @@ export const teamSlice = createSlice({
         id
       }
     },
+    setMeetingActive: (state, action) => {
+      let { meeting } = action.payload
+      if (meeting) {
+        let { teamId } = meeting
+        if (teamId == state.team.id) {
+          state.team.meetings.push(meeting)
+          state.team.meetingActive = meeting
+        }
+      }
+    }
   },
   extraReducers: {
     [getJoinedTeams.pending]: (state) => {
@@ -364,6 +374,7 @@ export const teamSlice = createSlice({
     },
     [getTeamInfo.pending]: (state) => {
       state.loading = true
+      state.teamLoaded = false
     },
     [getTeamInfo.fulfilled]: (state, action) => {
       state.team = extend(state.team, action.payload.team)
@@ -497,14 +508,20 @@ export const teamSlice = createSlice({
     },
     [createTeamMeeting.pending]: (state, action) => {
       console.log('create meeting pending')
+      state.loading = true
     },
     [createTeamMeeting.fulfilled]: (state, action) => {
-      console.log(action.payload.meeting)
-      state.team.meetingActive = action.payload.meeting
+      let { meeting } = action.payload
+      state.team.meetingActive = meeting
+      socketClient.emit('new-meeting', {
+        meeting: meeting
+      })
       state.team.meetings.push(action.payload.meeting)
+      state.loading = false
     },
     [createTeamMeeting.rejected]: (state, action) => {
       state.error = action.payload.error;
+      state.loading = false
     },
     [getCurrentMeeting.pending]: () => {
       console.log('get current meeting pending')
@@ -551,6 +568,6 @@ export const teamSlice = createSlice({
 })
 
 export const { cleanTeamState, sendMessage, updateMeetingState,
-  setMeetingJoined } = teamSlice.actions;
+  setMeetingJoined, setMeetingActive } = teamSlice.actions;
 
 export default teamSlice.reducer

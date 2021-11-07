@@ -106,7 +106,7 @@ export default function ChatBox({ chatVisible }) {
             <div className="chatbox-content">
                 {currentNumOfMessages !== 0 && <div className='message-list'
                     ref={scrollRef} style={{
-                        height: `calc(70vh - ${imageUrl ? 120 : 0}px)`
+                        height: `calc(60vh - ${imageUrl ? 120 : 0}px)`
                     }}>
                     {currentNumOfMessages && meetingReducer.meeting.messages.slice(0, currentNumOfMessages - 1)
                         .map((message, idx) => (

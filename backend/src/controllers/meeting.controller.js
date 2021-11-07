@@ -6,6 +6,7 @@ const User = require('../models/user')
 const fs = require('fs')
 const { Readable } = require('stream');
 const { v4 } = require('uuid')
+const axios = require('axios')
 
 const getMeetingById = async (req, res) => {
   const { meetingId } = req.params
@@ -48,6 +49,37 @@ const createMeeting = async (req, res) => {
       teamId,
       hostId: id
     })
+
+    console.log(meeting)
+
+    const janusServer = process.env.JANUS_SERVER
+
+    let response = await axios.post(`${janusServer}`, {
+      janus: 'create',
+      transaction: 'meeting_app',
+      id: Number(meeting.id)
+    })
+    console.log(response.data, response.status)
+    if (response.data && response.data.janus === 'success') {
+      let sessionId = response.data.data.id
+      response = await axios.post(`${janusServer}/${sessionId}`, {
+        janus: 'attach',
+        transaction: 'meeting_app',
+        plugin: 'janus.plugin.videoroom'
+      })
+      console.log(response.data, response.status)
+      _id = response.data.data.id
+      if (response.data && response.data.janus === 'success') {
+        response = await axios.post(`${janusServer}/${sessionId}/${_id}`, {
+          janus: 'message',
+          transaction: 'meeting_app',
+          body: {
+            request: 'create',
+            room: Number(meeting.id)
+          }
+        })
+      }
+    }
     return res.status(200).json({ meeting })
   } catch (error) {
     console.log(error)

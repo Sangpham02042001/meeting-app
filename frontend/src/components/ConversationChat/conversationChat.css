@@ -38,8 +38,7 @@
   align-items: center;
 }
 
-
-.conversation-message  .header-btn-list {
+.conversation-message .header-btn-list {
   display: flex;
   position: relative;
 }
@@ -100,8 +99,8 @@
   padding: 10px;
   opacity: 1;
   border: none;
+  resize: none;
 }
-
 
 .conversation-message .input-btn {
   display: flex;

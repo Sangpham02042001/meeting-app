@@ -9,7 +9,7 @@
   right: 20px;
   top: 0;
   min-width: 0px;
-  width: 460px;
+  width: 340px;
   border-radius: 10px;
 }
 
@@ -43,6 +43,7 @@
   padding-bottom: 8px;
   width: 100%;
   position: relative;
+  overflow-y: auto;
 }
 
 .chatbox-sender {
@@ -60,7 +61,6 @@
 }
 
 .chatbox .message-list {
-  overflow-y: auto;
   padding: 10px;
   width: 100%;
 }
