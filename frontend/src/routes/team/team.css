@@ -1,6 +1,7 @@
 .team-container {
   display: flex;
-  overflow-y: hidden;
+  overflow: hidden;
+  background-color: var(--primary-bg);
 }
 
 .team-container > div {
@@ -11,14 +12,16 @@
 .team-body {
   /* background-color: #ebebeb; */
   position: relative;
+  transition: width 0.3s;
+  overflow-x: hidden;
 }
 
 .team-info-container {
-  padding: 10px;
-  /* background-color: #ebebeb; */
-  width: 20%;
-  border-left: 1px solid #cecccc;
-  min-width: 250px;
+  box-sizing: border-box;
+  box-shadow: -3px 0 10px var(--gray-shadow);
+  background-color: #f0f0f0;
+  transition: width 0.3s;
+  display: flex;
 }
 
 .team-info-user-avatar {
@@ -61,7 +64,7 @@
   z-index: 10;
   display: flex;
   position: absolute;
-  right: 0;
+  right: 20px;
   top: 0;
   height: 100%;
 }
@@ -102,4 +105,24 @@
 .image-message-upload > .remove-image-btn:hover {
   color: gray;
   transition: color 0.5s ease;
+}
+
+.search-team-box input {
+  outline: none;
+  border: none;
+  padding: 10px;
+  width: 95%;
+  margin: auto;
+  /* background-color: #cecccc; */
+}
+
+.arrow-expand-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background-image: linear-gradient(90deg, transparent, #f3f0f0);
+}
+
+.arrow-expand-container:hover {
+  background-image: linear-gradient(90deg, transparent, #d0d0d0);
 }

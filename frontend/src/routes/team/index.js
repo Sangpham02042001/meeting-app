@@ -3,10 +3,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
 import {
   Grid, Button, Dialog, DialogActions,
-  DialogContent, TextField
+  DialogContent, IconButton, Tooltip,
+
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import DoubleArrowIcon from '@mui/icons-material/DoubleArrow';
 import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
+import ImageIcon from '@mui/icons-material/Image';
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
   confirmInvitations, getTeamMessages, cleanTeamState,
@@ -197,7 +200,7 @@ export default function Team(props) {
 
   return (
     <Grid container>
-      <Grid item sm={2} style={{ padding: 0 }}>
+      <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--gray-shadow)' }}>
         <TeamList />
       </Grid>
       <Grid item sm={10} style={{ padding: 0 }}>
@@ -208,7 +211,7 @@ export default function Team(props) {
             {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
               ref={scrollRef} style={{
                 height: teamBody.current && teamBody.current.offsetHeight ?
-                  teamBody.current.offsetHeight - (imageUrl ? 160 : 40) : '560px'
+                  teamBody.current.offsetHeight - (imageUrl ? 170 : 50) : '560px'
               }}>
               {currentNumOfMessages && teamReducer.team.messages.slice(0, currentNumOfMessages - 1)
                 .map((message, idx) => (
@@ -235,7 +238,7 @@ export default function Team(props) {
                   }}></i>
               </div>}
               <div className="search-team-box">
-                <TextField style={{ width: '100%' }}
+                <input
                   variant="outlined"
                   type="text" placeholder="Chat"
                   className='team-message-input' name='message'
@@ -244,40 +247,57 @@ export default function Team(props) {
                   value={input}
                   onChange={e => setInput(e.target.value)} />
                 <div className="input-list-btn" >
-                  <label htmlFor="images" className='send-image-label'>
-                    <InsertPhotoIcon style={{ color: "#69B00B" }} />
-                    {/* <i style={{ color: "#69B00B" }} className="fas fa-image"></i> */}
-                  </label>
-                  <input type="file" accept='image/*'
-                    onChange={handleImageInputChange}
-                    id="images" style={{
-                      display: 'none'
-                    }} />
-                  <Button variant="text" onClick={handleSendMessage}
-                    style={{ padding: 0 }}>
-                    <SendIcon style={{ color: "#1A73E8" }} />
-                  </Button>
+                  <Tooltip title="Attach a photo">
+                    <Button>
+                      <label htmlFor="images" className='send-image-label'>
+                        <ImageIcon color='success' />
+                        {/* <i style={{ color: "#69B00B" }} className="fas fa-image"></i> */}
+                      </label>
+                      <input type="file" accept='image/*'
+                        onChange={handleImageInputChange}
+                        id="images" style={{
+                          display: 'none'
+                        }} />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Send message">
+                    <Button variant="text" onClick={handleSendMessage}
+                      style={{ padding: 0 }}>
+                      <SendIcon style={{ color: "#1A73E8" }} />
+                    </Button>
+                  </Tooltip>
                 </div>
               </div>
             </form>
           </div>
-          {isTeamInfoShow && <div className="team-info-container">
-            <strong>About</strong>
-            <p>{teamReducer.team.name}</p>
+          {<div className="team-info-container" style={{
+            width: isTeamInfoShow ? '24%' : '0px',
+            paddingLeft: 0
+          }}>
+            <div className='arrow-expand-container' onClick={e => {
+              e.preventDefault()
+              setTeamInfoShow(false)
+            }}>
+              <DoubleArrowIcon />
+            </div>
+            <div style={{ padding: '10px 0' }}>
+              <strong>About</strong>
+              <p style={{ paddingLeft: '10px' }}>{teamReducer.team.name}</p>
 
-            <strong>Members ({teamReducer.team.members.length})</strong>
-            {teamReducer.team.members.slice(0, 5).map(member => (
-              <span key={`member ${member.id}`}
-                style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <div className='team-info-user-avatar'
-                  style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${member.id}")` }}>
-                </div>
-                <p style={{ marginBottom: 0 }}>{member.userName}</p>
-              </span>
-            ))}
-            {teamReducer.team.members.length > 5 && <Link to="#">
-              See all members
-            </Link>}
+              <strong>Members ({teamReducer.team.members.length})</strong>
+              {teamReducer.team.members.slice(0, 5).map(member => (
+                <span key={`member ${member.id}`}
+                  style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', paddingLeft: '10px' }}>
+                  <div className='team-info-user-avatar'
+                    style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${member.id}")` }}>
+                  </div>
+                  <p style={{ marginBottom: 0 }}>{member.userName}</p>
+                </span>
+              ))}
+              {teamReducer.team.members.length > 5 && <Link to="#">
+                See all members
+              </Link>}
+            </div>
           </div>}
         </div>
       </Grid>

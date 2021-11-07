@@ -162,12 +162,13 @@ export default function TeamHeader({ showTeamInfo }) {
             Join Meeting
           </Button>
         }
-        <Tooltip title="Team info">
+        <Tooltip title="Team info" style={{ marginRight: '10px' }}>
           <IconButton onClick={showTeamInfo}>
             <InfoIcon color='primary' />
           </IconButton>
         </Tooltip>
         <Button variant="outlined" className="meeting-btn"
+          style={{ backgroundColor: '#fff' }}
           disabled={teamReducer.team.meetingActive || teamReducer.meetingJoined}
           startIcon={<VideoCameraFrontIcon style={{ color: 'rgb(25, 118, 210)' }} />}
           onClick={e => {

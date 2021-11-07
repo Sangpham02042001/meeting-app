@@ -1,6 +1,7 @@
 :root {
   /* --main-color: linear-gradient(to right, #0d6efd 0%, #031633 100%); */
-  --gray-shadow: rgb(219, 216, 216);
+  --gray-shadow: rgb(199, 196, 196);
+  --primary-bg: rgb(240, 240, 240);
 }
 
 .App {
@@ -40,7 +41,7 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(126, 125, 125);
+  background: rgb(185, 184, 184);
   border-radius: 10px;
 }
 
