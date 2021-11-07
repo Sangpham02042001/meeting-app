@@ -12,7 +12,6 @@ import {
 } from '../../store/reducers/meeting.reducer'
 import './layout.css'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import LogoutIcon from '@mui/icons-material/Logout';
 // import Avatar from '../Avatar/index'
 
 export default function Layout({ children }) {
@@ -195,22 +194,6 @@ export default function Layout({ children }) {
                 <button className="btn-default" ><i className="fas fa-cog"></i></button>
               </NavLink>
             </div>
-
-            {/* <div className="btn-list-selection">
-
-              <Button className="btn-default" onClick={handleLogout}><LogoutIcon /></Button>
-
-            </div>
-
-            <div>
-              <Avatar src={`${baseURL}/api/user/avatar/${userReducer.user.id}`}
-                alt="user avatar"
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  margin: 'auto'
-                }} />
-            </div> */}
           </div>
           <div style={{width: '100%', height: '100%', position: 'relative'}}>
             <Navbar />

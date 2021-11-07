@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux'
-import { Button } from '@mui/material';
+import { IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import Avatar from '../Avatar';
 import './meetingUserList.css';
 
@@ -9,14 +10,15 @@ export default function MeetingUserList({ usersVisible, members }) {
     return (
         <div className="user-list">
             <div className="user-list-header">
-                <div className="user-list-title">
+                <div>
                     Participants
                 </div>
                 <div>
-                    <Button variant="outline-light" onClick={usersVisible}>
-                        <i style={{ color: "black" }} className="fas fa-times"></i>
-                    </Button>
+                    <IconButton onClick={usersVisible}>
+                        <CloseIcon />
+                    </IconButton>
                 </div>
+
             </div>
             <div className="user-list-container">
                 {[...members].sort((a, b) => {

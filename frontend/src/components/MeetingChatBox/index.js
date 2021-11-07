@@ -123,11 +123,12 @@ export default function ChatBox({ chatVisible }) {
                         backgroundImage: `url("${imageUrl}")`
                     }}>
                     </div>
-                    <i className="far fa-times-circle remove-image-btn"
+                    <IconButton className='remove-image-btn'
                         onClick={e => {
-                            e.preventDefault()
                             setImageUrl('')
-                        }}></i>
+                        }}>
+                        <CloseIcon />
+                    </IconButton>
                 </div>}
             </div>
             <div className="chatbox-sender">

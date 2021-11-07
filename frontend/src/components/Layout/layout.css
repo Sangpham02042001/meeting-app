@@ -2,7 +2,6 @@
   position: relative;
   display: flex;
   height: 100%;
-  /* height: calc(100% - 52px); */
 }
 
 .list-selection {
@@ -12,7 +11,7 @@
   top: 0;
   margin: 0;
   padding: 0;
-  background-color: #99b3cc;
+  background-color: #99b0c7;
   height: 100%;
   text-align: center;
   z-index: 10;
