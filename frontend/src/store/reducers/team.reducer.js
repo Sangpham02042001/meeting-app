@@ -458,9 +458,9 @@ export const teamSlice = createSlice({
     [getTeamMessages.fulfilled]: (state, action) => {
       // state.loading = false;
       if (state.team.messages.length === 0) {
-        state.team.messages.push(...action.payload.messages.sort((team1, team2) => team1.id - team2.id))
+        state.team.messages.push(...action.payload.messages.sort((mess, mess2) => mess.id - mess2.id))
       } else {
-        state.team.messages.unshift(...action.payload.messages.sort((team1, team2) => team1.id - team2.id))
+        state.team.messages.unshift(...action.payload.messages.sort((mess, mess2) => mess.id - mess2.id))
       }
       if (action.payload.numOfMessages) {
         state.team.numOfMessages = action.payload.numOfMessages

@@ -50,7 +50,7 @@ export default function Team(props) {
     dispatch(getTeamInfo({ teamId }))
     dispatch(getTeamMessages({
       teamId,
-      offset: offsetMessages,
+      offset: 0,
       num: 15
     }))
     setOffsetMessages(15)
@@ -63,7 +63,7 @@ export default function Team(props) {
           if (regex.test(file.name)) {
             setImage(file)
             let reader = new FileReader()
-            let url = reader.readAsDataURL(file)
+            reader.readAsDataURL(file)
             reader.onloadend = e => {
               setImageUrl(reader.result)
             }
