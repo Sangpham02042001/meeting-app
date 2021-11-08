@@ -11,7 +11,7 @@
   top: 0;
   margin: 0;
   padding: 0;
-  background-color: #99b0c7;
+  background-color: var(--primary-color);
   height: 100%;
   text-align: center;
   z-index: 10;

@@ -6,7 +6,7 @@
 }
 
 .dropdown-btn {
-  background-color: #1962a7;
+  background-color: var(--primary-color);
   color: white;
   font-size: 20px;
   border: none;

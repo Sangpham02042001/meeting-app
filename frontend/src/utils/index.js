@@ -46,4 +46,29 @@ const timeDiff = (second) => {
   return time + " years ago";
 }
 
-export { convertDate, timeDiff }
+const WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
+  'Friday', 'Saturday', 'Sunday']
+
+const MONTHS = ['Jan', 'Feb', 'Marh', 'Apr', 'May', "June",
+  'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+const messageTimeDiff = (mysqlTime1, mysqlTime2) => {
+  let time1 = new Date(mysqlTime1).getTime()
+  let time2 = new Date(mysqlTime2).getTime()
+  let timeDiff = Math.round((time1 - time2) / 1000)
+  let res = ''
+  if (timeDiff > 3600) {
+    time2 = new Date(mysqlTime2)
+    timeDiff = Date.now() - time2
+    let minute = time2.getMinutes().toString().length === 1 ? `0${time2.getMinutes()}` : time2.getMinutes()
+    let hour = time2.getHours().toString().length === 1 ? `0${time2.getHours()}` : time2.getHours()
+    if (timeDiff < 43200) {
+      res = `${hour}:${minute}`
+    } else {
+      res = `${WEEK_DAYS[time2.getDay()]}, ${MONTHS[time2.getMonth()]} ${time2.getDate()} ${time2.getFullYear()} ${hour}:${minute}`
+    }
+  }
+  return res
+}
+
+export { convertDate, timeDiff, messageTimeDiff }
