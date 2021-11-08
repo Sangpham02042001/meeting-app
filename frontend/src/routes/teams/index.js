@@ -31,12 +31,14 @@ export default function Teams(props) {
 					</div>
 					<div className="team-list">
 						{teamReducer.joinedTeams.map(team => (
-							<Link key={team.id} className="team-item" to={`/teams/${team.id}`}>
-								<div className='team-item-image'
-									style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${team.id}")` }}>
-								</div>
-								<h5>{team.name}</h5>
-							</Link>
+							<span key={team.id} className="team-item">
+								<Link to={`/teams/${team.id}`}>
+									<div className='team-item-image'
+										style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${team.id}")` }}>
+									</div>
+									<h5>{team.name}</h5>
+								</Link>
+							</span>
 						))}
 					</div>
 				</Grid>

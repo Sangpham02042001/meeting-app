@@ -1,10 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Avatar, Tooltip } from '@mui/material'
 import { baseURL } from '../../utils'
 import './style.css'
 
 export default function Message({ message, logInUserId, hasAvatar, lastMessage, userName }) {
-  return (message.userId === logInUserId ?
+  const [isExpandImage, setExpandImage] = useState(false)
+
+  const expandImage = () => {
+    setExpandImage(true)
+  }
+
+
+  return <> {message.userId === logInUserId ?
     <div className={`own-message ${lastMessage ? 'last-message' : ''}`}
       style={{ marginBottom: '7px' }}>
       <div>
@@ -13,12 +20,12 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
         </p>}
         {message.photo && <div className='message-photo' style={{
           backgroundImage: `url(${baseURL}/api/messages/${message.id}/image)`
-        }}></div>}
+        }} onClick={expandImage}></div>}
       </div>
     </div > :
     <div >
       <div className={`message  ${lastMessage ? 'last-message' : ''}`}
-        style={{ marginBottom: '7px' }}>
+        style={{ marginBottom: !hasAvatar ? '7px' : 0 }}>
         {hasAvatar && <span className='avatar-message'>
           <Avatar sx={{ width: '40px', height: '40px' }}
             src={`${baseURL}/api/user/avatar/${message.userId}`} />
@@ -29,7 +36,7 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
           </p>}
           {message.photo && <div className={`message-photo ${hasAvatar ? 'photo-last-message' : ''}`} style={{
             backgroundImage: `url(${baseURL}/api/messages/${message.id}/image)`
-          }}></div>}
+          }} onClick={expandImage}></div>}
         </div>
       </div>
       {userName && <p style={{
@@ -39,6 +46,15 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
         marginBottom: '10px',
         marginTop: 0
       }}>{userName}</p>}
-    </div>
-  )
+    </div>}
+    {isExpandImage && <div id="imageExpandModal" className="imageExpandModal">
+      <span className="close-expand-image" onClick={e => {
+        e.preventDefault()
+        setExpandImage(false)
+      }}>&times;</span>
+      <div className="expand-modal-content" id="img01" style={{
+        backgroundImage: `url(${baseURL}/api/messages/${message.id}/image)`
+      }}></div>
+    </div>}
+  </>
 }
