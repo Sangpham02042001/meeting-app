@@ -10,7 +10,6 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
     e.preventDefault();
     setIsPreviewImg(true);
     setImgPreviewUrl(`${baseURL}/api/messages/${message.id}/image`)
-    console.log('preview', messageId);
   }
   const handleClose = () => {
     setIsPreviewImg(false)
@@ -51,8 +50,6 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
               marginBottom: '10px',
               marginTop: 0
             }}>{userName}</p>}
-
-
           </div>
       }
 

@@ -145,20 +145,21 @@ const ConversationLink = ({ conversation, user }) => {
     return (
         <>
             {participant &&
-                <div className={`conversation-link ${curParticipant && participant.id === curParticipant.id ? 'link-selected': ''}`} onClick={changeConversation}>
+                <div className={`conversation-link ${curParticipant && participant.id === curParticipant.id ? 'link-selected' : ''}`} onClick={changeConversation}>
                     <Avatar width="40px" height="40px" userId={participant.id} />
 
                     <div className="link-content">
-                        <div className="link-name">
+                        <div className="link-name" style={{
+                            opacity: curParticipant && participant.id === curParticipant.id ? '1' : '0.7'
+                        }}>
                             {participant.userName}
                         </div>
                         <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
                             {lastMessage &&
-                                (lastMessage.userId === user.id ? 
-                                    <span>You: {lastMessage.photo ? <ImageIcon color='success'/> : lastMessage.content}</span>
+                                (lastMessage.userId === user.id ?
+                                    <span>You: {lastMessage.photo ? <ImageIcon color='success' /> : lastMessage.content}</span>
                                     :
-                                    <span>{lastMessage.photo ? <ImageIcon color='success'/> : lastMessage.content}</span>
-                                    
+                                    <span>{lastMessage.photo ? <ImageIcon color='success' /> : lastMessage.content}</span>
                                 )
                             }
                         </div>

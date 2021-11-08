@@ -12,8 +12,8 @@
   min-width: 250px;
   width: 20%;
   height: 100%;
-  background-color: #f0f0f0;
-  box-shadow: 2px 2px 5px #dadcdf;
+  background-color: var(--primary-bg);
+  box-shadow: var(--box-shadow);
 }
 
 .conversation-list .search-user {
@@ -37,12 +37,12 @@
   background-color: #ffffff;
   width: 90%;
   left: 15px;
-  box-shadow: 0px 1px 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--box-shadow);
   cursor: pointer;
   padding: 7px;
   border-radius: 5px;
   overflow-y: auto;
-  z-index: 5;
+  z-index: 20;
 }
 
 .search-list .user-find {
@@ -67,7 +67,7 @@
 .conversation-content {
   width: 100%;
   height: 100%;
-  background-color: #f0f0f0;
+  background-color: var(--primary-bg);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -82,7 +82,6 @@
   width: 95%;
   border-radius: 5px;
   cursor: pointer;
-  opacity: 0.6;
 }
 
 .conversation-link:hover {
@@ -99,7 +98,7 @@
 }
 
 .link-selected {
-  background-color: rgba(208, 227, 235, 0.493);
+  background-color: rgba(208, 227, 235, 0.603);
   opacity: 1;
 }
 
@@ -108,7 +107,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 120px;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .conversation-link .last-message-unread {
@@ -117,5 +116,5 @@
   white-space: nowrap;
   width: 120px;
   opacity: 1;
-  font-weight: 600;
+  font-weight: 500;
 }

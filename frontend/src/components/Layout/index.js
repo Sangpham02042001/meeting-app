@@ -3,6 +3,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, NavLink, useRouteMatch, useHistory } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { Avatar, Snackbar, IconButton } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import MessageIcon from '@mui/icons-material/Message';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { socketClient, broadcastLocal, baseURL } from '../../utils';
 import { sendMessageCv, conversationCalling, cancelCall } from '../../store/reducers/conversation.reducer';
 import { sendMessage, updateMeetingState, setMeetingActive } from '../../store/reducers/team.reducer';
@@ -180,42 +184,33 @@ export default function Layout({ children }) {
   return (
     <>
       {!meetingId ? <>
-
+        <Navbar />
         <div className="layout">
           <div className="list-selection">
-            <div>
-              <Link to='/home'>
-                <Avatar src='/meeting-logo.png' style={{
-                  width: '40px',
-                  height: '40px',
-                  margin: 'auto'
-                }} />
-              </Link>
-            </div>
             <div className="btn-list-selection">
               <NavLink exact to='/home' activeClassName="btn-active">
-                <button className="btn-default" ><i className="fas fa-home"></i></button>
+                <button className="btn-default" ><HomeIcon/></button>
               </NavLink>
             </div>
             <div className="btn-list-selection">
               <NavLink to='/conversations' activeClassName="btn-active">
-                <button className="btn-default" ><i className="fas fa-comment-dots"></i></button>
+                <button className="btn-default" ><MessageIcon/></button>
 
               </NavLink>
             </div>
             <div className="btn-list-selection">
               <NavLink to='/teams' activeClassName="btn-active">
-                <button className="btn-default"><i className="fas fa-users"></i></button>
+                <button className="btn-default"><PeopleAltIcon/></button>
               </NavLink>
             </div>
             <div className="btn-list-selection">
               <NavLink to='/setting' activeClassName="btn-active">
-                <button className="btn-default" ><i className="fas fa-cog"></i></button>
+                <button className="btn-default" ><SettingsIcon/></button>
               </NavLink>
             </div>
           </div>
           <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-            <Navbar />
+           
             <div className="content-layout">
               {children}
             </div>

@@ -6,7 +6,7 @@ import './navbar.css'
 import { getNotifs, readNotif } from '../../store/reducers/notification.reducer'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import Loading from '../Loading'
-import Avatar from '../Avatar/index'
+import { Avatar } from '@mui/material'
 
 export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
@@ -47,9 +47,19 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="nav-brand">
-        MEETING APP
-      </Link>
+      <div style={{display: 'flex'}}>
+        <Link to='/home'>
+          <Avatar src='/meeting-logo.png' style={{
+            width: '40px',
+            height: '40px',
+          }} />
+        </Link>
+
+        <Link to="/" className="nav-brand">
+          MEETING APP
+        </Link>
+      </div>
+
       <div className="navbar-btn">
         <div className="dropdown" >
           <button className="dropdown-btn" style={{ color: "white", background: 'transparent' }} >
@@ -101,7 +111,7 @@ export default function Navbar() {
 
         <div className="dropdown" key={user.avatar}>
           <button className="dropdown-btn" style={{ color: "white", padding: 0, textAlign: 'center' }}>
-            <Avatar width="36px" height="36px" userId={user.id} />
+            <Avatar sx={{ width: "40px", height: "40px" }} src={`${baseURL}/api/user/avatar/${user.id}`} />
           </button>
           <div className="dropdown-content logout-container">
             <div onClick={handleProfile}>Profile</div>

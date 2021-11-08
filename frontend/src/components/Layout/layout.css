@@ -1,61 +1,52 @@
 .layout {
   position: relative;
   display: flex;
-  height: 100%;
+  height: calc(100vh - 56px);
+}
+
+.content-layout {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 56px);
+  background-color: var(--primary-bg);
 }
 
 .list-selection {
   display: flex;
   flex-direction: column;
   position: relative;
-  top: 0;
-  margin: 0;
-  padding: 0;
-  background-color: var(--primary-color);
+  background-color: var(--primary-bg);
   height: 100%;
   text-align: center;
   z-index: 10;
+  box-shadow: var(--box-shadow);
+  
 }
 
 .btn-list-selection {
-  margin-top: 30px;
+  margin-top: 15px;
 }
 
 .btn-list-selection .btn-default {
   width: 60px;
-  height: 50px;
+  height: 60px;
   border-style: none;
   border-radius: 5px;
   background-color: transparent;
-  color: white;
+  color: var(--primary-color);
   font-size: 20px;
 }
 
 .btn-list-selection .btn-active::before {
   content: "";
-  height: 50px;
-  border-left: solid 0.2rem#fff;
-  left: 0.1rem;
   position: absolute;
+  height: 60px;
+  border-left: solid 0.2rem var(--primary-color);
+  left: 0.1rem;
 }
 
 .btn-list-selection .btn-default:hover {
   background-color: rgba(207, 209, 211, 0.212);
 }
 
-.btn-list-selection .btn-active button {
-  pointer-events: none;
-  width: 60px;
-  height: 50px;
-  border-style: none;
-  border-radius: 5px;
-  color: white;
-  font-size: 20px;
-}
 
-.content-layout {
-  position: relative;
-  width: 100%;
-  height: calc(100vh - 52px);
-  background-color: rgb(240, 240, 240);
-}

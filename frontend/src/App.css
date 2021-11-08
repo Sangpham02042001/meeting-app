@@ -1,9 +1,9 @@
 :root {
   /* --main-color: linear-gradient(to right, #0d6efd 0%, #031633 100%); */
   --gray-shadow: rgb(199, 196, 196);
-  --primary-bg: rgb(240, 240, 240);
-  /* --primary-color: #85a3be; */
   --primary-color: #1962a7;
+  --primary-bg: #f8f8f8;
+  --box-shadow: 2px 2px 5px #dadcdf;
 }
 
 .App {
@@ -35,16 +35,16 @@ html {
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  border-radius: 10px;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgb(185, 184, 184);
-  border-radius: 10px;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
