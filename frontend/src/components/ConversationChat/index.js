@@ -42,7 +42,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
     const [imageMessage, setImageMessage] = useState(null);
     const [imageMessageUrl, setImageMessageUrl] = useState('');
-    const [showInfo, setShowInfo] = useState(true);
+    const [showInfo, setShowInfo] = useState(false);
     const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
     const messages = useSelector(state => state.conversationReducer.conversation.messages);
     const dispatch = useDispatch();
@@ -235,7 +235,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             </div>
             {
                 showInfo &&
-                <div className="conversation-info">
+                <div className="conversation-info" >
                     <div className="custom-info">
                         <Avatar width='40px' height='40px'
                             userId={participant.id} />

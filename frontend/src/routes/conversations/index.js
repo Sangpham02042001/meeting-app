@@ -6,6 +6,7 @@ import { getConversations, createConversation, clearConversation } from '../../s
 import { Switch, Route } from "react-router-dom";
 import { useHistory } from 'react-router';
 import Avatar from '../../components/Avatar';
+import ImageIcon from '@mui/icons-material/Image';
 import ConversationChat from '../../components/ConversationChat';
 
 
@@ -153,10 +154,11 @@ const ConversationLink = ({ conversation, user }) => {
                         </div>
                         <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
                             {lastMessage &&
-                                (lastMessage.userId === user.id ?
-                                    <span>You: {lastMessage.content}</span>
+                                (lastMessage.userId === user.id ? 
+                                    <span>You: {lastMessage.photo ? <ImageIcon color='success'/> : lastMessage.content}</span>
                                     :
-                                    <span>{lastMessage.content}</span>
+                                    <span>{lastMessage.photo ? <ImageIcon color='success'/> : lastMessage.content}</span>
+                                    
                                 )
                             }
                         </div>

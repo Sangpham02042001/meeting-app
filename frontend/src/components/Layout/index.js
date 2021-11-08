@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, NavLink, useRouteMatch, useHistory } from 'react-router-dom'
 import Navbar from '../Navbar';
-import { Avatar } from '@mui/material';
+import { Avatar, Snackbar, IconButton } from '@mui/material';
 import { socketClient, broadcastLocal, baseURL } from '../../utils';
 import { sendMessageCv, conversationCalling, cancelCall } from '../../store/reducers/conversation.reducer';
 import { sendMessage, updateMeetingState, setMeetingActive } from '../../store/reducers/team.reducer';
@@ -21,12 +21,12 @@ export default function Layout({ children }) {
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
-
+  const [isSkConnected, setIsSkConnected] = useState(false);
 
   useEffect(() => {
     socketClient.auth = { userId: userReducer.user.id };
     socketClient.connect();
-
+    setIsSkConnected(true);
     //conversation
     socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }) => {
       dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, photo, createdAt }));
@@ -122,25 +122,44 @@ export default function Layout({ children }) {
     }
 
     socketClient.on("disconnect", () => {
-      console.log('disconnect', socketClient)
       socketClient.connect();
+      console.log('try to auto reconnect')
     });
 
+    socketClient.on('connect_error', (error) => {
+      console.log(error)
+      setIsSkConnected(false)
+    });
 
+    socketClient.on('error', (error) => {
+      console.log(error)
+      setIsSkConnected(false)
+    });
+
+    console.log(socketClient);
 
     return () => {
       socketClient.disconnect();
     }
   }, [])
 
-  const history = useHistory()
+  const reconnectAction = (
+    <React.Fragment>
+      <Button color="secondary" size="small" onClick={e => {
+        socketClient.connect();
+        setIsSkConnected(true);
+      }}>
+        CONNECT
+      </Button>
+      
+    </React.Fragment>
+  )
 
-  const handleLogout = e => {
-    e.preventDefault()
-    window.localStorage.removeItem('user')
-    history.push('/')
-    location.reload()
-  }
+  useEffect(() => {
+    if (!socketClient.connected) {
+      socketClient.connect();
+    } 
+  }, [socketClient.connected])
 
   const handleCancelCall = () => {
     dispatch(cancelCall({
@@ -202,6 +221,13 @@ export default function Layout({ children }) {
             </div>
           </div>
 
+          <Snackbar
+            open={!isSkConnected}
+            autoHideDuration={6000}
+            message="Try to connect network"
+            action={reconnectAction}
+          />
+
 
           <Dialog
             fullWidth={true}
@@ -218,10 +244,10 @@ export default function Layout({ children }) {
                 <Avatar src={`${baseURL}/api/user/avatar/${conversationCall.senderId}`}
                   alt="user avatar"
                   style={{
-                    width: '36px',
-                    height: '36px',
+                    width: '40px',
+                    height: '40px',
                   }} />
-                <span style={{ fontSize: '18px', fontWeight: 600 }}>{conversationCall.senderName}</span> is calling you...
+                <span style={{ fontSize: '18px', fontWeight: 500 }}>{conversationCall.senderName}</span> is calling you...
               </div>
 
             </DialogContent>
