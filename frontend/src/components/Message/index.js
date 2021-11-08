@@ -31,10 +31,10 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
           <div >
             <div className={`message  ${lastMessage ? 'last-message' : ''}`}
               style={{ marginBottom: '7px' }}>
-              {hasAvatar && <span className='avatar-message'>
+              {hasAvatar && <Tooltip title={userName}>
                 <Avatar sx={{ width: '40px', height: '40px' }}
                   src={`${baseURL}/api/user/avatar/${message.userId}`} />
-              </span>}
+              </Tooltip>}
               <div className={message.photo ? 'message-with-photo' : ''}>
                 {message.content && <p className={hasAvatar ? 'user-last-message' : ''}>
                   {message.content}

@@ -7,8 +7,7 @@ import {
 
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import DoubleArrowIcon from '@mui/icons-material/DoubleArrow';
-import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import ImageIcon from '@mui/icons-material/Image';
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
@@ -72,7 +71,7 @@ export default function Team(props) {
     return () => {
       // socketClient.leave(`team ${teamId}`)
       socketClient.emit('out-team', { teamId })
-      // dispatch(cleanTeamState())
+      dispatch(cleanTeamState())
       setOffsetMeetmess(0)
       setImageUrl('')
       setImage('')
@@ -205,158 +204,159 @@ export default function Team(props) {
     return (user || {}).userName || '';
   }
 
-  return (
-    <Grid container>
-      <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--gray-shadow)' }}>
-        <TeamList />
-      </Grid>
-      <Grid item sm={10} style={{ padding: 0 }}>
-        <TeamHeader showTeamInfo={showTeamInfo} />
-        {teamReducer.teamLoaded && <div className="team-container">
-          <div className="team-body" ref={teamBody}
-            style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
-            {currentNumOfMeetMess !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
-              ref={scrollRef} style={{
-                height: teamBody.current && teamBody.current.offsetHeight ?
-                  teamBody.current.offsetHeight - (imageUrl ? 170 : 50) : '560px'
-              }}>
-              {currentNumOfMeetMess && meetmess.slice(0, currentNumOfMeetMess - 1)
-                .map((item, idx) => (item.isMessage ? <div key={'message' + item.id}>
-                  <Message message={item}
-                    logInUserId={user.id}
-                    userName={item.userId != meetmess[idx + 1].userId ? getUserName(item.userId) : ''}
-                    hasAvatar={item.userId != meetmess[idx + 1].userId} />
-                  {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)
-                    && <div className='time-text'>
-                      <span>
-                        {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)}
-                      </span>
-                    </div>}
-                </div> :
-                  <MeetingItem key={'meeting' + item.id} meeting={item} />
-                ))}
-              {currentNumOfMeetMess && (meetmess[currentNumOfMeetMess - 1].isMessage ?
-                <Message message={meetmess[currentNumOfMeetMess - 1]}
-                  logInUserId={user.id} userName={getUserName(meetmess[currentNumOfMeetMess - 1].userId)}
-                  hasAvatar={true} lastMessage={true} />
-                : <MeetingItem key={'meeting' + meetmess[currentNumOfMeetMess - 1].id} meeting={meetmess[currentNumOfMeetMess - 1]} />)}
-            </div>}
-
-            <form onSubmit={handleSendMessage}
-              style={{ position: "absolute", left: 0, bottom: '2px', width: '100%' }}>
-              {imageUrl && <div className='image-message-upload'>
-                <div style={{
-                  backgroundImage: `url("${imageUrl}")`
-                }}>
-                </div>
-                <i className="far fa-times-circle remove-image-btn"
-                  onClick={e => {
-                    e.preventDefault()
-                    setImageUrl('')
-                    setImage(null);
-                  }}></i>
-              </div>}
-              <div className="search-team-box">
-                <input
-                  variant="outlined"
-                  type="text" placeholder="Chat"
-                  className='team-message-input' name='message'
-                  autoComplete="off"
-                  ref={inputRef}
-                  value={input}
-                  onChange={e => setInput(e.target.value)} />
-                <div className="input-list-btn" >
-                  <Tooltip title="Attach a photo">
-                    <Button>
-                      <label htmlFor="images" className='send-image-label'>
-                        <ImageIcon color='success' />
-                        {/* <i style={{ color: "#69B00B" }} className="fas fa-image"></i> */}
-                      </label>
-                      <input type="file" accept='image/*'
-                        onChange={handleImageInputChange}
-                        id="images" style={{
-                          display: 'none'
-                        }} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="Send message">
-                    <Button variant="text" onClick={handleSendMessage}
-                      style={{ padding: 0 }}>
-                      <SendIcon style={{ color: "#1A73E8" }} />
-                    </Button>
-                  </Tooltip>
-                </div>
-              </div>
-            </form>
-          </div>
-          {<div className="team-info-container" style={{
-            width: isTeamInfoShow ? '24%' : '0px',
-            paddingLeft: 0
-          }}>
-            <div className='arrow-expand-container' onClick={e => {
-              e.preventDefault()
-              setTeamInfoShow(false)
-            }}>
-              <DoubleArrowIcon />
-            </div>
-            <div style={{ padding: '10px 0' }}>
-              <strong>About</strong>
-              <p style={{ paddingLeft: '10px' }}>{teamReducer.team.name}</p>
-
-              <strong>Members ({teamReducer.team.members.length})</strong>
-              {teamReducer.team.members.slice(0, 5).map(member => (
-                <span key={`member ${member.id}`}
-                  style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', paddingLeft: '10px' }}>
-                  <div className='team-info-user-avatar'
-                    style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${member.id}")` }}>
-                  </div>
-                  <p style={{ marginBottom: 0 }}>{member.userName}</p>
-                </span>
-              ))}
-              {teamReducer.team.members.length > 5 && <Link to="#">
-                See all members
-              </Link>}
-            </div>
-          </div>}
-        </div>}
-      </Grid>
-
-
-      <Dialog open={isInvitedModalShow} onClose={handleCloseInvitedModal}>
-        <DialogContent>You are invited to join this team</DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={handleRefuseInvitation}>
-            Refuse
-          </Button>
-          <Button variant="text" onClick={handleConfirmInvitation}>
-            Agree
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={isNotMemberModalShow}>
-        <DialogContent>You aren't member of this team. Request to join this team ?</DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={handleCloseNotMemberModal}>
-            No
-          </Button>
-          <Button variant="text" onClick={handleRequestJoin}>
-            Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={isRequestModalShow}>
-        <DialogContent>You are requesting to join this team. Wait for the admin approve you request ?</DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={handleCancelRequest}>
-            Cancel Request
-          </Button>
-          <Button variant="text" onClick={handleCloseRequestModal}>
-            Back to My teams
-          </Button>
-        </DialogActions>
-      </Dialog>
+  return (teamReducer.teamLoaded && <Grid container>
+    <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--gray-shadow)' }}>
+      <TeamList />
     </Grid>
+    <Grid item sm={10} style={{ padding: 0 }}>
+      <TeamHeader showTeamInfo={showTeamInfo} />
+      {teamReducer.teamLoaded && <div className="team-container">
+        <div className="team-body" ref={teamBody}
+          style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
+          {currentNumOfMeetMess !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
+            ref={scrollRef} style={{
+              height: teamBody.current && teamBody.current.offsetHeight ?
+                teamBody.current.offsetHeight - (imageUrl ? 170 : 50) : '560px'
+            }}>
+            {currentNumOfMeetMess && meetmess.slice(0, currentNumOfMeetMess - 1)
+              .map((item, idx) => (item.isMessage ? <div key={'message' + item.id}>
+                <Message message={item}
+                  logInUserId={user.id}
+                  userName={item.userId != meetmess[idx + 1].userId ? getUserName(item.userId) : ''}
+                  hasAvatar={item.userId != meetmess[idx + 1].userId} />
+                {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)
+                  && <div className='time-text'>
+                    <span>
+                      {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)}
+                    </span>
+                  </div>}
+              </div> :
+                <MeetingItem key={'meeting' + item.id} meeting={item} />
+              ))}
+            {currentNumOfMeetMess && (meetmess[currentNumOfMeetMess - 1].isMessage ?
+              <Message message={meetmess[currentNumOfMeetMess - 1]}
+                logInUserId={user.id} userName={getUserName(meetmess[currentNumOfMeetMess - 1].userId)}
+                hasAvatar={true} lastMessage={true} />
+              : <MeetingItem key={'meeting' + meetmess[currentNumOfMeetMess - 1].id} meeting={meetmess[currentNumOfMeetMess - 1]} />)}
+          </div>}
+
+          <form onSubmit={handleSendMessage}
+            style={{ position: "absolute", left: 0, bottom: '2px', width: '100%' }}>
+            {imageUrl && <div className='image-message-upload'>
+              <div style={{
+                backgroundImage: `url("${imageUrl}")`
+              }}>
+              </div>
+              <i className="far fa-times-circle remove-image-btn"
+                onClick={e => {
+                  e.preventDefault()
+                  setImageUrl('')
+                  setImage(null);
+                }}></i>
+            </div>}
+            <div className="search-team-box">
+              <input
+                variant="outlined"
+                type="text" placeholder="Chat"
+                className='team-message-input' name='message'
+                autoComplete="off"
+                ref={inputRef}
+                value={input}
+                onChange={e => setInput(e.target.value)} />
+              <div className="input-list-btn" >
+                <Tooltip title="Attach a photo">
+                  <Button>
+                    <label htmlFor="images" className='send-image-label'>
+                      <ImageIcon color='success' />
+                      {/* <i style={{ color: "#69B00B" }} className="fas fa-image"></i> */}
+                    </label>
+                    <input type="file" accept='image/*'
+                      onChange={handleImageInputChange}
+                      id="images" style={{
+                        display: 'none'
+                      }} />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Send message">
+                  <Button variant="text" onClick={handleSendMessage}
+                    style={{ padding: 0 }}>
+                    <SendIcon style={{ color: "#1A73E8" }} />
+                  </Button>
+                </Tooltip>
+              </div>
+            </div>
+          </form>
+        </div>
+        {<div className="team-info-container" style={{
+          width: isTeamInfoShow ? '24%' : '0px',
+          paddingLeft: 0
+        }}>
+          <div className='arrow-expand-container' onClick={e => {
+            e.preventDefault()
+            setTeamInfoShow(!isTeamInfoShow)
+          }}>
+            <Tooltip title={isTeamInfoShow ? 'Hide team info' : "Show team info"}>
+              <KeyboardArrowRightIcon className={isTeamInfoShow ? 'arrow-rotate' : 'arrow-rotate-reverse'} />
+            </Tooltip>
+          </div>
+          <div style={{ padding: '10px 0' }}>
+            <strong>About</strong>
+            <p style={{ paddingLeft: '10px' }}>{teamReducer.team.name}</p>
+
+            <strong>Members ({teamReducer.team.members.length})</strong>
+            {teamReducer.team.members.slice(0, 5).map(member => (
+              <span key={`member ${member.id}`}
+                style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', paddingLeft: '10px' }}>
+                <div className='team-info-user-avatar'
+                  style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${member.id}")` }}>
+                </div>
+                <p style={{ marginBottom: 0 }}>{member.userName}</p>
+              </span>
+            ))}
+            {teamReducer.team.members.length > 5 && <Link to="#">
+              See all members
+            </Link>}
+          </div>
+        </div>}
+      </div>}
+    </Grid>
+
+
+    <Dialog open={isInvitedModalShow} onClose={handleCloseInvitedModal}>
+      <DialogContent>You are invited to join this team</DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={handleRefuseInvitation}>
+          Refuse
+        </Button>
+        <Button variant="text" onClick={handleConfirmInvitation}>
+          Agree
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+    <Dialog open={isNotMemberModalShow}>
+      <DialogContent>You aren't member of this team. Request to join this team ?</DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={handleCloseNotMemberModal}>
+          No
+        </Button>
+        <Button variant="text" onClick={handleRequestJoin}>
+          Yes
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+    <Dialog open={isRequestModalShow}>
+      <DialogContent>You are requesting to join this team. Wait for the admin approve you request ?</DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={handleCancelRequest}>
+          Cancel Request
+        </Button>
+        <Button variant="text" onClick={handleCloseRequestModal}>
+          Back to My teams
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </Grid>
   )
 }

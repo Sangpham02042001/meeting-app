@@ -18,7 +18,7 @@ export default function Teams(props) {
 
 	return (
 		<>
-			<Grid container style={{ padding: '0 20px', backgroundColor: '#f0f0f0' }}>
+			<Grid container style={{ padding: '0 20px' }}>
 				<Grid item sm={12}>
 					<div className="teams-header">
 						<h3>Teams</h3>
