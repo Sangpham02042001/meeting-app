@@ -13,7 +13,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
   confirmInvitations, getTeamMessages, cleanTeamState,
-  sendMessage
+  sendMessage, getTeamMeetMess
 } from '../../store/reducers/team.reducer'
 import { baseURL, broadcastLocal, socketClient, messageTimeDiff } from '../../utils'
 import Loading from '../../components/Loading'
@@ -21,20 +21,21 @@ import './team.css'
 import TeamHeader from '../../components/TeamHeader'
 import TeamList from '../../components/TeamList'
 import Message from '../../components/Message'
+import MeetingItem from './MeetingItem';
 
 
 export default function Team(props) {
   const { teamId } = useParams()
   const teamReducer = useSelector(state => state.teamReducer)
-  let messages = useSelector(state => state.teamReducer.team.messages)
-  let currentNumOfMessages = (messages || {}).length || 0
+  let meetmess = useSelector(state => state.teamReducer.team.meetmess)
+  let currentNumOfMeetMess = (meetmess || {}).length || 0
   const user = useSelector(state => state.userReducer.user)
   const dispatch = useDispatch()
   const history = useHistory()
   const [input, setInput] = useState('')
   const [image, setImage] = useState(null)
   const [imageUrl, setImageUrl] = useState('')
-  const [offsetMessages, setOffsetMessages] = useState(0)
+  const [offsetMeetmess, setOffsetMeetmess] = useState(0)
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
   const [isRequestModalShow, setRequestModalShow] = useState(false)
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
@@ -45,12 +46,12 @@ export default function Team(props) {
 
   useEffect(() => {
     dispatch(getTeamInfo({ teamId }))
-    dispatch(getTeamMessages({
+    dispatch(getTeamMeetMess({
       teamId,
       offset: 0,
       num: 15
     }))
-    setOffsetMessages(15)
+    setOffsetMeetmess(15)
 
     window.addEventListener('paste', e => {
       if (document.activeElement == inputRef.current) {
@@ -71,8 +72,8 @@ export default function Team(props) {
     return () => {
       // socketClient.leave(`team ${teamId}`)
       socketClient.emit('out-team', { teamId })
-      dispatch(cleanTeamState())
-      setOffsetMessages(0)
+      // dispatch(cleanTeamState())
+      setOffsetMeetmess(0)
       setImageUrl('')
       setImage('')
       window.removeEventListener('paste', () => {
@@ -178,13 +179,13 @@ export default function Team(props) {
   }
 
   const handleMessageScroll = e => {
-    if (teamReducer.team.numOfMessages > currentNumOfMessages && e.target.scrollTop === 0) {
-      dispatch(getTeamMessages({
+    if (teamReducer.team.numOfMeetMess > currentNumOfMeetMess && e.target.scrollTop === 0) {
+      dispatch(getTeamMeetMess({
         teamId,
-        offset: offsetMessages,
+        offset: offsetMeetmess,
         num: 15
       }))
-      setOffsetMessages(offsetMessages + 15)
+      setOffsetMeetmess(offsetMeetmess + 15)
     }
   }
 
@@ -200,7 +201,8 @@ export default function Team(props) {
   }
 
   const getUserName = userId => {
-    return (teamReducer.team.members.find(user => user.id == userId).userName)
+    let user = teamReducer.team.members.find(user => user.id == userId)
+    return (user || {}).userName || '';
   }
 
   return (
@@ -213,30 +215,33 @@ export default function Team(props) {
         {teamReducer.teamLoaded && <div className="team-container">
           <div className="team-body" ref={teamBody}
             style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
-            {currentNumOfMessages !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
+            {currentNumOfMeetMess !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
               ref={scrollRef} style={{
                 height: teamBody.current && teamBody.current.offsetHeight ?
                   teamBody.current.offsetHeight - (imageUrl ? 170 : 50) : '560px'
               }}>
-              {currentNumOfMessages && messages.slice(0, currentNumOfMessages - 1)
-                .map((message, idx) => (
-                  <div key={'message' + message.id}>
-                    <Message message={message}
-                      logInUserId={user.id}
-                      userName={message.userId != messages[idx + 1].userId ? getUserName(message.userId) : ''}
-                      hasAvatar={message.userId != messages[idx + 1].userId} />
-                    {messageTimeDiff(messages[idx + 1].createdAt, messages[idx].createdAt)
-                      && <div className='time-text'>
-                        <span>
-                          {messageTimeDiff(messages[idx + 1].createdAt, messages[idx].createdAt)}
-                        </span>
-                      </div>}
-                  </div>
+              {currentNumOfMeetMess && meetmess.slice(0, currentNumOfMeetMess - 1)
+                .map((item, idx) => (item.isMessage ? <div key={'message' + item.id}>
+                  <Message message={item}
+                    logInUserId={user.id}
+                    userName={item.userId != meetmess[idx + 1].userId ? getUserName(item.userId) : ''}
+                    hasAvatar={item.userId != meetmess[idx + 1].userId} />
+                  {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)
+                    && <div className='time-text'>
+                      <span>
+                        {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)}
+                      </span>
+                    </div>}
+                </div> :
+                  <MeetingItem key={'meeting' + item.id} meeting={item} />
                 ))}
-              {currentNumOfMessages && <Message message={messages[currentNumOfMessages - 1]}
-                logInUserId={user.id} userName={getUserName(messages[currentNumOfMessages - 1].userId)}
-                hasAvatar={true} lastMessage={true} />}
+              {currentNumOfMeetMess && (meetmess[currentNumOfMeetMess - 1].isMessage ?
+                <Message message={meetmess[currentNumOfMeetMess - 1]}
+                  logInUserId={user.id} userName={getUserName(meetmess[currentNumOfMeetMess - 1].userId)}
+                  hasAvatar={true} lastMessage={true} />
+                : <MeetingItem key={'meeting' + meetmess[currentNumOfMeetMess - 1].id} meeting={meetmess[currentNumOfMeetMess - 1]} />)}
             </div>}
+
             <form onSubmit={handleSendMessage}
               style={{ position: "absolute", left: 0, bottom: '2px', width: '100%' }}>
               {imageUrl && <div className='image-message-upload'>

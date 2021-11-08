@@ -14,8 +14,12 @@ const initialState = {
     requestUsers: [],
     messages: [],
     messagesLoaded: false,
+    meetmessLoaded: false,
     meetings: [],
-    meetingActive: null
+    meetingActive: null,
+    meetmess: [],
+    numOfMessages: 0,
+    numOfMeetMess: 0
   },
   joinedTeamLoaded: false,
   requestTeamLoaded: false,
@@ -198,6 +202,22 @@ export const getTeamMessages = createAsyncThunk('teams/getMessages', async ({ te
   }
 })
 
+export const getTeamMeetMess = createAsyncThunk('teams/getMeetMess', async ({ teamId, offset, num }, { rejectWithValue }) => {
+  try {
+    let response = await axiosAuth.get(`/api/teams/${teamId}/meetmess?offset=${offset}&num=${num}`)
+    return {
+      meetmess: response.data.meetmess,
+      numOfMeetMess: response.data.numOfMeetMess
+    }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
 export const deleteTeam = createAsyncThunk('teams/delete', async ({ teamId }, { rejectWithValue }) => {
   try {
     let response = await axiosAuth.delete(`/api/teams/${teamId}`)
@@ -297,6 +317,8 @@ export const teamSlice = createSlice({
         requestUsers: [],
         messages: [],
         messagesLoaded: false,
+        meetmess: [],
+        meetmessLoaded: false,
         meetings: []
       }
     },
@@ -480,6 +502,23 @@ export const teamSlice = createSlice({
     },
     [getTeamMessages.rejected]: (state, action) => {
       state.team.messagesLoaded = true
+    },
+    [getTeamMeetMess.pending]: (state) => {
+      state.team.meetmessLoaded = false
+    },
+    [getTeamMeetMess.fulfilled]: (state, action) => {
+      if (state.team.meetmess.length === 0) {
+        state.team.meetmess.push(...action.payload.meetmess)
+      } else {
+        state.team.meetmess.unshift(...action.payload.meetmess)
+      }
+      if (action.payload.numOfMeetMess) {
+        state.team.numOfMeetMess = action.payload.numOfMeetMess
+      }
+      state.team.meetmessLoaded = true
+    },
+    [getTeamMeetMess]: (state, action) => {
+      state.team.meetmessLoaded = true
     },
     [outTeam.pending]: (state) => {
       state.loading = true

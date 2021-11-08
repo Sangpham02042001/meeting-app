@@ -582,14 +582,15 @@ const getTeamMeetMess = async (req, res) => {
       ...message,
       isMessage: true
     }))
-    let conversations = [...messages, ...meetings].sort((item1, item2) => {
+    let numOfMeetMess = [...messages, ...meetings].length
+    let meetmess = [...messages, ...meetings].sort((item1, item2) => {
       let time1 = new Date(item1.createdAt).getTime()
       let time2 = new Date(item2.createdAt).getTime()
       if (time1 > time2) {
         return -1;
       }
     }).splice(offset, num)
-    return res.status(200).json({ conversations });
+    return res.status(200).json({ meetmess, numOfMeetMess });
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })

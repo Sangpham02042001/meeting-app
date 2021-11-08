@@ -71,4 +71,11 @@ const messageTimeDiff = (mysqlTime1, mysqlTime2) => {
   return res
 }
 
-export { convertDate, timeDiff, messageTimeDiff }
+const getTime = mysqlTime => {
+  let time = new Date(mysqlTime)
+  let minute = time.getMinutes().toString().length === 1 ? `0${time.getMinutes()}` : time.getMinutes()
+  let hour = time.getHours().toString().length === 1 ? `0${time.getHours()}` : time.getHours()
+  return `${WEEK_DAYS[time.getDay()]}, ${MONTHS[time.getMonth()]} ${time.getDate()} ${time.getFullYear()} ${hour}:${minute}`
+}
+
+export { convertDate, timeDiff, messageTimeDiff, getTime }
