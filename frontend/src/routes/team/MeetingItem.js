@@ -36,6 +36,7 @@ export default function MeetingItem({ meeting }) {
     <div style={{
       width: '96%',
       margin: '15px auto',
+      fontSize: '14px'
     }}>
       <div className='time-text'>
         <span>
@@ -48,7 +49,7 @@ export default function MeetingItem({ meeting }) {
           aria-controls="panel1a-content"
           id="panel1a-header">
           <div style={{ width: '100%' }}>
-            <Typography>Meeting created by <strong>{hostName}</strong></Typography>
+            <Typography style={{ fontSize: '14px' }}>Meeting created by <strong>{hostName}</strong></Typography>
             <hr />
             <div style={{
               marginTop: '10px',
@@ -70,7 +71,7 @@ export default function MeetingItem({ meeting }) {
           maxHeight: '400px',
           overflowY: 'auto'
         }}>
-          <Typography>
+          <Typography style={{ fontSize: '14px' }}>
             {error ? { error } : messages.length ?
               <>
                 {messages.slice(0, messages.length - 1).map((message, idx) => (
@@ -81,6 +82,7 @@ export default function MeetingItem({ meeting }) {
                 ))}
                 <Message message={messages[messages.length - 1]}
                   logInUserId={null}
+                  userName={getUserName(messages[messages.length - 1].userId)}
                   hasAvatar={true} lastMessage={true} />
               </> :
               <p>No messages in this meeting</p>

@@ -31,10 +31,11 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
           <div >
             <div className={`message  ${lastMessage ? 'last-message' : ''}`}
               style={{ marginBottom: '7px' }}>
-              {hasAvatar && <Tooltip title={userName}>
+              {hasAvatar && (userName ? <Tooltip title={userName}>
                 <Avatar sx={{ width: '40px', height: '40px' }}
                   src={`${baseURL}/api/user/avatar/${message.userId}`} />
-              </Tooltip>}
+              </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
+                src={`${baseURL}/api/user/avatar/${message.userId}`} />)}
               <div className={message.photo ? 'message-with-photo' : ''}>
                 {message.content && <p className={hasAvatar ? 'user-last-message' : ''}>
                   {message.content}
@@ -43,13 +44,6 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                 ><img width="100%" height="100%" src={`${baseURL}/api/messages/${message.id}/image`} /></div>}
               </div>
             </div>
-            {userName && <p style={{
-              paddingLeft: '40px',
-              fontSize: '14px',
-              color: 'gray',
-              marginBottom: '10px',
-              marginTop: 0
-            }}>{userName}</p>}
           </div>
       }
 

@@ -68,6 +68,7 @@ export default function Team(props) {
         }
       }
     })
+
     return () => {
       // socketClient.leave(`team ${teamId}`)
       socketClient.emit('out-team', { teamId })
@@ -98,7 +99,7 @@ export default function Team(props) {
         history.push('/teams')
         return
       }
-      if (teamReducer.team.members.every(u => u.id != user.id)) {
+      if (teamReducer.team.members.length && teamReducer.team.members.every(u => u.id != user.id)) {
         // if (teamReducer.team.teamType === 'private') {
         history.push('/teams')
         // }

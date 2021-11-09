@@ -12,8 +12,6 @@ const initialState = {
     members: [],
     invitedUsers: [],
     requestUsers: [],
-    messages: [],
-    messagesLoaded: false,
     meetmessLoaded: false,
     meetings: [],
     meetingActive: null,
@@ -186,22 +184,6 @@ export const inviteUsers = createAsyncThunk('teams/inviteUsers', async ({ teamId
   }
 })
 
-export const getTeamMessages = createAsyncThunk('teams/getMessages', async ({ teamId, offset, num }, { rejectWithValue }) => {
-  try {
-    let response = await axiosAuth.get(`/api/teams/${teamId}/messages?offset=${offset}&num=${num}`)
-    return {
-      messages: response.data.messages,
-      numOfMessages: response.data.numOfMessages
-    }
-  } catch (error) {
-    let { data } = error.response
-    if (data && data.error) {
-      return rejectWithValue(data)
-    }
-    return error
-  }
-})
-
 export const getTeamMeetMess = createAsyncThunk('teams/getMeetMess', async ({ teamId, offset, num }, { rejectWithValue }) => {
   try {
     let response = await axiosAuth.get(`/api/teams/${teamId}/meetmess?offset=${offset}&num=${num}`)
@@ -247,7 +229,7 @@ export const createNewTeam = createAsyncThunk('teams/create', async ({ formData 
         id: team.id,
         name: team.name,
         hostId: team.hostId,
-        messages: []
+        meetmess: []
       }
     }
   } catch (error) {
@@ -312,11 +294,10 @@ export const teamSlice = createSlice({
   reducers: {
     cleanTeamState: (state, action) => {
       state.team = {
+        name: 'clean',
         members: [],
         invitedUsers: [],
         requestUsers: [],
-        messages: [],
-        messagesLoaded: false,
         meetmess: [],
         meetmessLoaded: false,
         meetings: []
@@ -493,25 +474,6 @@ export const teamSlice = createSlice({
     [deleteTeam.rejected]: (state, action) => {
       state.loading = false
       state.error = action.payload.error
-    },
-    [getTeamMessages.pending]: (state) => {
-      // state.loading = true;
-      state.team.messagesLoaded = false
-    },
-    [getTeamMessages.fulfilled]: (state, action) => {
-      // state.loading = false;
-      if (state.team.messages.length === 0) {
-        state.team.messages.push(...action.payload.messages.sort((mess, mess2) => mess.id - mess2.id))
-      } else {
-        state.team.messages.unshift(...action.payload.messages.sort((mess, mess2) => mess.id - mess2.id))
-      }
-      if (action.payload.numOfMessages) {
-        state.team.numOfMessages = action.payload.numOfMessages
-      }
-      state.team.messagesLoaded = true
-    },
-    [getTeamMessages.rejected]: (state, action) => {
-      state.team.messagesLoaded = true
     },
     [getTeamMeetMess.pending]: (state) => {
       state.team.meetmessLoaded = false

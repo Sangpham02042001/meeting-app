@@ -102,6 +102,7 @@
 .team-list {
   display: flex;
   flex-wrap: wrap;
+  z-index: 10;
 }
 
 .team-item {
