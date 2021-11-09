@@ -45,7 +45,7 @@ io.use((socket, next) => {
     if (!userID) {
         return next(new Error("invalid userId"));
     }
-    socket.id = userID;
+    socket.userId = userID;
     next();
 })
 

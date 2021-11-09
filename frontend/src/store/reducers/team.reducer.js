@@ -323,9 +323,9 @@ export const teamSlice = createSlice({
       }
     },
     sendMessage: (state, action) => {
-      let { messageId, content, senderId, teamId, photo } = action.payload;
+      let { messageId, content, senderId, teamId, photo, isMessage } = action.payload;
       if (state.team.id && state.team.id == teamId) {
-        state.team.messages.push({ id: messageId, content, userId: senderId, teamId, photo })
+        state.team.meetmess.push({ id: messageId, content, userId: senderId, teamId, photo, isMessage })
       }
     },
     updateMeetingState: (state, action) => {
@@ -348,6 +348,16 @@ export const teamSlice = createSlice({
         if (teamId == state.team.id) {
           state.team.meetings.push(meeting)
           state.team.meetingActive = meeting
+        }
+      }
+    },
+    endActiveMeeting: (state, action) => {
+      let { meeting } = action.payload
+      if (state.team.meetingActive.id == meeting.id) {
+        state.team.meetingActive = null
+        let idx = state.team.meetings.findIndex(m => m.id == meeting.id)
+        if (idx >= 0) {
+          state.team.meetings.splice(idx, 1, meeting)
         }
       }
     }
@@ -507,11 +517,7 @@ export const teamSlice = createSlice({
       state.team.meetmessLoaded = false
     },
     [getTeamMeetMess.fulfilled]: (state, action) => {
-      if (state.team.meetmess.length === 0) {
-        state.team.meetmess.push(...action.payload.meetmess)
-      } else {
-        state.team.meetmess.unshift(...action.payload.meetmess)
-      }
+      state.team.meetmess.unshift(...action.payload.meetmess)
       if (action.payload.numOfMeetMess) {
         state.team.numOfMeetMess = action.payload.numOfMeetMess
       }
@@ -607,6 +613,6 @@ export const teamSlice = createSlice({
 })
 
 export const { cleanTeamState, sendMessage, updateMeetingState,
-  setMeetingJoined, setMeetingActive } = teamSlice.actions;
+  setMeetingJoined, setMeetingActive, endActiveMeeting } = teamSlice.actions;
 
 export default teamSlice.reducer

@@ -191,6 +191,13 @@ const Meeting = (props) => {
 					console.log('remote turn off camera')
 				}
 				setTrigger(v4())
+			},
+			oncleanup: function () {
+				Janus.log(" ::: Got a cleanup notification (remote feed " + id + ") :::");
+				remoteFeed.simulcastStarted = false;
+				remoteStreams.current.splice(remoteFeed.rfindex, 1)
+				feedRefs.current.splice(remoteFeed.rfindex, 1)
+				setTrigger(v4())
 			}
 		})
 	}
@@ -334,6 +341,10 @@ const Meeting = (props) => {
 										sfuRef.current.muteVideo();
 									}
 								}
+							},
+							oncleanup: function () {
+								Janus.log(" ::: Got a cleanup notification: we are unpublished now :::");
+								myStream.current = null;
 							},
 							error: (error) => {
 								console.log(error)

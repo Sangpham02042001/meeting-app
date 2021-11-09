@@ -1,24 +1,31 @@
-const users = {};
-const socketToMeeting = {};
+const userSockets = {
+
+};
 
 const { getMemberTeam, sendMessage } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
-    joinMeeting, outMeeting, getUserMeeting,
+    joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage } = require('../controllers/conversation.controller');
 
 
 
 const socketServer = (socket) => {
+    if (!userSockets[socket.userId]) {
+        userSockets[socket.userId] = [socket.id]
+    } else {
+        userSockets[socket.userId].push(socket.id)
+    }
     //team
     socket.on('send-message-team', async ({ teamId, senderId, content, image }) => {
         let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, image })
         socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, photo: message.photo })
-        console.log('sent-message-team', socket.id)
         for (let m of members) {
-            socket.to(m.id).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photo: message.photo });
+            for (const socketId of userSockets[m.id]) {
+                socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photo: message.photo });
+            }
         }
     })
 
@@ -28,7 +35,9 @@ const socketServer = (socket) => {
         let { teamId } = meeting
         let members = await getMemberTeam({ teamId });
         for (let m of members) {
-            socket.to(m.id).emit('new-meeting-created', { meeting });
+            for (const socketId of userSockets[m.id]) {
+                socket.to(socketId).emit('new-meeting-created', { meeting });
+            }
         }
     })
 
@@ -50,7 +59,9 @@ const socketServer = (socket) => {
         socket.emit('joined-meeting', { members, meetingId, teamId })
 
         for (let m of members) {
-            socket.to(m.userId).emit('user-join-meeting', { teamId, meetingId, user });
+            for (const socketId of userSockets[m.userId]) {
+                socket.to(socketId).emit('user-join-meeting', { teamId, meetingId, user });
+            }
         }
     });
 
@@ -59,7 +70,6 @@ const socketServer = (socket) => {
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessageMeeting({ senderId, content, image, meetingId })
         socket.emit('sent-message-meeting', { messageId: message.id, content, meetingId, senderId, photo: message.photo, teamId })
-        console.log('sent-message-meeting', socket.id)
         // for (let m of members) {
         //     socket.to(m.id).emit('receive-message-meeting', { messageId: message.id, meetingId, teamId, senderId, content, photo: message.photo });
         // }
@@ -73,20 +83,25 @@ const socketServer = (socket) => {
     socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, image }) => {
         const converId = await setConversation({ senderId, receiverId, conversationId });
         const message = await setMessage({ content, conversationId: converId, senderId, image });
-
         if (message) {
             socket.emit('conversation-sentMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt })
-            socket.to(receiverId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt });
+            for (const socketId of userSockets[receiverId]) {
+                socket.to(socketId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt });
+            }
         }
     })
 
     socket.on('conversation-call', ({ conversationId, senderId, senderName, receiverId }) => {
         console.log(senderName);
-        socket.to(receiverId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
+        for (const socketId of userSockets[receiverId]) {
+            socket.to(socketId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
+        }
     })
 
     socket.on('conversation-cancel-call', ({ conversationId, senderId, receiverId }) => {
-        socket.to(receiverId).emit('cancel-call', { conversationId, senderId, receiverId })
+        for (const socketId of userSockets[receiverId]) {
+            socket.to(socketId).emit('cancel-call', { conversationId, senderId, receiverId })
+        }
     })
 
     //disconnect
@@ -95,33 +110,31 @@ const socketServer = (socket) => {
         if (socket.meetingId) {
             let { message } = await outMeeting({
                 meetingId: socket.meetingId,
-                userId: socket.id
+                userId: socket.userId
             })
             if (message) {
                 let members = await getActiveMemberMeeting({ meetingId: socket.meetingId });
                 if (members.length === 0) {
                     console.log('all out meeting')
                     members = await updateMeetingState({ meetingId: socket.meetingId })
+                    let meeting = await getMeetingInfo({ meetingId: socket.meetingId })
                     console.log(members)
-                    // for (let m of members) {
-                    //     socket.to(m.userId).emit('end-meeting', {
-                    //         meetingId: socket.meetingId
-                    //     })
-                    // }
-                    socket.to(`meeting-${socket.meetingId}`).emit('end-meeting', {
-                        meetingId: socket.meetingId
-                    })
+                    for (let m of members) {
+                        for (const socketId of userSockets[m.userId]) {
+                            socket.to(socketId).emit('end-meeting', {
+                                meeting
+                            })
+                        }
+                    }
                 } else {
-                    // for (let m of members) {
-                    //     socket.to(m.userId).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.id });
-                    // }
 
-                    socket.to(`meeting-${socket.meetingId}`).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.id });
+                    socket.to(`meeting-${socket.meetingId}`).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.userId });
                 }
             }
             delete socket.meetingId;
             socket.leave(`meeting-${socket.meetingId}`)
         }
+        userSockets[socket.userId] = userSockets[socket.userId].filter(socketId => socketId != socket.id)
     });
 }
 

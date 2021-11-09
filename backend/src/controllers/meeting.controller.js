@@ -45,11 +45,11 @@ const createMeeting = async (req, res) => {
   let { teamId } = req.body
   let { id } = req.auth
   try {
-    const meeting = await Meeting.create({
+    let meeting = await Meeting.create({
       teamId,
       hostId: id
     })
-
+    meeting = await getMeetingInfo({ meetingId: meeting.id })
     console.log(meeting)
 
     const janusServer = process.env.JANUS_SERVER
@@ -203,20 +203,24 @@ const updateMeetingState = async ({ meetingId }) => {
     })
     meeting.active = false
     await meeting.save()
-    // await sequelize.query(
-    //   "UPDATE meetings m SET time = TIMESTAMPDIFF(SECOND, m.createdAt, NOW()) " +
-    //   "WHERE m.id = :meetingId", {
-    //   replacements: {
-    //     meetingId
+    // let members = await sequelize.query(
+    //   "SELECT ut.userId FROM users_meetings ut " +
+    //   "INNER JOIN meetings m ON m.id = ut.meetingId " +
+    //   "WHERE m.id = :meetingId;",
+    //   {
+    //     replacements: {
+    //       meetingId
+    //     },
+    //     type: QueryTypes.SELECT
     //   }
-    // })
+    // )
     let members = await sequelize.query(
-      "SELECT ut.userId FROM users_meetings ut " +
-      "INNER JOIN meetings m ON m.id = ut.meetingId " +
-      "WHERE m.id = :meetingId;",
+      "SELECT ut.userId FROM users_teams ut " +
+      "WHERE ut.teamId = :teamId;",
       {
         replacements: {
-          meetingId
+          meetingId,
+          teamId: meeting.teamId
         },
         type: QueryTypes.SELECT
       }

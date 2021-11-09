@@ -589,7 +589,7 @@ const getTeamMeetMess = async (req, res) => {
       if (time1 > time2) {
         return -1;
       }
-    }).splice(offset, num)
+    }).splice(offset, num).reverse()
     return res.status(200).json({ meetmess, numOfMeetMess });
   } catch (error) {
     console.log(error)

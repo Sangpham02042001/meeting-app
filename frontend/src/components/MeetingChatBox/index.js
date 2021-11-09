@@ -64,8 +64,7 @@ export default function ChatBox({ chatVisible }) {
     }
 
     const handleSendMessage = () => {
-        ;
-        let userId = socketClient.id;
+        let userId = userReducer.user.id;
         if (message !== '' || image) {
             socketClient.emit('send-message-meeting', {
                 senderId: userId,

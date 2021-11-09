@@ -39,7 +39,7 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                 {message.content && <p className={hasAvatar ? 'user-last-message' : ''}>
                   {message.content}
                 </p>}
-                {message.photo && <div onClick={handlePreviewImg(e, message.id)} className={`message-photo ${hasAvatar ? 'photo-last-message' : ''}`}
+                {message.photo && <div onClick={e => handlePreviewImg(e, message.id)} className={`message-photo ${hasAvatar ? 'photo-last-message' : ''}`}
                 ><img width="100%" height="100%" src={`${baseURL}/api/messages/${message.id}/image`} /></div>}
               </div>
             </div>

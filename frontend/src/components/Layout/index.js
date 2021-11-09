@@ -9,7 +9,7 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { socketClient, broadcastLocal, baseURL } from '../../utils';
 import { sendMessageCv, conversationCalling, cancelCall } from '../../store/reducers/conversation.reducer';
-import { sendMessage, updateMeetingState, setMeetingActive } from '../../store/reducers/team.reducer';
+import { sendMessage, updateMeetingState, setMeetingActive, endActiveMeeting } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
   sendMeetingMessage
@@ -61,14 +61,14 @@ export default function Layout({ children }) {
 
     socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photo }) => {
       dispatch(sendMessage({
-        messageId, content, senderId, teamId, photo
+        messageId, content, senderId, teamId, photo, isMessage: true
       }))
       broadcastLocal.postMessage({ messageId, teamId, senderId, content, photo })
     })
 
     socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, photo }) => {
       dispatch(sendMessage({
-        messageId, content, senderId, teamId, photo
+        messageId, content, senderId, teamId, photo, isMessage: true
       }))
     })
 
@@ -104,13 +104,13 @@ export default function Layout({ children }) {
       }))
     })
 
-    // socketClient.on('end-meeting', ({ meetingId }) => {
-    //   console.log(`end meeting with id, ${meetingId}`)
-    //   broadcastLocal.postMessage({
-    //     messageType: 'end-meeting',
-    //     meetingId
-    //   })
-    // })
+    socketClient.on('end-meeting', ({ meeting }) => {
+      dispatch(endActiveMeeting({ meeting }))
+      // broadcastLocal.postMessage({
+      //   messageType: 'end-meeting',
+      //   meetingId
+      // })
+    })
 
     broadcastLocal.onmessage = (message) => {
       console.log(message);
@@ -155,14 +155,14 @@ export default function Layout({ children }) {
       }}>
         CONNECT
       </Button>
-      
+
     </React.Fragment>
   )
 
   useEffect(() => {
     if (!socketClient.connected) {
       socketClient.connect();
-    } 
+    }
   }, [socketClient.connected])
 
   const handleCancelCall = () => {
@@ -189,28 +189,28 @@ export default function Layout({ children }) {
           <div className="list-selection">
             <div className="btn-list-selection">
               <NavLink exact to='/home' activeClassName="btn-active">
-                <button className="btn-default" ><HomeIcon/></button>
+                <button className="btn-default" ><HomeIcon /></button>
               </NavLink>
             </div>
             <div className="btn-list-selection">
               <NavLink to='/conversations' activeClassName="btn-active">
-                <button className="btn-default" ><MessageIcon/></button>
+                <button className="btn-default" ><MessageIcon /></button>
 
               </NavLink>
             </div>
             <div className="btn-list-selection">
               <NavLink to='/teams' activeClassName="btn-active">
-                <button className="btn-default"><PeopleAltIcon/></button>
+                <button className="btn-default"><PeopleAltIcon /></button>
               </NavLink>
             </div>
             <div className="btn-list-selection">
               <NavLink to='/setting' activeClassName="btn-active">
-                <button className="btn-default" ><SettingsIcon/></button>
+                <button className="btn-default" ><SettingsIcon /></button>
               </NavLink>
             </div>
           </div>
           <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-           
+
             <div className="content-layout">
               {children}
             </div>
