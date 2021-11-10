@@ -9,9 +9,10 @@
 
 .profile-layout {
   display: flex;
-  height: 80vh;
-  margin-top: 10vh;
+  height: calc(100vh - 56px);
   margin-left: 50px;
+  background-color: var(--primary-bg);
+  padding-top: 10vh;
 }
 
 .profile-content {

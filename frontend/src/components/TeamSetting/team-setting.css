@@ -1,0 +1,21 @@
+.setting-user-list {
+  overflow-y: auto;
+  max-height: 450px;
+}
+
+.setting-user-item {
+  display: flex;
+  width: 500px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.setting-user-item > div {
+  display: flex;
+  align-items: center;
+}
+
+.setting-user-item > div > span {
+  margin-left: 20px;
+}

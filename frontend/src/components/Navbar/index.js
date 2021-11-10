@@ -5,6 +5,8 @@ import { baseURL, timeDiff } from '../../utils'
 import './navbar.css'
 import { getNotifs, readNotif } from '../../store/reducers/notification.reducer'
 import InfiniteScroll from 'react-infinite-scroll-component'
+import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
 import Loading from '../Loading'
 import { Avatar } from '@mui/material'
 
@@ -47,7 +49,7 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <div style={{display: 'flex'}}>
+      <div style={{ display: 'flex' }}>
         <Link to='/home'>
           <Avatar src='/meeting-logo.png' style={{
             width: '40px',
@@ -71,7 +73,10 @@ export default function Navbar() {
               dataLength={notifications.length}
               next={handleNotif}
               hasMore={hasMore}
-              loader={<div className="notification justify-content-center"><img src="/loading.gif" className="loadingNotification" /></div>}
+              loader={<div className="notification justify-content-center"
+                style={{ display: 'flex', justifyContent: 'center' }}>
+                <Avatar src="/loading.gif" className="loadingNotification" />
+              </div>}
               scrollableTarget="dropdown-notification"
               endMessage={<p style={{ textAlign: 'center' }}>
                 <b>There is no more notification!</b>
@@ -96,10 +101,11 @@ export default function Navbar() {
                 }
                 return (
                   <Link className="notification" onClick={() => handleReadNotif(event, notification.id)} to={notification.relativeLink} key={notification.id} style={style}>
-                    {notification.isRead ? null : (<i className="bi bi-circle-fill" style={{ color: "rbg(0,312,255,1)", position: "absolute", top: "3px" }}></i>)}
-                    <img className="notificationImg" src={imgSrc}></img>
-                    {notification.content}
-                    <br />
+                    <div style={{ display: 'flex' }}>
+                      {notification.isRead ? null : (<i className="bi bi-circle-fill" style={{ color: "rbg(0,312,255,1)", position: "absolute", top: "3px" }}></i>)}
+                      <Avatar className="notificationImg" src={imgSrc}></Avatar>
+                      {notification.content}
+                    </div>
                     <span style={{ fontSize: '15px' }}>{timeDiff(notification.timeDifferent)}</span>
                     <div />
                   </Link>
@@ -113,9 +119,12 @@ export default function Navbar() {
           <button className="dropdown-btn" style={{ color: "white", padding: 0, textAlign: 'center' }}>
             <Avatar sx={{ width: "40px", height: "40px" }} src={`${baseURL}/api/user/avatar/${user.id}`} />
           </button>
-          <div className="dropdown-content logout-container">
-            <div onClick={handleProfile}>Profile</div>
-            <div onClick={handleLogout}>Logout</div>
+          <div className="navbar dropdown-content logout-container">
+            <div onClick={handleProfile}>
+              <PersonIcon /> My profile</div>
+            <div onClick={handleLogout}>
+              <LogoutIcon /> Logout
+            </div>
           </div>
         </div>
 

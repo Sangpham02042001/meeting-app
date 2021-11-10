@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { create } from 'lodash'
 import extend from 'lodash/extend'
-import { axiosAuth, socketClient } from '../../utils'
+import { axiosAuth, baseURL, socketClient } from '../../utils'
 
 const initialState = {
   joinedTeams: [],
@@ -57,6 +57,20 @@ export const getInvitedTeams = createAsyncThunk('teams/getInvitedTeams', async (
   }
 })
 
+export const removeMember = createAsyncThunk('teams/removeMember', async ({ userId, teamId }, { rejectWithValue }) => {
+  try {
+    await axiosAuth.put(`/api/teams/${teamId}/remove-members`, {
+      users: [userId]
+    })
+    return { userId }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
 
 export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId }, { rejectWithValue }) => {
   let response = await axiosAuth.get(`/api/teams/${teamId}`)
@@ -184,12 +198,58 @@ export const inviteUsers = createAsyncThunk('teams/inviteUsers', async ({ teamId
   }
 })
 
+export const cancelInviteUsers = createAsyncThunk('teams/cancelInvite', async ({ teamId, userId }, { rejectWithValue }) => {
+  try {
+    await axiosAuth.put(`${baseURL}/api/teams/${teamId}/users`, {
+      users: [userId]
+    })
+    return { userId }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
+export const confirmJoinRequests = createAsyncThunk('teams/confirmRequests', async ({ teamId, userId }, { rejectWithValue }) => {
+  try {
+    await axiosAuth.put(`${baseURL}/api/teams/${teamId}/confirm-requests`, {
+      users: [userId]
+    })
+    return { userId }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
+export const refuseJoinRequests = createAsyncThunk('teams/refuseRequest', async ({ teamId, userId }, { rejectWithValue }) => {
+  try {
+    await axiosAuth.put(`${baseURL}/api/teams/${teamId}/remove-requests`, {
+      users: [userId]
+    })
+    return { userId }
+  } catch (error) {
+    let { data } = error.response
+    if (data && data.error) {
+      return rejectWithValue(data)
+    }
+    return error
+  }
+})
+
 export const getTeamMeetMess = createAsyncThunk('teams/getMeetMess', async ({ teamId, offset, num }, { rejectWithValue }) => {
   try {
     let response = await axiosAuth.get(`/api/teams/${teamId}/meetmess?offset=${offset}&num=${num}`)
     return {
       meetmess: response.data.meetmess,
-      numOfMeetMess: response.data.numOfMeetMess
+      numOfMeetMess: response.data.numOfMeetMess,
+      offset
     }
   } catch (error) {
     let { data } = error.response
@@ -450,11 +510,34 @@ export const teamSlice = createSlice({
       state.loading = true
     },
     [inviteUsers.fulfilled]: (state, action) => {
-      state.team.invitedUsers.concat(action.payload.users)
+      state.team.invitedUsers.push(...action.payload.users)
       state.loading = false
     },
     [inviteUsers.rejected]: (state, action) => {
       state.loading = false
+      state.error = action.payload.error
+    },
+    [cancelInviteUsers.fulfilled]: (state, action) => {
+      let { userId } = action.payload
+      state.team.invitedUsers = state.team.invitedUsers.filter(t => t.id != userId)
+    },
+    [cancelInviteUsers.rejected]: (state, action) => {
+      state.error = action.payload.error
+    },
+    [confirmJoinRequests.fulfilled]: (state, action) => {
+      let { userId } = action.payload
+      let user = state.team.requestUsers.find(u => u.id == userId)
+      state.team.members.push(user)
+      state.team.requestUsers = state.team.requestUsers.filter(u => u.id != userId)
+    },
+    [confirmJoinRequests.rejected]: (state, action) => {
+      state.error = action.payload.error
+    },
+    [refuseJoinRequests.fulfilled]: (state, action) => {
+      let { userId } = action.payload
+      state.team.requestUsers = state.team.requestUsers.filter(u => u.id != userId)
+    },
+    [refuseJoinRequests.rejected]: (state, action) => {
       state.error = action.payload.error
     },
     [deleteTeam.pending]: (state) => {
@@ -479,7 +562,11 @@ export const teamSlice = createSlice({
       state.team.meetmessLoaded = false
     },
     [getTeamMeetMess.fulfilled]: (state, action) => {
-      state.team.meetmess.unshift(...action.payload.meetmess)
+      if (!action.payload.offset) {
+        state.team.meetmess = action.payload.meetmess
+      } else {
+        state.team.meetmess.unshift(...action.payload.meetmess)
+      }
       if (action.payload.numOfMeetMess) {
         state.team.numOfMeetMess = action.payload.numOfMeetMess
       }
@@ -570,6 +657,14 @@ export const teamSlice = createSlice({
     [cancelJoinRequest.rejected]: (state, action) => {
       let { error } = action.payload
       console.log(error)
+    },
+    [removeMember.fulfilled]: (state, action) => {
+      let { userId } = action.payload
+      state.team.members = state.team.members.filter(m => m.id != userId)
+    },
+    [removeMember.rejected]: (state, action) => {
+      let { error } = action.payload
+      state.error = error
     }
   }
 })

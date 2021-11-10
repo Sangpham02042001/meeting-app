@@ -72,7 +72,7 @@ export default function Team(props) {
     return () => {
       // socketClient.leave(`team ${teamId}`)
       socketClient.emit('out-team', { teamId })
-      dispatch(cleanTeamState())
+      // dispatch(cleanTeamState())
       setOffsetMeetmess(0)
       setImageUrl('')
       setImage('')
