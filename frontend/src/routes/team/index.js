@@ -231,6 +231,13 @@ export default function Team(props) {
                       {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)}
                     </span>
                   </div>}
+                {meetmess[idx + 1].isMessage && meetmess[idx + 1].userId != item.userId
+                  && meetmess[idx + 1].userId !== user.id
+                  && <p style={{
+                    margin: 0,
+                    paddingLeft: '40px',
+                    color: 'gray'
+                  }}>{getUserName(meetmess[idx + 1].userId)}</p>}
               </div> :
                 <MeetingItem key={'meeting' + item.id} meeting={item} />
               ))}

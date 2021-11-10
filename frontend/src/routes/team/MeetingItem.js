@@ -75,10 +75,18 @@ export default function MeetingItem({ meeting }) {
             {error ? { error } : messages.length ?
               <>
                 {messages.slice(0, messages.length - 1).map((message, idx) => (
-                  <Message key={idx} message={message}
-                    logInUserId={null}
-                    userName={message.userId != messages[idx + 1].userId ? getUserName(message.userId) : ''}
-                    hasAvatar={message.userId != messages[idx + 1].userId} />
+                  <div key={idx}>
+                    <Message message={message}
+                      logInUserId={null}
+                      userName={message.userId != messages[idx + 1].userId ? getUserName(message.userId) : ''}
+                      hasAvatar={message.userId != messages[idx + 1].userId} />
+                    {messages[idx + 1].userId != message.userId
+                      && <p style={{
+                        margin: 0,
+                        paddingLeft: '40px',
+                        color: 'gray'
+                      }}>{getUserName(messages[idx + 1].userId)}</p>}
+                  </div>
                 ))}
                 <Message message={messages[messages.length - 1]}
                   logInUserId={null}

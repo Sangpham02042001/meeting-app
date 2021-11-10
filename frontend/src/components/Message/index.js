@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { Avatar, Tooltip, Button, Box, Typography, Modal, Dialog, DialogContent } from '@mui/material';
-import { baseURL } from '../../utils'
+import { Avatar, Tooltip, Dialog, DialogContent } from '@mui/material';
+import { baseURL, getTime } from '../../utils'
 import './style.css'
 
 export default function Message({ message, logInUserId, hasAvatar, lastMessage, userName }) {
@@ -21,27 +21,40 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
           <div className={`own-message ${lastMessage ? 'last-message' : ''}`}
             style={{ marginBottom: '0px' }}>
             <div>
-              {message.content && <p>
-                {message.content}
-              </p>}
+              {message.content &&
+                <Tooltip title={getTime(message.createdAt)} placement="left">
+                  <p>
+                    {message.content}
+                  </p>
+                </Tooltip>}
               {message.photo && <div onClick={e => handlePreviewImg(e, message.id)} className='message-photo'>
-                <img width="100%" height="100%" src={`${baseURL}/api/messages/${message.id}/image`} /></div>}
+                <Tooltip title={getTime(message.createdAt)} placement="left">
+                  <img width="100%" height="100%" src={`${baseURL}/api/messages/${message.id}/image`} />
+                </Tooltip>
+              </div>}
             </div>
           </div > :
           <div >
             <div className={`message  ${lastMessage ? 'last-message' : ''}`}
-              style={{ marginBottom: '7px' }}>
+              style={{ marginBottom: hasAvatar ? '10px' : 0 }}>
               {hasAvatar && (userName ? <Tooltip title={userName}>
                 <Avatar sx={{ width: '40px', height: '40px' }}
                   src={`${baseURL}/api/user/avatar/${message.userId}`} />
               </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
                 src={`${baseURL}/api/user/avatar/${message.userId}`} />)}
               <div className={message.photo ? 'message-with-photo' : ''}>
-                {message.content && <p className={hasAvatar ? 'user-last-message' : ''}>
-                  {message.content}
-                </p>}
+                {message.content &&
+                  <Tooltip title={getTime(message.createdAt)} placement='right'>
+                    <p className={hasAvatar ? 'user-last-message' : ''}>
+                      {message.content}
+                    </p>
+                  </Tooltip>}
                 {message.photo && <div onClick={e => handlePreviewImg(e, message.id)} className={`message-photo ${hasAvatar ? 'photo-last-message' : ''}`}
-                ><img width="100%" height="100%" src={`${baseURL}/api/messages/${message.id}/image`} /></div>}
+                >
+                  <Tooltip title={getTime(message.createdAt)} placement='right'>
+                    <img width="100%" height="100%" src={`${baseURL}/api/messages/${message.id}/image`} />
+                  </Tooltip>
+                </div>}
               </div>
             </div>
           </div>
