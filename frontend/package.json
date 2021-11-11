@@ -13,6 +13,7 @@
     "@testing-library/user-event": "^12.1.10",
     "axios": "^0.21.4",
     "bootstrap": "^5.1.0",
+    "emoji-picker-react": "^3.4.8",
     "fs": "0.0.1-security",
     "lodash": "^4.17.21",
     "passport": "^0.4.1",

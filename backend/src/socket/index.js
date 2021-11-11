@@ -21,11 +21,11 @@ const socketServer = (socket) => {
         let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, image })
-        socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, photo: message.photo })
+        socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, photo: message.photo, createdAt: message.createdAt })
         for (let m of members) {
-            if (userSockets[m.id]) {
+            if (userSockets[m.id] && userSockets[m.id].length) {
                 for (const socketId of userSockets[m.id]) {
-                    socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photo: message.photo });
+                    socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photo: message.photo, createdAt: message.createdAt });
                 }
             }
         }
@@ -37,7 +37,7 @@ const socketServer = (socket) => {
         let { teamId } = meeting
         let members = await getMemberTeam({ teamId });
         for (let m of members) {
-            if (userSockets[m.id]) {
+            if (userSockets[m.id] && userSockets[m.id].length) {
                 for (const socketId of userSockets[m.id]) {
                     socket.to(socketId).emit('new-meeting-created', { meeting });
                 }
@@ -63,7 +63,7 @@ const socketServer = (socket) => {
         socket.emit('joined-meeting', { members, meetingId, teamId })
 
         for (let m of members) {
-            if (userSockets[m.userId]) {
+            if (userSockets && userSockets[m.userId]) {
                 for (const socketId of userSockets[m.userId]) {
                     socket.to(socketId).emit('user-join-meeting', { teamId, meetingId, user });
                 }
@@ -88,23 +88,18 @@ const socketServer = (socket) => {
         const converId = await setConversation({ senderId, receiverId, conversationId });
         const message = await setMessage({ content, conversationId: converId, senderId, images });
         if (message) {
-            socket.emit('conversation-sentMessage', {
-                messageId: message.id, content, senderId, receiverId,
-                conversationId: converId, photos: message.photos, createdAt: message.createdAt
-            })
-            if (userSockets[receiverId]) {
+            socket.emit('conversation-sentMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt })
+            if (userSockets[receiverId] && userSockets[receiverId].length) {
                 for (const socketId of userSockets[receiverId]) {
-                    socket.to(socketId).emit('conversation-receiveMessage', {
-                        messageId: message.id, content, senderId, receiverId,
-                        conversationId: converId, photos: message.photos, createdAt: message.createdAt
-                    });
+                    socket.to(socketId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt });
                 }
             }
         }
     })
 
     socket.on('conversation-call', ({ conversationId, senderId, senderName, receiverId }) => {
-        if (userSockets[receiverId]) {
+        console.log(senderName);
+        if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (const socketId of userSockets[receiverId]) {
                 socket.to(socketId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
             }
@@ -112,7 +107,7 @@ const socketServer = (socket) => {
     })
 
     socket.on('conversation-cancel-call', ({ conversationId, senderId, receiverId }) => {
-        if (userSockets[receiverId]) {
+        if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (const socketId of userSockets[receiverId]) {
                 socket.to(socketId).emit('cancel-call', { conversationId, senderId, receiverId })
             }
