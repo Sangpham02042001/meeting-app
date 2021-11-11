@@ -97,13 +97,14 @@ export default function SignUp() {
     return (
         !userReducer.loaded ? <Loading />
             : (userReducer.authenticated ? <Redirect to="/" />
-                : <div style={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
+                : <div className="auth-page">
                     <div className="form-container">
                         <h1 style={{ marginBottom: '30px' }}>Meeting App</h1>
                         <form onSubmit={handleSubmit} className="auth-form">
                             <TextField
                                 name="firstName"
                                 label="First Name"
+                                required
                                 value={firstName}
                                 onChange={handleChange("firstName")}
                                 variant="standard"
@@ -111,6 +112,7 @@ export default function SignUp() {
                             <TextField
                                 name="lastName"
                                 label="Last Name"
+                                required
                                 value={lastName}
                                 onChange={handleChange("lastName")}
                                 variant="standard"
@@ -119,6 +121,7 @@ export default function SignUp() {
                                 type="email"
                                 name="email"
                                 label="Email"
+                                required
                                 value={email}
                                 onChange={handleChange("email")}
                                 variant="standard"
@@ -130,6 +133,7 @@ export default function SignUp() {
                                 type="password"
                                 name="password"
                                 label="Password"
+                                required
                                 value={password}
                                 onChange={handleChange("password")}
                                 autoComplete="off"
@@ -142,6 +146,7 @@ export default function SignUp() {
                                 type="password"
                                 name="password"
                                 label="Confirm Password"
+                                required
                                 value={passwordConfirmation}
                                 onChange={handleChange("passwordConfirmation")}
                                 variant="standard"
