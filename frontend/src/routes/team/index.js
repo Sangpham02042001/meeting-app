@@ -6,9 +6,11 @@ import {
   DialogContent, IconButton, Tooltip,
 
 } from '@mui/material';
+import Picker, { SKIN_TONE_MEDIUM_DARK } from 'emoji-picker-react';
 import SendIcon from '@mui/icons-material/Send';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import ImageIcon from '@mui/icons-material/Image';
+import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
   confirmInvitations, getTeamMessages, cleanTeamState,
@@ -33,6 +35,7 @@ export default function Team(props) {
   const history = useHistory()
   const [input, setInput] = useState('')
   const [image, setImage] = useState(null)
+  const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
   const [imageUrl, setImageUrl] = useState('')
   const [offsetMeetmess, setOffsetMeetmess] = useState(0)
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
@@ -109,6 +112,10 @@ export default function Team(props) {
     }
   }, [teamReducer.teamLoaded])
 
+  useEffect(() => {
+    if (scrollRef.current) { scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }
+  }, [currentNumOfMeetMess])
+
   const handleCloseInvitedModal = () => {
     setInvitedModalShow(false)
     history.push('/teams')
@@ -163,6 +170,7 @@ export default function Team(props) {
     if (!input && !image) {
       return
     }
+    setIsOpenEmojiList(false)
     let formData = new FormData()
     input && formData.append('content', input)
     image && formData.append('photo', image)
@@ -205,6 +213,18 @@ export default function Team(props) {
     return (user || {}).userName || '';
   }
 
+  const chooseEmoji = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsOpenEmojiList(!isOpenEmojiList)
+  }
+
+  const onEmojiClick = (event, emojiObject) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setInput(input.concat(emojiObject.emoji))
+  };
+
   return (teamReducer.teamLoaded && <Grid container>
     <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--gray-shadow)' }}>
       <TeamList />
@@ -213,6 +233,7 @@ export default function Team(props) {
       <TeamHeader showTeamInfo={showTeamInfo} />
       {teamReducer.teamLoaded && <div className="team-container">
         <div className="team-body" ref={teamBody}
+          // onClick={e => { e.preventDefault(); setIsOpenEmojiList(false) }}
           style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
           {currentNumOfMeetMess !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
             ref={scrollRef} style={{
@@ -262,6 +283,16 @@ export default function Team(props) {
                   setImage(null);
                 }}></i>
             </div>}
+
+            {isOpenEmojiList &&
+              <div style={{
+                position: 'absolute',
+                top: '-330px',
+                right: '100px',
+              }}>
+                <Picker onEmojiClick={onEmojiClick} skinTone={SKIN_TONE_MEDIUM_DARK} />
+              </div>}
+
             <div className="search-team-box">
               <input
                 variant="outlined"
@@ -270,6 +301,7 @@ export default function Team(props) {
                 autoComplete="off"
                 ref={inputRef}
                 value={input}
+                onClick={e => { e.preventDefault(); setIsOpenEmojiList(false) }}
                 onChange={e => setInput(e.target.value)} />
               <div className="input-list-btn" >
                 <Tooltip title="Attach a photo">
@@ -283,6 +315,11 @@ export default function Team(props) {
                       id="images" style={{
                         display: 'none'
                       }} />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Choose an emoji">
+                  <Button onClick={chooseEmoji} >
+                    <InsertEmoticonIcon color='secondary' />
                   </Button>
                 </Tooltip>
                 <Tooltip title="Send message">
