@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { TextField, Button } from '@mui/material';
+import {
+    TextField, Button, Box, Typography,
+    Container
+} from '@mui/material';
 import { useHistory } from "react-router";
 import { Link, Redirect } from "react-router-dom";
 import Loading from "../Loading";
@@ -41,7 +44,7 @@ export default function Login() {
     return (
         !userReducer.loaded ? <Loading />
             : (userReducer.authenticated ? <Redirect to="/home" />
-                : <div className="loginPage">
+                : <div className="auth-page">
                     <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Meeting App</h1>
                     <form onSubmit={handleSubmit} className="auth-form">
                         <TextField
@@ -49,12 +52,14 @@ export default function Login() {
                             name="email"
                             value={email}
                             variant="standard"
+                            required
                             label="Email"
                             onChange={(e) => setEmail(e.target.value)} />
                         <TextField
                             type="password"
                             name="password"
                             label="Password"
+                            required
                             value={password}
                             variant="standard"
                             onChange={(e) => setPassword(e.target.value)} />
@@ -67,12 +72,6 @@ export default function Login() {
                             <Button type="submit" variant="contained"
                                 disabled={!email || !password}>Log in</Button>
                         </div>
-                        {/* <div className="d-flex otherLogin mb-1">
-                                    <div>Or log in with:</div>
-                                    <a href="#" className="btn btn-secondary"><i className="bi bi-facebook"></i></a>
-                                    <a href="#" className="btn btn-info"><i className="bi bi-twitter"></i></a>
-                                    <a href="#" className="btn btn-danger"><i className="bi bi-google"></i></a>
-                                </div> */}
                     </form> <br /> <br />
                 </div>
             )
