@@ -23,8 +23,10 @@ const socketServer = (socket) => {
         const message = await sendMessage({ teamId, senderId, content, image })
         socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, photo: message.photo })
         for (let m of members) {
-            for (const socketId of userSockets[m.id]) {
-                socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photo: message.photo });
+            if (userSockets[m.id]) {
+                for (const socketId of userSockets[m.id]) {
+                    socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photo: message.photo });
+                }
             }
         }
     })
@@ -35,8 +37,10 @@ const socketServer = (socket) => {
         let { teamId } = meeting
         let members = await getMemberTeam({ teamId });
         for (let m of members) {
-            for (const socketId of userSockets[m.id]) {
-                socket.to(socketId).emit('new-meeting-created', { meeting });
+            if (userSockets[m.id]) {
+                for (const socketId of userSockets[m.id]) {
+                    socket.to(socketId).emit('new-meeting-created', { meeting });
+                }
             }
         }
     })
@@ -59,8 +63,10 @@ const socketServer = (socket) => {
         socket.emit('joined-meeting', { members, meetingId, teamId })
 
         for (let m of members) {
-            for (const socketId of userSockets[m.userId]) {
-                socket.to(socketId).emit('user-join-meeting', { teamId, meetingId, user });
+            if (userSockets[m.userId]) {
+                for (const socketId of userSockets[m.userId]) {
+                    socket.to(socketId).emit('user-join-meeting', { teamId, meetingId, user });
+                }
             }
         }
     });
@@ -70,9 +76,7 @@ const socketServer = (socket) => {
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessageMeeting({ senderId, content, image, meetingId })
         socket.emit('sent-message-meeting', { messageId: message.id, content, meetingId, senderId, photo: message.photo, teamId })
-        // for (let m of members) {
-        //     socket.to(m.id).emit('receive-message-meeting', { messageId: message.id, meetingId, teamId, senderId, content, photo: message.photo });
-        // }
+
         socket.to(`meeting-${meetingId}`).emit('receive-message-meeting', {
             messageId: message.id, meetingId, senderId, content, photo: message.photo
         })
@@ -80,27 +84,38 @@ const socketServer = (socket) => {
 
     //conversation
 
-    socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, image }) => {
+    socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, images }) => {
         const converId = await setConversation({ senderId, receiverId, conversationId });
-        const message = await setMessage({ content, conversationId: converId, senderId, image });
+        const message = await setMessage({ content, conversationId: converId, senderId, images });
         if (message) {
-            socket.emit('conversation-sentMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt })
-            for (const socketId of userSockets[receiverId]) {
-                socket.to(socketId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt });
+            socket.emit('conversation-sentMessage', {
+                messageId: message.id, content, senderId, receiverId,
+                conversationId: converId, photos: message.photos, createdAt: message.createdAt
+            })
+            if (userSockets[receiverId]) {
+                for (const socketId of userSockets[receiverId]) {
+                    socket.to(socketId).emit('conversation-receiveMessage', {
+                        messageId: message.id, content, senderId, receiverId,
+                        conversationId: converId, photos: message.photos, createdAt: message.createdAt
+                    });
+                }
             }
         }
     })
 
     socket.on('conversation-call', ({ conversationId, senderId, senderName, receiverId }) => {
-        console.log(senderName);
-        for (const socketId of userSockets[receiverId]) {
-            socket.to(socketId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
+        if (userSockets[receiverId]) {
+            for (const socketId of userSockets[receiverId]) {
+                socket.to(socketId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
+            }
         }
     })
 
     socket.on('conversation-cancel-call', ({ conversationId, senderId, receiverId }) => {
-        for (const socketId of userSockets[receiverId]) {
-            socket.to(socketId).emit('cancel-call', { conversationId, senderId, receiverId })
+        if (userSockets[receiverId]) {
+            for (const socketId of userSockets[receiverId]) {
+                socket.to(socketId).emit('cancel-call', { conversationId, senderId, receiverId })
+            }
         }
     })
 
@@ -120,11 +135,14 @@ const socketServer = (socket) => {
                     let meeting = await getMeetingInfo({ meetingId: socket.meetingId })
                     console.log(members)
                     for (let m of members) {
-                        for (const socketId of userSockets[m.userId]) {
-                            socket.to(socketId).emit('end-meeting', {
-                                meeting
-                            })
+                        if (userSockets[m.userId]) {
+                            for (const socketId of userSockets[m.userId]) {
+                                socket.to(socketId).emit('end-meeting', {
+                                    meeting
+                                })
+                            }
                         }
+
                     }
                 } else {
 

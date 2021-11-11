@@ -73,22 +73,29 @@
 }
 
 .conversation-message .bottom-message {
+  display: flex;
   position: relative;
   width: 100%;
-  padding: 15px 5%;
+  padding: 15px 10%;
 }
 
 .conversation-message .input-message {
   position: relative;
-  display: flex;
   border-radius: 24px;
   overflow-x: hidden;
   overflow-y: hidden;
   margin: 0 auto;
   background-color: #f0f2f5;
+  width: 100%;
 }
 
-.conversation-message .input-box {
+.conversation-message .input-image {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+
+.input-message > textarea {
   width: 100%;
   box-sizing: border-box;
   overflow-y: auto;
@@ -102,5 +109,10 @@
 
 .conversation-message .input-btn {
   display: flex;
-  justify-content: center;
+}
+
+.conversation-message .input-btn > button {
+  margin: 0 10px;
+  width: 36px;
+  height: 36px;
 }

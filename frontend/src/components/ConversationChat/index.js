@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { cancelCall, getParticipant } from '../../store/reducers/conversation.reducer'
-import Message from '../Message';
+import MessageConversation from '../MessageConversation';
 import Avatar from '../Avatar/index';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
@@ -21,9 +21,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
+import MicIcon from '@mui/icons-material/Mic';
+import MicNoneIcon from '@mui/icons-material/MicNone';
 import Picker, { SKIN_TONE_MEDIUM_DARK } from 'emoji-picker-react';
 import { socketClient, broadcastLocal, baseURL } from '../../utils';
 import { getMessages, readConversation, startCall } from '../../store/reducers/conversation.reducer';
+import { v4 } from 'uuid';
 import './conversationChat.css';
 
 const Accordion = styled((props) => (
@@ -63,6 +66,8 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 
+
+
 export default function Index({ conversation, user }) {
   const participant = useSelector(state => state.conversationReducer.conversation.participant);
   const dispatch = useDispatch();
@@ -85,18 +90,19 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const minRows = 1;
   const maxRows = 5;
 
-  const [imageMessage, setImageMessage] = useState(null);
-  const [imageMessageUrl, setImageMessageUrl] = useState('');
+  const [imageMessage, setImageMessage] = useState([]);
+  const [imageMessageUrl, setImageMessageUrl] = useState([]);
   const [showInfo, setShowInfo] = useState(false);
   const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
-  const [chosenEmoji, setChosenEmoji] = useState(null);
   const [expanded, setExpanded] = useState('panel1');
-
+  const [forceRender, setForceRender] = useState(v4());
 
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const messages = useSelector(state => state.conversationReducer.conversation.messages);
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
+  const speechReplyRef = useRef('');
+  const voiceDetectRef = useRef(false);
 
 
   useEffect(() => {
@@ -137,16 +143,15 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
   const handleSendMessage = (event) => {
     if (content !== '' || imageMessage) {
-      socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage });
+      console.log(imageMessage);
+      socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, images: imageMessage });
       broadcastLocal.postMessage({ content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage })
       setContent('');
-      setImageMessage(null);
-      setImageMessageUrl('');
+      setImageMessage([]);
+      setImageMessageUrl([]);
       setRows(minRows);
     }
   }
-
-
 
   const chooseEmoji = () => {
     setIsOpenEmojiList(!isOpenEmojiList);
@@ -156,10 +161,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const onEmojiClick = (event, emojiObject) => {
     console.log(emojiObject);
     setContent(content.concat(emojiObject.emoji));
-    setChosenEmoji(emojiObject);
   };
-
-
 
   const handleVoiceCall = () => {
     socketClient.emit('conversation-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: participant.id });
@@ -173,12 +175,60 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
   const onImageInputChange = e => {
     e.preventDefault()
-    setImageMessage(e.target.files[0])
+    console.log(e.target.files);
+    for (let imgFile of imageMessage) {
+      if (imgFile === e.target.files[0]) {
+        return;
+      }
+    }
+    setImageMessage([...imageMessage, e.target.files[0]]);
+    console.log(imageMessage);
     let reader = new FileReader()
     reader.readAsDataURL(e.target.files[0])
     reader.onloadend = e => {
-      setImageMessageUrl(reader.result)
+      setImageMessageUrl([...imageMessageUrl, reader.result])
     }
+  }
+
+  const runSpeechRecognition = () => {
+    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = new SpeechRecognition();
+
+    recognition.onstart = function () {
+      console.log('voice start')
+      voiceDetectRef.current = true;
+      setForceRender(v4());
+    }
+
+
+    recognition.onspeechend = function () {
+      console.log('voice end')
+      voiceDetectRef.current = false;
+      setForceRender(v4());
+      recognition.stop();
+    }
+
+    recognition.onerror = function (event) {
+      speechReplyRef.current = 'Error occurred in recognition: ' + event.error;
+      voiceDetectRef.current = false;
+      setForceRender(v4());
+      recognition.stop();
+    }
+
+    recognition.onresult = function (event) {
+      let transcript = event.results[0][0].transcript;
+      let confidence = event.results[0][0].confidence;
+      console.log(transcript, confidence * 100 + '%')
+      if (confidence > 0.6 && transcript.length) {
+        socketClient.emit('conversation-sendMessage', { content: transcript, senderId: user.id, receiverId: participant.id, conversationId, image: null });
+        broadcastLocal.postMessage({ content: transcript, senderId: user.id, receiverId: participant.id, conversationId, image: null })
+      } else {
+        speechReplyRef.current = "Could not understand!"
+      }
+
+    };
+
+    recognition.start();
   }
 
   const handleChange = (panel) => (event, newExpanded) => {
@@ -227,20 +277,19 @@ const ConversationChat = ({ conversationId, user, participant }) => {
           {messages.length > 0 && messages.slice(0, messages.length - 1)
             .map((message, idx) => {
               return (
-                <Message message={message} key={message.id}
+                <MessageConversation message={message} key={message.id}
                   logInUserId={user.id}
                   hasAvatar={message.userId != messages[idx + 1].userId}
                   userName={user.firstName.concat(' ', user.lastName)}
                 />
               )
             })}
-          {messages.length > 0 && <Message message={messages[messages.length - 1]}
+          {messages.length > 0 && <MessageConversation message={messages[messages.length - 1]}
             logInUserId={user.id}
             hasAvatar={true} lastMessage={true} />}
 
         </div>
         <div className="bottom-message">
-
           {isOpenEmojiList &&
             <div style={{
               position: 'absolute',
@@ -251,30 +300,46 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             </div>}
 
           <div className="input-message" >
-            {imageMessageUrl &&
-              <div style={{
-                position: 'relative',
-                minWidth: '150px',
-                minHeight: '150px',
-                maxWidth: '150px',
-                maxHeight: '150px',
-              }}>
-                <IconButton
-                  style={{
-                    position: 'absolute',
-                    right: '-25px',
-                    top: '-8px'
-                  }}
-                  onClick={e => {
-                    e.preventDefault()
-                    setImageMessageUrl('')
-                    setImageMessage(null);
+            <div className="input-image">
+              {imageMessage.map((imgMessage, idx) => {
+                let imgIdx = imageMessage.findIndex(img => img === imgMessage)
+                let imgUrl = imageMessageUrl[imgIdx];
+                return (
+                  <div key={idx} style={{
+                    position: 'relative',
+                    width: '150px',
+                    height: '150px',
                   }}>
-                  <CloseIcon />
-                </IconButton>
-                <img width="100%" height="100%" src={`${imageMessageUrl}`} />
-              </div>}
-            <textarea className="input-box"
+                    <IconButton
+                      style={{
+                        position: 'absolute',
+                        right: '-25px',
+                        top: '-8px',
+                        zIndex: '10'
+                      }}
+                      onClick={e => {
+                        e.preventDefault()
+                        setImageMessage(imgMsgList => {
+                          let tmpArr = [...imgMsgList];
+                          tmpArr.splice(imgIdx, 1);
+                          return tmpArr;
+                        })
+                        setImageMessageUrl(imgMsgUrlList => {
+                          let tmpArr = [...imgMsgUrlList];
+                          tmpArr.splice(imgIdx, 1);
+                          return tmpArr;
+                        })
+                      }}>
+                      <CloseIcon />
+                    </IconButton>
+                    <img width="100%" height="100%" src={`${imgUrl}`} />
+                  </div>
+                )
+              })
+              }
+            </div>
+
+            <textarea
               onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}
               placeholder="Send message"
               rows={rows}
@@ -283,30 +348,52 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               value={content}
             />
 
-            <div className="input-btn">
-              <Tooltip title="Attach a photo">
-                <Button >
-                  <label style={{ cursor: 'pointer' }} htmlFor="images">
-                    <ImageIcon color='success' />
-                  </label>
-                  <input type="file" accept='image/*'
-                    onChange={onImageInputChange}
-                    id="images" style={{
-                      display: 'none'
-                    }} />
-                </Button>
-              </Tooltip>
-              <Tooltip title="Choose an emoji">
-                <Button onClick={chooseEmoji} >
-                  <InsertEmoticonIcon color='secondary' />
-                </Button>
-              </Tooltip>
-              <Tooltip title="Send message">
-                <Button onClick={handleSendMessage}>
-                  <SendIcon style={{ color: "#1A73E8" }} />
-                </Button>
-              </Tooltip>
-            </div>
+          </div>
+
+          <div className="input-btn">
+
+            <Tooltip title="Attach a photo">
+              <IconButton >
+                <label style={{
+                  cursor: 'pointer',
+                  display: 'flex'
+                }}
+                  htmlFor="images">
+                  <ImageIcon color='success' />
+                </label>
+                <input type="file" accept='image/*'
+                  onChange={onImageInputChange}
+                  id="images"
+                  style={{
+                    display: 'none'
+                  }} />
+              </IconButton>
+
+            </Tooltip>
+
+
+            <Tooltip title="Choose an emoji">
+              <IconButton onClick={chooseEmoji} >
+                <InsertEmoticonIcon color="secondary" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Speech to text">
+              <IconButton onClick={runSpeechRecognition}>
+                {voiceDetectRef.current ?
+                  <MicNoneIcon style={{ color: "#1A73E8" }} />
+                  :
+                  <MicIcon style={{ color: "#1A73E8" }} />
+                }
+              </IconButton>
+            </Tooltip>
+
+
+            <Tooltip title="Send message" style={{ display: !content.length && 'none' }}>
+              <Button onClick={handleSendMessage} >
+                <SendIcon style={{ color: "#1A73E8" }} />
+              </Button>
+            </Tooltip>
+
           </div>
         </div>
       </div>
@@ -326,8 +413,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             <AccordionDetails>
 
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <Button startIcon={<DarkModeIcon color="primary"/>}>Dark Mode</Button>
-                <Button startIcon={<ColorLensIcon color="primary"/>}>Change Themes</Button>
+                <Button startIcon={<DarkModeIcon color="primary" />}>Dark Mode</Button>
+                <Button startIcon={<ColorLensIcon color="primary" />}>Change Themes</Button>
               </div>
 
             </AccordionDetails>

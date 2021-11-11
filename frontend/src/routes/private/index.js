@@ -12,7 +12,6 @@ export default function PrivateRoute({ children, ...rest }) {
   const childrenWithProps = React.Children.map(children, child => {
     // Checking isValidElement is the safe way and avoids a typescript
     // error too.
-    console.log(child)
     if (React.isValidElement(child)) {
       return React.cloneElement(child, { params: rest.location.pathname });
     }

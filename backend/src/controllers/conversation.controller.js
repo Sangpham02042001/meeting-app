@@ -1,6 +1,7 @@
 const Conversation = require('../models/conversation');
 const User = require('../models/user');
-const Message = require('../models/message')
+const Message = require('../models/message');
+const Media = require('../models/media');
 const sequelize = require('../models');
 const { Op, QueryTypes } = require("sequelize");
 const fs = require('fs');
@@ -13,7 +14,7 @@ const getConversations = async (req, res) => {
         const conversations = await sequelize.query(
             "SELECT conversationId, userId as participantId, tb1.isRead " +
             "FROM users_conversations uc " +
-            "JOIN (SELECT conversationId, isRead FROM users_conversations WHERE userId = :userId) tb1 using(conversationId) "+
+            "JOIN (SELECT conversationId, isRead FROM users_conversations WHERE userId = :userId) tb1 using(conversationId) " +
             "WHERE uc.userId NOT LIKE :userId " +
             "ORDER BY uc.updatedAt DESC;",
             {
@@ -66,17 +67,21 @@ const getMessages = async (req, res) => {
         let messages = await Message.findAll({
             where: {
                 conversationId
+            },
+            include: {
+                model: Media,
             }
         })
 
-        messages = messages.map(mess => {
-            mess.teamId = undefined;
-            return mess;
-        })
+        for (let m of messages) {
+            m.dataValues.photos = m.dataValues.Media;
+            delete m.dataValues.Media;
+        }
 
         return res.status(200).json({ messages })
 
     } catch (error) {
+        console.log(error)
         return res.status(403).json({
             message: "Could not get messages!"
         })
@@ -90,13 +95,15 @@ const getLastMessage = async (req, res) => {
             where: {
                 conversationId
             },
+            include: Media,
             order: [['updatedAt', 'DESC']],
         })
         if (!lastMessage) {
             lastMessage = {};
         }
 
-        lastMessage.teamId = undefined;
+        lastMessage.dataValues.photos = lastMessage.dataValues.Media;
+        delete lastMessage.dataValues.Media;
 
         return res.status(200).json({ lastMessage })
     } catch (error) {
@@ -111,7 +118,7 @@ const readConversation = async (req, res) => {
     try {
         const { conversationId, userId } = req.body;
         if (!conversationId || !userId) {
-            
+
             return res.status(200).json({
                 conversationId: null
             })
@@ -135,20 +142,32 @@ const readConversation = async (req, res) => {
     }
 }
 
-const setMessage = async ({ content, image, conversationId, senderId }) => {
+const setMessage = async ({ content, images, conversationId, senderId }) => {
     try {
-        let photoName = null;
-        if (image) {
-            photoName = v4() + '.png';
-            let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
-            const imageStream = new Readable();
-            imageStream._read = () => { }
-            imageStream.push(image)
-            imageStream.pipe(writeStream)
-        }
-        const message = await Message.create({ content, photo: photoName, conversationId, userId: senderId });
+        let photoNames = [];
+        if (images) {
+            for (let image of images) {
+                if (image) {
+                    let photoName = v4() + '.png';
+                    let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
+                    const imageStream = new Readable();
+                    imageStream._read = () => { }
+                    imageStream.push(image)
+                    imageStream.pipe(writeStream)
+                    photoNames.push(photoName);
+                }
+            }
 
-        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 1 WHERE conversationId = :conversationId AND userId = :userId",
+        }
+
+        const message = await Message.create({ content, conversationId, userId: senderId });
+        await Promise.all(photoNames.map(async (name, idx) => {
+            let media = await Media.create({ pathName: name, messageId: message.id })
+            photoNames[idx] = media;
+        }))
+        message.photos = photoNames;
+        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 1 " +
+            "WHERE conversationId = :conversationId AND userId = :userId",
             {
                 replacements: {
                     conversationId,
@@ -157,7 +176,8 @@ const setMessage = async ({ content, image, conversationId, senderId }) => {
             }
         )
 
-        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 0 WHERE conversationId = :conversationId AND userId NOT LIKE :userId",
+        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 0 " +
+            "WHERE conversationId = :conversationId AND userId NOT LIKE :userId",
             {
                 replacements: {
                     conversationId,
@@ -166,12 +186,10 @@ const setMessage = async ({ content, image, conversationId, senderId }) => {
             }
         )
 
-        if (!message) {
-            return null;
-        }
         return message;
     } catch (error) {
-        console.log(error)
+
+        console.log('error', error)
         return null;
     }
 }

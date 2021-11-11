@@ -18,7 +18,6 @@ export default function Conversations(props) {
     const conversations = useSelector(state => state.conversationReducer.conversations);
     const dispatch = useDispatch();
     const history = useHistory();
-    console.log(props.params);
     useEffect(() => {
         dispatch(getConversations({ userId: user.id }));
 
@@ -165,9 +164,9 @@ const ConversationLink = ({ conversation, user }) => {
                         <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
                             {lastMessage &&
                                 (lastMessage.userId === user.id ?
-                                    <span>You: {lastMessage.photo ? <ImageIcon color='success' /> : lastMessage.content}</span>
+                                    <span>You: {(lastMessage.photos && lastMessage.photos.length) ? <ImageIcon color='success' /> : lastMessage.content}</span>
                                     :
-                                    <span>{lastMessage.photo ? <ImageIcon color='success' /> : lastMessage.content}</span>
+                                    <span>{(lastMessage.photos && lastMessage.photos.length) ? <ImageIcon color='success' /> : lastMessage.content}</span>
                                 )
                             }
                         </div>

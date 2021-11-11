@@ -78,7 +78,7 @@ export const conversationSlice = createSlice({
   },
   reducers: {
     sendMessageCv: (state, action) => {
-      const { messageId, content, senderId, receiverId, conversationId, photo, createdAt } = action.payload;
+      const { messageId, content, senderId, receiverId, conversationId, photos, createdAt } = action.payload;
       let conversation = state.conversations.find(conv => conv.participantId === receiverId);
       if (conversation) {
         conversation.conversationId = conversationId;
@@ -89,7 +89,7 @@ export const conversationSlice = createSlice({
       }
 
       if (state.conversation.participant && (receiverId === state.conversation.participant.id || senderId === state.conversation.participant.id)) {
-        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
+        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, photos, createdAt });
       }
 
       const pIdx = state.conversations.map(conv => conv.conversationId).indexOf(conversationId);
@@ -106,13 +106,13 @@ export const conversationSlice = createSlice({
       state.lastMessageChange = !state.lastMessageChange;
     },
     receiveMessageCv: (state, action) => {
-      const { messageId, content, senderId, receiverId, conversationId, photo, createdAt } = action.payload;
+      const { messageId, content, senderId, receiverId, conversationId, photos, createdAt } = action.payload;
       const conversation = state.conversations.find(conv => conv.conversationId === conversationId);
       if (!conversation) {
         state.conversations.unshift({ conversationId, participantId: senderId, isRead: false })
       }
       if (state.conversation.participant && senderId === state.conversation.participant.id) {
-        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, photo, createdAt });
+        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, photos, createdAt });
       }
       state.lastMessageChange = !state.lastMessageChange;
     },
