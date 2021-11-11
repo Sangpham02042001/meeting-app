@@ -5,9 +5,12 @@ import Message from '../Message';
 import Avatar from '../Avatar/index';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
-  DialogContent, DialogContentText, DialogTitle, TextField
+  DialogContent, DialogContentText, DialogTitle, Typography
 } from '@mui/material';
-
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import MuiAccordion from '@mui/material/Accordion';
+import { styled } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
 import PhoneIcon from '@mui/icons-material/Phone';
 import VideocamIcon from '@mui/icons-material/Videocam';
@@ -15,9 +18,50 @@ import ImageIcon from '@mui/icons-material/Image';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import InfoIcon from '@mui/icons-material/Info';
 import CloseIcon from '@mui/icons-material/Close';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import ColorLensIcon from '@mui/icons-material/ColorLens';
+import Picker, { SKIN_TONE_MEDIUM_DARK } from 'emoji-picker-react';
 import { socketClient, broadcastLocal, baseURL } from '../../utils';
 import { getMessages, readConversation, startCall } from '../../store/reducers/conversation.reducer';
 import './conversationChat.css';
+
+const Accordion = styled((props) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  '&:not(:last-child)': {
+    borderBottom: 0,
+  },
+  '&:before': {
+    display: 'none',
+  },
+}));
+
+const AccordionSummary = styled((props) => (
+  <MuiAccordionSummary
+    expandIcon={<ExpandMoreIcon sx={{ fontSize: '1.5rem' }} />}
+    {...props}
+  />
+))(({ theme }) => ({
+  backgroundColor:
+    theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, .05)'
+      : 'rgba(0, 0, 0, .03)',
+
+  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+    transform: 'rotate(180deg)',
+  },
+  '& .MuiAccordionSummary-content': {
+    marginLeft: theme.spacing(1),
+  },
+}));
+
+const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderTop: '1px solid rgba(0, 0, 0, .125)',
+}));
+
 
 export default function Index({ conversation, user }) {
   const participant = useSelector(state => state.conversationReducer.conversation.participant);
@@ -44,11 +88,16 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const [imageMessage, setImageMessage] = useState(null);
   const [imageMessageUrl, setImageMessageUrl] = useState('');
   const [showInfo, setShowInfo] = useState(false);
+  const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
+  const [chosenEmoji, setChosenEmoji] = useState(null);
+  const [expanded, setExpanded] = useState('panel1');
+
+
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const messages = useSelector(state => state.conversationReducer.conversation.messages);
   const dispatch = useDispatch();
-
   const scrollRef = useRef(null);
+
 
   useEffect(() => {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -99,19 +148,17 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
 
 
-  const handleSendIcon = () => {
-
-    // fetch('./public/logo152.png')
-    //     .then(res => res.arrayBuffer())
-    //     .then(data => {
-    //         console.log(data);
-    //         const file = new File(new Uint8Array(data), 'thumb.png');
-    //         console.log(file);
-    //         socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, image: file });
-    //         broadcastLocal.postMessage({ content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage })
-    //     })
+  const chooseEmoji = () => {
+    setIsOpenEmojiList(!isOpenEmojiList);
 
   }
+
+  const onEmojiClick = (event, emojiObject) => {
+    console.log(emojiObject);
+    setContent(content.concat(emojiObject.emoji));
+    setChosenEmoji(emojiObject);
+  };
+
 
 
   const handleVoiceCall = () => {
@@ -134,9 +181,13 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     }
   }
 
+  const handleChange = (panel) => (event, newExpanded) => {
+    setExpanded(newExpanded ? panel : false);
+  };
+
   return (
     <>
-      <div className="conversation-message" style={{ width: !showInfo ? '100%' : '75%' }}>
+      <div className="conversation-message" style={{ width: !showInfo ? '100%' : '75%' }} >
         <div className="header-message">
           <div className="header-left">
             <Avatar width='40px' height='40px'
@@ -162,7 +213,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
           </div>
         </div>
-        <div className="content-message" ref={scrollRef}>
+        <div className="content-message" ref={scrollRef} onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}>
           <div className="info-beginner-content">
             <Avatar width='80px' height='80px'
               userId={participant.id} />
@@ -178,7 +229,9 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               return (
                 <Message message={message} key={message.id}
                   logInUserId={user.id}
-                  hasAvatar={message.userId != messages[idx + 1].userId} />
+                  hasAvatar={message.userId != messages[idx + 1].userId}
+                  userName={user.firstName.concat(' ', user.lastName)}
+                />
               )
             })}
           {messages.length > 0 && <Message message={messages[messages.length - 1]}
@@ -188,14 +241,23 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         </div>
         <div className="bottom-message">
 
-          <div className="input-message">
+          {isOpenEmojiList &&
+            <div style={{
+              position: 'absolute',
+              top: '-315px',
+              right: '150px',
+            }}>
+              <Picker onEmojiClick={onEmojiClick} skinTone={SKIN_TONE_MEDIUM_DARK} />
+            </div>}
+
+          <div className="input-message" >
             {imageMessageUrl &&
               <div style={{
                 position: 'relative',
-                minWidth: '100px',
-                minHeight: '100px',
-                maxWidth: '100px',
-                maxHeight: '100px',
+                minWidth: '150px',
+                minHeight: '150px',
+                maxWidth: '150px',
+                maxHeight: '150px',
               }}>
                 <IconButton
                   style={{
@@ -213,6 +275,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                 <img width="100%" height="100%" src={`${imageMessageUrl}`} />
               </div>}
             <textarea className="input-box"
+              onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}
               placeholder="Send message"
               rows={rows}
               onChange={onWriteMessage}
@@ -234,7 +297,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                 </Button>
               </Tooltip>
               <Tooltip title="Choose an emoji">
-                <Button onClick={handleSendIcon} >
+                <Button onClick={chooseEmoji} >
                   <InsertEmoticonIcon color='secondary' />
                 </Button>
               </Tooltip>
@@ -247,18 +310,44 @@ const ConversationChat = ({ conversationId, user, participant }) => {
           </div>
         </div>
       </div>
-      {
-        showInfo &&
-        <div className="conversation-info" >
-          <div className="custom-info">
-            <Avatar width='40px' height='40px'
-              userId={participant.id} />
-            <div style={{ fontSize: "36px" }}>
-              {participant.userName}
-            </div>
+      <div className="conversation-info" style={{ display: !showInfo ? 'none' : 'flex' }}>
+        <div className="custom-info">
+          <Avatar width='80px' height='80px'
+            userId={participant.id} />
+          <div style={{ fontSize: "36px" }}>
+            {participant.userName}
           </div>
         </div>
-      }
+        <div className="-conversation-info-btn">
+          <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+            <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+              <Typography>Customise chat</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <Button startIcon={<DarkModeIcon color="primary"/>}>Dark Mode</Button>
+                <Button startIcon={<ColorLensIcon color="primary"/>}>Change Themes</Button>
+              </div>
+
+            </AccordionDetails>
+          </Accordion>
+          <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
+            <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
+              <Typography>Shared media</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+                malesuada lacus ex, sit amet blandit leo lobortis eget. Lorem ipsum dolor
+                sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
+                sit amet blandit leo lobortis eget.
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
+        </div>
+      </div>
+
 
       <Dialog
         open={conversationCall.isCalling}

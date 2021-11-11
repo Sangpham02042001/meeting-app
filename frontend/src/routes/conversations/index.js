@@ -4,13 +4,13 @@ import './conversations.css';
 import { axiosAuth } from '../../utils';
 import { getConversations, createConversation, clearConversation } from '../../store/reducers/conversation.reducer';
 import { Switch, Route } from "react-router-dom";
-import { useHistory } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 import Avatar from '../../components/Avatar';
 import ImageIcon from '@mui/icons-material/Image';
 import ConversationChat from '../../components/ConversationChat';
 
 
-export default function Conversations() {
+export default function Conversations(props) {
     const [textSearch, setTextSearch] = useState('');
     const [searchUsers, setSearchUsers] = useState([]);
     const [userSearch, setUserSearch] = useState(null);
@@ -18,6 +18,7 @@ export default function Conversations() {
     const conversations = useSelector(state => state.conversationReducer.conversations);
     const dispatch = useDispatch();
     const history = useHistory();
+    console.log(props.params);
     useEffect(() => {
         dispatch(getConversations({ userId: user.id }));
 
@@ -100,20 +101,27 @@ export default function Conversations() {
                 </div>
             </div>
             <div className="conversation-content">
-                <Switch>
-                    {
-                        conversations.map(conver => {
-                            return (
-                                <Route path={`/conversations/${conver.participantId}`} key={conver.participantId}>
-                                    <ConversationChat
-                                        conversation={conver}
-                                        user={user}
-                                    />
-                                </Route>
-                            )
-                        })
-                    }
-                </Switch>
+                {props.params === '/conversations' ?
+                    <div className="conversation-welcome">
+                        HELLO WORLD
+                    </div>
+                    :
+                    <Switch>
+                        {
+                            conversations.map(conver => {
+                                return (
+                                    <Route path={`/conversations/${conver.participantId}`} key={conver.participantId}>
+                                        <ConversationChat
+                                            conversation={conver}
+                                            user={user}
+                                        />
+                                    </Route>
+                                )
+                            })
+                        }
+                    </Switch>
+                }
+
             </div>
         </div>
     )
@@ -145,7 +153,7 @@ const ConversationLink = ({ conversation, user }) => {
     return (
         <>
             {participant &&
-                <div className={`conversation-link ${curParticipant && participant.id === curParticipant.id ? 'link-selected' : ''}`} onClick={changeConversation}>
+                <div className={`${curParticipant && participant.id === curParticipant.id ? 'link-selected' : ''} conversation-link`} onClick={changeConversation}>
                     <Avatar width="40px" height="40px" userId={participant.id} />
 
                     <div className="link-content">

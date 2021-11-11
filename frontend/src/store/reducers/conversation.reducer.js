@@ -139,6 +139,7 @@ export const conversationSlice = createSlice({
     },
     clearConversation: (state, action) => {
       state.conversation.participant = null;
+      state.conversation.messages = [];
     }
   }
 })

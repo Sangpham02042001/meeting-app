@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Avatar, Tooltip, Dialog, DialogContent } from '@mui/material';
-import { baseURL, getTime } from '../../utils'
+import { Avatar, Tooltip, Dialog, DialogContent, IconButton } from '@mui/material';
+import { baseURL, getTime } from '../../utils';
+import CloseIcon from '@mui/icons-material/Close';
 import './style.css'
 
 export default function Message({ message, logInUserId, hasAvatar, lastMessage, userName }) {
@@ -33,15 +34,17 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                 </Tooltip>
               </div>}
             </div>
-          </div > :
+          </div >
+          :
           <div >
             <div className={`message  ${lastMessage ? 'last-message' : ''}`}
               style={{ marginBottom: hasAvatar ? '10px' : 0 }}>
-              {hasAvatar && (userName ? <Tooltip title={userName}>
-                <Avatar sx={{ width: '40px', height: '40px' }}
-                  src={`${baseURL}/api/user/avatar/${message.userId}`} />
-              </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
-                src={`${baseURL}/api/user/avatar/${message.userId}`} />)}
+              {hasAvatar && (userName ?
+                <Tooltip title={userName}>
+                  <Avatar sx={{ width: '40px', height: '40px' }}
+                    src={`${baseURL}/api/user/avatar/${message.userId}`} />
+                </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
+                  src={`${baseURL}/api/user/avatar/${message.userId}`} />)}
               <div className={message.photo ? 'message-with-photo' : ''}>
                 {message.content &&
                   <Tooltip title={getTime(message.createdAt)} placement='right'>
@@ -67,6 +70,15 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
         maxWidth='xl'
       >
         <DialogContent>
+          <IconButton
+            sx={{
+              position: 'absolute',
+              right: 0,
+              top: 0
+            }}
+            onClick={handleClose}>
+            <CloseIcon />
+          </IconButton>
           <img width="100%" height="100%" src={imgPreviewUrl} />
         </DialogContent>
       </Dialog >

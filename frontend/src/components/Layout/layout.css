@@ -35,6 +35,7 @@
   background-color: transparent;
   color: var(--primary-color);
   font-size: 20px;
+  cursor: pointer;
 }
 
 .btn-list-selection .btn-active::before {

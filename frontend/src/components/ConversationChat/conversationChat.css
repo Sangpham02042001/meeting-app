@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: display 0.3s;
 }
 
 .conversation-info .custom-info {
@@ -72,6 +73,7 @@
 }
 
 .conversation-message .bottom-message {
+  position: relative;
   width: 100%;
   padding: 15px 5%;
 }

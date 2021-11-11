@@ -59,6 +59,7 @@
 .conversation-list .conversation-user {
   margin-top: 5px;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -71,6 +72,11 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+}
+
+.conversation-content .conversation-welcome {
+  width: 100%;
+  text-align: center;
 }
 
 
@@ -98,9 +104,11 @@
 }
 
 .link-selected {
-  background-color: rgba(208, 227, 235, 0.603);
+  background-color: rgba(208, 227, 235, 0.603) !important;
   opacity: 1;
 }
+
+
 
 .conversation-link .last-message {
   overflow: hidden;
