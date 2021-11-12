@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams, Link, useHistory } from 'react-router-dom'
 import {
   Grid, Button, Dialog, DialogActions,
-  DialogContent, IconButton, Tooltip,
-
+  DialogContent, Snackbar, Tooltip,
+  Alert
 } from '@mui/material';
 import Picker, { SKIN_TONE_MEDIUM_DARK } from 'emoji-picker-react';
 import SendIcon from '@mui/icons-material/Send';
@@ -42,6 +42,7 @@ export default function Team(props) {
   const [isRequestModalShow, setRequestModalShow] = useState(false)
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
   const [isTeamInfoShow, setTeamInfoShow] = useState(false)
+  const [isLargeImage, setLargeImageCheck] = useState(false)
   const teamBody = useRef()
   const scrollRef = useRef(null)
   const inputRef = useRef(null)
@@ -196,6 +197,20 @@ export default function Team(props) {
   const handleImageInputChange = e => {
     e.preventDefault()
     if (e.target.files.length) {
+      let size = 0;
+      for (const file of e.target.files) {
+        size += Math.round(file.size / 1024)
+      }
+      for (const file of images) {
+        size += Math.round(file.size / 1024)
+      }
+      if (size > 1024) {
+        setLargeImageCheck(true)
+        setTimeout(() => {
+          setLargeImageCheck(false)
+        }, 3000)
+        return
+      }
       setImages([...images, ...e.target.files])
       let urls = []
       for (const file of e.target.files) {
@@ -267,9 +282,15 @@ export default function Team(props) {
             }}>
             {currentNumOfMeetMess && meetmess.slice(0, currentNumOfMeetMess - 1)
               .map((item, idx) => (item.isMessage ? <div key={'message' + item.id}>
+                {idx === 0 && meetmess[idx].isMessage && meetmess[idx].userid !== user.id
+                  && <p style={{
+                    margin: 0,
+                    paddingLeft: '40px',
+                    color: 'gray'
+                  }}>{getUserName(meetmess[idx].userId)}</p>}
                 <Message message={item}
                   logInUserId={user.id}
-                  userName={item.userId != meetmess[idx + 1].userId ? getUserName(item.userId) : ''}
+                  userName={(item.userId != meetmess[idx + 1].userId || idx === 0) ? getUserName(item.userId) : ''}
                   hasAvatar={item.userId != meetmess[idx + 1].userId} />
                 {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)
                   && <div className='time-text'>
@@ -444,6 +465,11 @@ export default function Team(props) {
         </Button>
       </DialogActions>
     </Dialog>
+    <Snackbar open={isLargeImage} autoHideDuration={3000}>
+      <Alert severity="error">
+        Too large images to upload
+      </Alert>
+    </Snackbar>
   </Grid>
   )
 }

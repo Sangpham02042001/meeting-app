@@ -5,7 +5,8 @@ import Message from '../Message';
 import Avatar from '../Avatar/index';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
-  DialogContent, DialogContentText, DialogTitle, Typography
+  DialogContent, DialogContentText, DialogTitle, Typography,
+  Snackbar, Alert
 } from '@mui/material';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
@@ -96,6 +97,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
   const [expanded, setExpanded] = useState('panel1');
   const [forceRender, setForceRender] = useState(v4());
+  const [isLargeImage, setLargeImageCheck] = useState(false)
 
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const messages = useSelector(state => state.conversationReducer.conversation.messages);
@@ -175,6 +177,20 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const onImageInputChange = e => {
     e.preventDefault()
     if (e.target.files.length) {
+      let size = 0;
+      for (const file of e.target.files) {
+        size += Math.round(file.size / 1024)
+      }
+      for (const file of imageMessage) {
+        size += Math.round(file.size / 1024)
+      }
+      if (size > 1024) {
+        setLargeImageCheck(true)
+        setTimeout(() => {
+          setLargeImageCheck(false)
+        }, 3000)
+        return
+      }
       setImageMessage([...imageMessage, ...e.target.files]);
       let urls = []
       for (const file of e.target.files) {
@@ -452,6 +468,11 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         </DialogActions>
       </Dialog>
 
+      <Snackbar open={isLargeImage} autoHideDuration={3000}>
+        <Alert severity="error">
+          Too large images to upload
+        </Alert>
+      </Snackbar>
     </>
   )
 }

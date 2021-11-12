@@ -369,7 +369,7 @@ const getNotifications = async (req, res) => {
       return res.status(200).json({ notifications, numOfNotifications, numOf_UnReadNotifications })
     } else {
       let notifications = await sequelize.query(
-        "SELECT *, TIME_TO_SEC(TIMEDIFF(NOW(), createdAt)) AS timeDifferent FROM notifications WHERE userId = :id ORDER BY createdAt ASC LIMIT :offset, :num;",
+        "SELECT *, TIME_TO_SEC(TIMEDIFF(NOW(), createdAt)) AS timeDifferent FROM notifications WHERE userId = :id ORDER BY createdAt DESC LIMIT :offset, :num;",
         {
           replacements: {
             id, offset: Number(offset), num: Number(num)

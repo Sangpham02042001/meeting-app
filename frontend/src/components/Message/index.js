@@ -89,7 +89,8 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                   </Tooltip>}
                 {message.photos.length > 0 &&
                   <Tooltip title={getTime(message.createdAt)} placement="right">
-                    <div className='message-photo-list'>
+                    <div className='message-photo-list'
+                      style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
                       {message.photos.map((photo, idx) => {
                         return (
                           <div key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
@@ -128,10 +129,10 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
             onClick={handleClose}>
             <CloseIcon />
           </IconButton>
-          <div style={{ width: '1000px', height: '600px', backgroundImage: `url(${imgPreviewUrl})`, backgroundRepeat: 'no-repeat', backgroundPosition: 'center', backgroundSize: 'cover' }} >
+          {/* <div style={{ width: '1000px', height: '600px', backgroundImage: `url(${imgPreviewUrl})`, backgroundRepeat: 'no-repeat', backgroundPosition: 'center', backgroundSize: 'cover' }} >
 
-          </div>
-          {/* <img width="100%" height="100%" src={imgPreviewUrl} /> */}
+          </div> */}
+          <img width="100%" height="100%" src={imgPreviewUrl} />
         </DialogContent>
       </Dialog >
     </>
