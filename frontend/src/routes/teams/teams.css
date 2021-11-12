@@ -158,3 +158,17 @@
   position: absolute;
   right: 10px;
 }
+
+.search-team-box > textarea {
+  width: 75%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 10px 10px 24px;
+  outline: none;
+  border: none;
+  resize: none;
+  background-color: #f0f2f5;
+  border-radius: 20px;
+  margin-left: 5%;
+}

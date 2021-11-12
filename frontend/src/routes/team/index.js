@@ -41,10 +41,14 @@ export default function Team(props) {
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
   const [isRequestModalShow, setRequestModalShow] = useState(false)
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
-  const [isTeamInfoShow, setTeamInfoShow] = useState(true)
+  const [isTeamInfoShow, setTeamInfoShow] = useState(false)
   const teamBody = useRef()
   const scrollRef = useRef(null)
   const inputRef = useRef(null)
+
+  const [rows, setRows] = useState(1);
+  const minRows = 1;
+  const maxRows = 5;
 
   useEffect(() => {
     dispatch(getTeamInfo({ teamId }))
@@ -113,8 +117,11 @@ export default function Team(props) {
   }, [teamReducer.teamLoaded])
 
   useEffect(() => {
-    if (scrollRef.current) { scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }
-  }, [currentNumOfMeetMess])
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [teamReducer.team.fakeMessageId])
+
 
   const handleCloseInvitedModal = () => {
     setInvitedModalShow(false)
@@ -213,6 +220,14 @@ export default function Team(props) {
     return (user || {}).userName || '';
   }
 
+  const handleEnterMessage = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSendMessage(event);
+      setInput('');
+    }
+  }
+
   const chooseEmoji = (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -225,6 +240,25 @@ export default function Team(props) {
     setInput(input.concat(emojiObject.emoji))
   };
 
+  const onWriteMessage = (event) => {
+    event.preventDefault()
+    const textareaLineHeight = 24;
+
+    const previousRows = event.target.rows;
+    event.target.rows = minRows; // reset number of rows in textarea 
+    const currentRows = ~~(event.target.scrollHeight / textareaLineHeight);
+
+    if (currentRows === previousRows) {
+      event.target.rows = currentRows;
+    }
+
+    if (currentRows >= maxRows) {
+      event.target.rows = maxRows;
+      event.target.scrollTop = event.target.scrollHeight;
+    }
+    setRows(currentRows < maxRows ? currentRows : maxRows)
+    setInput(event.target.value);
+  }
   return (teamReducer.teamLoaded && <Grid container>
     <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--gray-shadow)' }}>
       <TeamList />
@@ -294,15 +328,17 @@ export default function Team(props) {
               </div>}
 
             <div className="search-team-box">
-              <input
+              <textarea
                 variant="outlined"
                 type="text" placeholder="Chat"
                 className='team-message-input' name='message'
                 autoComplete="off"
                 ref={inputRef}
+                rows={rows}
                 value={input}
+                onKeyDown={handleEnterMessage}
                 onClick={e => { e.preventDefault(); setIsOpenEmojiList(false) }}
-                onChange={e => setInput(e.target.value)} />
+                onChange={onWriteMessage} />
               <div className="input-list-btn" >
                 <Tooltip title="Attach a photo">
                   <Button>
@@ -323,8 +359,7 @@ export default function Team(props) {
                   </Button>
                 </Tooltip>
                 <Tooltip title="Send message">
-                  <Button variant="text" onClick={handleSendMessage}
-                    style={{ padding: 0 }}>
+                  <Button variant="text" onClick={handleSendMessage}>
                     <SendIcon style={{ color: "#1A73E8" }} />
                   </Button>
                 </Tooltip>

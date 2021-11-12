@@ -82,11 +82,14 @@
   right: 20px;
   top: 0;
   height: 100%;
+  margin-left: 15px;
+  align-items: flex-end;
 }
 
 .input-list-btn > button {
   background-color: transparent !important;
   border: none;
+  min-width: 50px;
 }
 
 .send-image-label {

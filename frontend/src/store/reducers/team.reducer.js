@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { create } from 'lodash'
 import extend from 'lodash/extend'
+import { v4 } from 'uuid'
 import { axiosAuth, baseURL, socketClient } from '../../utils'
 
 const initialState = {
@@ -17,7 +18,8 @@ const initialState = {
     meetingActive: null,
     meetmess: [],
     numOfMessages: 0,
-    numOfMeetMess: 0
+    numOfMeetMess: 0,
+    fakeMessageId: v4()
   },
   joinedTeamLoaded: false,
   requestTeamLoaded: false,
@@ -367,6 +369,7 @@ export const teamSlice = createSlice({
       let { messageId, content, senderId, teamId, photo, isMessage, createdAt } = action.payload;
       if (state.team.id && state.team.id == teamId) {
         state.team.meetmess.push({ id: messageId, content, userId: senderId, teamId, photo, isMessage, createdAt })
+        state.team.fakeMessageId = v4()
       }
     },
     updateMeetingState: (state, action) => {
