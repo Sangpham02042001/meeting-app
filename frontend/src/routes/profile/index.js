@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
 	Tabs, Tab, Typography, Box, Avatar, TextField,
 	Button, Dialog, DialogContent, DialogActions, DialogContentText,
-	DialogTitle
+	DialogTitle, Snackbar, Alert
 } from '@mui/material';
 import { baseURL } from '../../utils';
 import { Link } from 'react-router-dom';
@@ -57,6 +57,8 @@ export default function Profile() {
 	const [isConfirmInvitationShow, setConfirmInvitationShow] = useState(false)
 	const [isRemoveInvitationShow, setRemoveInvitatonShow] = useState(false)
 	const [isCancelRequestShow, setCancelRequestShow] = useState(false)
+	const [message, setMessage] = useState({})
+	const [editted, setEditted] = useState(false)
 
 	useEffect(() => {
 		setFirstName(userReducer.user.firstName)
@@ -71,6 +73,19 @@ export default function Profile() {
 			dispatch(getInvitedTeams())
 		}
 	}, [])
+
+	useEffect(() => {
+		if (editted) {
+			setMessage({
+				type: 'success',
+				content: 'Edit profile successfully'
+			})
+			setTimeout(() => {
+				setMessage({})
+				setEditted(false)
+			}, 3000)
+		}
+	}, [userReducer.user.firstName, userReducer.user.lastName, userReducer.user.avatar])
 
 	const handleTabChange = (event, newValue) => {
 		setCurrentTab(newValue);
@@ -101,6 +116,7 @@ export default function Profile() {
 			form: formData,
 			userId: userReducer.user.id
 		}))
+		setEditted(true)
 	}
 
 	//out team
@@ -401,6 +417,11 @@ export default function Profile() {
 					</Button>
 				</DialogActions>
 			</Dialog>
+			<Snackbar open={message.content && message.content.length} autoHideDuration={3000}>
+				<Alert severity={message.type}>
+					{message.content}
+				</Alert>
+			</Snackbar>
 		</div>
 	)
 }

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    TextField, Button, Box, Typography,
-    Container
+    TextField, Button, Snackbar, Alert
 } from '@mui/material';
 import { useHistory } from "react-router";
 import { Link, Redirect } from "react-router-dom";
@@ -24,6 +23,9 @@ export default function Login() {
                 history.push('/home')
             } else if (userReducer.error) {
                 setLoginError(userReducer.error)
+                setTimeout(() => {
+                    setLoginError('')
+                }, 3000)
             } else {
                 if (!userReducer.authenticated) {
                     dispatch(isAuthenticated())
@@ -63,7 +65,6 @@ export default function Login() {
                             value={password}
                             variant="standard"
                             onChange={(e) => setPassword(e.target.value)} />
-                        {loginError && <p className='error-message'>{loginError}</p>}
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <p style={{ marginBottom: 0 }}>
                                 Don't have account?{"\t"}
@@ -73,6 +74,11 @@ export default function Login() {
                                 disabled={!email || !password}>Log in</Button>
                         </div>
                     </form> <br /> <br />
+                    <Snackbar open={loginError} autoHideDuration={3000}>
+                        <Alert severity="error">
+                            {loginError}
+                        </Alert>
+                    </Snackbar>
                 </div>
             )
     )

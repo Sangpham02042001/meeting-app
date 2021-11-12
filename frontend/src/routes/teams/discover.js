@@ -5,7 +5,7 @@ import {
   Grid, Button, Dialog, DialogContent,
   DialogTitle, DialogActions, Avatar, Input,
   TextField, InputLabel, InputAdornment, FormControl,
-  MenuItem
+  MenuItem, Alert, Snackbar
 } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import SearchIcon from '@mui/icons-material/Search';
@@ -19,7 +19,6 @@ export default function TeamDiscover() {
   const teamReducer = useSelector(state => state.teamReducer)
   const dispatch = useDispatch()
   const history = useHistory()
-  const [createTeamError, setCreateTeamError] = useState('')
   const [teamName, setTeamName] = useState('')
   const [searchTeamName, setSearchTeamName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -32,19 +31,18 @@ export default function TeamDiscover() {
   const [teamCoverPhoto, setTeamCoverPhoto] = useState('')
   const [isCreateModalShow, setCreateModalShow] = useState(false)
   const [isInviteModalShow, setInviteModalShow] = useState(false)
-
-  useEffect(() => {
-    return () => {
-      setInvitedUsers([])
-      setSearchUsers([])
-      setTeamCoverPhoto('')
-    }
-  }, [])
+  const [message, setMessage] = useState({})
 
   useEffect(() => {
     if (teamReducer.error) {
       setLoading(false)
-      setCreateTeamError(teamReducer.error)
+      setMessage({
+        type: 'error',
+        content: teamReducer.error
+      })
+      setTimeout(() => {
+        setMessage({})
+      }, 3000)
     }
   }, [teamReducer.error])
 
@@ -56,9 +54,14 @@ export default function TeamDiscover() {
       let length = teamReducer.joinedTeams.length
       let team = teamReducer.joinedTeams[length - 1]
       setNewTeamId(team.id)
+      setMessage({
+        type: 'success',
+        content: 'Create new team successfully'
+      })
+      setTimeout(() => {
+        setMessage({})
+      }, 3000)
     }
-    // console.log(response.data)
-    // setNewTeamId(response.data.team.id)
   }, [teamReducer.joinedTeams.length])
 
   const handleCreateModalClose = () => {
@@ -66,7 +69,7 @@ export default function TeamDiscover() {
     setTeamName('')
     setPublicTeam(true)
     setTeamCoverPhoto('')
-    setCreateTeamError('')
+    setMessage({})
   }
 
   const handleCreateTeam = () => {
@@ -127,20 +130,6 @@ export default function TeamDiscover() {
     dispatch(createNewTeam({
       formData
     }))
-    // let response = await axiosAuth.post('/api/teams', formData);
-    // setLoading(false)
-    // if (response.status == 201) {
-    //   handleCreateModalClose()
-    //   setInviteModalShow(true)
-    //   console.log(response.data)
-    //   let { team } = response.data
-    //   dispatch(createNewTeam({
-    //     id: team.id,
-    //     name: team.name,
-    //     hostId: team.hostId
-    //   }))
-    //   setNewTeamId(response.data.team.id)
-    // }
   }
 
   const handleSearchTeams = async (e) => {
@@ -175,7 +164,7 @@ export default function TeamDiscover() {
     <Grid container>
       <Grid item sm={12} style={{ padding: '15px' }}>
         <Link to='/teams' style={{ color: '#000', textDecoration: 'none', fontWeight: '700' }}>
-          &lt; &nbsp;Back
+          &lt; &nbsp; &nbsp; All teams
         </Link>
         <h3>Join or create a team</h3>
         <div className='create-team-box'>
@@ -240,7 +229,6 @@ export default function TeamDiscover() {
           <TextField label="Team name" variant="standard"
             style={{ width: '100%', marginBottom: '20px' }}
             value={teamName} onChange={e => setTeamName(e.target.value)} />
-          {createTeamError && <p style={{ color: 'red' }}>{createTeamError}</p>}
 
           <TextField
             select
@@ -353,6 +341,12 @@ export default function TeamDiscover() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000}>
+        <Alert severity={message.type}>
+          {message.content}
+        </Alert>
+      </Snackbar>
     </Grid >
   )
 }

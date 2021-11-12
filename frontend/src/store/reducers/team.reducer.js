@@ -593,6 +593,7 @@ export const teamSlice = createSlice({
     },
     [createNewTeam.pending]: (state) => {
       console.log('create team pending');
+      state.error = null;
     },
     [createNewTeam.fulfilled]: (state, action) => {
       let { id, hostId, name } = action.payload

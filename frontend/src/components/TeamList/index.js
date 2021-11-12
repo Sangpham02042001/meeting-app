@@ -19,7 +19,7 @@ export default function TeamList() {
   return (
     <div className="teamlist-container">
       <Link to={`/teams`} className="back-to-teams-link">
-        <strong>&lt;Back</strong>
+        <strong>&lt; &nbsp; &nbsp; All teams</strong>
       </Link>
       {teamReducer.joinedTeams.map(team => (
         <Link to={`/teams/${team.id}`} key={team.id}

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import {
     TextField, Button, Dialog,
-    DialogTitle, DialogContent, DialogActions
+    DialogTitle, DialogContent, DialogActions,
+    Alert, Snackbar
 } from '@mui/material';
 import { Link, Redirect } from 'react-router-dom';
 import Loading from "../Loading";
@@ -65,10 +66,16 @@ export default function SignUp() {
         event.preventDefault()
         if (password.length < 6) {
             setPasswordError('Password must has at least 6 characters')
+            setTimeout(() => {
+                setPasswordError('')
+            }, 3000)
             return
         }
         if (password !== passwordConfirmation) {
             setPasswordCfError("Confirm password doesn't match")
+            setTimeout(() => {
+                setPasswordCfError('')
+            }, 3000)
             return
         }
         let data = {
@@ -92,6 +99,9 @@ export default function SignUp() {
             })
             .catch(error => {
                 setSignupError(email + " is already being used.");
+                setTimeout(() => {
+                    setSignupError('')
+                }, 3000)
             })
     }
     return (
@@ -126,9 +136,6 @@ export default function SignUp() {
                                 onChange={handleChange("email")}
                                 variant="standard"
                             />
-                            {signupError && <p className="error-message">
-                                {signupError}
-                            </p>}
                             <TextField
                                 type="password"
                                 name="password"
@@ -139,9 +146,6 @@ export default function SignUp() {
                                 autoComplete="off"
                                 variant="standard"
                             />
-                            {passwordError && <p className="error-message">
-                                {passwordError}
-                            </p>}
                             <TextField
                                 type="password"
                                 name="password"
@@ -151,9 +155,6 @@ export default function SignUp() {
                                 onChange={handleChange("passwordConfirmation")}
                                 variant="standard"
                             />
-                            {passwordCfError && <p className="error-message">
-                                {passwordCfError}
-                            </p>}
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <p style={{ marginBottom: 0 }}>
                                     Have account ? <Link to="/login">Sign in here</Link>
@@ -181,6 +182,25 @@ export default function SignUp() {
                             </Button>
                         </DialogActions>
                     </Dialog>
+
+
+                    <Snackbar open={passwordError} autoHideDuration={3000}>
+                        <Alert severity="error">
+                            {passwordError}
+                        </Alert>
+                    </Snackbar>
+
+                    <Snackbar open={passwordCfError} autoHideDuration={3000}>
+                        <Alert severity="error">
+                            {passwordCfError}
+                        </Alert>
+                    </Snackbar>
+
+                    <Snackbar open={signupError} autoHideDuration={3000}>
+                        <Alert severity="error">
+                            {signupError}
+                        </Alert>
+                    </Snackbar>
                 </div>)
     )
 }
