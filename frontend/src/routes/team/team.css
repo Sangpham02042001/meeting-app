@@ -100,6 +100,7 @@
   padding: 10px;
   border-top: 1px solid var(--gray-shadow);
   position: relative;
+  display: flex;
 }
 
 .image-message-upload > div {
@@ -109,12 +110,14 @@
   width: 100px;
   height: 100px;
   border-radius: 10px;
+  margin-right: 20px;
+  position: relative;
 }
 
-.image-message-upload > .remove-image-btn {
+.image-message-upload > div > .remove-image-btn {
   position: absolute;
   top: 2px;
-  left: 100px;
+  right: -10px;
   font-size: 20px;
   z-index: 2;
   cursor: pointer;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { cancelCall, getParticipant } from '../../store/reducers/conversation.reducer'
-import MessageConversation from '../MessageConversation';
+import Message from '../Message';
 import Avatar from '../Avatar/index';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
@@ -145,7 +145,6 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     if (content !== '' || imageMessage) {
       console.log(imageMessage);
       socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, images: imageMessage });
-      broadcastLocal.postMessage({ content, senderId: user.id, receiverId: participant.id, conversationId, image: imageMessage })
       setContent('');
       setImageMessage([]);
       setImageMessageUrl([]);
@@ -175,18 +174,14 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
   const onImageInputChange = e => {
     e.preventDefault()
-    console.log(e.target.files);
-    for (let imgFile of imageMessage) {
-      if (imgFile === e.target.files[0]) {
-        return;
+    if (e.target.files.length) {
+      setImageMessage([...imageMessage, ...e.target.files]);
+      let urls = []
+      for (const file of e.target.files) {
+        let url = URL.createObjectURL(file)
+        urls.push(url)
       }
-    }
-    setImageMessage([...imageMessage, e.target.files[0]]);
-    console.log(imageMessage);
-    let reader = new FileReader()
-    reader.readAsDataURL(e.target.files[0])
-    reader.onloadend = e => {
-      setImageMessageUrl([...imageMessageUrl, reader.result])
+      setImageMessageUrl([...imageMessageUrl, ...urls])
     }
   }
 
@@ -277,14 +272,14 @@ const ConversationChat = ({ conversationId, user, participant }) => {
           {messages.length > 0 && messages.slice(0, messages.length - 1)
             .map((message, idx) => {
               return (
-                <MessageConversation message={message} key={message.id}
+                <Message message={message} key={message.id}
                   logInUserId={user.id}
                   hasAvatar={message.userId != messages[idx + 1].userId}
                   userName={user.firstName.concat(' ', user.lastName)}
                 />
               )
             })}
-          {messages.length > 0 && <MessageConversation message={messages[messages.length - 1]}
+          {messages.length > 0 && <Message message={messages[messages.length - 1]}
             logInUserId={user.id}
             hasAvatar={true} lastMessage={true} />}
 
@@ -363,6 +358,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                 </label>
                 <input type="file" accept='image/*'
                   onChange={onImageInputChange}
+                  multiple="multiple"
                   id="images"
                   style={{
                     display: 'none'

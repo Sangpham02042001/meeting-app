@@ -366,9 +366,9 @@ export const teamSlice = createSlice({
       }
     },
     sendMessage: (state, action) => {
-      let { messageId, content, senderId, teamId, photo, isMessage, createdAt } = action.payload;
+      let { messageId, content, senderId, teamId, photos, isMessage, createdAt } = action.payload;
       if (state.team.id && state.team.id == teamId) {
-        state.team.meetmess.push({ id: messageId, content, userId: senderId, teamId, photo, isMessage, createdAt })
+        state.team.meetmess.push({ id: messageId, content, userId: senderId, teamId, photos, isMessage, createdAt })
         state.team.fakeMessageId = v4()
       }
     },

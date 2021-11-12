@@ -17,15 +17,15 @@ const socketServer = (socket) => {
         userSockets[socket.userId].push(socket.id)
     }
     //team
-    socket.on('send-message-team', async ({ teamId, senderId, content, image }) => {
+    socket.on('send-message-team', async ({ teamId, senderId, content, images }) => {
         let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
-        const message = await sendMessage({ teamId, senderId, content, image })
-        socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, photo: message.photo, createdAt: message.createdAt })
+        const message = await sendMessage({ teamId, senderId, content, images })
+        socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, photos: message.photos, createdAt: message.createdAt })
         for (let m of members) {
             if (userSockets[m.id] && userSockets[m.id].length) {
                 for (const socketId of userSockets[m.id]) {
-                    socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photo: message.photo, createdAt: message.createdAt });
+                    socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, photos: message.photos, createdAt: message.createdAt });
                 }
             }
         }
@@ -88,10 +88,10 @@ const socketServer = (socket) => {
         const converId = await setConversation({ senderId, receiverId, conversationId });
         const message = await setMessage({ content, conversationId: converId, senderId, images });
         if (message) {
-            socket.emit('conversation-sentMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt })
+            socket.emit('conversation-sentMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photos: message.photos, createdAt: message.createdAt })
             if (userSockets[receiverId] && userSockets[receiverId].length) {
                 for (const socketId of userSockets[receiverId]) {
-                    socket.to(socketId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photo: message.photo, createdAt: message.createdAt });
+                    socket.to(socketId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photos: message.photos, createdAt: message.createdAt });
                 }
             }
         }

@@ -59,16 +59,15 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photo, createdAt }) => {
+    socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photos, createdAt }) => {
       dispatch(sendMessage({
-        messageId, content, senderId, teamId, photo, isMessage: true, createdAt
+        messageId, content, senderId, teamId, photos, isMessage: true, createdAt
       }))
-      broadcastLocal.postMessage({ messageId, teamId, senderId, content, photo })
     })
 
-    socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, photo, createdAt }) => {
+    socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, photos, createdAt }) => {
       dispatch(sendMessage({
-        messageId, content, senderId, teamId, photo, isMessage: true, createdAt
+        messageId, content, senderId, teamId, photos, isMessage: true, createdAt
       }))
     })
 

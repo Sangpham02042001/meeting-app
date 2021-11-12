@@ -3,6 +3,7 @@ const { QueryTypes } = require('sequelize')
 const sequelize = require('../models')
 const Team = require('../models/team')
 const User = require('../models/user')
+const Media = require('../models/media');
 const Message = require('../models/message')
 const { getMeetingInfo } = require('./meeting.controller')
 
@@ -437,24 +438,47 @@ const updateBasicTeamInfo = async (req, res) => {
 //   })
 // }
 
-const sendMessage = async ({ teamId, senderId, content, image }) => {
+const sendMessage = async ({ teamId, senderId, content, images }) => {
   try {
-    let photoName = null;
-    if (image) {
-      photoName = v4() + '.png';
-      let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
-      const imageStream = new Readable();
-      imageStream._read = () => { }
-      imageStream.push(image)
-      imageStream.pipe(writeStream)
+    let photoNames = [];
+    if (images) {
+      for (let image of images) {
+        if (image) {
+          let photoName = v4() + '.png';
+          let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
+          const imageStream = new Readable();
+          imageStream._read = () => { }
+          imageStream.push(image)
+          imageStream.pipe(writeStream)
+          photoNames.push(photoName);
+        }
+      }
+
     }
 
-    const message = await Message.create({
-      content,
-      userId: senderId,
-      teamId,
-      photo: photoName
-    })
+    const message = await Message.create({ content, teamId, userId: senderId });
+    await Promise.all(photoNames.map(async (name, idx) => {
+      let media = await Media.create({ pathName: name, messageId: message.id })
+      photoNames[idx] = media;
+    }))
+    message.photos = photoNames;
+
+    // let photoName = null;
+    // if (image) {
+    //   photoName = v4() + '.png';
+    //   let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
+    //   const imageStream = new Readable();
+    //   imageStream._read = () => { }
+    //   imageStream.push(image)
+    //   imageStream.pipe(writeStream)
+    // }
+
+    // const message = await Message.create({
+    //   content,
+    //   userId: senderId,
+    //   teamId,
+    //   photo: photoName
+    // })
     return message;
   } catch (error) {
     console.log(error)
@@ -569,19 +593,23 @@ const getTeamMeetMess = async (req, res) => {
       ...meeting,
       isMeeting: true
     }))
-    let messages = await sequelize.query(
-      "SELECT * FROM messages WHERE teamId = :teamId",
-      {
-        replacements: {
-          teamId
-        },
-        type: QueryTypes.SELECT
+
+    let messages = await Message.findAll({
+      where: {
+        teamId
+      },
+      include: {
+        model: Media,
       }
-    )
-    messages = messages.map(message => ({
-      ...message,
-      isMessage: true
-    }))
+    })
+
+    for (let m of messages) {
+      m.dataValues.isMessage = true
+      m.dataValues.photos = m.dataValues.Media;
+      delete m.dataValues.Media;
+    }
+
+
     let numOfMeetMess = [...messages, ...meetings].length
     let meetmess = [...messages, ...meetings].sort((item1, item2) => {
       let time1 = new Date(item1.createdAt).getTime()

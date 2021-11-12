@@ -128,7 +128,7 @@ export const conversationSlice = createSlice({
       state.conversationCall = { ...state.conversationCall, ...action.payload, isRinging: true }
     },
     startCall: (state, action) => {
-      state.conversationCall = {...state.conversationCall, ...action.payload, isCalling: true }
+      state.conversationCall = { ...state.conversationCall, ...action.payload, isCalling: true }
     },
     cancelCall: (state, action) => {
       let { conversationId } = action.payload;

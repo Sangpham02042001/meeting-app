@@ -34,9 +34,9 @@ export default function Team(props) {
   const dispatch = useDispatch()
   const history = useHistory()
   const [input, setInput] = useState('')
-  const [image, setImage] = useState(null)
+  const [images, setImages] = useState([])
+  const [imageUrl, setImageUrl] = useState([])
   const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
-  const [imageUrl, setImageUrl] = useState('')
   const [offsetMeetmess, setOffsetMeetmess] = useState(0)
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
   const [isRequestModalShow, setRequestModalShow] = useState(false)
@@ -65,11 +65,11 @@ export default function Team(props) {
           let file = e.clipboardData.files[0]
           let regex = /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i
           if (regex.test(file.name)) {
-            setImage(file)
+            setImages([...images, file])
             let reader = new FileReader()
             reader.readAsDataURL(file)
             reader.onloadend = e => {
-              setImageUrl(reader.result)
+              setImageUrl([...imageUrl, reader.result])
             }
           }
         }
@@ -80,9 +80,6 @@ export default function Team(props) {
       // socketClient.leave(`team ${teamId}`)
       socketClient.emit('out-team', { teamId })
       // dispatch(cleanTeamState())
-      setOffsetMeetmess(0)
-      setImageUrl('')
-      setImage('')
       window.removeEventListener('paste', () => {
         console.log('remove events')
       })
@@ -174,23 +171,15 @@ export default function Team(props) {
 
   const handleSendMessage = e => {
     e.preventDefault()
-    if (!input && !image) {
+    if (!input && !images.length) {
       return
     }
     setIsOpenEmojiList(false)
-    let formData = new FormData()
-    input && formData.append('content', input)
-    image && formData.append('photo', image)
-    // dispatch(sendMessage({
-    //   data: formData,
-    //   teamId
-    // }))
 
-    socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, image });
-    broadcastLocal.postMessage({ teamId, senderId: user.id, content: input, image })
+    socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, images });
     setInput('')
-    setImageUrl('')
-    setImage('')
+    setImageUrl([])
+    setImages([])
   }
 
   const handleMessageScroll = e => {
@@ -205,13 +194,15 @@ export default function Team(props) {
   }
 
   const handleImageInputChange = e => {
-    // e.preventDefault()
-    console.log(e.target.files[0])
-    setImage(e.target.files[0])
-    let reader = new FileReader()
-    let url = reader.readAsDataURL(e.target.files[0])
-    reader.onloadend = e => {
-      setImageUrl(reader.result)
+    e.preventDefault()
+    if (e.target.files.length) {
+      setImages([...images, ...e.target.files])
+      let urls = []
+      for (const file of e.target.files) {
+        let url = URL.createObjectURL(file)
+        urls.push(url)
+      }
+      setImageUrl([...imageUrl, ...urls])
     }
   }
 
@@ -272,7 +263,7 @@ export default function Team(props) {
           {currentNumOfMeetMess !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
             ref={scrollRef} style={{
               height: teamBody.current && teamBody.current.offsetHeight ?
-                teamBody.current.offsetHeight - (imageUrl ? 170 : 50) : '560px'
+                teamBody.current.offsetHeight - (imageUrl.length ? 170 : 50) : '560px'
             }}>
             {currentNumOfMeetMess && meetmess.slice(0, currentNumOfMeetMess - 1)
               .map((item, idx) => (item.isMessage ? <div key={'message' + item.id}>
@@ -305,18 +296,33 @@ export default function Team(props) {
 
           <form onSubmit={handleSendMessage}
             style={{ position: "absolute", left: 0, bottom: '2px', width: '100%' }}>
-            {imageUrl && <div className='image-message-upload'>
-              <div style={{
-                backgroundImage: `url("${imageUrl}")`
-              }}>
+            {images.length > 0 &&
+              <div className='image-message-upload'>
+                {
+                  images.map((i, idx) => {
+                    let imgIdx = images.findIndex(img => img === i)
+                    let imgUrl = imageUrl[imgIdx];
+                    return <div key={idx} style={{
+                      backgroundImage: `url("${imgUrl}")`
+                    }}>
+                      <i className="far fa-times-circle remove-image-btn"
+                        onClick={e => {
+                          e.preventDefault()
+                          setImageUrl(imgMsgList => {
+                            let tmpArr = [...imgMsgList];
+                            tmpArr.splice(imgIdx, 1);
+                            return tmpArr;
+                          })
+                          setImages(imgMsgList => {
+                            let tmpArr = [...imgMsgList];
+                            tmpArr.splice(imgIdx, 1);
+                            return tmpArr;
+                          });
+                        }}></i>
+                    </div>
+                  })}
               </div>
-              <i className="far fa-times-circle remove-image-btn"
-                onClick={e => {
-                  e.preventDefault()
-                  setImageUrl('')
-                  setImage(null);
-                }}></i>
-            </div>}
+            }
 
             {isOpenEmojiList &&
               <div style={{
@@ -347,6 +353,7 @@ export default function Team(props) {
                       {/* <i style={{ color: "#69B00B" }} className="fas fa-image"></i> */}
                     </label>
                     <input type="file" accept='image/*'
+                      multiple="multiple"
                       onChange={handleImageInputChange}
                       id="images" style={{
                         display: 'none'

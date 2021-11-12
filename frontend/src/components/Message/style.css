@@ -1,6 +1,7 @@
 .own-message {
   display: flex;
   justify-content: flex-end;
+  margin-right: 15px;
 }
 
 .own-message > div {
@@ -50,6 +51,11 @@
   margin-left: 45px;
 }
 
+.last-message > .message-with-photo > div {
+  margin-left: 5px;
+  margin-bottom: 0;
+}
+
 .message-with-photo > div.photo-last-message {
   margin-left: 6px;
   margin-bottom: 6px;
@@ -70,9 +76,24 @@
   margin-bottom: 6px;
 }
 
-.message-photo {
-  max-width: 400px;
-  max-height: 350px;
-  margin-bottom: 6px;
+.message-photo-list {
+  display: flex;
+  max-width: 470px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.own-message .message-photo-list {
+  justify-content: flex-end;
+}
+
+.message .message-photo-list {
+  justify-content: flex-start;
+}
+
+.message-photo-list > div {
+  border-radius: 15px;
+  margin-right: 5px;
+  background-size: cover;
   cursor: pointer;
 }

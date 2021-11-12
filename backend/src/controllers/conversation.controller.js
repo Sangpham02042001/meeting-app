@@ -98,12 +98,11 @@ const getLastMessage = async (req, res) => {
             include: Media,
             order: [['updatedAt', 'DESC']],
         })
-        if (!lastMessage) {
-            lastMessage = {};
+        if (lastMessage) {
+            // lastMessage = {};
+            lastMessage.dataValues.photos = lastMessage.dataValues.Media;
+            delete lastMessage.dataValues.Media;
         }
-
-        lastMessage.dataValues.photos = lastMessage.dataValues.Media;
-        delete lastMessage.dataValues.Media;
 
         return res.status(200).json({ lastMessage })
     } catch (error) {
@@ -185,6 +184,7 @@ const setMessage = async ({ content, images, conversationId, senderId }) => {
                 }
             }
         )
+        console.log('save new message', message)
 
         return message;
     } catch (error) {
