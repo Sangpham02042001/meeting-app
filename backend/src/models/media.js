@@ -13,6 +13,9 @@ Media.init({
     },
     pathName: {
         type: DataTypes.STRING,
+    },
+    type: {
+        type: DataTypes.STRING(10),
     }
 }, {
     sequelize,

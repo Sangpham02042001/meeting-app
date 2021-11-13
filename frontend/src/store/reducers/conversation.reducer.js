@@ -4,14 +4,12 @@ import { axiosAuth } from '../../utils';
 
 export const getConversations = createAsyncThunk('conversations/getUserConversations', async ({ userId }) => {
   const response = await axiosAuth.get(`/api/conversations/users/${userId}`);
-
   return response.data;
 })
 
 
 export const getMessages = createAsyncThunk('conversations/getMessages', async ({ conversationId }) => {
   const response = await axiosAuth.get(`/api/conversations/${conversationId}/messages`);
-
   return response.data;
 })
 
@@ -25,6 +23,11 @@ export const readConversation = createAsyncThunk('conversations/readConversation
   return response.data;
 })
 
+export const getAllImages = createAsyncThunk('conversations/getAllImages', async ({ conversationId }) => {
+  const response = await axiosAuth.get(`/api/conversations/${conversationId}/messages/images`);
+  return response.data;
+})
+
 
 export const conversationSlice = createSlice({
   name: 'Conversation',
@@ -32,6 +35,7 @@ export const conversationSlice = createSlice({
     conversations: [],
     conversation: {
       messages: [],
+      images: [],
       participant: null,
     },
     conversationCall: {
@@ -75,16 +79,27 @@ export const conversationSlice = createSlice({
     [readConversation.rejected]: (state, action) => {
       console.log('Read error!!');
     },
+    [getAllImages.fulfilled]: (state, action) => {
+      const { images } = action.payload;
+      state.conversation.images = images;
+    },
+    [getAllImages.rejected]: (state, action) => {
+      console.log('get images error')
+    },
   },
   reducers: {
     sendMessageCv: (state, action) => {
       const { messageId, content, senderId, receiverId, conversationId, photos, createdAt } = action.payload;
-      let conversation = state.conversations.find(conv => conv.participantId === receiverId);
-      if (conversation) {
-        conversation.conversationId = conversationId;
+      let convParticipant = state.conversations.find(conv => {
+        return (conv.participantId === receiverId || conv.participantId === senderId)
+      });
+
+      if (convParticipant) {
+        convParticipant.conversationId = conversationId;
       }
-      conversation = state.conversations.find(conv => conv.conversationId === conversationId);
-      if (!conversation) {
+
+      let conversation = state.conversations.find(conv => conv.conversationId === conversationId);
+      if (!conversation && !convParticipant) {
         state.conversations.unshift({ conversationId, participantId: senderId, isRead: false })
       }
 
@@ -92,7 +107,8 @@ export const conversationSlice = createSlice({
         state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, photos, createdAt });
       }
 
-      const pIdx = state.conversations.map(conv => conv.conversationId).indexOf(conversationId);
+      //check is read?
+      const pIdx = state.conversations.findIndex(conv => conv.conversationId === conversationId);
       if (pIdx >= 0) {
         conversation = state.conversations[pIdx];
         conversation.isRead = true;
@@ -107,7 +123,7 @@ export const conversationSlice = createSlice({
     },
     receiveMessageCv: (state, action) => {
       const { messageId, content, senderId, receiverId, conversationId, photos, createdAt } = action.payload;
-      const conversation = state.conversations.find(conv => conv.conversationId === conversationId);
+      let conversation = state.conversations.find(conv => conv.conversationId === conversationId);
       if (!conversation) {
         state.conversations.unshift({ conversationId, participantId: senderId, isRead: false })
       }

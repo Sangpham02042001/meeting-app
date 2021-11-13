@@ -8,6 +8,6 @@ router.route('/api/messages/:messageId/image')
 router.route('/api/messages/:messageId/:mediaId')
   .get(getImageMessageMedia)
 
-// router.route('/api/messages/:messageId')
+
 
 module.exports = router

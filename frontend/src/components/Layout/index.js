@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, NavLink, useRouteMatch, useHistory } from 'react-router-dom'
+import { NavLink, useRouteMatch, useHistory } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { Avatar, Snackbar, IconButton } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';

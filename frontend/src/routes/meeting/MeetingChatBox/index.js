@@ -6,8 +6,8 @@ import ImageIcon from '@mui/icons-material/Image';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { socketClient, broadcastLocal } from '../../utils';
-import Message from '../Message';
+import { socketClient, broadcastLocal } from '../../../utils';
+import Message from '../../../components/Message';
 
 export default function ChatBox({ chatVisible }) {
     const { teamId } = useParams()

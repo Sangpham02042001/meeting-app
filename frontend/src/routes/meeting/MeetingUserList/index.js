@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux'
 import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import Avatar from '../Avatar';
+import Avatar from '../../../components/Avatar';
 import './meetingUserList.css';
 
 export default function MeetingUserList({ usersVisible, members }) {

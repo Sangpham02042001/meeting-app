@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { broadcastLocal, socketClient } from "../../utils";
-import MeetingChatBox from "../../components/MeetingChatBox";
-import MeetingUserList from "../../components/MeetingUserList";
+import MeetingChatBox from "./MeetingChatBox";
+import MeetingUserList from "./MeetingUserList";
+import MeetingVideo from "./MeetingVideo";
 import { isAuthenticated } from '../../store/reducers/user.reducer';
 import {
 	getTeamInfo,
@@ -12,7 +13,6 @@ import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
 import Janus from '../../janus'
 import { janusServer } from '../../utils'
 import Avatar from '../../components/Avatar'
-import MeetingVideo from "../../components/MeetingVideo";
 import { v4 } from 'uuid'
 
 // ***React Material***

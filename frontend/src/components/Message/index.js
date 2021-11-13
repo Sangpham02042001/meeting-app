@@ -136,9 +136,8 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                 right: '20px',
                 top: '20px',
                 padding: '5px',
-                background: '#FFF'
+                background: '#fff !important'
               }}
-              className='close-img-expand-btn'
               onClick={handleClose}>
               <CloseIcon />
             </IconButton>

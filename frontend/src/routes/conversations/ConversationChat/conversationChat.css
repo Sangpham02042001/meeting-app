@@ -16,6 +16,11 @@
   align-items: center;
 }
 
+.conversation-info .conversation-info-btn {
+  width: 100%;
+  margin-top: 50px;
+}
+
 .conversation-message {
   height: 100%;
   display: flex;
@@ -104,6 +109,7 @@
   border: none;
   resize: none;
   background-color: #f0f2f5;
+  display: flex;
 }
 
 .conversation-message .input-btn {

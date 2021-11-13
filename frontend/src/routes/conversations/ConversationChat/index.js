@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { cancelCall, getParticipant } from '../../store/reducers/conversation.reducer'
-import Message from '../Message';
-import Avatar from '../Avatar/index';
+import { cancelCall, getAllImages, getParticipant } from '../../../store/reducers/conversation.reducer'
+import Message from '../../../components/Message';
+import Avatar from '../../../components/Avatar/index';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
   DialogContent, DialogContentText, DialogTitle, Typography,
@@ -24,11 +24,15 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import MicIcon from '@mui/icons-material/Mic';
 import MicNoneIcon from '@mui/icons-material/MicNone';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import Picker, { SKIN_TONE_MEDIUM_DARK } from 'emoji-picker-react';
-import { socketClient, broadcastLocal, baseURL } from '../../utils';
-import { getMessages, readConversation, startCall } from '../../store/reducers/conversation.reducer';
+import { socketClient, broadcastLocal, baseURL } from '../../../utils';
+import { getMessages, readConversation, startCall } from '../../../store/reducers/conversation.reducer';
 import { v4 } from 'uuid';
 import './conversationChat.css';
+import PreviewImage from '../../../components/PreviewImage';
+import useRecorder from '../../../hooks/useRecorder';
+
 
 const Accordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -40,6 +44,7 @@ const Accordion = styled((props) => (
   '&:before': {
     display: 'none',
   },
+  width: '100%'
 }));
 
 const AccordionSummary = styled((props) => (
@@ -53,7 +58,7 @@ const AccordionSummary = styled((props) => (
       ? 'rgba(255, 255, 255, .05)'
       : 'rgba(0, 0, 0, .03)',
 
-  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+  '& .MuiAccordionSummary-expandIconWrapper.Mui-expandedPanel': {
     transform: 'rotate(180deg)',
   },
   '& .MuiAccordionSummary-content': {
@@ -72,7 +77,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 export default function Index({ conversation, user }) {
   const participant = useSelector(state => state.conversationReducer.conversation.participant);
   const dispatch = useDispatch();
-  useEffect(async () => {
+  useEffect(() => {
     dispatch(getParticipant({ participantId: conversation.participantId }));
   }, [conversation.participantId])
 
@@ -90,22 +95,24 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const [rows, setRows] = useState(1);
   const minRows = 1;
   const maxRows = 5;
-
+  const imgPath = `${baseURL}/api/messages`
   const [imageMessage, setImageMessage] = useState([]);
   const [imageMessageUrl, setImageMessageUrl] = useState([]);
   const [showInfo, setShowInfo] = useState(false);
   const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
-  const [expanded, setExpanded] = useState('panel1');
   const [forceRender, setForceRender] = useState(v4());
-  const [isLargeImage, setLargeImageCheck] = useState(false)
+  const [isLargeImage, setLargeImageCheck] = useState(false);
+  const [isPreview, setIsPreview] = useState(false);
+  const [imgPreview, setImgPreview] = useState(null);
 
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const messages = useSelector(state => state.conversationReducer.conversation.messages);
+  const images = useSelector(state => state.conversationReducer.conversation.images);
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
   const speechReplyRef = useRef('');
   const voiceDetectRef = useRef(false);
-
+  const [audioURL, isRecording, startRecording, stopRecording] = useRecorder();
 
   useEffect(() => {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -113,6 +120,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
   useEffect(() => {
     dispatch(getMessages({ conversationId }))
+    dispatch(getAllImages({ conversationId }))
     dispatch(readConversation({ conversationId, userId: user.id }))
   }, [conversationId])
 
@@ -134,6 +142,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     setRows(currentRows < maxRows ? currentRows : maxRows)
     setContent(event.target.value);
   }
+
+
 
   const handleEnterMessage = (event) => {
     if (event.key === "Enter") {
@@ -184,7 +194,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       for (const file of imageMessage) {
         size += Math.round(file.size / 1024)
       }
-      if (size > 1024) {
+      if (size > 5120) {
         setLargeImageCheck(true)
         setTimeout(() => {
           setLargeImageCheck(false)
@@ -230,11 +240,11 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       let transcript = event.results[0][0].transcript;
       let confidence = event.results[0][0].confidence;
       console.log(transcript, confidence * 100 + '%')
-      if (confidence > 0.6 && transcript.length) {
+      if (confidence < 0.6 && transcript.length) {
         socketClient.emit('conversation-sendMessage', { content: transcript, senderId: user.id, receiverId: participant.id, conversationId, image: null });
-        broadcastLocal.postMessage({ content: transcript, senderId: user.id, receiverId: participant.id, conversationId, image: null })
       } else {
-        speechReplyRef.current = "Could not understand!"
+        speechReplyRef.current = "Could not understand!";
+        setForceRender(v4());
       }
 
     };
@@ -242,9 +252,16 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     recognition.start();
   }
 
-  const handleChange = (panel) => (event, newExpanded) => {
-    setExpanded(newExpanded ? panel : false);
-  };
+  const handlePreview = (event, messageId, photoId) => {
+    event.preventDefault();
+    setIsPreview(true);
+    setImgPreview(imgPath.concat(`/${messageId}/${photoId}`));
+  }
+
+  const handleRecord = () => {
+    !isRecording ? startRecording() : stopRecording();
+    console.log(audioURL);
+  }
 
   return (
     <>
@@ -363,7 +380,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
           <div className="input-btn">
 
-            <Tooltip title="Attach a photo">
+            <Tooltip title="Attach photos">
               <IconButton >
                 <label style={{
                   cursor: 'pointer',
@@ -383,15 +400,30 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
             </Tooltip>
 
-
             <Tooltip title="Choose an emoji">
               <IconButton onClick={chooseEmoji} >
                 <InsertEmoticonIcon color="secondary" />
               </IconButton>
             </Tooltip>
+            <Tooltip title="Attach a file">
+              <IconButton >
+                <AttachFileIcon color="primary" />
+              </IconButton>
+            </Tooltip>
+
             <Tooltip title="Speech to text">
               <IconButton onClick={runSpeechRecognition}>
                 {voiceDetectRef.current ?
+                  <MicNoneIcon color="secondary" />
+                  :
+                  <MicIcon color="secondary" />
+                }
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Record">
+              <IconButton onClick={handleRecord}>
+                {isRecording ?
                   <MicNoneIcon style={{ color: "#1A73E8" }} />
                   :
                   <MicIcon style={{ color: "#1A73E8" }} />
@@ -417,41 +449,59 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             {participant.userName}
           </div>
         </div>
-        <div className="-conversation-info-btn">
-          <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
-            <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-              <Typography>Customise chat</Typography>
+        <div className="conversation-info-btn">
+          <Accordion>
+            <AccordionSummary aria-controls="custom-chat-content" id="custom-chat-header">
+              <Typography>Customize Chat</Typography>
             </AccordionSummary>
             <AccordionDetails>
-
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Button startIcon={<DarkModeIcon color="primary" />}>Dark Mode</Button>
                 <Button startIcon={<ColorLensIcon color="primary" />}>Change Themes</Button>
               </div>
-
             </AccordionDetails>
           </Accordion>
-          <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
-            <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
-              <Typography>Shared media</Typography>
+          <Accordion >
+            <AccordionSummary aria-controls="shared-media-content" id="shared-media-header">
+              <Typography>Shared Media</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Typography>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                malesuada lacus ex, sit amet blandit leo lobortis eget. Lorem ipsum dolor
-                sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
-                sit amet blandit leo lobortis eget.
-              </Typography>
+              <div>
+                {images.map((img, idx) => {
+                  return (
+                    <img key={idx}
+                      style={{
+                        cursor: 'pointer'
+                      }}
+                      onClick={event => handlePreview(event, img.messageId, img.photoId)}
+                      width="100px" height="100px"
+                      src={imgPath.concat(`/${img.messageId}/${img.photoId}`)} />
+                  )
+                })}
+              </div>
+            </AccordionDetails>
+          </Accordion>
+          <Accordion >
+            <AccordionSummary aria-controls="shared-file-content" id="shared-file-header">
+              <Typography>Shared Files</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <div>
+
+              </div>
             </AccordionDetails>
           </Accordion>
         </div>
       </div>
 
 
+      <PreviewImage isPreview={isPreview}
+        onClose={(e) => { setIsPreview(false) }}
+        image={imgPreview}
+      />
+
       <Dialog
         open={conversationCall.isCalling}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
           <Avatar width='40px' height='40px'
@@ -468,9 +518,9 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={isLargeImage} autoHideDuration={3000}>
+      <Snackbar open={isLargeImage} autoHideDuration={5000}>
         <Alert severity="error">
-          Too large images to upload
+          Can not upload file &gt; 5MB !
         </Alert>
       </Snackbar>
     </>

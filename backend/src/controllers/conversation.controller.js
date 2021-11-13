@@ -143,7 +143,7 @@ const readConversation = async (req, res) => {
 
 const setMessage = async ({ content, images, conversationId, senderId }) => {
     try {
-        let photoNames = [];
+        let medias = [];
         if (images) {
             for (let image of images) {
                 if (image) {
@@ -153,18 +153,18 @@ const setMessage = async ({ content, images, conversationId, senderId }) => {
                     imageStream._read = () => { }
                     imageStream.push(image)
                     imageStream.pipe(writeStream)
-                    photoNames.push(photoName);
+                    medias.push(photoName);
                 }
             }
 
         }
 
         const message = await Message.create({ content, conversationId, userId: senderId });
-        await Promise.all(photoNames.map(async (name, idx) => {
-            let media = await Media.create({ pathName: name, messageId: message.id })
-            photoNames[idx] = media;
+        await Promise.all(medias.map(async (name, idx) => {
+            let media = await Media.create({ pathName: name, messageId: message.id, type: 'image' })
+            medias[idx] = media;
         }))
-        message.photos = photoNames;
+        message.photos = medias;
         await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 1 " +
             "WHERE conversationId = :conversationId AND userId = :userId",
             {
@@ -194,6 +194,36 @@ const setMessage = async ({ content, images, conversationId, senderId }) => {
     }
 }
 
+const getImagesMessageCv = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+
+        const images = await sequelize.query(
+            "SELECT m.id as photoId, msg.id as messageId, m.createdAt FROM media m " +
+            "JOIN messages msg on msg.id = m.messageId " +
+            "JOIN conversations cv on cv.id = msg.conversationId " +
+            "WHERE msg.conversationId = :conversationId " +
+            "ORDER BY m.updatedAt DESC"
+        , {
+            replacements: {
+                conversationId
+            },
+            type: QueryTypes.SELECT
+        })
+        
+        return res.status(200).json({ images })
+
+    } catch (error) {
+        console.log(error)
+        return res.status(403).json({
+            message: "Could not get images!"
+        })
+    }
+}
 
 
-module.exports = { getConversations, getMessages, getLastMessage, setConversation, setMessage, readConversation }
+
+module.exports = {
+    getConversations, getMessages, getLastMessage,
+    setConversation, setMessage, readConversation, getImagesMessageCv
+}

@@ -21,4 +21,5 @@ Conversation.hasMany(Message, {
   foreignKey: 'conversationId'
 })
 
+
 module.exports = Conversation
