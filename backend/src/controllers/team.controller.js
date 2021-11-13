@@ -343,6 +343,36 @@ const searchTeams = async (req, res) => {
   }
 }
 
+const searchTeamWithCode = async (req, res) => {
+  let { code } = req.query
+  console.log(code)
+  try {
+    let team = await Team.findOne({
+      where: {
+        teamCode: code
+      },
+      include: [
+        {
+          model: User,
+          as: 'host'
+        }
+      ]
+    })
+    if (team) {
+      team.dataValues.host = {
+        id: team.dataValues.host.id,
+        name: team.dataValues.host.firstName + ' ' + team.dataValues.host.lastName
+      }
+    } else {
+      throw `Team with code ${code} not found`
+    }
+    return res.status(200).json({ team })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 const updateBasicTeamInfo = async (req, res) => {
   let { teamId } = req.params
   const form = formidable.IncomingForm()
@@ -632,5 +662,5 @@ module.exports = {
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   sendMessage, getTeamMessages, getMemberTeam,
-  getTeamMeetMess, getMeetings
+  getTeamMeetMess, getMeetings, searchTeamWithCode
 }

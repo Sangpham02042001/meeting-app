@@ -6,13 +6,16 @@ const { getTeamInfo, createTeam, getTeamCoverPhoto,
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   sendMessage, getTeamMessages, getMeetings,
-  getTeamMeetMess } = require('../controllers/team.controller')
+  getTeamMeetMess, searchTeamWithCode } = require('../controllers/team.controller')
 const { isAdmin, isMember } = require('../controllers/auth.controller')
 
 const router = Router()
 
 router.route('/api/teams/search')
   .post(requireSignin, searchTeams)
+
+router.route('/api/teams/search-with-code')
+  .get(requireSignin, searchTeamWithCode);
 
 router.route('/api/teams/:teamId/members')
   .get(requireSignin, getTeamMembers)

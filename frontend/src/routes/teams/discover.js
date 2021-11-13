@@ -10,9 +10,9 @@ import {
 import GroupIcon from '@mui/icons-material/Group';
 import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
-import { axiosAuth, baseURL } from '../../utils'
+import { axiosAuth, baseURL, getTime } from '../../utils'
 import { Link } from 'react-router-dom'
-import { createNewTeam, requestJoinTeam } from '../../store/reducers/team.reducer'
+import { createNewTeam, requestJoinTeam, getJoinedTeams, getRequestTeams, getInvitedTeams } from '../../store/reducers/team.reducer'
 
 export default function TeamDiscover() {
   const user = useSelector(state => state.userReducer.user)
@@ -24,6 +24,8 @@ export default function TeamDiscover() {
   const [loading, setLoading] = useState(false)
   const [isPublicTeam, setPublicTeam] = useState(true)
   const [newTeamId, setNewTeamId] = useState(0)
+  const [teamCode, setTeamCode] = useState('')
+  const [team, setTeam] = useState({})
   const [searchUsers, setSearchUsers] = useState([])
   const [invitedUsers, setInvitedUsers] = useState([])
   const [searchTeams, setSearchTeams] = useState([])
@@ -63,6 +65,18 @@ export default function TeamDiscover() {
       }, 3000)
     }
   }, [teamReducer.joinedTeams.length])
+
+  useEffect(() => {
+    if (!teamReducer.joinedTeamLoaded) {
+      dispatch(getJoinedTeams())
+    }
+    if (!teamReducer.requestTeamLoaded) {
+      dispatch(getRequestTeams())
+    }
+    if (!teamReducer.invitedTeamLoaded) {
+      dispatch(getInvitedTeams())
+    }
+  }, [])
 
   const handleCreateModalClose = () => {
     setCreateModalShow(false)
@@ -158,6 +172,57 @@ export default function TeamDiscover() {
     e.preventDefault()
     dispatch(requestJoinTeam({ team }))
     setSearchTeams(searchTeams.filter(t => t.id != team.id))
+    setTeam({})
+  }
+
+  const findTeamWithCode = async () => {
+    try {
+      let response = await axiosAuth.get(`/api/teams/search-with-code?code=${teamCode}`)
+      let { team } = response.data
+      if (team) {
+        setTeam(team)
+      }
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.error) {
+        setMessage({
+          type: 'error',
+          content: error.response.data.error
+        })
+      } else {
+        setMessage({
+          type: 'error',
+          content: 'Something wrong, try again!'
+        })
+      }
+      setTimeout(() => {
+        setMessage({})
+      }, 3000)
+    }
+  }
+
+  const closeTeam = () => {
+    setTeam({})
+  }
+
+  const isMemberOfTeam = (teamId) => {
+    if (teamReducer.joinedTeams.find(t => t.id === teamId)) {
+      return `You are a member of this team`
+    }
+    return ''
+  }
+
+  const isInvitedOfTeam = (teamId) => {
+    if (teamReducer.invitedTeams.find(t => t.id === teamId)) {
+      return `You are invited to join this team`
+    }
+    return ''
+  }
+
+  const isRequestOfTeam = (teamId) => {
+    if (teamReducer.requestingTeams.find(t => t.id === teamId)) {
+      return `You are requesting to join this team`
+    }
+    return ''
   }
 
   return (
@@ -166,21 +231,38 @@ export default function TeamDiscover() {
         <Link to='/teams' style={{ color: '#000', textDecoration: 'none', fontWeight: '700' }}>
           &lt; &nbsp; &nbsp; All teams
         </Link>
-        <h3>Join or create a team</h3>
-        <div className='create-team-box'>
-          <img className="create-team-empty-img" src="/public/teamimage-empty.svg" alt="Team Image" />
-          <h5>Create Team</h5>
-          <div style={{ marginBottom: '15px', display: 'flex' }}>
-            <Avatar className='create-team-box-user' src="/public/create-team-user1.svg" alt="Team Image" />
-            <Avatar className='create-team-box-user' src="/public/create-team-user2.svg" alt="Team Image" />
-            <Avatar className='create-team-box-user' src="/public/create-team-user3.svg" alt="Team Image" />
-          </div>
-          <Button variant="text" onClick={handleCreateTeam}
-            startIcon={<GroupIcon style={{ color: 'rgb(25, 118, 210)' }} />}>
-            Create team
-          </Button>
+        <h3 style={{ margin: '15px 0' }}>Join or create a team</h3>
+        <div style={{ display: 'flex', width: '100%' }}>
+          <span className='create-team-box'>
+            <img className="create-team-empty-img" src="teamimage-empty.svg" alt="Team Image" />
+            <h5>Create Team</h5>
+            <div style={{ marginBottom: '15px', display: 'flex' }}>
+              <Avatar className='create-team-box-user' src="create-team-user1.svg" alt="Team Image" />
+              <Avatar className='create-team-box-user' src="create-team-user2.svg" alt="Team Image" />
+              <Avatar className='create-team-box-user' src="create-team-user3.svg" alt="Team Image" />
+            </div>
+            <Button variant="text" onClick={handleCreateTeam}
+              startIcon={<GroupIcon style={{ color: 'rgb(25, 118, 210)' }} />}>
+              Create team
+            </Button>
+          </span>
+
+          <span className='create-team-box'>
+            <img className="create-team-empty-img" src="join-team-code.svg" alt="Team Image" />
+            <h5>Join a team with code</h5>
+            <div className='team-code-container'>
+              <input value={teamCode} id="team-code"
+                onChange={e => setTeamCode(e.target.value)}
+                placeholder='Enter code' />
+            </div>
+            <Button variant="text" onClick={findTeamWithCode} disabled={!teamCode}>
+              Join team
+            </Button>
+          </span>
+
         </div>
-        <div style={{ marginTop: '15px', display: "flex", justifyContent: 'space-between' }}>
+
+        <div style={{ marginTop: '20px', display: "flex", justifyContent: 'space-between' }}>
           <h3>Search teams you want to join</h3>
           <form onSubmit={handleSearchTeams} style={{ display: 'flex' }}>
             {loading && <div style={{ textAlign: 'center', marginRight: '10px' }}>
@@ -340,6 +422,38 @@ export default function TeamDiscover() {
             Invite
           </Button>
         </DialogActions>
+      </Dialog>
+
+      <Dialog open={team && team.name} onClose={closeTeam}>
+        {team.name && <>
+          <DialogTitle>Team Info</DialogTitle>
+          <DialogContent>
+            <h4>{team.name}</h4>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+              <Avatar sx={{ width: '100px', height: '100px' }} src={`${baseURL}/api/team/coverphoto/${team.id}`} />
+            </div>
+            <div>This team is created at <strong>{getTime(team.createdAt)}</strong></div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <strong style={{ marginRight: '15px' }}>Admin: </strong>
+              <Avatar style={{ marginRight: '5px' }} src={`${baseURL}/api/user/avatar/${team.host.id}`} />
+              <strong>{team.host.name}</strong>
+            </div>
+            <div style={{ color: 'red' }}>
+              {isMemberOfTeam(team.id)}
+              {isInvitedOfTeam(team.id)}
+              {isRequestOfTeam(team.id)}
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button variant='text' onClick={closeTeam}>
+              Close
+            </Button>
+            <Button variant='text' onClick={handleRequestJoin(team)}
+              disabled={isMemberOfTeam(team.id).length > 0 || isInvitedOfTeam(team.id).length > 0 || isRequestOfTeam(team.id).length > 0}>
+              Join
+            </Button>
+          </DialogActions>
+        </>}
       </Dialog>
 
       <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000}>
