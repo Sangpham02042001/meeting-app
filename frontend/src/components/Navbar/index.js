@@ -117,7 +117,7 @@ export default function Navbar() {
 
         <div className="dropdown" key={user.avatar}>
           <button className="dropdown-btn" style={{ color: "white", padding: 0, textAlign: 'center' }}>
-            <Avatar sx={{ width: "40px", height: "40px" }} src={`${baseURL}/api/user/avatar/${user.id}`} />
+            <Avatar sx={{ width: "40px", height: "40px" }} src={`${baseURL}/api/user/avatar/${user.id}?id=${user.avatar}`} />
           </button>
           <div className="navbar dropdown-content logout-container">
             <div onClick={handleProfile}>

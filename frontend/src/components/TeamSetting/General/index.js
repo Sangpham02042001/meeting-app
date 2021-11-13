@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { TextField, MenuItem, Button } from '@mui/material'
+import {
+  TextField, MenuItem, Button, Avatar,
+  Alert, Snackbar
+} from '@mui/material'
 import { baseURL } from '../../../utils'
 import { updateBasicTeamInfo } from '../../../store/reducers/team.reducer'
 
@@ -10,6 +13,9 @@ export default function TeamGeneralSetting() {
   const [teamName, setTeamName] = useState(() => teamReducer.team.name)
   const [teamType, setTeamType] = useState(() => teamReducer.team.teamType)
   const [teamCoverPhoto, setTeamCoverPhoto] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
+  const [message, setMessage] = useState({})
+  const [editted, setEditted] = useState(false)
 
   const handleUpdateTeamInfo = (e) => {
     e.preventDefault()
@@ -21,10 +27,48 @@ export default function TeamGeneralSetting() {
       data: formData,
       teamId: teamReducer.team.id
     }))
+    setEditted(true)
+  }
+
+  useEffect(() => {
+    if (editted) {
+      setImageUrl('')
+      setMessage({
+        type: 'success',
+        content: 'Edit team successfully'
+      })
+      setTimeout(() => {
+        setMessage({})
+        setEditted(false)
+      }, 3000)
+    }
+  }, [teamReducer.team.name, teamReducer.team.teamType, teamReducer.team.coverPhoto])
+
+  const handleImageChange = (e) => {
+    if (e.target.files.length) {
+      setTeamCoverPhoto(e.target.files[0])
+      let reader = new FileReader()
+      let url = reader.readAsDataURL(e.target.files[0])
+      reader.onloadend = e => {
+        setImageUrl(reader.result)
+      }
+    }
   }
 
   return (
-    <div style={{ margin: 'auto' }}>
+    <div style={{ margin: 'auto', maxWidth: '450px' }}>
+      <div>
+        <div className='profile-avatar-container'>
+          <Avatar
+            key={teamReducer.team.coverPhoto}
+            alt="Remy Sharp"
+            src={imageUrl || `${baseURL}/api/team/coverphoto/${teamReducer.team.id}?id=${teamReducer.team.coverPhoto}`}
+            sx={{ width: 200, height: 200, margin: 'auto', border: '5px solid #f7f7f7' }} />
+          <label className='new-avatar-btn' htmlFor='newAvatar'><i className="fas fa-camera"></i></label>
+          <input id="newAvatar" type="file" accept='image/*' style={{ display: 'none' }}
+            onChange={handleImageChange}></input>
+        </div>
+      </div>
       <TextField variant="standard"
         style={{ width: '100%', marginBottom: '20px' }}
         label="Team Name"
@@ -40,21 +84,17 @@ export default function TeamGeneralSetting() {
         <MenuItem value="public">Public - Anyone can request to join and find this team</MenuItem>
         <MenuItem value="private">Private - Only team owners can add members</MenuItem>
       </TextField>
-      <p style={{ marginBottom: '5px', color: 'gray', fontSize: '14px' }}>Change Team Cover Photo</p>
-      <TextField
-        variant="standard"
-        style={{ width: '100%', marginBottom: '20px' }}
-        type="file"
-        name="coverPhoto"
-        accept='image/*'
-        onChange={(e) => setTeamCoverPhoto(e.target.files[0])}
-      />
       <Button variant="text"
         onClick={handleUpdateTeamInfo}
         disabled={(teamName && teamName.trim() === teamReducer.team.name)
-          && !teamCoverPhoto && (teamType === teamReducer.team.teamType)}>
+          && !imageUrl && (teamType === teamReducer.team.teamType)}>
         Save the change
       </Button>
+      <Snackbar open={message.content && message.content.length} autoHideDuration={3000}>
+        <Alert severity={message.type}>
+          {message.content}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

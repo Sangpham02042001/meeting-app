@@ -91,8 +91,8 @@ export default function Team(props) {
 
   useEffect(() => {
     if (teamReducer.teamLoaded) {
+      console.log('scroll ref', scrollRef.current.scrollHeight)
       if (scrollRef.current) {
-        console.log(scrollRef.current.scrollHeight)
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
       if (!teamReducer.team.name) {

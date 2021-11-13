@@ -117,6 +117,7 @@ export default function Profile() {
 			userId: userReducer.user.id
 		}))
 		setEditted(true)
+		setImageUrl('')
 	}
 
 	//out team
@@ -247,7 +248,7 @@ export default function Profile() {
 								<Avatar
 									key={userReducer.user.avatar}
 									alt="Remy Sharp"
-									src={imageUrl || `${baseURL}/api/user/avatar/${userReducer.user.id}`}
+									src={imageUrl || `${baseURL}/api/user/avatar/${userReducer.user.id}?id=${userReducer.user.avatar}`}
 									sx={{ width: 200, height: 200, margin: 'auto', border: '5px solid #f7f7f7' }} />
 								<label className='new-avatar-btn' htmlFor='newAvatar'><i className="fas fa-camera"></i></label>
 								<input id="newAvatar" type="file" accept='image/*' style={{ display: 'none' }}

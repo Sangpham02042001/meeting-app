@@ -91,6 +91,7 @@
   justify-content: flex-start;
 }
 
+.message-photo-list > img,
 .message-photo-list > div {
   border-radius: 15px;
   margin-right: 5px;

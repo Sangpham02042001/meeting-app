@@ -206,7 +206,7 @@ BEGIN
         WHERE id = teamId;
 	END IF;
     
-	SELECT t.name, t.teamType FROM teams t
+	SELECT t.name, t.teamType, t.coverPhoto FROM teams t
 	WHERE t.id = teamId;
 END$$
 DELIMITER ;
