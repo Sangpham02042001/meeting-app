@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { NavLink, useRouteMatch, useHistory } from 'react-router-dom'
 import Navbar from '../Navbar';
-import { Avatar, Snackbar, IconButton } from '@mui/material';
+import { Avatar, Snackbar, IconButton, Tooltip } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import MessageIcon from '@mui/icons-material/Message';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
@@ -186,27 +186,35 @@ export default function Layout({ children }) {
         <Navbar />
         <div className="layout">
           <div className="list-selection">
-            <div className="btn-list-selection">
-              <NavLink exact to='/home' activeClassName="btn-active">
-                <button className="btn-default" ><HomeIcon /></button>
-              </NavLink>
-            </div>
-            <div className="btn-list-selection">
-              <NavLink to='/conversations' activeClassName="btn-active">
-                <button className="btn-default" ><MessageIcon /></button>
+            <NavLink exact to='/home' activeClassName="btn-active">
+              <button className="btn-default" >
+                <Tooltip title='Home' placement='right'>
+                  <HomeIcon />
+                </Tooltip>
+              </button>
+            </NavLink>
+            <NavLink to='/conversations' activeClassName="btn-active">
+              <button className="btn-default" >
+                <Tooltip title='Messages' placement='right'>
+                  <MessageIcon />
+                </Tooltip>
+              </button>
 
-              </NavLink>
-            </div>
-            <div className="btn-list-selection">
-              <NavLink to='/teams' activeClassName="btn-active">
-                <button className="btn-default"><PeopleAltIcon /></button>
-              </NavLink>
-            </div>
-            <div className="btn-list-selection">
-              <NavLink to='/setting' activeClassName="btn-active">
-                <button className="btn-default" ><SettingsIcon /></button>
-              </NavLink>
-            </div>
+            </NavLink>
+            <NavLink to='/teams' activeClassName="btn-active">
+              <button className="btn-default">
+                <Tooltip title='Teams' placement='right'>
+                  <PeopleAltIcon />
+                </Tooltip>
+              </button>
+            </NavLink>
+            <NavLink to='/setting' activeClassName="btn-active">
+              <button className="btn-default" >
+                <Tooltip title='Setting' placement='right'>
+                  <SettingsIcon />
+                </Tooltip>
+              </button>
+            </NavLink>
           </div>
           <div style={{ width: '100%', height: '100%', position: 'relative' }}>
 

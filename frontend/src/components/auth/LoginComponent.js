@@ -74,7 +74,7 @@ export default function Login() {
                                 disabled={!email || !password}>Log in</Button>
                         </div>
                     </form> <br /> <br />
-                    <Snackbar open={loginError} autoHideDuration={3000}>
+                    <Snackbar open={loginError.length > 0} autoHideDuration={3000}>
                         <Alert severity="error">
                             {loginError}
                         </Alert>

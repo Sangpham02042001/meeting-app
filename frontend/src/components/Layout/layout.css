@@ -20,14 +20,13 @@
   text-align: center;
   z-index: 10;
   box-shadow: var(--box-shadow);
-  
 }
 
-.btn-list-selection {
+.list-selection > a {
   margin-top: 15px;
 }
 
-.btn-list-selection .btn-default {
+.list-selection .btn-default {
   width: 60px;
   height: 60px;
   border-style: none;
@@ -36,9 +35,10 @@
   color: var(--primary-color);
   font-size: 20px;
   cursor: pointer;
+  position: relative;
 }
 
-.btn-list-selection .btn-active::before {
+.list-selection .btn-active::before {
   content: "";
   position: absolute;
   height: 60px;
@@ -46,8 +46,6 @@
   left: 0.1rem;
 }
 
-.btn-list-selection .btn-default:hover {
+.list-selection .btn-default:hover {
   background-color: rgba(207, 209, 211, 0.212);
 }
-
-
