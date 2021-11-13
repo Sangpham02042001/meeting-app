@@ -16,7 +16,7 @@ import {
   confirmInvitations, getTeamMessages, cleanTeamState,
   sendMessage, getTeamMeetMess
 } from '../../store/reducers/team.reducer'
-import { baseURL, broadcastLocal, socketClient, messageTimeDiff } from '../../utils'
+import { baseURL, broadcastLocal, socketClient, messageTimeDiff, getTime } from '../../utils'
 import Loading from '../../components/Loading'
 import './team.css'
 import TeamHeader from '../../components/TeamHeader'
@@ -43,9 +43,11 @@ export default function Team(props) {
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
   const [isTeamInfoShow, setTeamInfoShow] = useState(false)
   const [isLargeImage, setLargeImageCheck] = useState(false)
+  const [message, setMessage] = useState('')
   const teamBody = useRef()
   const scrollRef = useRef(null)
   const inputRef = useRef(null)
+
 
   const [rows, setRows] = useState(1);
   const minRows = 1;
@@ -120,6 +122,15 @@ export default function Team(props) {
     }
   }, [teamReducer.team.fakeMessageId])
 
+  useEffect(() => {
+    if (images.length) {
+      setMessage('Upload image successfully')
+      setTimeout(() => {
+        setMessage('')
+      }, 3000);
+    }
+  }, [images.length])
+
 
   const handleCloseInvitedModal = () => {
     setInvitedModalShow(false)
@@ -181,6 +192,7 @@ export default function Team(props) {
     setInput('')
     setImageUrl([])
     setImages([])
+    setRows(1)
   }
 
   const handleMessageScroll = e => {
@@ -278,11 +290,16 @@ export default function Team(props) {
           {currentNumOfMeetMess !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
             ref={scrollRef} style={{
               height: teamBody.current && teamBody.current.offsetHeight ?
-                teamBody.current.offsetHeight - (imageUrl.length ? 170 : 50) : '560px'
+                teamBody.current.offsetHeight - (imageUrl.length ? 170 : 50) - (rows - 1) * 24 : '560px'
             }}>
             {currentNumOfMeetMess && meetmess.slice(0, currentNumOfMeetMess - 1)
               .map((item, idx) => (item.isMessage ? <div key={'message' + item.id}>
-                {idx === 0 && meetmess[idx].isMessage && meetmess[idx].userid !== user.id
+                {idx === 0 && <div className='time-text'>
+                  <span>
+                    {getTime(meetmess[idx].createdAt)}
+                  </span>
+                </div>}
+                {idx === 0 && meetmess[idx].isMessage && meetmess[idx].userId !== user.id
                   && <p style={{
                     margin: 0,
                     paddingLeft: '40px',
@@ -292,7 +309,7 @@ export default function Team(props) {
                   logInUserId={user.id}
                   userName={(item.userId != meetmess[idx + 1].userId || idx === 0) ? getUserName(item.userId) : ''}
                   hasAvatar={item.userId != meetmess[idx + 1].userId} />
-                {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)
+                {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt) && idx !== 0
                   && <div className='time-text'>
                     <span>
                       {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)}
@@ -465,9 +482,16 @@ export default function Team(props) {
         </Button>
       </DialogActions>
     </Dialog>
+
     <Snackbar open={isLargeImage} autoHideDuration={3000}>
       <Alert severity="error">
         Too large images to upload
+      </Alert>
+    </Snackbar>
+
+    <Snackbar open={message.length > 0} autoHideDuration={3000}>
+      <Alert severity="success">
+        {message}
       </Alert>
     </Snackbar>
   </Grid>

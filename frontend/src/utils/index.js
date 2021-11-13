@@ -58,14 +58,14 @@ const messageTimeDiff = (mysqlTime1, mysqlTime2) => {
   let timeDiff = Math.round((time1 - time2) / 1000)
   let res = ''
   if (timeDiff > 3600) {
-    time2 = new Date(mysqlTime2)
-    timeDiff = Date.now() - time2
-    let minute = time2.getMinutes().toString().length === 1 ? `0${time2.getMinutes()}` : time2.getMinutes()
-    let hour = time2.getHours().toString().length === 1 ? `0${time2.getHours()}` : time2.getHours()
+    time1 = new Date(mysqlTime1)
+    timeDiff = Date.now() - time1
+    let minute = time1.getMinutes().toString().length === 1 ? `0${time1.getMinutes()}` : time1.getMinutes()
+    let hour = time1.getHours().toString().length === 1 ? `0${time1.getHours()}` : time1.getHours()
     if (timeDiff < 43200) {
       res = `${hour}:${minute}`
     } else {
-      res = `${WEEK_DAYS[time2.getDay()]}, ${MONTHS[time2.getMonth()]} ${time2.getDate()} ${time2.getFullYear()} ${hour}:${minute}`
+      res = `${WEEK_DAYS[time1.getDay()]}, ${MONTHS[time1.getMonth()]} ${time1.getDate()} ${time1.getFullYear()} ${hour}:${minute}`
     }
   }
   return res
