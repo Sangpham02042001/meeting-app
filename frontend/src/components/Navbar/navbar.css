@@ -3,6 +3,7 @@
   justify-content: space-between;
   padding: 8px;
   background-color: var(--primary-color);
+  z-index: 10;
 }
 
 .navbar .nav-brand {

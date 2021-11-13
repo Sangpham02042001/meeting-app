@@ -6,6 +6,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
 }
 
 code {
@@ -13,11 +14,12 @@ code {
     monospace;
 }
 
-html, body, #app, body>#root {
-  height: 100%
-}
 
-body>#root {
+body > #root {
   padding: 0;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 

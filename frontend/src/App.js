@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter, Route, Switch, Redirect, HashRouter } from "react-router-dom";
 import Home from "./routes/home";
 import Teams from "./routes/teams";
 import Conversations from "./routes/conversations";
@@ -18,7 +18,7 @@ import TeamSetting from './routes/team/setting';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/public" >
       <Switch>
         <Route exact path="/" component={() => <Welcome />} />
         <Route exact path="/login" component={() => <Login />} />

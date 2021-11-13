@@ -80,10 +80,6 @@ const Meeting = (props) => {
 				success: function (jsep) {
 					Janus.debug("Got publisher SDP!", jsep);
 					const publish = { request: "configure", audio: useAudio, video: true };
-					// if (acodec)
-					//     publish["audiocodec"] = acodec;
-					// if (vcodec)
-					//     publish["videocodec"] = vcodec;
 					sfuRef.current.send({ message: publish, jsep: jsep });
 				},
 				error: function (error) {

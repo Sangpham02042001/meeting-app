@@ -6,14 +6,6 @@
   --box-shadow: 2px 2px 5px #dadcdf;
 }
 
-.App {
-  position: relative;
-}
-
-.video-list {
-  display: flex;
-}
-
 .otherLogin > * {
   margin-right: 20px;
 }

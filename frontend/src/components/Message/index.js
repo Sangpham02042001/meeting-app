@@ -18,17 +18,16 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
     setIsPreviewImg(false)
   }
 
-  const getImageSize = () => {
+  const getImageSize = (numOfPhotos) => {
     let itemWidth, height, width
-    let numOfPhotos = message.photos.length
     if (numOfPhotos == 1) {
       itemWidth = '350px';
       width = '350px';
       height = '400px'
-    } else if (numOfPhotos == 2) {
+    } else if (numOfPhotos <= 3) {
       width = '410px';
       itemWidth = '200px'
-      height = '250px'
+      height = '200px'
     } else {
       width = '470px';
       itemWidth = '150px'
@@ -50,28 +49,32 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                     {message.content}
                   </p>
                 </Tooltip>}
-              {message.photos.length > 0 &&
+              {message.photos && message.photos.length > 0 &&
                 <Tooltip title={getTime(message.createdAt)} placement="left">
                   <div className='message-photo-list'>
                     {message.photos.map((photo, idx) => {
                       return (
-                        // <div key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                        //   style={{
-                        //     backgroundImage: `url(${baseURL}/api/messages/${message.id}/${photo.id})`,
-                        //     width: getImageSize().itemWidth,
-                        //     height: getImageSize().height
-                        //   }}
-                        //   className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                        // >
-                        // </div>
-                        <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                          src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
-                          className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                          style={{
-                            maxWidth: getImageSize().itemWidth,
-                            maxHeight: getImageSize().height,
-                          }} />
-                      )
+                        <div key={idx}>
+                          {
+                            message.photos.length > 1 ?
+                              <img onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                                src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  width: getImageSize(message.photos.length).itemWidth,
+                                  height: getImageSize(message.photos.length).height,
+                                }} />
+                              :
+                              <img onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                                src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  maxWidth: getImageSize(message.photos.length).itemWidth,
+                                  maxHeight: getImageSize(message.photos.length).height,
+                                }} />
+                          }
+
+                        </div>)
                     })}
                   </div>
                 </Tooltip>}
@@ -94,28 +97,31 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                       {message.content}
                     </p>
                   </Tooltip>}
-                {message.photos.length > 0 &&
+                {message.photos && message.photos.length > 0 &&
                   <Tooltip title={getTime(message.createdAt)} placement="right">
                     <div className='message-photo-list'
                       style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
                       {message.photos.map((photo, idx) => {
                         return (
-                          // <div key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                          //   style={{
-                          //     backgroundImage: `url(${baseURL}/api/messages/${message.id}/${photo.id})`,
-                          //     width: getImageSize().itemWidth,
-                          //     height: getImageSize().height
-                          //   }}
-                          //   className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                          // >
-                          // </div>
-                          <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                            src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
-                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                            style={{
-                              maxWidth: getImageSize().itemWidth,
-                              maxHeight: getImageSize().height,
-                            }} />
+                          <div key={idx}>
+                            {message.photos.length > 1 ?
+                              <img  onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                                src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  width: getImageSize(message.photos.length).itemWidth,
+                                  height: getImageSize(message.photos.length).height,
+                                }} />
+                              :
+                              <img onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                                src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  maxWidth: getImageSize(message.photos.length).itemWidth,
+                                  maxHeight: getImageSize(message.photos.length).height,
+                                }} />
+                            }
+                          </div>
                         )
                       })}
                     </div>
@@ -128,24 +134,19 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
       <Dialog
         open={isPreviewImg}
         onClose={handleClose}
-        // fullWidth={true}
         maxWidth='xl'
         style={{ backgroundColor: 'rgba(10, 10, 10, 0.5)' }}
       >
         <DialogContent style={{ padding: 0 }}>
           <IconButton
             sx={{
-              position: 'fixed',
-              right: '20px',
-              top: '20px',
-              color: '#FFF'
+              position: 'absolute',
+              right: '0px',
+              top: '0px',
             }}
             onClick={handleClose}>
             <CloseIcon />
           </IconButton>
-          {/* <div style={{ width: '1000px', height: '600px', backgroundImage: `url(${imgPreviewUrl})`, backgroundRepeat: 'no-repeat', backgroundPosition: 'center', backgroundSize: 'cover' }} >
-
-          </div> */}
           <img width="100%" height="100%" src={imgPreviewUrl} />
         </DialogContent>
       </Dialog >
