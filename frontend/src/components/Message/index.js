@@ -85,7 +85,7 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                     src={`${baseURL}/api/user/avatar/${message.userId}`} />
                 </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
                   src={`${baseURL}/api/user/avatar/${message.userId}`} />)}
-              <div className={message.photos.length > 0 ? 'message-with-photo' : ''}>
+              <div className={message.photos && message.photos.length > 0 ? 'message-with-photo' : ''}>
                 {message.content &&
                   <Tooltip title={getTime(message.createdAt)} placement='right'>
                     <p className={hasAvatar ? 'user-last-message' : ''}>

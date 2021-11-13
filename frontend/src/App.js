@@ -18,7 +18,7 @@ import TeamSetting from './routes/team/setting';
 
 function App() {
   return (
-    <BrowserRouter basename="/public" >
+    <HashRouter >
       <Switch>
         <Route exact path="/" component={() => <Welcome />} />
         <Route exact path="/login" component={() => <Login />} />
@@ -57,7 +57,7 @@ function App() {
         </PrivateRoute>
         <Route component={() => <NotFound />} />
       </Switch>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

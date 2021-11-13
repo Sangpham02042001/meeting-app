@@ -6,7 +6,7 @@ const sequelize = require('./models')
 const app = express();
 const server = http.createServer(app);
 const io = require('socket.io')(server, {
-    cors: '*'
+    cors: '*',
 })
 
 //routes
@@ -24,9 +24,10 @@ const socketServer = require('./socket');
 
 
 const PORT = process.env.PORT || 3001
-const HOST = process.env.HOST || 'locahost'
+const HOST = process.env.HOST || 'localhost'
 
 app.use('/public', express.static(process.env.PUBLIC_PATH || 'public'));
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
@@ -52,6 +53,7 @@ io.use((socket, next) => {
 
 io.on('connection', socket => {
     socketServer(socket)
+
 });
 
 server.listen(PORT, HOST, () => {

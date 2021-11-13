@@ -51,7 +51,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div style={{ display: 'flex' }}>
         <Link to='/home'>
-          <Avatar src='/public/meeting-logo.png' style={{
+          <Avatar src='meeting-logo.png' style={{
             width: '40px',
             height: '40px',
           }} />
@@ -75,7 +75,7 @@ export default function Navbar() {
               hasMore={hasMore}
               loader={<div className="notification justify-content-center"
                 style={{ display: 'flex', justifyContent: 'center' }}>
-                <Avatar src="/loading.gif" className="loadingNotification" />
+                <Avatar src="loading.gif" className="loadingNotification" />
               </div>}
               scrollableTarget="dropdown-notification"
               endMessage={<p style={{ textAlign: 'center' }}>
