@@ -50,7 +50,7 @@ router.route('/api/teams/:teamId/remove-members')
   .put(requireSignin, isAdmin, removeMembers)
 
 router.route('/api/teams/:teamId')
-  .get(getTeamInfo)
+  .get(requireSignin, getTeamInfo)
   .put(requireSignin, isAdmin, updateBasicTeamInfo)
   .delete(requireSignin, isAdmin, removeTeam)
 

@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   TextField, MenuItem, Button, Avatar,
-  Alert, Snackbar
+  Alert, Snackbar, Tooltip, IconButton
 } from '@mui/material'
 import { baseURL } from '../../../utils'
 import { updateBasicTeamInfo } from '../../../store/reducers/team.reducer'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 export default function TeamGeneralSetting() {
   const dispatch = useDispatch()
@@ -55,6 +56,17 @@ export default function TeamGeneralSetting() {
     }
   }
 
+  const copyTeamCode = () => {
+    navigator.clipboard.writeText(teamReducer.team.teamCode)
+    setMessage({
+      type: 'success',
+      content: 'Copied to clipboard'
+    })
+    setTimeout(() => {
+      setMessage({})
+    }, 3000)
+  }
+
   return (
     <div style={{ margin: 'auto', maxWidth: '450px' }}>
       <div>
@@ -68,6 +80,16 @@ export default function TeamGeneralSetting() {
           <input id="newAvatar" type="file" accept='image/*' style={{ display: 'none' }}
             onChange={handleImageChange}></input>
         </div>
+      </div>
+      <div style={{ margin: '10px 0', fontSize: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          Team code: <strong>{teamReducer.team.teamCode}</strong>
+        </div>
+        <Tooltip title="Copy to clipboard">
+          <IconButton onClick={copyTeamCode}>
+            <ContentCopyIcon />
+          </IconButton>
+        </Tooltip>
       </div>
       <TextField variant="standard"
         style={{ width: '100%', marginBottom: '20px' }}

@@ -428,7 +428,7 @@ export default function TeamDiscover() {
         {team.name && <>
           <DialogTitle>Team Info</DialogTitle>
           <DialogContent>
-            <h4>{team.name}</h4>
+            <h4>Team name: {team.name}</h4>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
               <Avatar sx={{ width: '100px', height: '100px' }} src={`${baseURL}/api/team/coverphoto/${team.id}`} />
             </div>
