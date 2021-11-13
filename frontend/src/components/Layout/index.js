@@ -186,7 +186,6 @@ export default function Layout({ children }) {
         <Navbar />
         <div className="layout">
           <div className="list-selection">
-
             <NavLink exact to='/home' activeClassName="btn-active">
               <button className="btn-default" >
                 <Tooltip title='Home' placement='right'>
