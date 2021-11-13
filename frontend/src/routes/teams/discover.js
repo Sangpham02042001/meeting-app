@@ -168,12 +168,12 @@ export default function TeamDiscover() {
         </Link>
         <h3>Join or create a team</h3>
         <div className='create-team-box'>
-          <img className="create-team-empty-img" src="/teamimage-empty.svg" alt="Team Image" />
+          <img className="create-team-empty-img" src="/public/teamimage-empty.svg" alt="Team Image" />
           <h5>Create Team</h5>
           <div style={{ marginBottom: '15px', display: 'flex' }}>
-            <Avatar className='create-team-box-user' src="/create-team-user1.svg" alt="Team Image" />
-            <Avatar className='create-team-box-user' src="/create-team-user2.svg" alt="Team Image" />
-            <Avatar className='create-team-box-user' src="/create-team-user3.svg" alt="Team Image" />
+            <Avatar className='create-team-box-user' src="/public/create-team-user1.svg" alt="Team Image" />
+            <Avatar className='create-team-box-user' src="/public/create-team-user2.svg" alt="Team Image" />
+            <Avatar className='create-team-box-user' src="/public/create-team-user3.svg" alt="Team Image" />
           </div>
           <Button variant="text" onClick={handleCreateTeam}
             startIcon={<GroupIcon style={{ color: 'rgb(25, 118, 210)' }} />}>

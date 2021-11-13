@@ -95,6 +95,11 @@
 .message-photo-list > div {
   border-radius: 15px;
   margin-right: 5px;
+  margin-bottom: 5px;
   background-size: cover;
   cursor: pointer;
+}
+
+.close-img-expand-btn {
+  background-color: #fff !important;
 }

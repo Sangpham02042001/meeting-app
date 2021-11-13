@@ -79,9 +79,9 @@
   transition: background-color 0.3s ease;
 }
 
-.navbar .dropdown-notification .notification span {
-  width: 100%;
+.notification p {
   text-align: right;
+  margin: 0;
 }
 
 .navbar .dropdown-content > a,
@@ -114,13 +114,9 @@
   background-repeat: no-repeat;
 }
 
-.navbar.notificationImg {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
+.navbar .notificationImg {
+  width: 40px;
+  height: 40px;
   margin-right: 10px;
 }
 

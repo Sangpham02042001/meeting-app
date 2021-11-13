@@ -4,17 +4,18 @@ import { useParams, Link, useHistory } from 'react-router-dom'
 import {
   Grid, Button, Dialog, DialogActions,
   DialogContent, Snackbar, Tooltip,
-  Alert
+  Alert, IconButton
 } from '@mui/material';
 import Picker, { SKIN_TONE_MEDIUM_DARK } from 'emoji-picker-react';
 import SendIcon from '@mui/icons-material/Send';
+import MicIcon from '@mui/icons-material/Mic';
+import MicNoneIcon from '@mui/icons-material/MicNone';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import ImageIcon from '@mui/icons-material/Image';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
-  confirmInvitations, getTeamMessages, cleanTeamState,
-  sendMessage, getTeamMeetMess
+  confirmInvitations, cleanTeamState, getTeamMeetMess
 } from '../../store/reducers/team.reducer'
 import { baseURL, broadcastLocal, socketClient, messageTimeDiff, getTime } from '../../utils'
 import Loading from '../../components/Loading'
@@ -23,6 +24,7 @@ import TeamHeader from '../../components/TeamHeader'
 import TeamList from '../../components/TeamList'
 import Message from '../../components/Message'
 import MeetingItem from './MeetingItem';
+import { v4 } from 'uuid'
 
 
 export default function Team(props) {
@@ -43,10 +45,13 @@ export default function Team(props) {
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
   const [isTeamInfoShow, setTeamInfoShow] = useState(false)
   const [isLargeImage, setLargeImageCheck] = useState(false)
+  const [forceRender, setForceRender] = useState(v4())
   const [message, setMessage] = useState('')
   const teamBody = useRef()
   const scrollRef = useRef(null)
   const inputRef = useRef(null)
+  const speechReplyRef = useRef('');
+  const voiceDetectRef = useRef(false);
 
 
   const [rows, setRows] = useState(1);
@@ -91,7 +96,6 @@ export default function Team(props) {
 
   useEffect(() => {
     if (teamReducer.teamLoaded) {
-      console.log('scroll ref', scrollRef.current.scrollHeight)
       if (scrollRef.current) {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
@@ -130,6 +134,46 @@ export default function Team(props) {
       }, 3000);
     }
   }, [images.length])
+
+  const runSpeechRecognition = () => {
+    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = new SpeechRecognition();
+
+    recognition.onstart = function () {
+      console.log('voice start')
+      voiceDetectRef.current = true;
+      setForceRender(v4());
+    }
+
+
+    recognition.onspeechend = function () {
+      console.log('voice end')
+      voiceDetectRef.current = false;
+      setForceRender(v4());
+      recognition.stop();
+    }
+
+    recognition.onerror = function (event) {
+      speechReplyRef.current = 'Error occurred in recognition: ' + event.error;
+      voiceDetectRef.current = false;
+      setForceRender(v4());
+      recognition.stop();
+    }
+
+    recognition.onresult = function (event) {
+      let transcript = event.results[0][0].transcript;
+      let confidence = event.results[0][0].confidence;
+      console.log(transcript, confidence * 100 + '%')
+      if (confidence > 0.6 && transcript.length) {
+        setInput(transcript)
+      } else {
+        speechReplyRef.current = "Could not understand!"
+      }
+
+    };
+
+    recognition.start();
+  }
 
 
   const handleCloseInvitedModal = () => {
@@ -376,6 +420,7 @@ export default function Team(props) {
                 variant="outlined"
                 type="text" placeholder="Chat"
                 className='team-message-input' name='message'
+                style={{ marginLeft: isTeamInfoShow ? '2%' : '5%' }}
                 autoComplete="off"
                 ref={inputRef}
                 rows={rows}
@@ -402,6 +447,15 @@ export default function Team(props) {
                   <Button onClick={chooseEmoji} >
                     <InsertEmoticonIcon color='secondary' />
                   </Button>
+                </Tooltip>
+                <Tooltip title="Speech to text">
+                  <IconButton onClick={runSpeechRecognition}>
+                    {voiceDetectRef.current ?
+                      <MicNoneIcon style={{ color: "#1A73E8" }} />
+                      :
+                      <MicIcon style={{ color: "#1A73E8" }} />
+                    }
+                  </IconButton>
                 </Tooltip>
                 <Tooltip title="Send message">
                   <Button variant="text" onClick={handleSendMessage}>

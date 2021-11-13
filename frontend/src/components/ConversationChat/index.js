@@ -476,6 +476,3 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     </>
   )
 }
-
-
-
