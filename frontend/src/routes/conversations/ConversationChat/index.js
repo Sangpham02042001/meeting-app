@@ -6,7 +6,7 @@ import Avatar from '../../../components/Avatar/index';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
   DialogContent, DialogContentText, DialogTitle, Typography,
-  Snackbar, Alert
+  Snackbar, Alert, ImageList, ImageListItem
 } from '@mui/material';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
@@ -67,7 +67,7 @@ const AccordionSummary = styled((props) => (
 }));
 
 const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
-  padding: theme.spacing(2),
+  padding: theme.spacing(0),
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
@@ -101,9 +101,9 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const [showInfo, setShowInfo] = useState(false);
   const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
   const [forceRender, setForceRender] = useState(v4());
-  const [isLargeImage, setLargeImageCheck] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
   const [imgPreview, setImgPreview] = useState(null);
+  const [messageAlert, setMessageAlert] = useState({})
 
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const messages = useSelector(state => state.conversationReducer.conversation.messages);
@@ -190,12 +190,22 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       let size = 0;
       for (const file of e.target.files) {
         size += Math.round(file.size / 1024)
+        if (file.type && !(new RegExp(/image\/*/).test(file.type))) {
+          setMessageAlert({
+            type: 'error',
+            content: 'Just upload image !'
+          })
+          return;
+        }
       }
       for (const file of imageMessage) {
         size += Math.round(file.size / 1024)
       }
       if (size > 5120) {
-        setLargeImageCheck(true)
+        setMessageAlert({
+          type: 'error',
+          content: 'Could not upload file > 5MB !'
+        })
         return
       }
       setImageMessage([...imageMessage, ...e.target.files]);
@@ -452,7 +462,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               <Typography>Customize Chat</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '15px' }}>
                 <Button startIcon={<DarkModeIcon color="primary" />}>Dark Mode</Button>
                 <Button startIcon={<ColorLensIcon color="primary" />}>Change Themes</Button>
               </div>
@@ -463,19 +473,26 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               <Typography>Shared Media</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <div>
-                {images.map((img, idx) => {
-                  return (
-                    <img key={idx}
+
+              <ImageList sx={{ width: '100%', height: 450 }}
+                cols={3}
+                rowHeight={160}
+              >
+                {images.map((img) => (
+                  <ImageListItem key={img.photoId}>
+                    <img
                       style={{
                         cursor: 'pointer'
                       }}
                       onClick={event => handlePreview(event, img.messageId, img.photoId)}
-                      width="100px" height="100px"
-                      src={imgPath.concat(`/${img.messageId}/${img.photoId}`)} />
-                  )
-                })}
-              </div>
+                      src={imgPath.concat(`/${img.messageId}/${img.photoId}`)}
+                      alt={'image'}
+                      loading="lazy"
+                    />
+                  </ImageListItem>
+                ))}
+              </ImageList>
+
             </AccordionDetails>
           </Accordion>
           <Accordion >
@@ -515,9 +532,11 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={isLargeImage} autoHideDuration={5000}>
-        <Alert severity="error">
-          Can not upload file &gt; 5MB !
+      <Snackbar open={messageAlert.content && messageAlert.content.length > 0}
+        autoHideDuration={3000}
+        onClose={e => { setMessageAlert({}) }}>
+        <Alert severity={messageAlert.type}>
+          {messageAlert.content}
         </Alert>
       </Snackbar>
     </>
