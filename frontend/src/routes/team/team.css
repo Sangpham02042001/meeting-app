@@ -84,6 +84,7 @@
 
 .send-image-label {
   padding-top: 2px;
+  cursor: pointer;
 }
 
 .image-message-upload {

@@ -13,6 +13,7 @@
   background: var(--primary-bg);
   box-shadow: none !important;
   margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .team-info-expand-container > div:first-child {
@@ -46,4 +47,8 @@
   background-size: cover;
   background-repeat: no-repeat;
   border-radius: 10px;
+}
+
+.team-info-expand-container::before {
+  display: none;
 }

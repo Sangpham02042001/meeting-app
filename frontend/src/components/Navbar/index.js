@@ -49,7 +49,7 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <div style={{ display: 'flex', marginLeft: '65px'}}>
+      <div style={{ display: 'flex' }}>
         <Link to='/home'>
           <Avatar src='meeting-logo.png' style={{
             width: '40px',

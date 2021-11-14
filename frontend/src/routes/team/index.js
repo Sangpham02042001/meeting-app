@@ -461,7 +461,8 @@ export default function Team(props) {
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Send message">
-                  <Button variant="text" onClick={handleSendMessage}>
+                  <Button variant="text" onClick={handleSendMessage}
+                    disabled={!input && !images.length}>
                     <SendIcon style={{ color: "#1A73E8" }} />
                   </Button>
                 </Tooltip>

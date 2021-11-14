@@ -272,7 +272,7 @@ export default function Profile() {
 						{teamReducer.joinedTeams.length > 0 ?
 							teamReducer.joinedTeams.map(team => {
 								return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} key={team.id}>
-									<Link style={{ margin: '10px', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+									<Link style={{ margin: '10px', display: 'flex', alignItems: 'center', textDecoration: 'none', color: '#000' }}
 										to={`/teams/${team.id}`}>
 										<Avatar alt="team coverphoto"
 											src={`${baseURL}/api/team/coverphoto/${team.id}")`}
