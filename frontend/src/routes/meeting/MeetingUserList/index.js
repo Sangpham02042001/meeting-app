@@ -8,7 +8,7 @@ import './meetingUserList.css';
 export default function MeetingUserList({ usersVisible, members }) {
     let user = useSelector(state => state.userReducer.user)
     return (
-        <div className="user-list">
+        <>
             <div className="user-list-header">
                 <div>
                     Participants
@@ -35,7 +35,7 @@ export default function MeetingUserList({ usersVisible, members }) {
                 })}
             </div>
 
-        </div>
+        </>
     )
 }
 

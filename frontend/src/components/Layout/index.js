@@ -9,7 +9,10 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { socketClient, broadcastLocal, baseURL } from '../../utils';
 import { sendMessageCv, conversationCalling, cancelCall } from '../../store/reducers/conversation.reducer';
-import { sendMessage, updateMeetingState, setMeetingActive, endActiveMeeting } from '../../store/reducers/team.reducer';
+import {
+  sendMessage, updateMeetingState, setMeetingActive, endActiveMeeting,
+  clearMeetingJoined
+} from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
   sendMeetingMessage
@@ -101,6 +104,10 @@ export default function Layout({ children }) {
       dispatch(userOutMeeting({
         meetingId, userId
       }))
+    })
+
+    socketClient.on('own-out-meeting', ({ meetingId }) => {
+      dispatch(clearMeetingJoined({ meetingId }))
     })
 
     socketClient.on('end-meeting', ({ meeting }) => {

@@ -11,13 +11,13 @@ import {
 } from '../../store/reducers/team.reducer'
 import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
 import Janus from '../../janus'
-import { janusServer } from '../../utils'
-import Avatar from '../../components/Avatar'
+import { janusServer, baseURL } from '../../utils'
+// import Avatar from '../../components/Avatar'
 import { v4 } from 'uuid'
 
 // ***React Material***
 import './meeting.css';
-import { Button, IconButton, Tooltip, Paper, styled, Badge } from '@mui/material';
+import { Button, IconButton, Tooltip, Snackbar, Alert, Badge, Avatar } from '@mui/material';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
@@ -42,6 +42,7 @@ const Meeting = (props) => {
 	const userReducer = useSelector(state => state.userReducer)
 	const teamReducer = useSelector(state => state.teamReducer)
 	const meetingReducer = useSelector(state => state.meetingReducer)
+	const [members, setMembers] = useState([])
 	const [isOpenInfo, setIsOpenInfo] = useState(false);
 	const [isOpenUsers, setIsOpenUsers] = useState(false);
 	const [isOpenChat, setIsOpenChat] = useState(false);
@@ -50,6 +51,7 @@ const Meeting = (props) => {
 	const [isEnableVideo, setIsEnableVideo] = useState(false);
 	const [isEnableAudio, setIsEnableAudio] = useState(false);
 	const [isMeetingEnd, setIsMeetingEnd] = useState(false);
+	const [message, setMessage] = useState('')
 	const [trigger, setTrigger] = useState(v4())
 
 	//******************janus************
@@ -100,6 +102,7 @@ const Meeting = (props) => {
 			plugin: "janus.plugin.videoroom",
 			opaqueId: opaqueId,
 			success: function (pluginHandle) {
+				console.log(`new remote feed, ${pluginHandle}`)
 				remoteFeed = pluginHandle;
 				remoteFeed.simulcastStarted = false;
 				Janus.log("Plugin attached! (" + remoteFeed.getPlugin() + ", id=" + remoteFeed.getId() + ")");
@@ -130,8 +133,8 @@ const Meeting = (props) => {
 					alert(msg["error"]);
 				} else if (event) {
 					if (event === "attached") {
-						console.log(msg)
-						for (var i = 1; i < 6; i++) {
+						console.log('new remote attach', msg)
+						for (let i = 1; i < 6; i++) {
 							if (!feedRefs.current[i]) {
 								feedRefs.current[i] = remoteFeed;
 								remoteFeed.rfindex = i;
@@ -142,13 +145,79 @@ const Meeting = (props) => {
 						remoteFeed.rfdisplay = msg["display"];
 						console.log("Successfully attached to feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") in room " + msg["room"]);
 					} else if (event === "event") {
-						console.log(msg)
+						//**************************************************************************************//
+						if (msg["publishers"]) {
+							let list = msg["publishers"];
+							Janus.debug("Got a list of available publishers/feeds:", list);
+							for (let f in list) {
+								let id = list[f]["id"];
+								let display = list[f]["display"];
+								let audio = list[f]["audio_codec"];
+								let video = list[f]["video_codec"];
+								Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
+								newRemoteFeed(id, display, audio, video);
+							}
+						} else if (msg["leaving"]) {
+							// One of the publishers has gone away?
+							let leaving = msg["leaving"];
+							Janus.log("Publisher left: " + leaving);
+							let remoteFeed = null;
+							for (let i = 1; i < 6; i++) {
+								if (feedRefs.current[i] && feedRefs.current[i].rfid == leaving) {
+									remoteFeed = feedRefs.current[i];
+									break;
+								}
+							}
+							if (remoteFeed != null) {
+								Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
+								// $('#remote'+remoteFeed.rfindex).empty().hide();
+								// $('#videoremote'+remoteFeed.rfindex).empty();
+								remoteStreams.current.splice(remoteFeed.rfindex, 1)
+								feedRefs.current[remoteFeed.rfindex] = null;
+								remoteFeed.detach();
+							}
+						} else if (msg["unpublished"]) {
+							let unpublished = msg["unpublished"];
+							Janus.log("Publisher left: " + unpublished);
+							if (unpublished === 'ok') {
+								sfuRef.current.hangup();
+								return;
+							}
+							let remoteFeed = null;
+							for (let i = 1; i < 6; i++) {
+								if (feedRefs.current[i] && feedRefs.current[i].rfid == unpublished) {
+									remoteFeed = feedRefs.current[i];
+									break;
+								}
+							}
+							if (remoteFeed != null) {
+								Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
+								// $('#remote'+remoteFeed.rfindex).empty().hide();
+								// $('#videoremote'+remoteFeed.rfindex).empty();
+								feedRefs.current[remoteFeed.rfindex] = null;
+								remoteStreams.current.splice(remoteFeed.rfindex, 1)
+								remoteFeed.detach();
+							}
+						} else if (msg["error"]) {
+							if (msg["error_code"] === 426) {
+								// This is a "no such room" error: give a more meaningful description
+								alert(
+									"<p>Apparently room <code>" + meetingId + "</code> (the one this demo uses as a test room) " +
+									"does not exist...</p><p>Do you have an updated <code>janus.plugin.videoroom.jcfg</code> " +
+									"configuration file? If not, make sure you copy the details of room <code>" + meetingId + "</code> " +
+									"from that sample in your current configuration file, then restart Janus and try again."
+								);
+							} else {
+								alert(msg["error"]);
+							}
+						}
+						//**************************************************************************************//
 					}
 				}
 				if (jsep) {
 					console.log('jsep answer ')
 					Janus.debug("Handling SDP as well...", jsep);
-					var stereo = (jsep.sdp.indexOf("stereo=1") !== -1);
+					let stereo = (jsep.sdp.indexOf("stereo=1") !== -1);
 					// Answer and attach
 					remoteFeed.createAnswer(
 						{
@@ -164,7 +233,7 @@ const Meeting = (props) => {
 							},
 							success: function (jsep) {
 								Janus.debug("Got SDP!", jsep);
-								var body = { request: "start", room: Number(meetingId) };
+								let body = { request: "start", room: Number(meetingId) };
 								remoteFeed.send({ message: body, jsep: jsep });
 							},
 							error: function (error) {
@@ -175,13 +244,14 @@ const Meeting = (props) => {
 				}
 			},
 			onremotestream: stream => {
+				console.log('onremotestream', remoteFeed.rfindex, remoteStreams.current.length)
 				remoteStreams.current[remoteFeed.rfindex] = {
 					stream,
 					name: JSON.parse(remoteFeed.rfdisplay).name,
 					userId: JSON.parse(remoteFeed.rfdisplay).userId
 				};
 				console.log(`new feed refs ${remoteStreams.current}`)
-				var videoTracks = stream.getVideoTracks();
+				let videoTracks = stream.getVideoTracks();
 				if (!videoTracks || videoTracks.length === 0) {
 					//No remote camera
 					console.log('remote turn off camera')
@@ -192,11 +262,23 @@ const Meeting = (props) => {
 				Janus.log(" ::: Got a cleanup notification (remote feed " + id + ") :::");
 				remoteFeed.simulcastStarted = false;
 				remoteStreams.current.splice(remoteFeed.rfindex, 1)
-				feedRefs.current.splice(remoteFeed.rfindex, 1)
+				feedRefs.current[remoteFeed.rfindex] = undefined
 				setTrigger(v4())
 			}
 		})
 	}
+
+	useEffect(() => {
+		if (meetingReducer.meeting.members.length) {
+			let length = meetingReducer.meeting.members.length
+			if (length > members.length) {
+				setMessage(`${meetingReducer.meeting.members[length - 1].userName} join`)
+			} else if (length < members.length) {
+				setMessage(`${members[members.length - 1].userName} out`)
+			}
+			setMembers([...meetingReducer.meeting.members])
+		}
+	}, [meetingReducer.meeting.members.length])
 
 	useEffect(() => {
 		if (!userReducer.loaded) {
@@ -263,34 +345,34 @@ const Meeting = (props) => {
 										publishOwnFeed(true);
 
 										if (msg["publishers"]) {
-											var list = msg["publishers"];
+											let list = msg["publishers"];
 											Janus.debug("Got a list of available publishers/feeds:", list);
-											for (var f in list) {
-												var id = list[f]["id"];
-												var display = list[f]["display"];
-												var audio = list[f]["audio_codec"];
-												var video = list[f]["video_codec"];
+											for (let f in list) {
+												let id = list[f]["id"];
+												let display = list[f]["display"];
+												let audio = list[f]["audio_codec"];
+												let video = list[f]["video_codec"];
 												Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
 												newRemoteFeed(id, display, audio, video);
 											}
 										}
 									} else if (event === 'event') {
 										if (msg["publishers"]) {
-											var list = msg["publishers"];
+											let list = msg["publishers"];
 											Janus.debug("Got a list of available publishers/feeds:", list);
-											for (var f in list) {
-												var id = list[f]["id"];
-												var display = list[f]["display"];
-												var audio = list[f]["audio_codec"];
-												var video = list[f]["video_codec"];
+											for (let f in list) {
+												let id = list[f]["id"];
+												let display = list[f]["display"];
+												let audio = list[f]["audio_codec"];
+												let video = list[f]["video_codec"];
 												Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
 												newRemoteFeed(id, display, audio, video);
 											}
 										} else if (msg["leaving"]) {
 											// One of the publishers has gone away?
-											var leaving = msg["leaving"];
+											let leaving = msg["leaving"];
 											console.log("Publisher left: " + leaving);
-											// var remoteFeed = null;
+											// let remoteFeed = null;
 											// if(remoteFeed != null) {
 											//     console.log("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
 											//     remoteFeed.detach();
@@ -303,12 +385,12 @@ const Meeting = (props) => {
 										sfuRef.current.handleRemoteJsep({ jsep: jsep });
 										// Check if any of the media we wanted to publish has
 										// been rejected (e.g., wrong or unsupported codec)
-										var audio = msg["audio_codec"];
+										let audio = msg["audio_codec"];
 										if (myStream.current && myStream.current.getAudioTracks() && myStream.current.getAudioTracks().length > 0 && !audio) {
 											// Audio has been rejected
 											console.warning("Our audio stream has been rejected, viewers won't hear us");
 										}
-										var video = msg["video_codec"];
+										let video = msg["video_codec"];
 										if (myStream.current && myStream.current.getVideoTracks() && myStream.current.getVideoTracks().length > 0 && !video) {
 											// Video has been rejected
 											console.warning("Our video stream has been rejected, viewers won't see us");
@@ -356,13 +438,9 @@ const Meeting = (props) => {
 
 		window.addEventListener('beforeunload', function (e) {
 			e.preventDefault()
-			broadcastLocal.postMessage('own-out-meeting')
+			// broadcastLocal.postMessage('own-out-meeting')
 		});
 
-		return () => {
-			setIsEnableAudio(false);
-			setIsEnableVideo(false);
-		}
 	}, []);
 
 	useEffect(() => {
@@ -472,26 +550,30 @@ const Meeting = (props) => {
 				<div className="my-video">
 					<video width="100%" ref={myVideo} muted autoPlay />
 					{(!isEnableVideo || !isVideoActive) &&
-						<div
-							style={{
-								position: 'absolute',
-								top: '20px', left: '70px',
-								color: '#fff',
-								textAlign: 'center',
-								fontSize: '24px',
-								zIndex: 10
-							}}>
-							<Avatar width="120px" height="120px"
-								userId={userReducer.user.id}
+						<div style={{
+							zIndex: 10,
+							position: 'absolute',
+							left: 0,
+							bottom: 0,
+							width: '100%'
+						}}>
+							<Avatar sx={{ width: "120px", height: '120px', zIndex: 10, position: 'absolute', bottom: '30px', left: '70px' }}
+								src={`${baseURL}/api/user/avatar/${userReducer.user.id}`}
 								alt={userReducer.user.firstName} />
-						</div>
-					}
+						</div>}
 					<h4>You</h4>
 				</div>
-				<MeetingVideo remoteStreams={remoteStreams} />
-				{isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
+				<div className="meeting-remote-videos"
+					style={{ width: isOpenChat || isOpenUsers || isOpenInfo ? '60%' : '80%' }}>
+					<MeetingVideo remoteStreams={remoteStreams} />
+				</div>
+				<div className="meeting-box" style={{
+					width: isOpenChat || isOpenInfo || isOpenUsers ? '20%' : '0%'
+				}}>
+					{isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
-				{isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} members={meetingReducer.meeting.members} />}
+					{isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} members={meetingReducer.meeting.members} />}
+				</div>
 
 			</div>
 			<div className="meeting-btn-list" >
@@ -589,6 +671,11 @@ const Meeting = (props) => {
 					</Tooltip>
 				</div>
 			</div>
+			<Snackbar open={message.length > 0} autoHideDuration={3000} onClose={e => setMessage('')}>
+				<Alert variant="filled" severity="info">
+					{message}
+				</Alert>
+			</Snackbar>
 		</div >
 			:
 			<div className="room-meeting" style={{

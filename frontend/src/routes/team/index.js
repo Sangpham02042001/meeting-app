@@ -45,7 +45,6 @@ export default function Team(props) {
   const [isRequestModalShow, setRequestModalShow] = useState(false)
   const [isNotMemberModalShow, setNotMemmberModalShow] = useState(false)
   const [isTeamInfoShow, setTeamInfoShow] = useState(false)
-  const [isLargeImage, setLargeImageCheck] = useState(false)
   const [forceRender, setForceRender] = useState(v4())
   const [message, setMessage] = useState('')
   const teamBody = useRef()
@@ -129,10 +128,10 @@ export default function Team(props) {
 
   useEffect(() => {
     if (images.length) {
-      setMessage('Upload image successfully')
-      setTimeout(() => {
-        setMessage('')
-      }, 3000);
+      setMessage({
+        type: 'success',
+        content: 'Upload image successfully'
+      })
     }
   }, [images.length])
 
@@ -256,16 +255,23 @@ export default function Team(props) {
     if (e.target.files.length) {
       let size = 0;
       for (const file of e.target.files) {
+        if (file.type && !(new RegExp(/image\/*/).test(file.type))) {
+          setMessage({
+            type: 'error',
+            content: 'Only accept upload images'
+          })
+          return;
+        }
         size += Math.round(file.size / 1024)
       }
       for (const file of images) {
         size += Math.round(file.size / 1024)
       }
-      if (size > 1024) {
-        setLargeImageCheck(true)
-        setTimeout(() => {
-          setLargeImageCheck(false)
-        }, 3000)
+      if (size > 5120) {
+        setMessage({
+          type: 'error',
+          content: 'Too large images to upload'
+        })
         return
       }
       setImages([...images, ...e.target.files])
@@ -461,10 +467,12 @@ export default function Team(props) {
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Send message">
-                  <Button variant="text" onClick={handleSendMessage}
-                    disabled={!input && !images.length}>
-                    <SendIcon style={{ color: "#1A73E8" }} />
-                  </Button>
+                  <div>
+                    <Button variant="text" onClick={handleSendMessage}
+                      disabled={!input && !images.length}>
+                      <SendIcon style={{ color: "#1A73E8" }} />
+                    </Button>
+                  </div>
                 </Tooltip>
               </div>
             </div>
@@ -524,15 +532,9 @@ export default function Team(props) {
       </DialogActions>
     </Dialog>
 
-    <Snackbar open={isLargeImage} autoHideDuration={3000}>
-      <Alert severity="error">
-        Too large images to upload
-      </Alert>
-    </Snackbar>
-
-    <Snackbar open={message.length > 0} autoHideDuration={3000}>
-      <Alert severity="success">
-        {message}
+    <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000} onClose={e => setMessage({})}>
+      <Alert severity={message.type}>
+        {message.content}
       </Alert>
     </Snackbar>
   </Grid>

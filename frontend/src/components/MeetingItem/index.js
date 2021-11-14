@@ -11,7 +11,7 @@ import Message from '../Message'
 
 export default function MeetingItem({ meeting }) {
   const user = useSelector(state => state.userReducer.user)
-  const hostName = (meeting.members.find(m => m.id === meeting.hostId) || {}).userName || ''
+  const hostName = ((meeting.members || []).find(m => m.id === meeting.hostId) || {}).userName || ''
   const [messages, setMessages] = useState([])
   const [error, setError] = useState('')
 

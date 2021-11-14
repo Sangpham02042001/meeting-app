@@ -5,6 +5,7 @@ import {
   Button, Dialog, DialogActions, DialogContent,
   DialogTitle, IconButton, Tooltip,
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 import InfoIcon from '@mui/icons-material/Info';
 import { baseURL } from '../../utils'
@@ -30,6 +31,7 @@ export default function TeamHeader({ showTeamInfo }) {
   const [isAudioActive, setAudioActive] = useState(true)
   const [isEnableVideo, setIsEnableVideo] = useState(false)
   const [isEnableAudio, setIsEnableAudio] = useState(false)
+  const [createMeetingPending, setCreateMeetingPending] = useState(false)
   const userVideo = useRef()
 
   function getConnectedDevices(type, callback) {
@@ -71,14 +73,10 @@ export default function TeamHeader({ showTeamInfo }) {
   }, [isJoinMeetingShow])
 
   useEffect(() => {
-    if (teamReducer.team.meetings.length) {
-
-      let meetingActive = teamReducer.team.meetingActive
+    if (teamReducer.team.meetingActive) {
+      setCreateMeetingPending(false)
     }
-    // if (meetingReducer.meetings.id) {
-    //   window.open(`/teams/${teamId}/meeting/${meetingReducer.meeting.id}`, '_blank')
-    // }
-  }, [teamReducer.team.meetings.length])
+  }, [teamReducer.team.meetingActive])
 
   const handleDeleteTeam = async () => {
     console.log('delete team')
@@ -122,8 +120,6 @@ export default function TeamHeader({ showTeamInfo }) {
     let checkAudioActive = userVideo.current.srcObject.getAudioTracks()[0].enabled;
     userVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
     setAudioActive(!isAudioActive)
-
-
   }
 
   const handleCreateMeeting = () => {
@@ -131,6 +127,7 @@ export default function TeamHeader({ showTeamInfo }) {
     dispatch(createTeamMeeting({
       teamId
     }))
+    setCreateMeetingPending(true)
   }
 
   const handleJoinMeeting = () => {
@@ -154,6 +151,8 @@ export default function TeamHeader({ showTeamInfo }) {
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
+        <LoadingButton loading={createMeetingPending} variant="text">
+        </LoadingButton>
         {
           teamReducer.team.meetingActive
           && <Button variant="contained"
@@ -258,7 +257,7 @@ export default function TeamHeader({ showTeamInfo }) {
             </DialogActions>
           </Dialog>
 
-          <Dialog open={isJoinMeetingShow} centered onClose={handleCloseJoinMeeting}>
+          <Dialog open={isJoinMeetingShow} centered="true" onClose={handleCloseJoinMeeting}>
             <DialogTitle>Join meeting
             </DialogTitle>
             <DialogContent>

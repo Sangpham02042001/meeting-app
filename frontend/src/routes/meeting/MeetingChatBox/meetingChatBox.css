@@ -1,4 +1,4 @@
-.chatbox {
+/* .chatbox {
   background: #fff;
   border-left: 1px solid #f1f3f4;
   display: flex;
@@ -11,19 +11,14 @@
   min-width: 0px;
   width: 340px;
   border-radius: 10px;
-}
+} */
 
-.chatbox p {
-  font-size: 14px;
-  max-width: 180px !important;
-}
-
-.chatbox .message-photo {
+.meeting-box .message-photo {
   width: 200px;
   height: 150px;
 }
 
-.chatbox .image-message-upload {
+.meeting-box .image-message-upload {
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -60,7 +55,7 @@
   border: none;
 }
 
-.chatbox .message-list {
+.meeting-box .message-list {
   padding: 10px;
   width: 100%;
 }

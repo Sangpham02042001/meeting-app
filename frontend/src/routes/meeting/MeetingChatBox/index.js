@@ -91,7 +91,7 @@ export default function ChatBox({ chatVisible }) {
     }
 
     return (
-        <div className="chatbox">
+        <>
             <div className="chatbox-header">
                 <div>
                     Messages
@@ -147,7 +147,7 @@ export default function ChatBox({ chatVisible }) {
                     <SendIcon style={{ color: "#1A73E8" }} />
                 </IconButton>
             </div>
-        </div>
+        </>
     )
 }
 

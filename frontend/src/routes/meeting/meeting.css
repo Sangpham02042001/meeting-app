@@ -22,7 +22,10 @@
   /* border: 1px solid #fff; */
   /* margin: 5px; */
   position: relative;
-  width: 250px;
+  width: 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .my-video > video {
@@ -59,4 +62,21 @@
 .meeting-btn-list button:disabled {
   color: #615e5e;
   border-color: #615e5e;
+}
+
+.meeting-remote-videos {
+  transition: width 0.3s;
+}
+
+.meeting-box {
+  background: #fff;
+  transition: width 0.3s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  opacity: 1;
+  overflow-x: hidden;
+  right: 20px;
+  top: 0;
+  border-radius: 10px;
 }

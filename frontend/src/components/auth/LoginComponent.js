@@ -23,9 +23,6 @@ export default function Login() {
                 history.push('/home')
             } else if (userReducer.error) {
                 setLoginError(userReducer.error)
-                setTimeout(() => {
-                    setLoginError('')
-                }, 3000)
             } else {
                 if (!userReducer.authenticated) {
                     dispatch(isAuthenticated())
@@ -74,7 +71,7 @@ export default function Login() {
                                 disabled={!email || !password}>Log in</Button>
                         </div>
                     </form> <br /> <br />
-                    <Snackbar open={loginError.length > 0} autoHideDuration={3000}>
+                    <Snackbar open={loginError.length > 0} autoHideDuration={3000} onClose={e => setLoginError('')}>
                         <Alert severity="error">
                             {loginError}
                         </Alert>

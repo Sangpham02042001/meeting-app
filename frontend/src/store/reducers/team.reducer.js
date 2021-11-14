@@ -404,6 +404,15 @@ export const teamSlice = createSlice({
           state.team.meetings.splice(idx, 1, meeting)
         }
       }
+      if ((state.meetingJoined || {}).id === meeting.id) {
+        state.meetingJoined = null
+      }
+    },
+    clearMeetingJoined: (state, action) => {
+      let { meetingId } = action.payload
+      if (meetingId === (state.meetingJoined || {}).id) {
+        state.meetingJoined = null
+      }
     }
   },
   extraReducers: {
@@ -674,6 +683,7 @@ export const teamSlice = createSlice({
 })
 
 export const { cleanTeamState, sendMessage, updateMeetingState,
-  setMeetingJoined, setMeetingActive, endActiveMeeting } = teamSlice.actions;
+  setMeetingJoined, setMeetingActive, endActiveMeeting,
+  clearMeetingJoined } = teamSlice.actions;
 
 export default teamSlice.reducer

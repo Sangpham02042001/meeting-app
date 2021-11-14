@@ -66,16 +66,10 @@ export default function SignUp() {
         event.preventDefault()
         if (password.length < 6) {
             setPasswordError('Password must has at least 6 characters')
-            setTimeout(() => {
-                setPasswordError('')
-            }, 3000)
             return
         }
         if (password !== passwordConfirmation) {
             setPasswordCfError("Confirm password doesn't match")
-            setTimeout(() => {
-                setPasswordCfError('')
-            }, 3000)
             return
         }
         let data = {
@@ -99,9 +93,6 @@ export default function SignUp() {
             })
             .catch(error => {
                 setSignupError(email + " is already being used.");
-                setTimeout(() => {
-                    setSignupError('')
-                }, 3000)
             })
     }
     return (
@@ -184,19 +175,19 @@ export default function SignUp() {
                     </Dialog>
 
 
-                    <Snackbar open={passwordError} autoHideDuration={3000}>
+                    <Snackbar open={passwordError.length > 0} autoHideDuration={3000} onClose={e => setPasswordError('')}>
                         <Alert severity="error">
                             {passwordError}
                         </Alert>
                     </Snackbar>
 
-                    <Snackbar open={passwordCfError} autoHideDuration={3000}>
+                    <Snackbar open={passwordCfError.length > 0} autoHideDuration={3000} onClose={e => setPasswordCfError('')}>
                         <Alert severity="error">
                             {passwordCfError}
                         </Alert>
                     </Snackbar>
 
-                    <Snackbar open={signupError} autoHideDuration={3000}>
+                    <Snackbar open={signupError.length > 0} autoHideDuration={3000} onClose={e => setSignupError('')}>
                         <Alert severity="error">
                             {signupError}
                         </Alert>

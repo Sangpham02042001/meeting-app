@@ -122,12 +122,13 @@ const socketServer = (socket) => {
                 meetingId: socket.meetingId,
                 userId: socket.userId
             })
+            let meeting
             if (message) {
                 let members = await getActiveMemberMeeting({ meetingId: socket.meetingId });
                 if (members.length === 0) {
                     console.log('all out meeting')
                     members = await updateMeetingState({ meetingId: socket.meetingId })
-                    let meeting = await getMeetingInfo({ meetingId: socket.meetingId })
+                    meeting = await getMeetingInfo({ meetingId: socket.meetingId })
                     console.log(members)
                     for (let m of members) {
                         if (userSockets[m.userId]) {
@@ -140,7 +141,11 @@ const socketServer = (socket) => {
 
                     }
                 } else {
-
+                    for (const socketId of userSockets[socket.userId]) {
+                        socket.to(socketId).emit('own-out-meeting', {
+                            meetingId: socket.meetingId
+                        })
+                    }
                     socket.to(`meeting-${socket.meetingId}`).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.userId });
                 }
             }

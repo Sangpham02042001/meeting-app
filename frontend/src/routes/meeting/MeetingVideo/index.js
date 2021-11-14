@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import './meetingVideo.css'
 
 const MeetingVideo = ({ remoteStreams }) => {
@@ -8,7 +8,7 @@ const MeetingVideo = ({ remoteStreams }) => {
     <div className="remote-videos">
       {
         remoteStreams.current.length && remoteStreams.current.map((remote, idx) => {
-          return <Video key={remote} stream={remote.stream} name={remote.name} />
+          return <Video key={idx} stream={remote.stream} name={remote.name} />
         })
       }
     </div>
@@ -27,19 +27,10 @@ const Video = ({ stream, name }) => {
   return (
     <div className="remote-video-item">
       <video width="100%" height="100%" ref={videoRef} autoPlay />
-      {/* {!isOpenCamera && <div
-				style={{
-					position: 'absolute',
-					top: '20px', left: '70px',
-					color: '#fff',
-					textAlign: 'center',
-					fontSize: '24px',
-					zIndex: 10
-				}}>
-				<Avatar sx={{ width: "120px", height: '120px' }}
-					src={`${baseURL}/api/user/avatar/${userId}`}
-					alt={name} />
-			</div>} */}
+      {!isOpenCamera &&
+        <Avatar sx={{ width: "120px", height: '120px', zIndex: 10 }}
+          src={`${baseURL}/api/user/avatar/${userId}`}
+          alt={name} />}
       <h4>{name}</h4>
     </div>
   );
