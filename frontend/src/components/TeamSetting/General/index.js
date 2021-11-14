@@ -39,7 +39,6 @@ export default function TeamGeneralSetting() {
         content: 'Edit team successfully'
       })
       setTimeout(() => {
-        setMessage({})
         setEditted(false)
       }, 3000)
     }
@@ -62,9 +61,6 @@ export default function TeamGeneralSetting() {
       type: 'success',
       content: 'Copied to clipboard'
     })
-    setTimeout(() => {
-      setMessage({})
-    }, 3000)
   }
 
   return (
@@ -112,7 +108,7 @@ export default function TeamGeneralSetting() {
           && !imageUrl && (teamType === teamReducer.team.teamType)}>
         Save the change
       </Button>
-      <Snackbar open={message.content && message.content.length} autoHideDuration={3000}>
+      <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000} onClose={e => setMessage({})}>
         <Alert severity={message.type}>
           {message.content}
         </Alert>

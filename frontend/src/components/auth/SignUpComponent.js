@@ -26,8 +26,6 @@ export default function SignUp() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
-    const [passwordError, setPasswordError] = useState('')
-    const [passwordCfError, setPasswordCfError] = useState('')
     const [isDialogShow, setModalShow] = useState(false)
     const [signupError, setSignupError] = useState('')
 
@@ -46,13 +44,13 @@ export default function SignUp() {
             case "password":
                 setPassword(val)
                 if (val.length >= 6) {
-                    setPasswordError('')
+                    setSignupError('')
                 }
                 break;
             case "passwordConfirmation":
                 setPasswordConfirmation(val)
                 if (val === password) {
-                    setPasswordCfError('')
+                    setSignupError('')
                 }
                 break;
         }
@@ -65,11 +63,11 @@ export default function SignUp() {
     const handleSubmit = (event) => {
         event.preventDefault()
         if (password.length < 6) {
-            setPasswordError('Password must has at least 6 characters')
+            setSignupError('Password must has at least 6 characters')
             return
         }
         if (password !== passwordConfirmation) {
-            setPasswordCfError("Confirm password doesn't match")
+            setSignupError("Confirm password doesn't match")
             return
         }
         let data = {
@@ -173,19 +171,6 @@ export default function SignUp() {
                             </Button>
                         </DialogActions>
                     </Dialog>
-
-
-                    <Snackbar open={passwordError.length > 0} autoHideDuration={3000} onClose={e => setPasswordError('')}>
-                        <Alert severity="error">
-                            {passwordError}
-                        </Alert>
-                    </Snackbar>
-
-                    <Snackbar open={passwordCfError.length > 0} autoHideDuration={3000} onClose={e => setPasswordCfError('')}>
-                        <Alert severity="error">
-                            {passwordCfError}
-                        </Alert>
-                    </Snackbar>
 
                     <Snackbar open={signupError.length > 0} autoHideDuration={3000} onClose={e => setSignupError('')}>
                         <Alert severity="error">

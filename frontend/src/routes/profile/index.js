@@ -81,7 +81,6 @@ export default function Profile() {
 				content: 'Edit profile successfully'
 			})
 			setTimeout(() => {
-				setMessage({})
 				setEditted(false)
 			}, 3000)
 		}
@@ -418,7 +417,7 @@ export default function Profile() {
 					</Button>
 				</DialogActions>
 			</Dialog>
-			<Snackbar open={message.content && message.content.length} autoHideDuration={3000}>
+			<Snackbar open={message.content && message.content.length} autoHideDuration={3000} onClose={e => setMessage({})}>
 				<Alert severity={message.type}>
 					{message.content}
 				</Alert>

@@ -42,9 +42,6 @@ export default function TeamDiscover() {
         type: 'error',
         content: teamReducer.error
       })
-      setTimeout(() => {
-        setMessage({})
-      }, 3000)
     }
   }, [teamReducer.error])
 
@@ -60,9 +57,6 @@ export default function TeamDiscover() {
         type: 'success',
         content: 'Create new team successfully'
       })
-      setTimeout(() => {
-        setMessage({})
-      }, 3000)
     }
   }, [teamReducer.joinedTeams.length])
 
@@ -194,9 +188,6 @@ export default function TeamDiscover() {
           content: 'Something wrong, try again!'
         })
       }
-      setTimeout(() => {
-        setMessage({})
-      }, 3000)
     }
   }
 
@@ -456,7 +447,7 @@ export default function TeamDiscover() {
         </>}
       </Dialog>
 
-      <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000}>
+      <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000} onClose={e => setMessage({})}>
         <Alert severity={message.type}>
           {message.content}
         </Alert>

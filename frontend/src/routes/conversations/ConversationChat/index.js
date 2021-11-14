@@ -196,9 +196,6 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       }
       if (size > 5120) {
         setLargeImageCheck(true)
-        setTimeout(() => {
-          setLargeImageCheck(false)
-        }, 3000)
         return
       }
       setImageMessage([...imageMessage, ...e.target.files]);
