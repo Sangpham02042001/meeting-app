@@ -23,8 +23,9 @@ import './team.css'
 import TeamHeader from '../../components/TeamHeader'
 import TeamList from '../../components/TeamList'
 import Message from '../../components/Message'
-import MeetingItem from './MeetingItem';
+import MeetingItem from '../../components/MeetingItem';
 import { v4 } from 'uuid'
+import TeamInfo from '../../components/TeamInfo';
 
 
 export default function Team(props) {
@@ -321,6 +322,8 @@ export default function Team(props) {
     setRows(currentRows < maxRows ? currentRows : maxRows)
     setInput(event.target.value);
   }
+
+
   return (teamReducer.teamLoaded && <Grid container>
     <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--gray-shadow)' }}>
       <TeamList />
@@ -330,7 +333,7 @@ export default function Team(props) {
       {teamReducer.teamLoaded && <div className="team-container">
         <div className="team-body" ref={teamBody}
           // onClick={e => { e.preventDefault(); setIsOpenEmojiList(false) }}
-          style={{ width: isTeamInfoShow ? '80%' : '100%', position: 'relative' }}>
+          style={{ width: isTeamInfoShow ? '70%' : '100%', position: 'relative' }}>
           {currentNumOfMeetMess !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
             ref={scrollRef} style={{
               height: teamBody.current && teamBody.current.offsetHeight ?
@@ -420,7 +423,7 @@ export default function Team(props) {
                 variant="outlined"
                 type="text" placeholder="Chat"
                 className='team-message-input' name='message'
-                style={{ marginLeft: isTeamInfoShow ? '2%' : '5%' }}
+                style={{ marginLeft: isTeamInfoShow ? '1%' : '5%' }}
                 autoComplete="off"
                 ref={inputRef}
                 rows={rows}
@@ -467,7 +470,7 @@ export default function Team(props) {
           </form>
         </div>
         {<div className="team-info-container" style={{
-          width: isTeamInfoShow ? '24%' : '0px',
+          width: isTeamInfoShow ? '30%' : '0px',
           paddingLeft: 0
         }}>
           <div className='arrow-expand-container' onClick={e => {
@@ -478,24 +481,7 @@ export default function Team(props) {
               <KeyboardArrowRightIcon className={isTeamInfoShow ? 'arrow-rotate' : 'arrow-rotate-reverse'} />
             </Tooltip>
           </div>
-          <div style={{ padding: '10px 0' }}>
-            <strong>About</strong>
-            <p style={{ paddingLeft: '10px' }}>{teamReducer.team.name}</p>
-
-            <strong>Members ({teamReducer.team.members.length})</strong>
-            {teamReducer.team.members.slice(0, 5).map(member => (
-              <span key={`member ${member.id}`}
-                style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', paddingLeft: '10px' }}>
-                <div className='team-info-user-avatar'
-                  style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${member.id}")` }}>
-                </div>
-                <p style={{ marginBottom: 0 }}>{member.userName}</p>
-              </span>
-            ))}
-            {teamReducer.team.members.length > 5 && <Link to="#">
-              See all members
-            </Link>}
-          </div>
+          <TeamInfo />
         </div>}
       </div>}
     </Grid>
