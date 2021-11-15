@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { cancelCall, getAllImages, getParticipant } from '../../../store/reducers/conversation.reducer'
-import Message from '../../../components/Message';
+import Message from '../../../components/MessageConver';
 import Avatar from '../../../components/Avatar/index';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
@@ -77,6 +77,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 export default function Index({ conversation, user }) {
   const participant = useSelector(state => state.conversationReducer.conversation.participant);
   const dispatch = useDispatch();
+
   useEffect(() => {
     dispatch(getParticipant({ participantId: conversation.participantId }));
   }, [conversation.participantId])
@@ -84,20 +85,21 @@ export default function Index({ conversation, user }) {
   return (
     <>
       {participant &&
-        <ConversationChat conversationId={conversation.conversationId} user={user} participant={participant} />
+        <ConversationChat conversationId={conversation.conversationId} user={user} participant={participant} key={participant.id} />
       }
     </>
   )
 }
 
 const ConversationChat = ({ conversationId, user, participant }) => {
+
   const [content, setContent] = useState('');
   const [rows, setRows] = useState(1);
   const minRows = 1;
   const maxRows = 5;
-  const imgPath = `${baseURL}/api/messages`
-  const [imageMessage, setImageMessage] = useState([]);
-  const [imageMessageUrl, setImageMessageUrl] = useState([]);
+  const filePath = `${baseURL}/api/messages`
+  const [filesMessage, setFilesMessage] = useState([]);
+  const [filesMessageUrl, setFilesMessageUrl] = useState([]);
   const [showInfo, setShowInfo] = useState(false);
   const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
   const [forceRender, setForceRender] = useState(v4());
@@ -115,12 +117,17 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const [audioURL, isRecording, startRecording, stopRecording] = useRecorder();
 
   useEffect(() => {
+    if (showInfo) {
+      dispatch(getAllImages({ conversationId }))
+    }
+  }, [showInfo])
+
+  useEffect(() => {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages.length])
 
   useEffect(() => {
     dispatch(getMessages({ conversationId }))
-    dispatch(getAllImages({ conversationId }))
     dispatch(readConversation({ conversationId, userId: user.id }))
   }, [conversationId])
 
@@ -154,12 +161,12 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   }
 
   const handleSendMessage = (event) => {
-    if (content !== '' || imageMessage) {
-      console.log(imageMessage);
-      socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, images: imageMessage });
+    if (content !== '' || filesMessage) {
+      console.log(filesMessage);
+      socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, files: filesMessage });
       setContent('');
-      setImageMessage([]);
-      setImageMessageUrl([]);
+      setFilesMessage([]);
+      setFilesMessageUrl([]);
       setRows(minRows);
     }
   }
@@ -184,21 +191,21 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     dispatch(cancelCall({ conversationId }))
   }
 
-  const onImageInputChange = e => {
+  const onFileInputChange = e => {
     e.preventDefault()
     if (e.target.files.length) {
       let size = 0;
+      let files = []
       for (const file of e.target.files) {
         size += Math.round(file.size / 1024)
-        if (file.type && !(new RegExp(/image\/*/).test(file.type))) {
-          setMessageAlert({
-            type: 'error',
-            content: 'Just upload image !'
-          })
-          return;
-        }
+        console.log(file)
+        files.push({
+          type: file.type,
+          name: file.name,
+          data: file
+        })
       }
-      for (const file of imageMessage) {
+      for (const file of filesMessage) {
         size += Math.round(file.size / 1024)
       }
       if (size > 5120) {
@@ -208,13 +215,29 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         })
         return
       }
-      setImageMessage([...imageMessage, ...e.target.files]);
+      setFilesMessage([...filesMessage, ...files]);
       let urls = []
       for (const file of e.target.files) {
+        // if ((/image\/(?!svg)/.test(file.type))) {
+        //   let url = URL.createObjectURL(file)
+        //   urls.push({
+        //     type: 'image',
+        //     url
+        //   })
+        // } else {
+        //   urls.push({
+        //     type: 'file',
+        //     name: file.name
+        //   })
+        // }
         let url = URL.createObjectURL(file)
-        urls.push(url)
+        urls.push({
+          type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file',
+          url,
+          name: file.name
+        })
       }
-      setImageMessageUrl([...imageMessageUrl, ...urls])
+      setFilesMessageUrl([...filesMessageUrl, ...urls])
     }
   }
 
@@ -248,7 +271,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       let confidence = event.results[0][0].confidence;
       console.log(transcript, confidence * 100 + '%')
       if (confidence < 0.6 && transcript.length) {
-        socketClient.emit('conversation-sendMessage', { content: transcript, senderId: user.id, receiverId: participant.id, conversationId, image: null });
+        socketClient.emit('conversation-sendMessage', { content: transcript, senderId: user.id, receiverId: participant.id, conversationId, files: null });
       } else {
         speechReplyRef.current = "Could not understand!";
         setForceRender(v4());
@@ -262,7 +285,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const handlePreview = (event, messageId, photoId) => {
     event.preventDefault();
     setIsPreview(true);
-    setImgPreview(imgPath.concat(`/${messageId}/${photoId}`));
+    setImgPreview(filePath.concat(`/${messageId}/${photoId}`));
   }
 
   const handleRecord = () => {
@@ -336,99 +359,131 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
           <div className="input-message" >
             <div className="input-image">
-              {imageMessage.map((imgMessage, idx) => {
-                let imgIdx = imageMessage.findIndex(img => img === imgMessage)
-                let imgUrl = imageMessageUrl[imgIdx];
+              {filesMessageUrl.map((fileUrl, idx) => {
                 return (
-                  <div key={idx} style={{
-                    position: 'relative',
-                    width: '150px',
-                    height: '150px',
-                  }}>
+                  <div key={idx}
+                    style={{
+                      position: 'relative',
+                      margin: '5px',
+
+                    }}>
                     <IconButton
                       style={{
                         position: 'absolute',
-                        right: '-25px',
+                        right: '-8px',
                         top: '-8px',
                         zIndex: '10'
                       }}
                       onClick={e => {
                         e.preventDefault()
-                        setImageMessage(imgMsgList => {
-                          let tmpArr = [...imgMsgList];
-                          tmpArr.splice(imgIdx, 1);
+                        setFilesMessage(files => {
+                          let tmpArr = [...files];
+                          tmpArr.splice(idx, 1);
                           return tmpArr;
                         })
-                        setImageMessageUrl(imgMsgUrlList => {
-                          let tmpArr = [...imgMsgUrlList];
-                          tmpArr.splice(imgIdx, 1);
+                        setFilesMessageUrl(filesUrl => {
+                          let tmpArr = [...filesUrl];
+                          tmpArr.splice(idx, 1);
                           return tmpArr;
                         })
                       }}>
                       <CloseIcon />
                     </IconButton>
-                    <img width="100%" height="100%" src={`${imgUrl}`} />
+                    {fileUrl.type === 'image' ?
+                      <div style={{
+                        position: 'relative',
+                        width: '150px',
+                        height: '150px',
+                      }}>
+                        <img width="100%" height="100%" src={`${fileUrl.url}`} />
+                      </div>
+                      :
+                      <a style={{
+                        background: '#fff',
+                        borderRadius: '10px',
+                        padding: '20px',
+                        fontWeight: '600'
+                      }}
+                        href={`${fileUrl.url}`}
+                        download={fileUrl.name}
+                      >
+                        {fileUrl.name}
+                      </a>
+                    }
                   </div>
                 )
               })
               }
             </div>
 
-            <textarea
-              onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}
-              placeholder="Send message"
-              rows={rows}
-              onChange={onWriteMessage}
-              onKeyDown={handleEnterMessage}
-              value={content}
-            />
-
+            <div style={{ display: 'flex' }}>
+              <textarea
+                onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}
+                placeholder="Send message"
+                rows={rows}
+                onChange={onWriteMessage}
+                onKeyDown={handleEnterMessage}
+                value={content}
+              />
+              <Tooltip title="Choose an emoji">
+                <IconButton onClick={chooseEmoji} >
+                  <InsertEmoticonIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
           </div>
 
           <div className="input-btn">
+            <div style={{ display: content.length ? 'none' : 'flex' }}>
+              <Tooltip title="Attach photos">
+                <IconButton >
+                  <label style={{
+                    cursor: 'pointer',
+                    display: 'flex'
+                  }}
+                    htmlFor="photos">
+                    <ImageIcon color='success' />
+                  </label>
+                  <input type="file" accept='image/*'
+                    onChange={onFileInputChange}
+                    multiple="multiple"
+                    id="photos"
+                    style={{
+                      display: 'none'
+                    }} />
+                </IconButton>
 
-            <Tooltip title="Attach photos">
-              <IconButton >
-                <label style={{
-                  cursor: 'pointer',
-                  display: 'flex'
-                }}
-                  htmlFor="images">
-                  <ImageIcon color='success' />
-                </label>
-                <input type="file" accept='image/*'
-                  onChange={onImageInputChange}
-                  multiple="multiple"
-                  id="images"
-                  style={{
-                    display: 'none'
-                  }} />
-              </IconButton>
+              </Tooltip>
 
-            </Tooltip>
+              <Tooltip title="Attach a file">
+                <IconButton >
+                  <label style={{
+                    cursor: 'pointer',
+                    display: 'flex'
+                  }}
+                    htmlFor="files">
+                    <AttachFileIcon color="primary" />
+                  </label>
+                  <input type="file"
+                    onChange={onFileInputChange}
+                    multiple="multiple"
+                    id="files"
+                    style={{
+                      display: 'none'
+                    }} />
+                </IconButton>
+              </Tooltip>
 
-            <Tooltip title="Choose an emoji">
-              <IconButton onClick={chooseEmoji} >
-                <InsertEmoticonIcon color="secondary" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Attach a file">
-              <IconButton >
-                <AttachFileIcon color="primary" />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Speech to text">
-              <IconButton onClick={runSpeechRecognition}>
-                {voiceDetectRef.current ?
-                  <MicNoneIcon color="secondary" />
-                  :
-                  <MicIcon color="secondary" />
-                }
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Record">
+              <Tooltip title="Speech to text">
+                <IconButton onClick={runSpeechRecognition}>
+                  {voiceDetectRef.current ?
+                    <MicNoneIcon color="primary" />
+                    :
+                    <MicIcon color="primary" />
+                  }
+                </IconButton>
+              </Tooltip>
+              {/* <Tooltip title="Record">
               <IconButton onClick={handleRecord}>
                 {isRecording ?
                   <MicNoneIcon style={{ color: "#1A73E8" }} />
@@ -436,15 +491,13 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                   <MicIcon style={{ color: "#1A73E8" }} />
                 }
               </IconButton>
-            </Tooltip>
-
-
+            </Tooltip> */}
+            </div>
             <Tooltip title="Send message" style={{ display: !content.length && 'none' }}>
-              <Button onClick={handleSendMessage} >
-                <SendIcon style={{ color: "#1A73E8" }} />
-              </Button>
+              <IconButton onClick={handleSendMessage} >
+                <SendIcon color="primary" />
+              </IconButton>
             </Tooltip>
-
           </div>
         </div>
       </div>
@@ -473,8 +526,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               <Typography>Shared Media</Typography>
             </AccordionSummary>
             <AccordionDetails>
-
-              <ImageList sx={{ width: '100%', height: 450 }}
+              <ImageList sx={{ width: '100%', maxHeight: 450 }}
                 cols={3}
                 rowHeight={160}
               >
@@ -485,7 +537,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                         cursor: 'pointer'
                       }}
                       onClick={event => handlePreview(event, img.messageId, img.photoId)}
-                      src={imgPath.concat(`/${img.messageId}/${img.photoId}`)}
+                      src={filePath.concat(`/${img.messageId}/${img.photoId}`)}
                       alt={'image'}
                       loading="lazy"
                     />

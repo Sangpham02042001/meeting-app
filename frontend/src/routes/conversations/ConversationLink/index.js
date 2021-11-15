@@ -6,6 +6,28 @@ import { axiosAuth } from '../../../utils';
 import { useHistory } from 'react-router';
 import Avatar from '../../../components/Avatar';
 import ImageIcon from '@mui/icons-material/Image';
+import AttachFile from '@mui/icons-material/AttachFile';
+
+const getElementLastMessage = (lastMessage) => {
+    if (lastMessage.photos && lastMessage.photos.length) {
+        return (
+            <>
+                <ImageIcon color='success' />
+                Image
+            </>
+        )
+    } else if (lastMessage.files && lastMessage.files.length) {
+        return (
+            <>
+                <AttachFile color='primary' />
+                Attach file
+            </>
+        )
+    } else {
+        return lastMessage.content;
+    }
+
+}
 
 export default function ConversationLink({ conversation, user }) {
     const [participant, setParticipant] = useState(null);
@@ -45,9 +67,9 @@ export default function ConversationLink({ conversation, user }) {
                         <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
                             {lastMessage &&
                                 (lastMessage.userId === user.id ?
-                                    <span>You: {(lastMessage.photos && lastMessage.photos.length) ? <ImageIcon color='success' /> : lastMessage.content}</span>
+                                    <span>You: {getElementLastMessage(lastMessage)}</span>
                                     :
-                                    <span>{(lastMessage.photos && lastMessage.photos.length) ? <ImageIcon color='success' /> : lastMessage.content}</span>
+                                    <span> {getElementLastMessage(lastMessage)}</span>
                                 )
                             }
                         </div>

@@ -14,6 +14,9 @@ Media.init({
     pathName: {
         type: DataTypes.STRING,
     },
+    name: {
+        type: DataTypes.STRING,
+    },
     type: {
         type: DataTypes.STRING(10),
     }

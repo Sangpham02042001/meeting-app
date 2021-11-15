@@ -74,7 +74,17 @@ const getMessages = async (req, res) => {
         })
 
         for (let m of messages) {
-            m.dataValues.photos = m.dataValues.Media;
+            let tmpFiles = [];
+            let tmpImages = []
+            for (let media of m.dataValues.Media) {
+                if (media.type === "image") {
+                    tmpImages.push(media)
+                } else {
+                    tmpFiles.push(media)
+                }
+            }
+            m.dataValues.files = tmpFiles;
+            m.dataValues.photos = tmpImages;
             delete m.dataValues.Media;
         }
 
@@ -99,8 +109,17 @@ const getLastMessage = async (req, res) => {
             order: [['updatedAt', 'DESC']],
         })
         if (lastMessage) {
-            // lastMessage = {};
-            lastMessage.dataValues.photos = lastMessage.dataValues.Media;
+            let tmpFiles = [];
+            let tmpImages = []
+            for (let media of lastMessage.dataValues.Media) {
+                if (media.type === "image") {
+                    tmpImages.push(media)
+                } else {
+                    tmpFiles.push(media)
+                }
+            }
+            lastMessage.dataValues.files = tmpFiles;
+            lastMessage.dataValues.photos = tmpImages;
             delete lastMessage.dataValues.Media;
         }
 
@@ -141,30 +160,43 @@ const readConversation = async (req, res) => {
     }
 }
 
-const setMessage = async ({ content, images, conversationId, senderId }) => {
+const setMessage = async ({ content, files, conversationId, senderId }) => {
     try {
-        let medias = [];
-        if (images) {
-            for (let image of images) {
-                if (image) {
-                    let photoName = v4() + '.png';
-                    let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
-                    const imageStream = new Readable();
-                    imageStream._read = () => { }
-                    imageStream.push(image)
-                    imageStream.pipe(writeStream)
-                    medias.push(photoName);
+        let multiMedia = [];
+        if (files) {
+            for (let file of files) {
+                if (file) {
+                    let fileName = v4().concat('-', file.name)
+                    const fileStream = new Readable();
+                    let writeStream = fs.createWriteStream(`./src/public/messages-${/image\/(?!svg)/.test(file.type) ? 'photos' : 'files'}/${fileName}`)
+                    fileStream._read = () => { }
+                    fileStream.push(file.data)
+                    fileStream.pipe(writeStream)
+                    multiMedia.push({
+                        pathName: fileName,
+                        name: file.name,
+                        type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
+                    });
                 }
             }
-
         }
 
         const message = await Message.create({ content, conversationId, userId: senderId });
-        await Promise.all(medias.map(async (name, idx) => {
-            let media = await Media.create({ pathName: name, messageId: message.id, type: 'image' })
-            medias[idx] = media;
+        await Promise.all(multiMedia.map(async (m, idx) => {
+            let media = await Media.create({ pathName: m.pathName, name: m.name, messageId: message.id, type: m.type })
+            multiMedia[idx] = media;
         }))
-        message.photos = medias;
+        let tmpImages = []
+        let tmpFiles = []
+        for (let media of multiMedia) {
+            if (media.type === "image") {
+                tmpImages.push(media)
+            } else {
+                tmpFiles.push(media)
+            }
+        }
+        message.files = tmpFiles;
+        message.photos = tmpImages
         await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 1 " +
             "WHERE conversationId = :conversationId AND userId = :userId",
             {
@@ -184,7 +216,6 @@ const setMessage = async ({ content, images, conversationId, senderId }) => {
                 }
             }
         )
-        console.log('save new message', message)
 
         return message;
     } catch (error) {
@@ -202,15 +233,15 @@ const getImagesMessageCv = async (req, res) => {
             "SELECT m.id as photoId, msg.id as messageId, m.createdAt FROM media m " +
             "JOIN messages msg on msg.id = m.messageId " +
             "JOIN conversations cv on cv.id = msg.conversationId " +
-            "WHERE msg.conversationId = :conversationId " +
+            "WHERE msg.conversationId = :conversationId AND m.type = 'image'" +
             "ORDER BY m.updatedAt DESC"
-        , {
-            replacements: {
-                conversationId
-            },
-            type: QueryTypes.SELECT
-        })
-        
+            , {
+                replacements: {
+                    conversationId
+                },
+                type: QueryTypes.SELECT
+            })
+
         return res.status(200).json({ images })
 
     } catch (error) {

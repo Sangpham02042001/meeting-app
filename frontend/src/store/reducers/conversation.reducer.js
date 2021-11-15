@@ -64,6 +64,7 @@ export const conversationSlice = createSlice({
       console.log('Get messages of user fail!')
     },
     [getParticipant.fulfilled]: (state, action) => {
+      
       state.conversation.participant = action.payload;
     },
     [getParticipant.rejected]: (state, action) => {
@@ -89,7 +90,7 @@ export const conversationSlice = createSlice({
   },
   reducers: {
     sendMessageCv: (state, action) => {
-      const { messageId, content, senderId, receiverId, conversationId, photos, createdAt } = action.payload;
+      const { messageId, content, senderId, receiverId, conversationId, files, photos, createdAt } = action.payload;
       let convParticipant = state.conversations.find(conv => {
         return (conv.participantId === receiverId || conv.participantId === senderId)
       });
@@ -104,7 +105,7 @@ export const conversationSlice = createSlice({
       }
 
       if (state.conversation.participant && (receiverId === state.conversation.participant.id || senderId === state.conversation.participant.id)) {
-        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, photos, createdAt });
+        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, files, photos, createdAt });
       }
 
       //check is read?
@@ -122,13 +123,13 @@ export const conversationSlice = createSlice({
       state.lastMessageChange = !state.lastMessageChange;
     },
     receiveMessageCv: (state, action) => {
-      const { messageId, content, senderId, receiverId, conversationId, photos, createdAt } = action.payload;
+      const { messageId, content, senderId, receiverId, conversationId, files, photos, createdAt } = action.payload;
       let conversation = state.conversations.find(conv => conv.conversationId === conversationId);
       if (!conversation) {
         state.conversations.unshift({ conversationId, participantId: senderId, isRead: false })
       }
       if (state.conversation.participant && senderId === state.conversation.participant.id) {
-        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, photos, createdAt });
+        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, files, photos, createdAt });
       }
       state.lastMessageChange = !state.lastMessageChange;
     },

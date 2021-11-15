@@ -35,13 +35,12 @@ export default function Layout({ children }) {
     socketClient.connect();
     setIsSkConnected(true);
     //conversation
-    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, photos, createdAt }) => {
-      dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, photos, createdAt }));
-      broadcastLocal.postMessage({ messageId, content, senderId, receiverId, conversationId, photos, createdAt })
+    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }) => {
+      dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }));
     })
 
-    socketClient.on('conversation-sentMessage', ({ messageId, content, senderId, receiverId, conversationId, photos, createdAt }) => {
-      dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, photos, createdAt }));
+    socketClient.on('conversation-sentMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }) => {
+      dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }));
     })
 
 

@@ -52,11 +52,6 @@ export default function TeamHeader({ showTeamInfo }) {
 
     })
 
-    return () => {
-      setIsEnableAudio(false);
-      setIsEnableVideo(false);
-    }
-
   }, [])
 
 

@@ -100,3 +100,18 @@
   cursor: pointer;
 }
 
+.message-file-list {
+  display: flex;
+  max-width: 470px;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.message-file-list a {
+  color: #fff;
+  font-weight: 600;
+  background: #accedf;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 1px;
+}

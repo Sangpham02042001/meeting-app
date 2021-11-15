@@ -255,7 +255,7 @@ export default function Team(props) {
     if (e.target.files.length) {
       let size = 0;
       for (const file of e.target.files) {
-        if (file.type && !(new RegExp(/image\/*/).test(file.type))) {
+        if (!(/image\/(?!svg)/.test(file.type))) {
           setMessage({
             type: 'error',
             content: 'Only accept upload images'

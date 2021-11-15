@@ -39,4 +39,26 @@ const getImageMessageMedia = async (req, res) => {
   }
 }
 
-module.exports = { getImageMessage, getImageMessageMedia }
+const getFileMessageMedia = async (req, res) => {
+  let { messageId, mediaId, type } = req.params
+  try {
+    let media = await Media.findOne({
+      where: {
+        id: mediaId,
+        messageId
+      },
+      attributes: ['pathName']
+    })
+    if (!media) {
+      return res.status(400).json({ error: 'File not found' })
+    }
+    if (media.pathName) {
+      fs.createReadStream(`./src/public/messages-files/${media.pathName}`).pipe(res)
+    }
+  } catch (error) {
+    return res.status(400).json({ error: 'File not found' })
+  }
+}
+
+
+module.exports = { getImageMessage, getImageMessageMedia, getFileMessageMedia }

@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Avatar, Tooltip, Dialog, DialogContent, IconButton, imageListClasses } from '@mui/material';
 import { baseURL, getTime } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
-import './style.css'
 
 export default function Message({ message, logInUserId, hasAvatar, lastMessage, userName }) {
   const [isPreviewImg, setIsPreviewImg] = useState(false);
@@ -73,6 +72,18 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                     })}
                   </div>
                 </Tooltip>}
+              {message.files && message.files.length > 0 &&
+                <div className="message-file-list">
+                  {message.files.map((file, idx) => {
+                    return (
+                      <a key={idx}
+                        href={`${baseURL}/api/messages/files/${message.id}/${file.id}`} target="_blank">
+                        {file.name}
+                      </a>
+                    )
+                  })}
+                </div>
+              }
             </div>
           </div >
           :
@@ -117,7 +128,21 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                       })}
                     </div>
                   </Tooltip>}
-
+                {message.files && message.files.length > 0 &&
+                  <div
+                    className="message-file-list"
+                    style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
+                    {message.files.map((file, idx) => {
+                      return (
+                        <a key={idx}
+                          style={{background: '#cdcfd5'}}
+                          href={`${baseURL}/api/messages/files/${message.id}/${file.id}`} target="_blank">
+                          {file.name}
+                        </a>
+                      )
+                    })}
+                  </div>
+                }
 
               </div>
             </div>

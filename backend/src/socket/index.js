@@ -84,14 +84,23 @@ const socketServer = (socket) => {
 
     //conversation
 
-    socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, images }) => {
+    socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, files }) => {
         const converId = await setConversation({ senderId, receiverId, conversationId });
-        const message = await setMessage({ content, conversationId: converId, senderId, images });
+        console.log(files);
+        const message = await setMessage({ content, conversationId: converId, senderId, files });
         if (message) {
-            socket.emit('conversation-sentMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photos: message.photos, createdAt: message.createdAt })
+            socket.emit('conversation-sentMessage', {
+                messageId: message.id, content, senderId, receiverId,
+                conversationId: converId, files: message.files, photos: message.photos, 
+                createdAt: message.createdAt
+            })
             if (userSockets[receiverId] && userSockets[receiverId].length) {
                 for (const socketId of userSockets[receiverId]) {
-                    socket.to(socketId).emit('conversation-receiveMessage', { messageId: message.id, content, senderId, receiverId, conversationId: converId, photos: message.photos, createdAt: message.createdAt });
+                    socket.to(socketId).emit('conversation-receiveMessage', {
+                        messageId: message.id, content, senderId, receiverId,
+                        conversationId: converId, files: message.files, photos: message.photos,
+                        createdAt: message.createdAt
+                    });
                 }
             }
         }

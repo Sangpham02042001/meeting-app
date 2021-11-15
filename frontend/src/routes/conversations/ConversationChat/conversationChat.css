@@ -1,6 +1,6 @@
 .conversation-info {
-  width: 25%;
   height: 100%;
+  width: 25%;
   background-color: var(--primary-bg);
   border-left: 2px solid rgba(0, 0, 0, 0.05);
   display: flex;
@@ -99,7 +99,7 @@
   flex-wrap: wrap;
 }
 
-.input-message > textarea {
+.input-message  textarea {
   width: 100%;
   box-sizing: border-box;
   overflow-y: auto;
@@ -114,10 +114,10 @@
 
 .conversation-message .input-btn {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
 }
 
-.conversation-message .input-btn > button {
+.conversation-message .input-btn button {
   margin: 0 10px;
   width: 36px;
   height: 36px;
