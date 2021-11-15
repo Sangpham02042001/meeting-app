@@ -6,8 +6,8 @@ import Conversations from "./routes/conversations";
 import Setting from "./routes/setting";
 import Profile from "./routes/profile";
 import TeamDiscover from './routes/teams/discover';
-import Login from './components/auth/LoginComponent';
-import SignUp from './components/auth/SignUpComponent';
+import Login from './components/Auth/LoginComponent';
+import SignUp from './components/Auth/SignUpComponent';
 import Welcome from './components/Welcome';
 import Meeting from './routes/meeting'
 import './App.css'

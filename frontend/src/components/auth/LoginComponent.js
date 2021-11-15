@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    TextField, Button, Snackbar, Alert
+    TextField, Button, Snackbar, Alert, Avatar,
+    Typography
 } from '@mui/material';
 import { useHistory } from "react-router";
 import { Link, Redirect } from "react-router-dom";
 import Loading from "../Loading";
 import { isAuthenticated, signin } from "../../store/reducers/user.reducer";
 import './auth.css'
-// import "frontend/src/App.css";
+import Copyright from "./CopyRight";
+
 
 export default function Login() {
     const userReducer = useSelector(state => state.userReducer)
@@ -44,7 +46,11 @@ export default function Login() {
         !userReducer.loaded ? <Loading />
             : (userReducer.authenticated ? <Redirect to="/home" />
                 : <div className="auth-page">
-                    <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Meeting App</h1>
+                    <Avatar sx={{ m: 1, width: 56, height: 56 }}
+                        src="meeting-logo.png" />
+                    <Typography component="h1" variant="h4" sx={{ marginBottom: '50px' }}>
+                        Meeting App
+                    </Typography>
                     <form onSubmit={handleSubmit} className="auth-form">
                         <TextField
                             type="email"
@@ -62,16 +68,17 @@ export default function Login() {
                             value={password}
                             variant="standard"
                             onChange={(e) => setPassword(e.target.value)} />
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <p style={{ marginBottom: 0 }}>
                                 Don't have account?{"\t"}
-                                <Link to="/signup" style={{ display: 'inline-block' }}>Sign up here</Link>
+                                <Link to="/signup" style={{ display: 'inline-block' }}>Sign up</Link>
                             </p>
                             <Button type="submit" variant="contained"
-                                disabled={!email || !password}>Log in</Button>
+                            >Log in</Button>
                         </div>
-                    </form> <br /> <br />
-                    <Snackbar open={loginError.length > 0} autoHideDuration={3000} onClose={e => setLoginError('')}>
+                    </form>
+                    <Copyright sx={{ mt: 5 }} />
+                    <Snackbar open={loginError.length > 0} autoHideDuration={3000}>
                         <Alert severity="error">
                             {loginError}
                         </Alert>

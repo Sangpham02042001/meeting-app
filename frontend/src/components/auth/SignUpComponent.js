@@ -3,13 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     TextField, Button, Dialog,
     DialogTitle, DialogContent, DialogActions,
-    Alert, Snackbar
+    Alert, Snackbar, Typography, Avatar
 } from '@mui/material';
 import { Link, Redirect } from 'react-router-dom';
 import Loading from "../Loading";
 import { isAuthenticated } from "../../store/reducers/user.reducer";
 import { axiosInstance } from "../../utils";
 import './auth.css'
+import Copyright from "./CopyRight";
 
 export default function SignUp() {
     const userReducer = useSelector(state => state.userReducer)
@@ -98,7 +99,11 @@ export default function SignUp() {
             : (userReducer.authenticated ? <Redirect to="/" />
                 : <div className="auth-page">
                     <div className="form-container">
-                        <h1 style={{ marginBottom: '30px' }}>Meeting App</h1>
+                        <Avatar sx={{ m: 1, width: 56, height: 56 }}
+                            src="meeting-logo.png" />
+                        <Typography component="h1" variant="h4" sx={{ marginBottom: '50px' }}>
+                            Meeting App
+                        </Typography>
                         <form onSubmit={handleSubmit} className="auth-form">
                             <TextField
                                 name="firstName"
@@ -144,17 +149,18 @@ export default function SignUp() {
                                 onChange={handleChange("passwordConfirmation")}
                                 variant="standard"
                             />
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <p style={{ marginBottom: 0 }}>
-                                    Have account ? <Link to="/login">Sign in here</Link>
+                                    Have account? <Link to="/login">Sign in</Link>
                                 </p>
-                                <Button variant="contained" type="submit"
-                                    disabled={!email || !password || !email || !passwordConfirmation || !firstName || !lastName}>
+                                <Button variant="contained" type="submit">
                                     Sign up
                                 </Button>
                             </div>
                         </form>
+                        <Copyright sx={{ mt: 5 }} />
                     </div>
+
                     <Dialog open={isDialogShow} onClose={handleCloseDialog}>
                         <DialogTitle>Welcome to Meeting App</DialogTitle>
                         <DialogContent>

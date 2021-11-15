@@ -112,10 +112,6 @@ export default function Layout({ children }) {
 
     socketClient.on('end-meeting', ({ meeting }) => {
       dispatch(endActiveMeeting({ meeting }))
-      // broadcastLocal.postMessage({
-      //   messageType: 'end-meeting',
-      //   meetingId
-      // })
     })
 
     broadcastLocal.onmessage = (message) => {
