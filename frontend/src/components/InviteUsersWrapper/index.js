@@ -4,7 +4,7 @@ import { useParams } from 'react-router'
 import {
   Button, Dialog, DialogContent, DialogTitle,
   DialogActions, FormControl, InputLabel,
-  Input, InputAdornment, Avatar
+  Input, InputAdornment, Avatar, Snackbar, Alert
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -21,6 +21,7 @@ export default function InviteUsersWrapper({ users }) {
   const [loading, setLoading] = useState(false)
   const [isShow, setShow] = useState(false)
   const [searchUserName, setSearchUserName] = useState('')
+  const [message, setMessage] = useState({})
   const { teamId } = useParams()
 
   useEffect(() => {
@@ -29,6 +30,16 @@ export default function InviteUsersWrapper({ users }) {
       setSearchUsers([])
     }
   }, [])
+
+  useEffect(() => {
+    if (invitedUsers.length) {
+      setMessage({
+        type: 'success',
+        content: 'Invite users successfully'
+      })
+      handleInviteModalClose()
+    }
+  }, [teamInvitedUsers.length])
 
   const handleInviteModalClose = () => {
     setShow(false)
@@ -165,6 +176,12 @@ export default function InviteUsersWrapper({ users }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000} onClose={e => setMessage({})}>
+        <Alert severity={message.type}>
+          {message.content}
+        </Alert>
+      </Snackbar>
     </>
   )
 }

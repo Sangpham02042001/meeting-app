@@ -1,7 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import InviteUsersWrapper from '../../InviteUsersWrapper'
-import { Avatar, Button, Dialog, DialogActions, DialogTitle } from '@mui/material'
+import {
+  Avatar, Button, Dialog, DialogActions,
+  DialogTitle, Snackbar, Alert
+} from '@mui/material'
 import { confirmJoinRequests, refuseJoinRequests } from '../../../store/reducers/team.reducer'
 import { baseURL } from '../../../utils'
 import '../team-setting.css'
@@ -11,8 +14,25 @@ export default function TeamRequestUsers() {
   const [isConfirmShow, setConfirmShow] = useState(false)
   const [isRefuseShow, setRefuseShow] = useState(false)
   const [selectedUser, setUser] = useState(null)
+  const [message, setMessage] = useState({})
   const dispatch = useDispatch()
   const team = useSelector(state => state.teamReducer.team)
+
+  useEffect(() => {
+    if (isConfirmShow) {
+      setMessage({
+        type: 'success',
+        content: 'Confirm request successfully'
+      })
+      setConfirmShow(false)
+    } else if (isRefuseShow) {
+      setMessage({
+        type: 'success',
+        content: "Refuse request successfully"
+      })
+      setRefuseShow(false)
+    }
+  }, [team.requestUsers.length])
 
   const handleConfirm = () => {
     dispatch(confirmJoinRequests({
@@ -20,7 +40,6 @@ export default function TeamRequestUsers() {
       teamId: team.id
     }))
     setUser(null)
-    setConfirmShow(false)
   }
 
   const handleRefuse = () => {
@@ -29,7 +48,6 @@ export default function TeamRequestUsers() {
       teamId: team.id
     }))
     setUser(null)
-    setRefuseShow(false)
   }
 
   const handleCloseConfirm = () => setConfirmShow(false)
@@ -78,6 +96,12 @@ export default function TeamRequestUsers() {
           <Button onClick={handleRefuse}>Confirm</Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000} onClose={e => setMessage({})}>
+        <Alert severity={message.type}>
+          {message.content}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

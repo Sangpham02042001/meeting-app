@@ -1,6 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Avatar, Button, Dialog, DialogActions, DialogTitle } from '@mui/material'
+import {
+  Avatar, Button, Dialog, DialogActions,
+  DialogTitle, Snackbar, Alert
+} from '@mui/material'
 import InviteUsersWrapper from '../../InviteUsersWrapper'
 import { baseURL } from '../../../utils'
 import { cancelInviteUsers } from '../../../store/reducers/team.reducer'
@@ -9,8 +12,19 @@ import '../team-setting.css'
 export default function TeamInvitedUsers() {
   const [isShow, setShow] = useState(false)
   const [selectedUser, setUser] = useState(null)
+  const [message, setMessage] = useState({})
   const dispatch = useDispatch()
   const team = useSelector(state => state.teamReducer.team)
+
+  useEffect(() => {
+    if (selectedUser) {
+      setMessage({
+        type: 'success',
+        content: 'Remove invitation successfully'
+      })
+      setUser(null)
+    }
+  }, [team.invitedUsers.length])
 
   const handleCancel = () => {
     dispatch(cancelInviteUsers({
@@ -18,7 +32,6 @@ export default function TeamInvitedUsers() {
       teamId: team.id
     }))
     setShow(false)
-    setUser(null)
   }
 
   const handleClose = () => setShow(false)
@@ -48,6 +61,12 @@ export default function TeamInvitedUsers() {
           <Button onClick={handleCancel}>Confirm</Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000} onClose={e => setMessage({})}>
+        <Alert severity={message.type}>
+          {message.content}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

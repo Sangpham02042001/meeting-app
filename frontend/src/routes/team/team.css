@@ -140,7 +140,7 @@
 
 .arrow-expand-container .arrow-rotate {
   transition: transform 0.3s linear;
-  font-size: 35px;
+  font-size: 30px;
 }
 
 .arrow-expand-container .arrow-rotate-reverse {
