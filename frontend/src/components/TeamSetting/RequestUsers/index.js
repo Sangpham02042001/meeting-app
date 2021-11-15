@@ -20,6 +20,7 @@ export default function TeamRequestUsers() {
 
   useEffect(() => {
     if (isConfirmShow) {
+      console.log('nothing')
       setMessage({
         type: 'success',
         content: 'Confirm request successfully'
