@@ -145,3 +145,12 @@
 .navbar.logout-container > div > a:hover {
   color: #000;
 }
+
+.notification-menu {
+  max-height: 400px;
+}
+
+.notification-menu a {
+  color: #000;
+  text-decoration: none;
+}

@@ -4,13 +4,13 @@ import { useParams, Link, useHistory } from 'react-router-dom'
 import {
   Button, Dialog, DialogActions, DialogContent,
   DialogTitle, IconButton, Tooltip,
+  Menu, MenuItem
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 import InfoIcon from '@mui/icons-material/Info';
 import { baseURL } from '../../utils'
 import './teamheader.css'
-import Dropdown from '../Dropdown'
 import { deleteTeam, outTeam, createTeamMeeting, setMeetingJoined } from '../../store/reducers/team.reducer'
 // import { createTeamMeeting } from '../../store/reducers/meeting.reducer'
 
@@ -31,8 +31,14 @@ export default function TeamHeader({ showTeamInfo }) {
   const [isAudioActive, setAudioActive] = useState(true)
   const [isEnableVideo, setIsEnableVideo] = useState(false)
   const [isEnableAudio, setIsEnableAudio] = useState(false)
+  const [anchorEl, setAnchorEl] = useState(null);
+  let isOpenMenu = Boolean(anchorEl)
   const [createMeetingPending, setCreateMeetingPending] = useState(false)
   const userVideo = useRef()
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null)
+  }
 
   function getConnectedDevices(type, callback) {
     navigator.mediaDevices.enumerateDevices()
@@ -164,150 +170,154 @@ export default function TeamHeader({ showTeamInfo }) {
         <Button variant="outlined" className="meeting-btn"
           style={{ backgroundColor: '#fff' }}
           disabled={teamReducer.team.meetingActive || teamReducer.meetingJoined}
-          startIcon={<VideoCameraFrontIcon style={{ color: 'rgb(25, 118, 210)' }} />}
+          startIcon={<VideoCameraFrontIcon style={{ color: 'var(--primary-color)' }} />}
           onClick={e => {
             e.preventDefault()
             setShowCreateMeeting(true)
           }}> Meeting
         </Button>
-        <div className="navbar-btn">
-          <Dropdown
-            dropdownStyle={{ transform: 'translateX(-60px)' }}
-            icon={<button className="dropdown-btn" style={{ color: "white" }}>
-              <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
-            </button>
-            }>
-            <div style={{ display: 'flex', flexDirection: 'column', width: '160px' }}>
-              {teamReducer.team.hostId === user.id && <Link to={`/teams/${teamId}/setting`}>
+
+        <Tooltip title="Menu" placement='bottom'>
+          <Button
+            id="basic-button"
+            className="team-header-menu-btn"
+            aria-controls="basic-menu"
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            onClick={e => {
+              e.preventDefault()
+              setAnchorEl(e.currentTarget)
+            }}
+          >
+            <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
+          </Button>
+        </Tooltip>
+        <Menu
+          className="teamheader-menu"
+          anchorEl={anchorEl}
+          open={isOpenMenu}
+          onClose={handleCloseMenu}
+          MenuListProps={{
+            'aria-labelledby': 'basic-button',
+          }}
+        >
+          {teamReducer.team.hostId === user.id &&
+            <MenuItem className='teamheaer-menu-item'>
+              <Link to={`/teams/${teamId}/setting`}>
                 <i className="fas fa-cog"></i> Manage Team
-              </Link>}
-              {teamReducer.team.hostId === user.id &&
-                <span style={{ padding: '12px 16px', cursor: 'pointer' }} onClick={e => {
-                  e.preventDefault()
-                  setDeleteModalShow(true)
-                }}>
-                  <i className="fas fa-trash-alt"></i> Delete Team
-                </span>}
-              {teamReducer.team.hostId !== user.id &&
-                <span style={{ padding: '12px 16px', cursor: 'pointer' }} onClick={e => {
-                  e.preventDefault()
-                  setOutModalShow(true)
-                }}>
-                  <i className="fas fa-sign-out-alt"></i> Leave Team
-                </span>}
+              </Link></MenuItem>}
+          {teamReducer.team.hostId === user.id &&
+            <MenuItem className='teamheaer-menu-item' onClick={e => {
+              e.preventDefault()
+              setDeleteModalShow(true)
+              setAnchorEl(null)
+            }}>
+              <i className="fas fa-trash-alt"></i> &nbsp; Delete Team
+            </MenuItem>}
+          {teamReducer.team.hostId !== user.id &&
+            <MenuItem className='teamheaer-menu-item' onClick={e => {
+              e.preventDefault()
+              setOutModalShow(true)
+              setAnchorEl(null)
+            }}>
+              <i className="fas fa-sign-out-alt"></i> Leave Team
+            </MenuItem>}
+        </Menu>
+
+        <Dialog open={isDeleteModalShow} onClose={handleCloseDeleteModal}>
+          <DialogTitle>
+            Confirm delete this team
+          </DialogTitle>
+          <DialogActions>
+            <Button variant="text" onClick={handleCloseDeleteModal}>
+              Cancel
+            </Button>
+            <Button variant="text" onClick={handleDeleteTeam}>Delete</Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={isOutModalShow} onClose={handleCloseOutModal}>
+          <DialogTitle>
+            <h4>Confirm out this team</h4>
+          </DialogTitle>
+          <DialogActions>
+            <Button variant="text" onClick={handleCloseOutModal}>
+              Cancel
+            </Button>
+            <Button variant="text" onClick={handleOutTeam}>Out</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Meeting here */}
+        <Dialog open={isCreateMeetingShow} onClose={handleCloseCreateMeeting}>
+          <DialogTitle>
+            Create new meeting
+          </DialogTitle>
+          <DialogActions>
+            <Button variant="text" onClick={handleCloseCreateMeeting}>
+              Cancel
+            </Button>
+            <Button variant="text" onClick={handleCreateMeeting}>
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={isJoinMeetingShow} centered="true" onClose={handleCloseJoinMeeting}>
+          <DialogTitle>Join meeting
+          </DialogTitle>
+          <DialogContent>
+            <video width="100%" height="320px" muted ref={userVideo} autoPlay />
+            <div style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
+              {
+                !isEnableVideo ?
+                  <Button variant="outlined" disabled={!isEnableVideo} onClick={handleActiveVideo} style={{ border: 'none', color: '#000' }}>
+                    <i className="fas fa-video-slash"></i>
+                  </Button>
+                  :
+                  <Button variant="outlined" onClick={handleActiveVideo} style={{ border: 'none', color: '#000' }}>
+                    {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
+                  </Button>
+              }
+              <span>Join with camera</span>
             </div>
-          </Dropdown>
-          {/* <div className="dropdown" style={{ marginRight: '5px' }}>
-            <button className="dropdown-btn" style={{ color: "white" }}>
-              <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
-            </button>
-            <div className="dropdown-content" style={{ width: '170px' }}>
-              {teamReducer.team.hostId === user.id && <Link to={`/teams/${teamId}/setting`}>
-                <i className="fas fa-cog"></i> Manage Team
-              </Link>}
-              {teamReducer.team.hostId === user.id && <span style={{ padding: '12px 16px' }}>
-                <i className="fas fa-trash-alt"></i> Delete Team
-              </span>}
-              {teamReducer.team.hostId !== user.id && <span style={{ padding: '12px 16px' }}>
-                <i className="fas fa-sign-out-alt"></i> Leave Team
-              </span>}
+
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {
+                !isEnableAudio ?
+                  <Button variant="outlined" disabled={!isEnableAudio} onClick={handleActiveAudio} style={{ border: 'none', color: '#000' }}>
+                    <i className="fas fa-microphone-slash"></i>
+                  </Button>
+                  :
+                  <Button variant="outlined" onClick={handleActiveAudio} style={{ border: 'none', color: '#000' }}>
+                    {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
+                  </Button>
+              }
+
+              <span>Join with audio</span>
             </div>
-          </div> */}
-          <Dialog open={isDeleteModalShow} onClose={handleCloseDeleteModal}>
-            <DialogTitle>
-              Confirm delete this team
-            </DialogTitle>
-            <DialogActions>
-              <Button variant="text" onClick={handleCloseDeleteModal}>
-                Cancel
-              </Button>
-              <Button variant="text" onClick={handleDeleteTeam}>Delete</Button>
-            </DialogActions>
-          </Dialog>
-
-          <Dialog open={isOutModalShow} onClose={handleCloseOutModal}>
-            <DialogTitle>
-              <h4>Confirm out this team</h4>
-            </DialogTitle>
-            <DialogActions>
-              <Button variant="text" onClick={handleCloseOutModal}>
-                Cancel
-              </Button>
-              <Button variant="text" onClick={handleOutTeam}>Out</Button>
-            </DialogActions>
-          </Dialog>
-
-          {/* Meeting here */}
-          <Dialog open={isCreateMeetingShow} onClose={handleCloseCreateMeeting}>
-            <DialogTitle>
-              Create new meeting
-            </DialogTitle>
-            <DialogActions>
-              <Button variant="text" onClick={handleCloseCreateMeeting}>
-                Cancel
-              </Button>
-              <Button variant="text" onClick={handleCreateMeeting}>
-                Create
-              </Button>
-            </DialogActions>
-          </Dialog>
-
-          <Dialog open={isJoinMeetingShow} centered="true" onClose={handleCloseJoinMeeting}>
-            <DialogTitle>Join meeting
-            </DialogTitle>
-            <DialogContent>
-              <video width="100%" height="320px" muted ref={userVideo} autoPlay />
-              <div style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
-                {
-                  !isEnableVideo ?
-                    <Button variant="outlined" disabled={!isEnableVideo} onClick={handleActiveVideo} style={{ border: 'none', color: '#000' }}>
-                      <i className="fas fa-video-slash"></i>
-                    </Button>
-                    :
-                    <Button variant="outlined" onClick={handleActiveVideo} style={{ border: 'none', color: '#000' }}>
-                      {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
-                    </Button>
-                }
-                <span>Join with camera</span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {
-                  !isEnableAudio ?
-                    <Button variant="outlined" disabled={!isEnableAudio} onClick={handleActiveAudio} style={{ border: 'none', color: '#000' }}>
-                      <i className="fas fa-microphone-slash"></i>
-                    </Button>
-                    :
-                    <Button variant="outlined" onClick={handleActiveAudio} style={{ border: 'none', color: '#000' }}>
-                      {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
-                    </Button>
-                }
-
-                <span>Join with audio</span>
-              </div>
-            </DialogContent>
-            <DialogActions>
-              <Button variant="text" onClick={handleCloseJoinMeeting}>
-                Cancel
-              </Button>
-              <Button variant="text">
-                {teamReducer.team.meetingActive
-                  && <Link target="_blank" style={{ zIndex: 10 }}
-                    onClick={e => {
-                      setShowJoinMeeting(false)
-                      dispatch(setMeetingJoined({
-                        teamId,
-                        id: teamReducer.team.meetingActive.id
-                      }))
-                    }}
-                    style={{ textDecoration: 'none' }}
-                    to={`/teams/${teamId}/meeting/${teamReducer.team.meetingActive.id}?video=${isVideoActive}&audio=${isAudioActive}`}>
-                    Join
-                  </Link>}
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </div>
+          </DialogContent>
+          <DialogActions>
+            <Button variant="text" onClick={handleCloseJoinMeeting}>
+              Cancel
+            </Button>
+            <Button variant="text">
+              {teamReducer.team.meetingActive
+                && <Link target="_blank" style={{ zIndex: 10 }}
+                  onClick={e => {
+                    setShowJoinMeeting(false)
+                    dispatch(setMeetingJoined({
+                      teamId,
+                      id: teamReducer.team.meetingActive.id
+                    }))
+                  }}
+                  style={{ textDecoration: 'none' }}
+                  to={`/teams/${teamId}/meeting/${teamReducer.team.meetingActive.id}?video=${isVideoActive}&audio=${isAudioActive}`}>
+                  Join
+                </Link>}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   )

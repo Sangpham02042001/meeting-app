@@ -42,11 +42,24 @@
   color: #fff;
   margin-right: 20px !important;
 }
-/* 
-.join-meeting-btn a {
+
+.team-header-menu-btn#basic-button {
   color: #fff;
+  background-color: var(--primary-color);
+  min-width: 0;
+  padding: 10px;
+  border-radius: 50%;
 }
 
-.join-meeting-btn a:hover {
-  color: #fff !important;
+.teamheader-menu {
+}
+
+/* .teamheaer-menu-item {
+  padding: 12px 16px;
+  cursor: pointer;
 } */
+
+.teamheaer-menu-item a {
+  color: #000;
+  text-decoration: none;
+}

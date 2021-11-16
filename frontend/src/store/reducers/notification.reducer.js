@@ -20,9 +20,8 @@ export const getNotifs = createAsyncThunk('notification/getNotifs', async (offse
 })
 
 export const readNotif = createAsyncThunk('notification/readNotif', async (notifId, { rejectWithValue }) => {
-    let { token } = JSON.parse(window.localStorage.getItem('user'))
-    let response = await axiosAuth.put(`${baseURL}/api/notifications/${notifId}`)
-    return response.data
+    await axiosAuth.put(`${baseURL}/api/notifications/${notifId}`)
+    return { notifId }
 })
 
 export const notificationSlice = createSlice({
@@ -52,6 +51,17 @@ export const notificationSlice = createSlice({
         [readNotif.pending]: (state, action) => {
         },
         [readNotif.fulfilled]: (state, action) => {
+            let { notifId } = action.payload
+            let idx = state.notifications.findIndex(noti => noti.id === notifId)
+            if (idx >= 0) {
+                state.notifications.splice(idx, 1, {
+                    ...state.notifications[idx],
+                    isRead: 1
+                })
+                if (state.numOf_UnReadNotifications) {
+                    state.numOf_UnReadNotifications = state.numOf_UnReadNotifications - 1;
+                }
+            }
         },
         [readNotif.rejected]: (state, action) => {
             state.error = action.error.message
