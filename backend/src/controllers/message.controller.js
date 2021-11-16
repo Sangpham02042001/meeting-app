@@ -1,6 +1,6 @@
 const Message = require('../models/message')
 const Media = require('../models/media')
-const fs = require('fs')
+const fs = require('fs');
 
 const getImageMessage = async (req, res) => {
   let { messageId } = req.params
@@ -40,20 +40,24 @@ const getImageMessageMedia = async (req, res) => {
 }
 
 const getFileMessageMedia = async (req, res) => {
-  let { messageId, mediaId, type } = req.params
+  let { messageId, mediaId } = req.params
   try {
     let media = await Media.findOne({
       where: {
         id: mediaId,
         messageId
       },
-      attributes: ['pathName']
     })
     if (!media) {
+      
       return res.status(400).json({ error: 'File not found' })
     }
+    
     if (media.pathName) {
-      fs.createReadStream(`./src/public/messages-files/${media.pathName}`).pipe(res)
+      let file = `./src/public/messages-files/${media.pathName}`;
+      let fileStream = fs.createReadStream(file);
+      res.setHeader('Content-disposition', 'attachment; filename=' + media.name);
+      fileStream.pipe(res);
     }
   } catch (error) {
     return res.status(400).json({ error: 'File not found' })

@@ -107,11 +107,17 @@
   margin-bottom: 8px;
 }
 
-.message-file-list a {
-  color: #fff;
-  font-weight: 600;
-  background: #accedf;
+.message-file-list .message-file {
+  background: #3a3b3c;
+  display: flex;
   padding: 10px;
   border-radius: 10px;
   margin: 1px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.message-file span {
+  color: #fff;
+  font-weight: 600;
 }

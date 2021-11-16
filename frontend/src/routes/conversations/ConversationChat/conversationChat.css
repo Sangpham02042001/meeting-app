@@ -16,10 +16,18 @@
   align-items: center;
 }
 
-.conversation-info .conversation-info-btn {
+.conversation-info .conversation-info-detail {
   width: 100%;
   margin-top: 50px;
 }
+
+.conversation-info-detail .accordion-detail {
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start; 
+  padding: 15px; 
+}
+
 
 .conversation-message {
   height: 100%;
@@ -94,9 +102,10 @@
   width: 100%;
 }
 
-.conversation-message .input-image {
+.conversation-message .input-file {
   display: flex;
-  flex-wrap: wrap;
+  padding: 5px;
+  overflow-y: auto;
 }
 
 .input-message  textarea {
@@ -114,7 +123,6 @@
 
 .conversation-message .input-btn {
   display: flex;
-  align-items: center;
 }
 
 .conversation-message .input-btn button {

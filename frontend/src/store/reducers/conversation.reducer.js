@@ -28,6 +28,11 @@ export const getAllImages = createAsyncThunk('conversations/getAllImages', async
   return response.data;
 })
 
+export const getAllFiles = createAsyncThunk('conversations/getAllFiles', async ({ conversationId }) => {
+  const response = await axiosAuth.get(`/api/conversations/${conversationId}/messages/files`);
+  return response.data;
+})
+
 
 export const conversationSlice = createSlice({
   name: 'Conversation',
@@ -36,6 +41,7 @@ export const conversationSlice = createSlice({
     conversation: {
       messages: [],
       images: [],
+      files: [],
       participant: null,
     },
     conversationCall: {
@@ -86,6 +92,13 @@ export const conversationSlice = createSlice({
     },
     [getAllImages.rejected]: (state, action) => {
       console.log('get images error')
+    },
+    [getAllFiles.fulfilled]: (state, action) => {
+      const { files } = action.payload;
+      state.conversation.files = files;
+    },
+    [getAllFiles.rejected]: (state, action) => {
+      console.log('get files error')
     },
   },
   reducers: {

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { cancelCall, getAllImages, getParticipant } from '../../../store/reducers/conversation.reducer'
 import Message from '../../../components/MessageConver';
 import Avatar from '../../../components/Avatar/index';
 import {
@@ -24,10 +23,15 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import MicIcon from '@mui/icons-material/Mic';
 import MicNoneIcon from '@mui/icons-material/MicNone';
+import DescriptionIcon from '@mui/icons-material/Description';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Picker, { SKIN_TONE_MEDIUM_DARK } from 'emoji-picker-react';
-import { socketClient, broadcastLocal, baseURL } from '../../../utils';
-import { getMessages, readConversation, startCall } from '../../../store/reducers/conversation.reducer';
+import { socketClient, baseURL } from '../../../utils';
+import {
+  getMessages, readConversation, startCall, cancelCall, getAllImages,
+  getParticipant, getAllFiles
+} from '../../../store/reducers/conversation.reducer';
 import { v4 } from 'uuid';
 import './conversationChat.css';
 import PreviewImage from '../../../components/PreviewImage';
@@ -105,11 +109,12 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const [forceRender, setForceRender] = useState(v4());
   const [isPreview, setIsPreview] = useState(false);
   const [imgPreview, setImgPreview] = useState(null);
-  const [messageAlert, setMessageAlert] = useState({})
+  const [messageAlert, setMessageAlert] = useState('')
 
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const messages = useSelector(state => state.conversationReducer.conversation.messages);
   const images = useSelector(state => state.conversationReducer.conversation.images);
+  const files = useSelector(state => state.conversationReducer.conversation.files);
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
   const speechReplyRef = useRef('');
@@ -119,6 +124,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   useEffect(() => {
     if (showInfo) {
       dispatch(getAllImages({ conversationId }))
+      dispatch(getAllFiles({ conversationId }))
     }
   }, [showInfo])
 
@@ -195,41 +201,28 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     e.preventDefault()
     if (e.target.files.length) {
       let size = 0;
-      let files = []
+      let filesUpload = []
       for (const file of e.target.files) {
         size += Math.round(file.size / 1024)
         console.log(file)
-        files.push({
+        filesUpload.push({
           type: file.type,
           name: file.name,
-          data: file
+          data: file,
+          size: file.size
         })
       }
       for (const file of filesMessage) {
         size += Math.round(file.size / 1024)
       }
-      if (size > 5120) {
-        setMessageAlert({
-          type: 'error',
-          content: 'Could not upload file > 5MB !'
-        })
+
+      if (size > 5120 ) {
+        setMessageAlert('Could not upload file > 5MB !')
         return
       }
-      setFilesMessage([...filesMessage, ...files]);
+      setFilesMessage([...filesMessage, ...filesUpload]);
       let urls = []
       for (const file of e.target.files) {
-        // if ((/image\/(?!svg)/.test(file.type))) {
-        //   let url = URL.createObjectURL(file)
-        //   urls.push({
-        //     type: 'image',
-        //     url
-        //   })
-        // } else {
-        //   urls.push({
-        //     type: 'file',
-        //     name: file.name
-        //   })
-        // }
         let url = URL.createObjectURL(file)
         urls.push({
           type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file',
@@ -358,63 +351,87 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             </div>}
 
           <div className="input-message" >
-            <div className="input-image">
-              {filesMessageUrl.map((fileUrl, idx) => {
-                return (
-                  <div key={idx}
-                    style={{
-                      position: 'relative',
-                      margin: '5px',
-
-                    }}>
-                    <IconButton
+            {filesMessageUrl.length > 0 &&
+              <div className="input-file">
+                {filesMessageUrl.map((fileUrl, idx) => {
+                  return (
+                    <div key={idx}
                       style={{
-                        position: 'absolute',
-                        right: '-8px',
-                        top: '-8px',
-                        zIndex: '10'
-                      }}
-                      onClick={e => {
-                        e.preventDefault()
-                        setFilesMessage(files => {
-                          let tmpArr = [...files];
-                          tmpArr.splice(idx, 1);
-                          return tmpArr;
-                        })
-                        setFilesMessageUrl(filesUrl => {
-                          let tmpArr = [...filesUrl];
-                          tmpArr.splice(idx, 1);
-                          return tmpArr;
-                        })
-                      }}>
-                      <CloseIcon />
-                    </IconButton>
-                    {fileUrl.type === 'image' ?
-                      <div style={{
                         position: 'relative',
-                        width: '150px',
-                        height: '150px',
+                        margin: '5px',
                       }}>
-                        <img width="100%" height="100%" src={`${fileUrl.url}`} />
-                      </div>
-                      :
-                      <a style={{
-                        background: '#fff',
-                        borderRadius: '10px',
-                        padding: '20px',
-                        fontWeight: '600'
-                      }}
-                        href={`${fileUrl.url}`}
-                        download={fileUrl.name}
-                      >
-                        {fileUrl.name}
-                      </a>
-                    }
-                  </div>
-                )
-              })
-              }
-            </div>
+                      <IconButton
+                        sx={{
+                          position: 'absolute',
+                          right: '-8px',
+                          top: '-8px',
+                          zIndex: '10',
+                          width: '24px',
+                          height: '24px',
+                          color: '#fff',
+                          background: '#3e4042 !important'
+                        }}
+                        onClick={e => {
+                          e.preventDefault()
+                          setFilesMessage(files => {
+                            let tmpArr = [...files];
+                            tmpArr.splice(idx, 1);
+                            return tmpArr;
+                          })
+                          setFilesMessageUrl(filesUrl => {
+                            let tmpArr = [...filesUrl];
+                            tmpArr.splice(idx, 1);
+                            return tmpArr;
+                          })
+                        }}>
+                        <CloseIcon fontSize='small' />
+                      </IconButton>
+                      {fileUrl.type === 'image' ?
+                        <img width='60' height='60' src={`${fileUrl.url}`} />
+                        :
+                        <div
+                          style={{
+                            background: '#fff',
+                            borderRadius: '10px',
+                            padding: '16px',
+                            width: '160px',
+                            height: '60px',
+                            display: 'flex'
+                          }}>
+                          <DescriptionIcon />
+                          <span style={{
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                            fontWeight: '600'
+                          }}>
+                            {fileUrl.name}
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  )
+                })
+                }
+
+                <Button>
+                  <label style={{
+                    cursor: 'pointer',
+                  }}
+                    htmlFor="files">
+                    < AddCircleIcon fontSize="large" />
+                  </label>
+                  <input type="file"
+                    onChange={onFileInputChange}
+                    multiple="multiple"
+                    id="files"
+                    style={{
+                      display: 'none'
+                    }} />
+                </Button>
+
+              </div>
+            }
 
             <div style={{ display: 'flex' }}>
               <textarea
@@ -434,7 +451,10 @@ const ConversationChat = ({ conversationId, user, participant }) => {
           </div>
 
           <div className="input-btn">
-            <div style={{ display: content.length ? 'none' : 'flex' }}>
+            <div style={{
+              display: content.length ? 'none' : 'flex',
+              alignItems: filesMessageUrl.length > 0 ? 'flex-end' : 'center'
+            }}>
               <Tooltip title="Attach photos">
                 <IconButton >
                   <label style={{
@@ -509,13 +529,13 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             {participant.userName}
           </div>
         </div>
-        <div className="conversation-info-btn">
+        <div className="conversation-info-detail">
           <Accordion>
             <AccordionSummary aria-controls="custom-chat-content" id="custom-chat-header">
               <Typography>Customize Chat</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '15px' }}>
+              <div className="accordion-detail">
                 <Button startIcon={<DarkModeIcon color="primary" />}>Dark Mode</Button>
                 <Button startIcon={<ColorLensIcon color="primary" />}>Change Themes</Button>
               </div>
@@ -528,16 +548,16 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             <AccordionDetails>
               <ImageList sx={{ width: '100%', maxHeight: 450 }}
                 cols={3}
-                rowHeight={160}
+                rowHeight={130}
               >
                 {images.map((img) => (
-                  <ImageListItem key={img.photoId}>
+                  <ImageListItem key={img.id}>
                     <img
                       style={{
                         cursor: 'pointer'
                       }}
-                      onClick={event => handlePreview(event, img.messageId, img.photoId)}
-                      src={filePath.concat(`/${img.messageId}/${img.photoId}`)}
+                      onClick={event => handlePreview(event, img.messageId, img.id)}
+                      src={filePath.concat(`/${img.messageId}/${img.id}`)}
                       alt={'image'}
                       loading="lazy"
                     />
@@ -552,8 +572,17 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               <Typography>Shared Files</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <div>
-
+              <div className="accordion-detail">
+                {files.map(file => {
+                  return (
+                    <div key={file.id} style={{
+                      fontWeight: '600',
+                      margin: '8px'
+                    }}>
+                      <a href={filePath.concat(`/files/${file.messageId}/${file.id}`)}>{file.name}</a>
+                    </div>
+                  )
+                })}
               </div>
             </AccordionDetails>
           </Accordion>
@@ -584,11 +613,11 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={messageAlert.content && messageAlert.content.length > 0}
+      <Snackbar open={messageAlert.length > 0}
         autoHideDuration={3000}
-        onClose={e => { setMessageAlert({}) }}>
-        <Alert severity={messageAlert.type}>
-          {messageAlert.content}
+        onClose={e => { setMessageAlert('') }}>
+        <Alert severity='error'>
+          {messageAlert}
         </Alert>
       </Snackbar>
     </>

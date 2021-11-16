@@ -230,7 +230,7 @@ const getImagesMessageCv = async (req, res) => {
         const { conversationId } = req.params;
 
         const images = await sequelize.query(
-            "SELECT m.id as photoId, msg.id as messageId, m.createdAt FROM media m " +
+            "SELECT m.id, msg.id as messageId, m.createdAt FROM media m " +
             "JOIN messages msg on msg.id = m.messageId " +
             "JOIN conversations cv on cv.id = msg.conversationId " +
             "WHERE msg.conversationId = :conversationId AND m.type = 'image'" +
@@ -252,9 +252,37 @@ const getImagesMessageCv = async (req, res) => {
     }
 }
 
+const getFilesMessageCv = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+
+        const files = await sequelize.query(
+            "SELECT m.id, m.messageId, m.name, m.type, m.createdAt FROM media m " +
+            "JOIN messages msg on msg.id = m.messageId " +
+            "JOIN conversations cv on cv.id = msg.conversationId " +
+            "WHERE msg.conversationId = :conversationId AND m.type = 'file'" +
+            "ORDER BY m.updatedAt DESC"
+            , {
+                replacements: {
+                    conversationId
+                },
+                type: QueryTypes.SELECT
+            })
+
+        return res.status(200).json({ files })
+
+    } catch (error) {
+        console.log(error)
+        return res.status(403).json({
+            message: "Could not get files!"
+        })
+    }
+}
+
 
 
 module.exports = {
     getConversations, getMessages, getLastMessage,
-    setConversation, setMessage, readConversation, getImagesMessageCv
+    setConversation, setMessage, readConversation, getImagesMessageCv,
+    getFilesMessageCv
 }
