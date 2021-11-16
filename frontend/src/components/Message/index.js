@@ -2,21 +2,26 @@ import React, { useState } from 'react'
 import { Avatar, Tooltip, Dialog, DialogContent, IconButton, imageListClasses } from '@mui/material';
 import { baseURL, getTime } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
+import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';
 import './style.css'
 
 export default function Message({ message, logInUserId, hasAvatar, lastMessage, userName }) {
   const [isPreviewImg, setIsPreviewImg] = useState(false);
   const [imgPreviewUrl, setImgPreviewUrl] = useState(null);
+  const [selectedPhotoId, setPhotoId] = useState(null)
 
   const handlePreviewImg = (e, messageId, photoId) => {
     e.preventDefault();
     setIsPreviewImg(true);
     setImgPreviewUrl(`${baseURL}/api/messages/${messageId}/${photoId}`)
+    setPhotoId(photoId)
   }
 
   const handleClose = () => {
     setIsPreviewImg(false)
+    setImgPreviewUrl(null)
+    setPhotoId(null)
   }
 
   const getImageSize = (numOfPhotos) => {
@@ -37,9 +42,14 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
     return { itemWidth, height, width }
   }
 
-  const handleDownload = (event, messageId, fileId) => {
+  const handleFileDownload = (event, messageId, fileId) => {
     event.preventDefault();
     window.open(`${baseURL}/api/messages/files/${messageId}/${fileId}`)
+  }
+
+  const handleImageDownload = (event) => {
+    event.preventDefault()
+    window.open(`${baseURL}/api/messages/photos/${message.id}/${selectedPhotoId}`)
   }
 
   return (
@@ -89,7 +99,7 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                         <div className="message-file" key={file.id} >
                           <DescriptionIcon sx={{ color: '#fff', margin: '5px' }} />
                           <span
-                            onClick={e => handleDownload(e, message.id, file.id)}
+                            onClick={e => handleFileDownload(e, message.id, file.id)}
                           >
                             {file.name}
                           </span>
@@ -152,7 +162,7 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                           <div className="message-file" key={file.id}>
                             <DescriptionIcon sx={{ color: '#fff', margin: '5px' }} />
                             <span
-                              onClick={e => handleDownload(e, message.id, file.id)}
+                              onClick={e => handleFileDownload(e, message.id, file.id)}
                             >
                               {file.name}
                             </span>
@@ -185,6 +195,19 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
               }}
               onClick={handleClose}>
               <CloseIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Download" placement="bottom">
+            <IconButton
+              sx={{
+                position: 'fixed',
+                right: '70px',
+                top: '20px',
+                padding: '5px',
+                background: '#fff !important'
+              }}
+              onClick={handleImageDownload}>
+              <DownloadIcon />
             </IconButton>
           </Tooltip>
           <img width="100%" height="100%" src={imgPreviewUrl} />

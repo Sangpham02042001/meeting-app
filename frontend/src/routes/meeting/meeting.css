@@ -31,15 +31,18 @@
 .my-video > video {
   position: absolute;
   bottom: 0;
-  height: 200px;
+  height: 150px;
+  width: 250px;
+  left: 20px;
 }
 
-.my-video > h4 {
+.my-video h4 {
   position: absolute;
   bottom: 0;
-  left: 0;
+  left: 10px;
   color: #fff;
-  background-color: black;
+  object-fit: cover;
+  border-radius: 15px;
 }
 
 .meeting-btn-list {

@@ -8,7 +8,7 @@ const MeetingVideo = ({ remoteStreams }) => {
     <div className="remote-videos">
       {
         remoteStreams.current.length && remoteStreams.current.map((remote, idx) => {
-          return <Video key={idx} stream={remote.stream} name={remote.name} />
+          return remote && remote.stream && <Video key={idx} stream={remote.stream} name={remote.name} />
         })
       }
     </div>
@@ -28,7 +28,7 @@ const Video = ({ stream, name }) => {
     <div className="remote-video-item">
       <video width="100%" height="100%" ref={videoRef} autoPlay />
       {!isOpenCamera &&
-        <Avatar sx={{ width: "120px", height: '120px', zIndex: 10 }}
+        <Avatar sx={{ width: "70px", height: '70px', zIndex: 10 }}
           src={`${baseURL}/api/user/avatar/${userId}`}
           alt={name} />}
       <h4>{name}</h4>

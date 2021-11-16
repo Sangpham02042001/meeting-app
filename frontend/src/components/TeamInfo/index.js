@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { baseURL } from '../../utils'
 import { Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DescriptionIcon from '@mui/icons-material/Description';
 import PreviewImage from '../PreviewImage';
 import './team-info.css'
 
@@ -15,14 +16,28 @@ export default function TeamInfo() {
       return [...value, ...currentArr]
     }, [])
 
+  const files = [...teamReducer.team.meetmess]
+    .filter(item => item.isMessage)
+    .map(item => item.files)
+    .reduce((value, currentArr) => {
+      return [...value, ...currentArr]
+    }, [])
+
   const [isPreview, setIsPreview] = useState(false)
-  const [imgPreview, setImgPreview] = useState(null)
   const imgPath = `${baseURL}/api/messages`
+  const [selectedMessageId, setMessageId] = useState(null)
+  const [selectedPhotoId, setPhotoId] = useState(null)
 
   const handlePreviewImage = (event, messageId, photoId) => {
     event.preventDefault();
     setIsPreview(true);
-    setImgPreview(imgPath.concat(`/${messageId}/${photoId}`));
+    setMessageId(messageId)
+    setPhotoId(photoId)
+  }
+
+  const handleDownload = (event, messageId, fileId) => {
+    event.preventDefault();
+    window.open(`${baseURL}/api/messages/files/${messageId}/${fileId}`)
   }
 
   return (
@@ -79,9 +94,34 @@ export default function TeamInfo() {
         </AccordionDetails>
       </Accordion>
 
+      <Accordion className='team-info-expand-container'>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <strong>Shared files</strong>
+        </AccordionSummary>
+        <AccordionDetails>
+          <div className='shared-file-list'>
+            {files.map((file, idx) => {
+              return <div key={file.id} >
+                <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                <span
+                  onClick={e => handleDownload(e, file.messageId, file.id)}
+                >
+                  {file.name}
+                </span>
+              </div>
+            })}
+            {/* {JSON.stringify(files)} */}
+          </div>
+        </AccordionDetails>
+      </Accordion>
+
       <PreviewImage isPreview={isPreview}
         onClose={(e) => { setIsPreview(false) }}
-        image={imgPreview}
+        messageId={selectedMessageId} photoId={selectedPhotoId}
       />
     </div>
   )

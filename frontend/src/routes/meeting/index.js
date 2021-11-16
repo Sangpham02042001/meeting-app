@@ -173,6 +173,7 @@ const Meeting = (props) => {
 								// $('#remote'+remoteFeed.rfindex).empty().hide();
 								// $('#videoremote'+remoteFeed.rfindex).empty();
 								remoteStreams.current.splice(remoteFeed.rfindex, 1)
+								setTrigger(v4())
 								feedRefs.current[remoteFeed.rfindex] = null;
 								remoteFeed.detach();
 							}
@@ -196,6 +197,7 @@ const Meeting = (props) => {
 								// $('#videoremote'+remoteFeed.rfindex).empty();
 								feedRefs.current[remoteFeed.rfindex] = null;
 								remoteStreams.current.splice(remoteFeed.rfindex, 1)
+								setTrigger(v4())
 								remoteFeed.detach();
 							}
 						} else if (msg["error"]) {
@@ -548,20 +550,22 @@ const Meeting = (props) => {
 		!isMeetingEnd ? <div className="room-meeting">
 			<div className="room-content">
 				<div className="my-video">
-					<video width="100%" ref={myVideo} muted autoPlay />
+					<video ref={myVideo} muted autoPlay />
 					{(!isEnableVideo || !isVideoActive) &&
 						<div style={{
-							zIndex: 10,
 							position: 'absolute',
-							left: 0,
-							bottom: 0,
-							width: '100%'
+							left: '20px',
+							bottom: '-1px',
+							width: '251px',
+							height: '151px',
+							backgroundColor: '#3c4043',
+							borderRadius: '15px'
 						}}>
-							<Avatar sx={{ width: "120px", height: '120px', zIndex: 10, position: 'absolute', bottom: '30px', left: '70px' }}
+							<Avatar sx={{ width: "70px", height: '70px', zIndex: 10, position: 'absolute', bottom: '40px', left: '90px' }}
 								src={`${baseURL}/api/user/avatar/${userReducer.user.id}`}
 								alt={userReducer.user.firstName} />
+							<h4>You</h4>
 						</div>}
-					<h4>You</h4>
 				</div>
 				<div className="meeting-remote-videos"
 					style={{ width: isOpenChat || isOpenUsers || isOpenInfo ? '60%' : '80%' }}>

@@ -108,7 +108,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
   const [forceRender, setForceRender] = useState(v4());
   const [isPreview, setIsPreview] = useState(false);
-  const [imgPreview, setImgPreview] = useState(null);
+  const [selectedMessageId, setMessageId] = useState(null)
+  const [selectedPhotoId, setPhotoId] = useState(null)
   const [messageAlert, setMessageAlert] = useState('')
 
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
@@ -278,7 +279,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const handlePreview = (event, messageId, photoId) => {
     event.preventDefault();
     setIsPreview(true);
-    setImgPreview(filePath.concat(`/${messageId}/${photoId}`));
+    setMessageId(messageId)
+    setPhotoId(photoId)
   }
 
   const handleRecord = () => {
@@ -592,7 +594,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
       <PreviewImage isPreview={isPreview}
         onClose={(e) => { setIsPreview(false) }}
-        image={imgPreview}
+        messageId={selectedMessageId} photoId={selectedPhotoId}
       />
 
       <Dialog

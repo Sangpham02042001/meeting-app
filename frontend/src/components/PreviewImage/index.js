@@ -4,7 +4,16 @@ import {
     DialogContent
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-export default function PreviewImage({ isPreview, image, onClose }) {
+import DownloadIcon from '@mui/icons-material/Download';
+import { baseURL } from '../../utils';
+
+export default function PreviewImage({ isPreview, onClose, messageId, photoId }) {
+
+    const imgPath = `${baseURL}/api/messages`
+    const handleImageDownload = (event) => {
+        event.preventDefault()
+        window.open(`${baseURL}/api/messages/photos/${messageId}/${photoId}`)
+    }
 
     return (
 
@@ -28,7 +37,20 @@ export default function PreviewImage({ isPreview, image, onClose }) {
                         <CloseIcon />
                     </IconButton>
                 </Tooltip>
-                <img width="100%" height="100%" src={image} />
+                <Tooltip title="Download" placement="bottom">
+                    <IconButton
+                        sx={{
+                            position: 'fixed',
+                            right: '70px',
+                            top: '20px',
+                            padding: '5px',
+                            background: '#fff !important'
+                        }}
+                        onClick={handleImageDownload}>
+                        <DownloadIcon />
+                    </IconButton>
+                </Tooltip>
+                <img width="100%" height="100%" src={imgPath.concat(`/${messageId}/${photoId}`)} />
             </DialogContent>
         </Dialog >
 

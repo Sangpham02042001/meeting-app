@@ -49,10 +49,10 @@ const getFileMessageMedia = async (req, res) => {
       },
     })
     if (!media) {
-      
+
       return res.status(400).json({ error: 'File not found' })
     }
-    
+
     if (media.pathName) {
       let file = `./src/public/messages-files/${media.pathName}`;
       let fileStream = fs.createReadStream(file);
@@ -64,5 +64,33 @@ const getFileMessageMedia = async (req, res) => {
   }
 }
 
+const downloadImageMessageMedia = async (req, res) => {
+  let { messageId, mediaId } = req.params
+  try {
+    let media = await Media.findOne({
+      where: {
+        id: mediaId,
+        messageId
+      },
+    })
+    if (!media) {
 
-module.exports = { getImageMessage, getImageMessageMedia, getFileMessageMedia }
+      return res.status(400).json({ error: 'File not found' })
+    }
+
+    if (media.pathName) {
+      let file = `./src/public/messages-photos/${media.pathName}`;
+      let fileStream = fs.createReadStream(file);
+      res.setHeader('Content-disposition', 'attachment; filename=' + media.name);
+      fileStream.pipe(res);
+    }
+  } catch (error) {
+    return res.status(400).json({ error: 'File not found' })
+  }
+}
+
+
+module.exports = {
+  getImageMessage, getImageMessageMedia, getFileMessageMedia,
+  downloadImageMessageMedia
+}
