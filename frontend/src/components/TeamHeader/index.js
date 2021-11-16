@@ -163,7 +163,10 @@ export default function TeamHeader({ showTeamInfo }) {
           </Button>
         }
         <Tooltip title="Team info" style={{ marginRight: '10px' }}>
-          <IconButton onClick={showTeamInfo}>
+          <IconButton onClick={e => {
+            e.preventDefault()
+            showTeamInfo()
+          }}>
             <InfoIcon color='primary' />
           </IconButton>
         </Tooltip>
@@ -183,7 +186,7 @@ export default function TeamHeader({ showTeamInfo }) {
             className="team-header-menu-btn"
             aria-controls="basic-menu"
             aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
+            aria-expanded={isOpenMenu ? 'true' : undefined}
             onClick={e => {
               e.preventDefault()
               setAnchorEl(e.currentTarget)

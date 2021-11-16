@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import Message from '../../../components/MessageConver';
+import Message from '../../../components/Message';
 import Avatar from '../../../components/Avatar/index';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
@@ -216,7 +216,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         size += Math.round(file.size / 1024)
       }
 
-      if (size > 5120 ) {
+      if (size > 5120) {
         setMessageAlert('Could not upload file > 5MB !')
         return
       }

@@ -13,6 +13,10 @@ import MicNoneIcon from '@mui/icons-material/MicNone';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import ImageIcon from '@mui/icons-material/Image';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
+import DescriptionIcon from '@mui/icons-material/Description';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
   confirmInvitations, cleanTeamState, getTeamMeetMess
@@ -37,8 +41,8 @@ export default function Team(props) {
   const dispatch = useDispatch()
   const history = useHistory()
   const [input, setInput] = useState('')
-  const [images, setImages] = useState([])
-  const [imageUrl, setImageUrl] = useState([])
+  const [filesMessage, setFilesMessage] = useState([]);
+  const [filesMessageUrl, setFilesMessageUrl] = useState([]);
   const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
   const [offsetMeetmess, setOffsetMeetmess] = useState(0)
   const [isInvitedModalShow, setInvitedModalShow] = useState(false)
@@ -67,22 +71,22 @@ export default function Team(props) {
     }))
     setOffsetMeetmess(15)
 
-    window.addEventListener('paste', e => {
-      if (document.activeElement == inputRef.current) {
-        if (e.clipboardData.files.length > 0) {
-          let file = e.clipboardData.files[0]
-          let regex = /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i
-          if (regex.test(file.name)) {
-            setImages([...images, file])
-            let reader = new FileReader()
-            reader.readAsDataURL(file)
-            reader.onloadend = e => {
-              setImageUrl([...imageUrl, reader.result])
-            }
-          }
-        }
-      }
-    })
+    // window.addEventListener('paste', e => {
+    //   if (document.activeElement == inputRef.current) {
+    //     if (e.clipboardData.files.length > 0) {
+    //       let file = e.clipboardData.files[0]
+    //       let regex = /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i
+    //       if (regex.test(file.name)) {
+    //         s 
+    //         let reader = new FileReader()
+    //         reader.readAsDataURL(file)
+    //         reader.onloadend = e => {
+    //           setImageUrl([...imageUrl, reader.result])
+    //         }
+    //       }
+    //     }
+    //   }
+    // })
 
     return () => {
       // socketClient.leave(`team ${teamId}`)
@@ -127,13 +131,13 @@ export default function Team(props) {
   }, [teamReducer.team.fakeMessageId])
 
   useEffect(() => {
-    if (images.length) {
+    if (filesMessage.length) {
       setMessage({
         type: 'success',
-        content: 'Upload image successfully'
+        content: 'Upload file successfully'
       })
     }
-  }, [images.length])
+  }, [filesMessage.length])
 
   const runSpeechRecognition = () => {
     let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -164,10 +168,16 @@ export default function Team(props) {
       let transcript = event.results[0][0].transcript;
       let confidence = event.results[0][0].confidence;
       console.log(transcript, confidence * 100 + '%')
-      if (confidence > 0.6 && transcript.length) {
-        setInput(transcript)
+      if (confidence > 0.6) {
+        if (transcript.length) {
+          setInput(transcript)
+        }
       } else {
         speechReplyRef.current = "Could not understand!"
+        setMessage({
+          type: 'warning',
+          content: 'Could not understand!'
+        })
       }
 
     };
@@ -227,15 +237,15 @@ export default function Team(props) {
 
   const handleSendMessage = e => {
     e.preventDefault()
-    if (!input && !images.length) {
+    if (!input && !filesMessage.length) {
       return
     }
     setIsOpenEmojiList(false)
 
-    socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, images });
+    socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, files: filesMessage });
     setInput('')
-    setImageUrl([])
-    setImages([])
+    setFilesMessage([]);
+    setFilesMessageUrl([]);
     setRows(1)
   }
 
@@ -247,40 +257,6 @@ export default function Team(props) {
         num: 15
       }))
       setOffsetMeetmess(offsetMeetmess + 15)
-    }
-  }
-
-  const handleImageInputChange = e => {
-    e.preventDefault()
-    if (e.target.files.length) {
-      let size = 0;
-      for (const file of e.target.files) {
-        if (!(/image\/(?!svg)/.test(file.type))) {
-          setMessage({
-            type: 'error',
-            content: 'Only accept upload images'
-          })
-          return;
-        }
-        size += Math.round(file.size / 1024)
-      }
-      for (const file of images) {
-        size += Math.round(file.size / 1024)
-      }
-      if (size > 5120) {
-        setMessage({
-          type: 'error',
-          content: 'Too large images to upload'
-        })
-        return
-      }
-      setImages([...images, ...e.target.files])
-      let urls = []
-      for (const file of e.target.files) {
-        let url = URL.createObjectURL(file)
-        urls.push(url)
-      }
-      setImageUrl([...imageUrl, ...urls])
     }
   }
 
@@ -329,6 +305,46 @@ export default function Team(props) {
     setInput(event.target.value);
   }
 
+  const onFileInputChange = e => {
+    e.preventDefault()
+    if (e.target.files.length) {
+      let size = 0;
+      let filesUpload = []
+      for (const file of e.target.files) {
+        size += Math.round(file.size / 1024)
+        console.log(file)
+        filesUpload.push({
+          type: file.type,
+          name: file.name,
+          data: file,
+          size: file.size
+        })
+      }
+      for (const file of filesMessage) {
+        size += Math.round(file.size / 1024)
+      }
+
+      if (size > 5120) {
+        setMessage({
+          type: 'error',
+          message: 'Could not upload file > 5MB !'
+        })
+        return
+      }
+      setFilesMessage([...filesMessage, ...filesUpload]);
+      let urls = []
+      for (const file of e.target.files) {
+        let url = URL.createObjectURL(file)
+        urls.push({
+          type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file',
+          url,
+          name: file.name
+        })
+      }
+      setFilesMessageUrl([...filesMessageUrl, ...urls])
+    }
+  }
+
 
   return (teamReducer.teamLoaded && <Grid container>
     <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--gray-shadow)' }}>
@@ -343,7 +359,7 @@ export default function Team(props) {
           {currentNumOfMeetMess !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
             ref={scrollRef} style={{
               height: teamBody.current && teamBody.current.offsetHeight ?
-                teamBody.current.offsetHeight - (imageUrl.length ? 170 : 50) - (rows - 1) * 24 : '560px'
+                teamBody.current.offsetHeight - (filesMessageUrl.length ? 170 : 50) - (rows - 1) * 24 : '560px'
             }}>
             {currentNumOfMeetMess && meetmess.slice(0, currentNumOfMeetMess - 1)
               .map((item, idx) => (item.isMessage ? <div key={'message' + item.id}>
@@ -387,38 +403,91 @@ export default function Team(props) {
 
           <form onSubmit={handleSendMessage}
             style={{ position: "absolute", left: 0, bottom: '2px', width: '100%' }}>
-            {images.length > 0 &&
+            {filesMessageUrl.length > 0 &&
               <div className='image-message-upload'>
                 {
-                  images.map((i, idx) => {
-                    let imgIdx = images.findIndex(img => img === i)
-                    let imgUrl = imageUrl[imgIdx];
-                    return <div key={idx} style={{
-                      backgroundImage: `url("${imgUrl}")`
-                    }}>
-                      <i className="far fa-times-circle remove-image-btn"
-                        onClick={e => {
-                          e.preventDefault()
-                          setImageUrl(imgMsgList => {
-                            let tmpArr = [...imgMsgList];
-                            tmpArr.splice(imgIdx, 1);
-                            return tmpArr;
-                          })
-                          setImages(imgMsgList => {
-                            let tmpArr = [...imgMsgList];
-                            tmpArr.splice(imgIdx, 1);
-                            return tmpArr;
-                          });
-                        }}></i>
-                    </div>
+                  filesMessageUrl.map((fileUrl, idx) => {
+                    return (
+                      <div key={idx}
+                        style={{
+                          position: 'relative'
+                        }}>
+                        <IconButton
+                          sx={{
+                            position: 'absolute',
+                            right: '-8px',
+                            top: '-8px',
+                            zIndex: '10',
+                            width: '24px',
+                            height: '24px',
+                            color: '#fff',
+                            background: '#3e4042 !important'
+                          }}
+                          onClick={e => {
+                            e.preventDefault()
+                            setFilesMessage(files => {
+                              let tmpArr = [...files];
+                              tmpArr.splice(idx, 1);
+                              return tmpArr;
+                            })
+                            setFilesMessageUrl(filesUrl => {
+                              let tmpArr = [...filesUrl];
+                              tmpArr.splice(idx, 1);
+                              return tmpArr;
+                            })
+                          }}>
+                          <CloseIcon fontSize='small' />
+                        </IconButton>
+                        {fileUrl.type === 'image' ?
+                          <img src={`${fileUrl.url}`} style={{
+                            width: '100px',
+                            height: '100px',
+                            borderRadius: '15px'
+                          }} />
+                          : <div
+                            style={{
+                              background: '#fff',
+                              borderRadius: '10px',
+                              padding: '16px',
+                              width: '160px',
+                              height: '60px',
+                              display: 'flex'
+                            }}>
+                            <DescriptionIcon />
+                            <span style={{
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap',
+                              textOverflow: 'ellipsis',
+                              fontWeight: '600'
+                            }}>
+                              {fileUrl.name}
+                            </span>
+                          </div>}
+                      </div>
+                    )
                   })}
+                <Button>
+                  <label style={{
+                    cursor: 'pointer',
+                  }}
+                    htmlFor="files">
+                    < AddCircleIcon fontSize="large" />
+                  </label>
+                  <input type="file"
+                    onChange={onFileInputChange}
+                    multiple="multiple"
+                    id="files"
+                    style={{
+                      display: 'none'
+                    }} />
+                </Button>
               </div>
             }
 
             {isOpenEmojiList &&
               <div style={{
                 position: 'absolute',
-                top: '-330px',
+                top: filesMessage.length ? '-220px' : '-330px',
                 right: '100px',
               }}>
                 <Picker onEmojiClick={onEmojiClick} skinTone={SKIN_TONE_MEDIUM_DARK} />
@@ -449,19 +518,41 @@ export default function Team(props) {
               </div>
               <div className="input-list-btn" >
                 <div style={{ display: input.length ? 'none' : 'flex' }}>
-                  <Tooltip title="Attach a photo">
-                    <Button>
-                      <label htmlFor="images" className='send-image-label'>
+                  <Tooltip title="Attach photos">
+                    <IconButton >
+                      <label style={{
+                        cursor: 'pointer',
+                        display: 'flex'
+                      }}
+                        htmlFor="photos">
                         <ImageIcon color='success' />
-                        {/* <i style={{ color: "#69B00B" }} className="fas fa-image"></i> */}
                       </label>
                       <input type="file" accept='image/*'
+                        onChange={onFileInputChange}
                         multiple="multiple"
-                        onChange={handleImageInputChange}
-                        id="images" style={{
+                        id="photos"
+                        style={{
                           display: 'none'
                         }} />
-                    </Button>
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Attach a file">
+                    <IconButton >
+                      <label style={{
+                        cursor: 'pointer',
+                        display: 'flex'
+                      }}
+                        htmlFor="files">
+                        <AttachFileIcon color="primary" />
+                      </label>
+                      <input type="file"
+                        onChange={onFileInputChange}
+                        multiple="multiple"
+                        id="files"
+                        style={{
+                          display: 'none'
+                        }} />
+                    </IconButton>
                   </Tooltip>
                   <Tooltip title="Speech to text">
                     <IconButton onClick={runSpeechRecognition}>
@@ -476,7 +567,7 @@ export default function Team(props) {
                 <Tooltip title="Send message">
                   <div>
                     <IconButton variant="text" onClick={handleSendMessage}
-                      disabled={!input && !images.length}>
+                      disabled={!input && !filesMessage.length}>
                       <SendIcon style={{ color: "#1A73E8" }} />
                     </IconButton>
                   </div>

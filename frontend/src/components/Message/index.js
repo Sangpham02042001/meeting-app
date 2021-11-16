@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Avatar, Tooltip, Dialog, DialogContent, IconButton, imageListClasses } from '@mui/material';
 import { baseURL, getTime } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
+import DescriptionIcon from '@mui/icons-material/Description';
 import './style.css'
 
 export default function Message({ message, logInUserId, hasAvatar, lastMessage, userName }) {
@@ -36,21 +37,28 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
     return { itemWidth, height, width }
   }
 
+  const handleDownload = (event, messageId, fileId) => {
+    event.preventDefault();
+    window.open(`${baseURL}/api/messages/files/${messageId}/${fileId}`)
+  }
+
   return (
     <>
       {
         message.userId === logInUserId ?
           <div className={`own-message ${lastMessage ? 'last-message' : ''}`}
             style={{ marginBottom: '0px' }}>
-            <div>
-              {message.content &&
-                <Tooltip title={getTime(message.createdAt)} placement="left">
+            <Tooltip title={getTime(message.createdAt)} placement="left">
+              <div>
+                {message.content &&
+
                   <p>
                     {message.content}
                   </p>
-                </Tooltip>}
-              {message.photos && message.photos.length > 0 &&
-                <Tooltip title={getTime(message.createdAt)} placement="left">
+
+                }
+                {message.photos && message.photos.length > 0 &&
+
                   <div className='message-photo-list'>
                     {message.photos.map((photo, idx) => {
                       return (message.photos.length > 1 ?
@@ -72,8 +80,27 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                       )
                     })}
                   </div>
-                </Tooltip>}
-            </div>
+                }
+                {message.files && message.files.length > 0 &&
+
+                  <div className="message-file-list">
+                    {message.files.map((file) => {
+                      return (
+                        <div className="message-file" key={file.id} >
+                          <DescriptionIcon sx={{ color: '#fff', margin: '5px' }} />
+                          <span
+                            onClick={e => handleDownload(e, message.id, file.id)}
+                          >
+                            {file.name}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                }
+              </div>
+            </Tooltip>
           </div >
           :
           <div >
@@ -85,15 +112,14 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                     src={`${baseURL}/api/user/avatar/${message.userId}`} />
                 </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
                   src={`${baseURL}/api/user/avatar/${message.userId}`} />)}
-              <div className={message.photos && message.photos.length > 0 ? 'message-with-photo' : ''}>
-                {message.content &&
-                  <Tooltip title={getTime(message.createdAt)} placement='right'>
+              <Tooltip title={getTime(message.createdAt)} placement='right'>
+                <div className={message.photos && message.photos.length > 0 ? 'message-with-photo' : ''}>
+                  {message.content &&
                     <p className={hasAvatar ? 'user-last-message' : ''}>
                       {message.content}
                     </p>
-                  </Tooltip>}
-                {message.photos && message.photos.length > 0 &&
-                  <Tooltip title={getTime(message.createdAt)} placement="right">
+                  }
+                  {message.photos && message.photos.length > 0 &&
                     <div className='message-photo-list'
                       style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
                       {message.photos.map((photo, idx) => {
@@ -116,10 +142,27 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                         )
                       })}
                     </div>
-                  </Tooltip>}
-
-
-              </div>
+                  }
+                  {message.files && message.files.length > 0 &&
+                    <div
+                      className="message-file-list"
+                      style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
+                      {message.files.map((file) => {
+                        return (
+                          <div className="message-file" key={file.id}>
+                            <DescriptionIcon sx={{ color: '#fff', margin: '5px' }} />
+                            <span
+                              onClick={e => handleDownload(e, message.id, file.id)}
+                            >
+                              {file.name}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  }
+                </div>
+              </Tooltip>
             </div>
           </div>
       }

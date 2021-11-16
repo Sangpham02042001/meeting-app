@@ -11,11 +11,11 @@ import { socketClient, broadcastLocal, baseURL } from '../../utils';
 import { sendMessageCv, conversationCalling, cancelCall } from '../../store/reducers/conversation.reducer';
 import {
   sendMessage, updateMeetingState, setMeetingActive, endActiveMeeting,
-  clearMeetingJoined
+  clearMeetingJoined, getCurrentMeeting
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
-  sendMeetingMessage
+  sendMeetingMessage, getC
 } from '../../store/reducers/meeting.reducer'
 import './layout.css'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
@@ -34,6 +34,9 @@ export default function Layout({ children }) {
     socketClient.auth = { userId: userReducer.user.id };
     socketClient.connect();
     setIsSkConnected(true);
+
+    dispatch(getCurrentMeeting())
+
     //conversation
     socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }) => {
       dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }));
@@ -61,15 +64,15 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photos, createdAt }) => {
+    socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photos, createdAt, files }) => {
       dispatch(sendMessage({
-        messageId, content, senderId, teamId, photos, isMessage: true, createdAt
+        messageId, content, senderId, teamId, photos, files, isMessage: true, createdAt
       }))
     })
 
-    socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, photos, createdAt }) => {
+    socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, files, photos, createdAt }) => {
       dispatch(sendMessage({
-        messageId, content, senderId, teamId, photos, isMessage: true, createdAt
+        messageId, content, senderId, teamId, photos, files, isMessage: true, createdAt
       }))
     })
 

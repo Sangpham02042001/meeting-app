@@ -24,6 +24,11 @@ export const readNotif = createAsyncThunk('notification/readNotif', async (notif
     return { notifId }
 })
 
+export const deleteNoti = createAsyncThunk('notifications/delete', async ({ notiId }, { rejectWithValue }) => {
+    await axiosAuth.delete(`/api/notifications/${notiId}`)
+    return { notiId }
+})
+
 export const notificationSlice = createSlice({
     name: 'Notification',
     initialState,
@@ -66,15 +71,35 @@ export const notificationSlice = createSlice({
         [readNotif.rejected]: (state, action) => {
             state.error = action.error.message
             console.log(state.error)
+        },
+        [deleteNoti.pending]: () => {
+
+        },
+        [deleteNoti.fulfilled]: (state, action) => {
+            let { notiId } = action.payload
+            if (notiId) {
+                let idx = state.notifications.findIndex(noti => noti.id === notiId)
+                if (idx >= 0) {
+                    state.notifications.splice(idx, 1)
+                }
+            }
+        },
+        [deleteNoti.rejected]: (state, action) => {
+            console.log(action.payload)
         }
     },
     reducers: {
-        // cleanNotificationState: state => {
-        //     state.notifications = []
-        //     state.numOf_UnReadNotifications = 0
-        // }
+        hideNoti: (state, action) => {
+            let { notiId } = action.payload
+            if (notiId) {
+                let idx = state.notifications.findIndex(noti => noti.id === notiId)
+                if (idx >= 0) {
+                    state.notifications.splice(idx, 1)
+                }
+            }
+        }
     }
 })
 
-// export const { cleanNotificationState } = notificationSlice.actions;
+export const { hideNoti } = notificationSlice.actions;
 export default notificationSlice.reducer

@@ -366,9 +366,9 @@ export const teamSlice = createSlice({
       }
     },
     sendMessage: (state, action) => {
-      let { messageId, content, senderId, teamId, photos, isMessage, createdAt } = action.payload;
+      let { messageId, content, senderId, teamId, photos, isMessage, createdAt, files } = action.payload;
       if (state.team.id && state.team.id == teamId) {
-        state.team.meetmess.push({ id: messageId, content, userId: senderId, teamId, photos, isMessage, createdAt })
+        state.team.meetmess.push({ id: messageId, content, userId: senderId, teamId, photos, isMessage, files, createdAt })
         state.team.fakeMessageId = v4()
       }
     },
@@ -462,9 +462,23 @@ export const teamSlice = createSlice({
       state.teamLoaded = false
     },
     [getTeamInfo.fulfilled]: (state, action) => {
-      state.team = extend(state.team, action.payload.team)
+      let { team } = action.payload
+      state.team = extend(state.team, team)
       state.loading = false
       state.teamLoaded = true
+      // if (team.meetingActive && team.meetingActive.id) {
+      //   let members = team.meetingActive.members
+      //   let { id } = JSON.parse(window.localStorage.getItem('user'))
+      //   if (id && members.length) {
+      //     let inMeeting = members.find(m => m.id === id)
+      //     if (inMeeting) {
+      //       team.meetingJoined = {
+      //         teamId: team.id,
+      //         meetingId: meetingActive.id
+      //       }
+      //     }
+      //   }
+      // }
     },
     [getTeamInfo.rejected]: (state, action) => {
       // state.error = action.payload.error
