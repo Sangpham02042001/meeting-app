@@ -74,6 +74,7 @@
   height: 100%;
   margin-left: 15px;
   align-items: flex-end;
+  margin-bottom: 5px;
 }
 
 .input-list-btn > button {

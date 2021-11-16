@@ -425,53 +425,60 @@ export default function Team(props) {
               </div>}
 
             <div className="search-team-box">
-              <textarea
-                variant="outlined"
-                type="text" placeholder="Chat"
-                className='team-message-input' name='message'
-                style={{ marginLeft: isTeamInfoShow ? '1%' : '5%' }}
-                autoComplete="off"
-                ref={inputRef}
-                rows={rows}
-                value={input}
-                onKeyDown={handleEnterMessage}
-                onClick={e => { e.preventDefault(); setIsOpenEmojiList(false) }}
-                onChange={onWriteMessage} />
-              <div className="input-list-btn" >
-                <Tooltip title="Attach a photo">
-                  <Button>
-                    <label htmlFor="images" className='send-image-label'>
-                      <ImageIcon color='success' />
-                      {/* <i style={{ color: "#69B00B" }} className="fas fa-image"></i> */}
-                    </label>
-                    <input type="file" accept='image/*'
-                      multiple="multiple"
-                      onChange={handleImageInputChange}
-                      id="images" style={{
-                        display: 'none'
-                      }} />
-                  </Button>
-                </Tooltip>
+              <div style={{
+                marginLeft: isTeamInfoShow ? '3%' : '5%',
+                width: '100%',
+                marginRight: input.length ? '3%' : 0
+              }}>
+                <textarea
+                  variant="outlined"
+                  type="text" placeholder="Chat"
+                  className='team-message-input' name='message'
+                  autoComplete="off"
+                  ref={inputRef}
+                  rows={rows}
+                  value={input}
+                  onKeyDown={handleEnterMessage}
+                  onClick={e => { e.preventDefault(); setIsOpenEmojiList(false) }}
+                  onChange={onWriteMessage} />
                 <Tooltip title="Choose an emoji">
-                  <Button onClick={chooseEmoji} >
-                    <InsertEmoticonIcon color='secondary' />
+                  <Button onClick={chooseEmoji} className='emoji-btn' >
+                    <InsertEmoticonIcon />
                   </Button>
                 </Tooltip>
-                <Tooltip title="Speech to text">
-                  <IconButton onClick={runSpeechRecognition}>
-                    {voiceDetectRef.current ?
-                      <MicNoneIcon style={{ color: "#1A73E8" }} />
-                      :
-                      <MicIcon style={{ color: "#1A73E8" }} />
-                    }
-                  </IconButton>
-                </Tooltip>
+              </div>
+              <div className="input-list-btn" >
+                <div style={{ display: input.length ? 'none' : 'flex' }}>
+                  <Tooltip title="Attach a photo">
+                    <Button>
+                      <label htmlFor="images" className='send-image-label'>
+                        <ImageIcon color='success' />
+                        {/* <i style={{ color: "#69B00B" }} className="fas fa-image"></i> */}
+                      </label>
+                      <input type="file" accept='image/*'
+                        multiple="multiple"
+                        onChange={handleImageInputChange}
+                        id="images" style={{
+                          display: 'none'
+                        }} />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Speech to text">
+                    <IconButton onClick={runSpeechRecognition}>
+                      {voiceDetectRef.current ?
+                        <MicNoneIcon style={{ color: "#1A73E8" }} />
+                        :
+                        <MicIcon style={{ color: "#1A73E8" }} />
+                      }
+                    </IconButton>
+                  </Tooltip>
+                </div>
                 <Tooltip title="Send message">
                   <div>
-                    <Button variant="text" onClick={handleSendMessage}
+                    <IconButton variant="text" onClick={handleSendMessage}
                       disabled={!input && !images.length}>
                       <SendIcon style={{ color: "#1A73E8" }} />
-                    </Button>
+                    </IconButton>
                   </div>
                 </Tooltip>
               </div>
