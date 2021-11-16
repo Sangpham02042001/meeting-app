@@ -9,21 +9,24 @@
 
 .notfound-page > h1 {
   font-size: 10rem;
+  color: var(--primary-color);
 }
 
 .notfound-page > h3 {
   font-size: 2rem;
   margin-bottom: 20px;
+  color: var(--primary-color);
 }
 
 .notfound-page a {
   padding: 10px 20px;
   border-radius: 20px;
   color: white;
-  background-color: #000;
+  background-color: var(--primary-color);
+  text-decoration: none;
 }
 
 .notfound-page a:hover {
-  background-color: rgb(59, 59, 59);
+  background-color: var(--primary-color);
   transition: background-color 0.2s ease;
 }

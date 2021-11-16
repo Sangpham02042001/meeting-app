@@ -383,7 +383,6 @@ export default function TeamDiscover() {
               </div>)
             )}
             {invitedUsers.length > 0 && <>
-              <hr />
               <h4>User list</h4>
             </>}
             {<div className="invited-user-list">
@@ -391,7 +390,7 @@ export default function TeamDiscover() {
                 <div key={user.id} className="invited-user-item">
                   <span style={{ display: 'flex', alignItems: 'center' }}>
                     <Avatar src={`${baseURL}/api/user/avatar/${user.id}`} alt="user avatar" />
-                    <span>
+                    <span style={{ marginLeft: '10px' }}>
                       <p>{user.userName}</p>
                       <p>{user.email}</p>
                     </span>
