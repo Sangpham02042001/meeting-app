@@ -8,14 +8,14 @@ const MeetingVideo = ({ remoteStreams }) => {
     <div className="remote-videos">
       {
         remoteStreams.current.length && remoteStreams.current.map((remote, idx) => {
-          return remote && remote.stream && <Video key={idx} stream={remote.stream} name={remote.name} />
+          return remote && remote.stream && <Video key={remote.userId} userId={remote.userId} stream={remote.stream} name={remote.name} />
         })
       }
     </div>
   );
 }
 
-const Video = ({ stream, name }) => {
+const Video = ({ stream, name, userId }) => {
   const videoRef = useRef();
 
   const [isOpenCamera, setOpenCamera] = useState(true)

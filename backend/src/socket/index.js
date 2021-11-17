@@ -62,8 +62,11 @@ const socketServer = (socket) => {
 
         socket.emit('joined-meeting', { members, meetingId, teamId })
 
+        console.log(`meeting ${members}`)
+
         for (let m of members) {
-            if (userSockets[m.userId] && userSockets[m.userId.length]) {
+            console.log(userSockets[m.userId])
+            if (userSockets[m.userId] && userSockets[m.userId].length) {
                 for (const socketId of userSockets[m.userId]) {
                     socket.to(socketId).emit('user-join-meeting', { teamId, meetingId, user });
                 }

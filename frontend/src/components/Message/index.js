@@ -17,7 +17,22 @@ export default function Message({
   const [isPreviewImg, setIsPreviewImg] = useState(false);
   const [imgPreviewUrl, setImgPreviewUrl] = useState(null);
   const [selectedPhotoId, setPhotoId] = useState(null)
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
   const [isContentOptionShow, setContentOptionShow] = useState('none')
+
+  const handleRemoveMessage = () => {
+    setAnchorEl(null);
+    socketClient.emit('conversation-remove-message', { conversationId, messageId: message.id, senderId: logInUserId, receiverId: participantId })
+  }
+
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null)
+  }
 
   const handlePreviewImg = (e, messageId, photoId) => {
     e.preventDefault();
@@ -123,7 +138,7 @@ export default function Message({
                 }
               </div>
             </Tooltip>
-            {/* <div>
+            <div>
               <IconButton onClick={handleOpenMenu}>
                 <MoreHorizIcon />
               </IconButton>
@@ -138,7 +153,7 @@ export default function Message({
               >
                 <MenuItem onClick={handleRemoveMessage}>Remove</MenuItem>
               </Menu>
-            </div> */}
+            </div>
           </div >
           :
           <div >

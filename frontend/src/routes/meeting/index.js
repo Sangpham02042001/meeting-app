@@ -134,7 +134,7 @@ const Meeting = (props) => {
 				} else if (event) {
 					if (event === "attached") {
 						console.log('new remote attach', msg)
-						for (let i = 1; i < 6; i++) {
+						for (let i = 0; i < 6; i++) {
 							if (!feedRefs.current[i]) {
 								feedRefs.current[i] = remoteFeed;
 								remoteFeed.rfindex = i;
@@ -162,7 +162,7 @@ const Meeting = (props) => {
 							let leaving = msg["leaving"];
 							Janus.log("Publisher left: " + leaving);
 							let remoteFeed = null;
-							for (let i = 1; i < 6; i++) {
+							for (let i = 0; i < 6; i++) {
 								if (feedRefs.current[i] && feedRefs.current[i].rfid == leaving) {
 									remoteFeed = feedRefs.current[i];
 									break;
@@ -174,7 +174,7 @@ const Meeting = (props) => {
 								// $('#videoremote'+remoteFeed.rfindex).empty();
 								remoteStreams.current.splice(remoteFeed.rfindex, 1)
 								setTrigger(v4())
-								feedRefs.current[remoteFeed.rfindex] = null;
+								feedRefs.current.splice(remoteFeed.rfindex, 1)
 								remoteFeed.detach();
 							}
 						} else if (msg["unpublished"]) {
@@ -185,7 +185,7 @@ const Meeting = (props) => {
 								return;
 							}
 							let remoteFeed = null;
-							for (let i = 1; i < 6; i++) {
+							for (let i = 0; i < 6; i++) {
 								if (feedRefs.current[i] && feedRefs.current[i].rfid == unpublished) {
 									remoteFeed = feedRefs.current[i];
 									break;
@@ -195,7 +195,7 @@ const Meeting = (props) => {
 								Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
 								// $('#remote'+remoteFeed.rfindex).empty().hide();
 								// $('#videoremote'+remoteFeed.rfindex).empty();
-								feedRefs.current[remoteFeed.rfindex] = null;
+								feedRefs.current.splice(remoteFeed.rfindex, 1)
 								remoteStreams.current.splice(remoteFeed.rfindex, 1)
 								setTrigger(v4())
 								remoteFeed.detach();
@@ -247,24 +247,27 @@ const Meeting = (props) => {
 			},
 			onremotestream: stream => {
 				console.log('onremotestream', remoteFeed.rfindex, remoteStreams.current.length)
-				remoteStreams.current[remoteFeed.rfindex] = {
-					stream,
-					name: JSON.parse(remoteFeed.rfdisplay).name,
-					userId: JSON.parse(remoteFeed.rfdisplay).userId
-				};
-				console.log(`new feed refs ${remoteStreams.current}`)
-				let videoTracks = stream.getVideoTracks();
-				if (!videoTracks || videoTracks.length === 0) {
-					//No remote camera
-					console.log('remote turn off camera')
+				let idx = remoteStreams.current.findIndex(stream => stream.userId == JSON.parse(remoteFeed.rfdisplay).userId)
+				if (idx < 0) {
+					remoteStreams.current[remoteFeed.rfindex] = {
+						stream,
+						name: JSON.parse(remoteFeed.rfdisplay).name,
+						userId: JSON.parse(remoteFeed.rfdisplay).userId
+					};
+					console.log(`new feed refs ${remoteStreams.current}`)
+					let videoTracks = stream.getVideoTracks();
+					if (!videoTracks || videoTracks.length === 0) {
+						//No remote camera
+						console.log('remote turn off camera')
+					}
+					setTrigger(v4())
 				}
-				setTrigger(v4())
 			},
 			oncleanup: function () {
 				Janus.log(" ::: Got a cleanup notification (remote feed " + id + ") :::");
 				remoteFeed.simulcastStarted = false;
 				remoteStreams.current.splice(remoteFeed.rfindex, 1)
-				feedRefs.current[remoteFeed.rfindex] = undefined
+				feedRefs.current.splice(remoteFeed.rfindex, 1)
 				setTrigger(v4())
 			}
 		})
