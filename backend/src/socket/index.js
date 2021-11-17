@@ -6,7 +6,7 @@ const { getMemberTeam, sendMessage } = require('../controllers/team.controller')
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
-const { setConversation, setMessage, getParticipantId } = require('../controllers/conversation.controller');
+const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
 
 
 
@@ -106,14 +106,16 @@ const socketServer = (socket) => {
         }
     })
 
-    socket.on('conversation-remove-message', async ({ conversationId, messageId, senderId }) => {
-        const receiverId = await getParticipantId({conversationId, senderId});
-        if (userSockets[receiverId] && userSockets[receiverId].length) {
-            for (const socketId of userSockets[receiverId]) {
-                socket.to(socketId).emit('conversation-removed-message', { conversationId, messageId, receiverId, senderId })
+    socket.on('conversation-remove-message', async ({ conversationId, messageId, senderId, receiverId }) => {
+        let report = await removeMessageCv({ conversationId, messageId, senderId });
+        if (report) {
+            if (userSockets[receiverId] && userSockets[receiverId].length) {
+                for (const socketId of userSockets[receiverId]) {
+                    socket.to(socketId).emit('conversation-removed-message', { conversationId, messageId, senderId })
+                }
             }
+            socket.emit('conversation-removed-message', { conversationId, messageId, senderId })
         }
-        socket.emit('conversation-removed-message', { conversationId, messageId, receiverId, senderId })
     })
 
     socket.on('conversation-call', ({ conversationId, senderId, senderName, receiverId }) => {

@@ -11,12 +11,14 @@ import './style.css'
 
 export default function Message({
   message, logInUserId, hasAvatar, lastMessage,
-  userName, conversationId }) {
+  userName, conversationId, participantId }) {
   const [isPreviewImg, setIsPreviewImg] = useState(false);
   const [imgPreviewUrl, setImgPreviewUrl] = useState(null);
   const [selectedPhotoId, setPhotoId] = useState(null)
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+
+  console.log(participantId)
 
   const handleOpenMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -28,7 +30,7 @@ export default function Message({
 
   const handleRemoveMessage = () => {
     setAnchorEl(null);
-    socketClient.emit('conversation-remove-message', { conversationId, messageId: message.id, senderId: logInUserId })
+    socketClient.emit('conversation-remove-message', { conversationId, messageId: message.id, senderId: logInUserId, receiverId: participantId })
   }
 
   const handlePreviewImg = (e, messageId, photoId) => {

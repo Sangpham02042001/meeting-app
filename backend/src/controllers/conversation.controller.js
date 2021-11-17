@@ -279,21 +279,44 @@ const getFilesMessageCv = async (req, res) => {
     }
 }
 
-const getParticipantId = async ({ conversationId, senderId }) => {
+const removeMessageCv = async ({ messageId }) => {
 
     try {
-        const participantId = await sequelize.query(
-            "SELECT userId FROM users_conversations " +
-            "WHERE conversationId = :conversationId AND userId NOT LIKE :senderId"
+        let media = await Media.findOne({
+            where: {
+                messageId
+            },
+            attributes: ['id', 'pathName', 'type']
+        })
+
+        await sequelize.query(
+            "DELETE FROM messages " +
+            "WHERE id = :messageId"
             , {
                 replacements: {
-                    conversationId,
-                    senderId
+                    messageId
                 },
-                type: QueryTypes.SELECT
+                type: QueryTypes.DELETE
             })
 
-        return (participantId[0] || {}).userId
+        if ((media || {}).type === 'image') {
+            fs.unlink(`./src/public/messages-photos/${media.pathName}`, (err) => {
+                if (err) {
+                    console.log(err)
+                    return null;
+                }
+            })
+        } else if ((media || {}).type === 'file') {
+            fs.unlink(`./src/public/messages-files/${media.pathName}`, (err) => {
+                if (err) {
+                    console.log(err)
+                    return null;
+                }
+            })
+        }
+
+        return 'success';
+
     } catch (error) {
         console.log(error);
         return null;
@@ -305,5 +328,5 @@ const getParticipantId = async ({ conversationId, senderId }) => {
 module.exports = {
     getConversations, getMessages, getLastMessage,
     setConversation, setMessage, readConversation, getImagesMessageCv,
-    getFilesMessageCv, getParticipantId
+    getFilesMessageCv, removeMessageCv
 }

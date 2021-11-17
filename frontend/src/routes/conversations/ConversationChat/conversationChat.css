@@ -127,6 +127,7 @@
 
 .conversation-message .input-btn {
   display: flex;
+  align-items: flex-end;
 }
 
 .conversation-message .input-btn button {

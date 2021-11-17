@@ -340,9 +340,12 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                 />
               )
             })}
-          {messages.length > 0 && <Message message={messages[messages.length - 1]}
-            logInUserId={user.id}
-            hasAvatar={true} lastMessage={true} />}
+          {messages.length > 0 &&
+            <Message message={messages[messages.length - 1]}
+              logInUserId={user.id}
+              conversationId={conversationId}
+              participantId={participant.id}
+              hasAvatar={true} lastMessage={true} />}
 
         </div>
         <div className="bottom-message">
@@ -457,8 +460,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
           <div className="input-btn">
             <div style={{
-              display: content.length ? 'none' : 'flex',
-              alignItems: filesMessageUrl.length > 0 ? 'flex-end' : 'center'
+              display: 'flex'
             }}>
               <Tooltip title="Attach photos">
                 <IconButton >
@@ -518,7 +520,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               </IconButton>
             </Tooltip> */}
             </div>
-            <Tooltip title="Send message" style={{ display: !content.length && 'none' }}>
+            <Tooltip title="Send message" style={{ display: !content.length ? 'none' : 'flex' }}>
               <IconButton onClick={handleSendMessage} >
                 <SendIcon color="primary" />
               </IconButton>
