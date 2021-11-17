@@ -34,6 +34,8 @@
   height: 150px;
   width: 250px;
   left: 20px;
+  object-fit: fill;
+  border-radius: 15px;
 }
 
 .my-video h4 {

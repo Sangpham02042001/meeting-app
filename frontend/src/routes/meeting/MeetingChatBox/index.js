@@ -3,6 +3,8 @@ import { Button, IconButton, TextField } from '@mui/material';
 import './meetingChatBox.css';
 import SendIcon from '@mui/icons-material/Send';
 import ImageIcon from '@mui/icons-material/Image';
+import DescriptionIcon from '@mui/icons-material/Description';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -15,11 +17,37 @@ export default function ChatBox({ chatVisible }) {
     const [message, setMessage] = useState('');
     const userReducer = useSelector(state => state.userReducer)
     const meetingReducer = useSelector(state => state.meetingReducer)
-    const [image, setImage] = useState(null)
-    const [imageUrl, setImageUrl] = useState('')
+    const [file, setFile] = useState(null)
+    const [fileUrl, setFileUrl] = useState('')
+
+    const [rows, setRows] = useState(1);
+    const minRows = 1;
+    const maxRows = 5;
+
+
     const currentNumOfMessages = meetingReducer.meeting.messages.length
     const scrollRef = useRef(null);
     const inputRef = useRef(null);
+
+    const onWriteMessage = (event) => {
+        event.preventDefault()
+        const textareaLineHeight = 36;
+
+        const previousRows = event.target.rows;
+        event.target.rows = minRows; // reset number of rows in textarea
+        const currentRows = ~~(event.target.scrollHeight / textareaLineHeight);
+
+        if (currentRows === previousRows) {
+            event.target.rows = currentRows;
+        }
+
+        if (currentRows >= maxRows) {
+            event.target.rows = maxRows;
+            event.target.scrollTop = event.target.scrollHeight;
+        }
+        setRows(currentRows < maxRows ? currentRows : maxRows)
+        setMessage(event.target.value);
+    }
 
     useEffect(() => {
         window.addEventListener('paste', e => {
@@ -28,11 +56,11 @@ export default function ChatBox({ chatVisible }) {
                     let file = e.clipboardData.files[0]
                     let regex = /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i
                     if (regex.test(file.name)) {
-                        setImage(file)
+                        setFile(file)
                         let reader = new FileReader()
                         let url = reader.readAsDataURL(file)
                         reader.onloadend = e => {
-                            setImageUrl(reader.result)
+                            setFileUrl(reader.result)
                         }
                     }
                 }
@@ -65,28 +93,39 @@ export default function ChatBox({ chatVisible }) {
 
     const handleSendMessage = () => {
         let userId = userReducer.user.id;
-        if (message !== '' || image) {
+        if (message !== '' || file) {
+            console.log(`content ${message}`)
             socketClient.emit('send-message-meeting', {
                 senderId: userId,
                 meetingId: meetingReducer.meeting.id,
                 content: message,
-                image,
+                file: file,
                 teamId
             })
             setMessage('');
-            setImageUrl('');
-            setImage('');
+            setFileUrl('');
+            setFile('');
+            setRows(1)
         }
 
     }
 
-    const handleImageInputChange = e => {
+    const onFileInputChange = e => {
         e.preventDefault()
-        setImage(e.target.files[0])
-        let reader = new FileReader()
-        let url = reader.readAsDataURL(e.target.files[0])
-        reader.onloadend = e => {
-            setImageUrl(reader.result)
+        if (e.target.files.length) {
+            let file = e.target.files[0]
+            setFile({
+                type: file.type,
+                name: file.name,
+                data: file,
+                size: file.size
+            })
+            let url = URL.createObjectURL(file)
+            setFileUrl({
+                type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file',
+                url,
+                name: file.name
+            })
         }
     }
 
@@ -105,7 +144,7 @@ export default function ChatBox({ chatVisible }) {
             <div className="chatbox-content">
                 {currentNumOfMessages !== 0 && <div className='message-list'
                     ref={scrollRef} style={{
-                        height: `calc(60vh - ${imageUrl ? 120 : 0}px)`
+                        height: `calc(60vh - ${(fileUrl ? 120 : 0) + (rows - 1) * 24}px)`
                     }}>
                     {currentNumOfMessages && meetingReducer.meeting.messages.slice(0, currentNumOfMessages - 1)
                         .map((message, idx) => (
@@ -117,35 +156,67 @@ export default function ChatBox({ chatVisible }) {
                         logInUserId={null}
                         hasAvatar={true} lastMessage={true} />}
                 </div>}
-                {imageUrl && <div className='image-message-upload'>
-                    <div style={{
-                        backgroundImage: `url("${imageUrl}")`
-                    }}>
-                    </div>
+                {fileUrl && <div className='image-message-upload'>
+                    {fileUrl.type === 'image' ?
+                        <img src={`${fileUrl.url}`} style={{
+                            width: '100px',
+                            height: '100px',
+                            borderRadius: '15px'
+                        }} />
+                        : <div
+                            style={{
+                                background: '#fff',
+                                borderRadius: '10px',
+                                padding: '16px',
+                                width: '160px',
+                                height: '60px',
+                                display: 'flex'
+                            }}>
+                            <DescriptionIcon />
+                            <span style={{
+                                overflow: 'hidden',
+                                whiteSpace: 'nowrap',
+                                textOverflow: 'ellipsis',
+                                fontWeight: '600'
+                            }}>
+                                {fileUrl.name}
+                            </span>
+                        </div>}
                     <IconButton className='remove-image-btn'
                         onClick={e => {
-                            setImageUrl('')
+                            setFileUrl('')
                         }}>
                         <CloseIcon />
                     </IconButton>
                 </div>}
             </div>
             <div className="chatbox-sender">
-                <TextField variant='outlined' ref={inputRef} placeholder="Send message"
-                    onKeyDown={handleEnterSendMessage} onChange={onChangeMessage} value={message} />
-                <Button >
-                    <label htmlFor="images" style={{ cursor: 'pointer' }}>
-                        <ImageIcon color='success' />
-                    </label>
-                    <input type="file" accept='image/*'
-                        onChange={handleImageInputChange}
-                        id="images" style={{
-                            display: 'none'
-                        }} />
-                </Button>
-                <IconButton onClick={handleSendMessage}>
-                    <SendIcon style={{ color: "#1A73E8" }} />
-                </IconButton>
+                <textarea
+                    variant="outlined"
+                    type="text" placeholder="Chat" name='message'
+                    autoComplete="off"
+                    ref={inputRef}
+                    rows={rows}
+                    value={message}
+                    onKeyDown={handleEnterSendMessage}
+                    onChange={onWriteMessage} />
+                <div style={{ display: 'flex' }}>
+                    <IconButton style={{
+                        display: message.length ? 'none' : 'block'
+                    }}>
+                        <label htmlFor="images" style={{ cursor: 'pointer' }}>
+                            < AttachFileIcon color="primary" />
+                        </label>
+                        <input type="file"
+                            onChange={onFileInputChange}
+                            id="images" style={{
+                                display: 'none'
+                            }} />
+                    </IconButton>
+                    <IconButton onClick={handleSendMessage}>
+                        <SendIcon style={{ color: "#1A73E8" }} />
+                    </IconButton>
+                </div>
             </div>
         </>
     )

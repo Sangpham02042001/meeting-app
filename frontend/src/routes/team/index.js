@@ -378,7 +378,7 @@ export default function Team(props) {
                   logInUserId={user.id}
                   userName={(item.userId != meetmess[idx + 1].userId || idx === 0) ? getUserName(item.userId) : ''}
                   hasAvatar={item.userId != meetmess[idx + 1].userId} />
-                {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt) && idx !== 0
+                {meetmess[idx + 1].isMessage && messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt) && idx !== 0
                   && <div className='time-text'>
                     <span>
                       {messageTimeDiff(meetmess[idx + 1].createdAt, meetmess[idx].createdAt)}

@@ -89,16 +89,15 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('sent-message-meeting', ({ messageId, meetingId, senderId, content, photo, teamId }) => {
+    socketClient.on('sent-message-meeting', ({ messageId, meetingId, senderId, content, photos, files, createdAt, teamId }) => {
       dispatch(sendMeetingMessage({
-        messageId, content, senderId, meetingId, photo
+        messageId, content, senderId, meetingId, photos, files, createdAt
       }))
-      broadcastLocal.postMessage({ messageId, meetingId, senderId, content, photo, teamId })
     })
 
-    socketClient.on('receive-message-meeting', ({ messageId, meetingId, senderId, content, photo, teamId }) => {
+    socketClient.on('receive-message-meeting', ({ messageId, meetingId, senderId, content, photos, files, teamId, createdAt }) => {
       dispatch(sendMeetingMessage({
-        messageId, content, senderId, meetingId, photo, teamId
+        messageId, content, senderId, meetingId, photos, teamId, files, createdAt
       }))
     })
 

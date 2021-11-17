@@ -71,14 +71,18 @@ const socketServer = (socket) => {
         }
     });
 
-    socket.on('send-message-meeting', async ({ teamId, senderId, content, image, meetingId }) => {
+    socket.on('send-message-meeting', async ({ teamId, senderId, content, file, meetingId }) => {
         let members = await getActiveMemberMeeting({ meetingId });
         members = members.filter(m => m.id !== senderId);
-        const message = await sendMessageMeeting({ senderId, content, image, meetingId })
-        socket.emit('sent-message-meeting', { messageId: message.id, content, meetingId, senderId, photo: message.photo, teamId })
+        const message = await sendMessageMeeting({ senderId, content, file, meetingId })
+        socket.emit('sent-message-meeting', {
+            messageId: message.id, content, meetingId, senderId,
+            photos: message.photos, teamId, files: message.files, createdAt: message.createdAt
+        })
 
         socket.to(`meeting-${meetingId}`).emit('receive-message-meeting', {
-            messageId: message.id, meetingId, senderId, content, photo: message.photo
+            messageId: message.id, meetingId, senderId, content,
+            photos: message.photos, files: message.files, createdAt: message.createdAt
         })
     })
 

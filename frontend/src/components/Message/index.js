@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
-import { Avatar, Tooltip, Dialog, DialogContent, IconButton, imageListClasses } from '@mui/material';
+import {
+  Avatar, Tooltip, Dialog, DialogContent, IconButton,
+  Menu, MenuItem
+} from '@mui/material';
 import { baseURL, getTime } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -10,6 +13,7 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
   const [isPreviewImg, setIsPreviewImg] = useState(false);
   const [imgPreviewUrl, setImgPreviewUrl] = useState(null);
   const [selectedPhotoId, setPhotoId] = useState(null)
+  const [isContentOptionShow, setContentOptionShow] = useState('none')
 
   const handlePreviewImg = (e, messageId, photoId) => {
     e.preventDefault();
@@ -27,9 +31,15 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
   const getImageSize = (numOfPhotos) => {
     let itemWidth, height, width
     if (numOfPhotos == 1) {
-      itemWidth = '350px';
-      width = '350px';
-      height = '400px'
+      if (message.meetingId) {
+        itemWidth = '200px',
+          width = '200px',
+          height = '200px'
+      } else {
+        itemWidth = '350px';
+        width = '350px';
+        height = '400px'
+      }
     } else if (numOfPhotos <= 3) {
       width = '410px';
       itemWidth = '200px'
@@ -61,11 +71,9 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
             <Tooltip title={getTime(message.createdAt)} placement="left">
               <div>
                 {message.content &&
-
                   <p>
                     {message.content}
                   </p>
-
                 }
                 {message.photos && message.photos.length > 0 &&
 

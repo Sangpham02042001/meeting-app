@@ -45,10 +45,18 @@
   position: relative;
   display: flex;
   align-items: center;
-  background: #f1f3f4;
-  border-radius: 25px;
-  height: 46px;
+  justify-content: space-between;
   margin: 15px;
+}
+
+.chatbox-sender textarea {
+  resize: none;
+  border-radius: 25px;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  outline: none;
+  background: #f1f3f4;
 }
 
 .chatbox-sender fieldset {

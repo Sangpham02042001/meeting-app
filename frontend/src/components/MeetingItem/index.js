@@ -11,20 +11,24 @@ import Message from '../Message'
 
 export default function MeetingItem({ meeting }) {
   const user = useSelector(state => state.userReducer.user)
-  const hostName = ((meeting.members || []).find(m => m.id === meeting.hostId) || {}).userName || ''
+  const teamMembers = useSelector(state => state.teamReducer.team.members)
+  const hostName = ((meeting.members || teamMembers || []).find(m => m.id === meeting.hostId) || {}).userName || ''
   const [messages, setMessages] = useState([])
   const [error, setError] = useState('')
 
   useEffect(() => {
-    (async () => {
-      try {
-        let response = await axiosAuth.get(`${baseURL}/api/meetings/${meeting.id}/messages`)
-        setMessages(response.data.messages)
-      } catch (error) {
-        console.log(error)
-        setError('Some thing wrong when get messages')
-      }
-    })()
+    if (!meeting.active) {
+      (async () => {
+        try {
+          let response = await axiosAuth.get(`${baseURL}/api/meetings/${meeting.id}/messages`)
+          console.log(response.data.messages)
+          setMessages(response.data.messages)
+        } catch (error) {
+          console.log(error)
+          setError('Some thing wrong when get messages')
+        }
+      })()
+    }
   }, [])
 
   const getUserName = userId => {
@@ -51,7 +55,7 @@ export default function MeetingItem({ meeting }) {
           <div style={{ width: '100%' }}>
             <Typography style={{ fontSize: '14px' }}>Meeting created by <strong>{hostName}</strong></Typography>
             <hr />
-            <div style={{
+            {meeting.members && <div style={{
               marginTop: '10px',
               display: 'flex',
               alignItems: 'center'
@@ -64,7 +68,7 @@ export default function MeetingItem({ meeting }) {
                   </Tooltip>
                 ))}
               </AvatarGroup>
-            </div>
+            </div>}
           </div>
         </AccordionSummary>
         <AccordionDetails style={{

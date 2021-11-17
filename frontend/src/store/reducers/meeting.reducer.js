@@ -86,9 +86,9 @@ export const meetingSlice = createSlice({
       state.messages.push({ message, userId, userName });
     },
     sendMeetingMessage: (state, action) => {
-      let { messageId, content, senderId, meetingId, photo } = action.payload;
+      let { messageId, content, senderId, meetingId, photos, files, createdAt } = action.payload;
       if (state.meeting.id && state.meeting.id == meetingId) {
-        state.meeting.messages.push({ id: messageId, content, userId: senderId, photo, meetingId })
+        state.meeting.messages.push({ id: messageId, content, userId: senderId, photos, files, meetingId, createdAt })
       }
     },
     userJoinMeeting: (state, action) => {

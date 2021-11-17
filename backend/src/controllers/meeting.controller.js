@@ -7,6 +7,7 @@ const fs = require('fs')
 const { Readable } = require('stream');
 const { v4 } = require('uuid')
 const axios = require('axios')
+const Media = require('../models/media')
 
 const getMeetingById = async (req, res) => {
   const { meetingId } = req.params
@@ -232,24 +233,37 @@ const updateMeetingState = async ({ meetingId }) => {
   }
 }
 
-const sendMessageMeeting = async ({ senderId, content, image, meetingId }) => {
+const sendMessageMeeting = async ({ senderId, content, file, meetingId }) => {
   try {
-    let photoName = null;
-    if (image) {
-      photoName = v4() + '.png';
-      let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
-      const imageStream = new Readable();
-      imageStream._read = () => { }
-      imageStream.push(image)
-      imageStream.pipe(writeStream)
-    }
-
     const message = await Message.create({
       content,
       userId: senderId,
-      meetingId,
-      photo: photoName
+      meetingId
     })
+    if (file) {
+      let fileName = v4().concat('-', file.name)
+      let writeStream = fs.createWriteStream(`./src/public/messages-${/image\/(?!svg)/.test(file.type) ? 'photos' : 'files'}/${fileName}`)
+      const fileStream = new Readable();
+      fileStream._read = () => { }
+      fileStream.push(file.data)
+      fileStream.pipe(writeStream)
+      let media = await Media.create({
+        pathName: fileName,
+        name: file.name,
+        messageId: message.id,
+        type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
+      })
+      if (media) {
+        if (media.type === 'image') {
+          message.photos = [media]
+          message.files = []
+        } else {
+          message.files = [media]
+          message.photos = []
+        }
+      }
+    }
+
     return message;
   } catch (error) {
     console.log(error)
