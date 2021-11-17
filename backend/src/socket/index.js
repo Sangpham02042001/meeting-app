@@ -6,7 +6,7 @@ const { getMemberTeam, sendMessage } = require('../controllers/team.controller')
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
-const { setConversation, setMessage } = require('../controllers/conversation.controller');
+const { setConversation, setMessage, getParticipantId } = require('../controllers/conversation.controller');
 
 
 
@@ -21,7 +21,7 @@ const socketServer = (socket) => {
         let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, files })
-        socket.emit('sent-message-team', { messageId: message.id, content, teamId, senderId, files: message.files, photos: message.photos, createdAt: message.createdAt })
+        socket.emit('receive-message-team', { messageId: message.id, content, teamId, senderId, files: message.files, photos: message.photos, createdAt: message.createdAt })
         for (let m of members) {
             if (userSockets[m.id] && userSockets[m.id].length) {
                 for (const socketId of userSockets[m.id]) {
@@ -63,7 +63,7 @@ const socketServer = (socket) => {
         socket.emit('joined-meeting', { members, meetingId, teamId })
 
         for (let m of members) {
-            if (userSockets && userSockets[m.userId]) {
+            if (userSockets[m.userId] && userSockets[m.userId.length]) {
                 for (const socketId of userSockets[m.userId]) {
                     socket.to(socketId).emit('user-join-meeting', { teamId, meetingId, user });
                 }
@@ -75,7 +75,7 @@ const socketServer = (socket) => {
         let members = await getActiveMemberMeeting({ meetingId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessageMeeting({ senderId, content, image, meetingId })
-        socket.emit('sent-message-meeting', { messageId: message.id, content, meetingId, senderId, photo: message.photo, teamId })
+        socket.emit('receive-message-meeting', { messageId: message.id, content, meetingId, senderId, photo: message.photo, teamId })
 
         socket.to(`meeting-${meetingId}`).emit('receive-message-meeting', {
             messageId: message.id, meetingId, senderId, content, photo: message.photo
@@ -89,7 +89,7 @@ const socketServer = (socket) => {
         console.log(files);
         const message = await setMessage({ content, conversationId: converId, senderId, files });
         if (message) {
-            socket.emit('conversation-sentMessage', {
+            socket.emit('conversation-receiveMessage', {
                 messageId: message.id, content, senderId, receiverId,
                 conversationId: converId, files: message.files, photos: message.photos,
                 createdAt: message.createdAt
@@ -104,6 +104,16 @@ const socketServer = (socket) => {
                 }
             }
         }
+    })
+
+    socket.on('conversation-remove-message', async ({ conversationId, messageId, senderId }) => {
+        const receiverId = await getParticipantId({conversationId, senderId});
+        if (userSockets[receiverId] && userSockets[receiverId].length) {
+            for (const socketId of userSockets[receiverId]) {
+                socket.to(socketId).emit('conversation-removed-message', { conversationId, messageId, receiverId, senderId })
+            }
+        }
+        socket.emit('conversation-removed-message', { conversationId, messageId, receiverId, senderId })
     })
 
     socket.on('conversation-call', ({ conversationId, senderId, senderName, receiverId }) => {

@@ -21,7 +21,7 @@ import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
   confirmInvitations, cleanTeamState, getTeamMeetMess
 } from '../../store/reducers/team.reducer'
-import { baseURL, broadcastLocal, socketClient, messageTimeDiff, getTime } from '../../utils'
+import { baseURL, socketClient, messageTimeDiff, getTime } from '../../utils'
 import Loading from '../../components/Loading'
 import './team.css'
 import TeamHeader from '../../components/TeamHeader'

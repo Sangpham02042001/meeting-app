@@ -279,10 +279,31 @@ const getFilesMessageCv = async (req, res) => {
     }
 }
 
+const getParticipantId = async ({ conversationId, senderId }) => {
+
+    try {
+        const participantId = await sequelize.query(
+            "SELECT userId FROM users_conversations " +
+            "WHERE conversationId = :conversationId AND userId NOT LIKE :senderId"
+            , {
+                replacements: {
+                    conversationId,
+                    senderId
+                },
+                type: QueryTypes.SELECT
+            })
+
+        return (participantId[0] || {}).userId
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
 
 
 module.exports = {
     getConversations, getMessages, getLastMessage,
     setConversation, setMessage, readConversation, getImagesMessageCv,
-    getFilesMessageCv
+    getFilesMessageCv, getParticipantId
 }

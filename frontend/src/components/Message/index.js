@@ -1,15 +1,35 @@
-import React, { useState } from 'react'
-import { Avatar, Tooltip, Dialog, DialogContent, IconButton, imageListClasses } from '@mui/material';
-import { baseURL, getTime } from '../../utils';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Avatar, Tooltip, Dialog, DialogContent, IconButton, Menu, MenuItem } from '@mui/material';
+import { baseURL, getTime, socketClient } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import './style.css'
 
-export default function Message({ message, logInUserId, hasAvatar, lastMessage, userName }) {
+
+export default function Message({
+  message, logInUserId, hasAvatar, lastMessage,
+  userName, conversationId }) {
   const [isPreviewImg, setIsPreviewImg] = useState(false);
   const [imgPreviewUrl, setImgPreviewUrl] = useState(null);
   const [selectedPhotoId, setPhotoId] = useState(null)
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const handleRemoveMessage = () => {
+    setAnchorEl(null);
+    socketClient.emit('conversation-remove-message', { conversationId, messageId: message.id, senderId: logInUserId })
+  }
 
   const handlePreviewImg = (e, messageId, photoId) => {
     e.preventDefault();
@@ -97,7 +117,7 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                     {message.files.map((file) => {
                       return (
                         <div className="message-file" key={file.id} >
-                          <DescriptionIcon sx={{ color: '#fff', margin: '5px' }} />
+                          <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
                           <span
                             onClick={e => handleFileDownload(e, message.id, file.id)}
                           >
@@ -111,6 +131,22 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                 }
               </div>
             </Tooltip>
+            <div>
+              <IconButton onClick={handleOpenMenu}>
+                <MoreHorizIcon />
+              </IconButton>
+              <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleCloseMenu}
+                MenuListProps={{
+                  'aria-labelledby': 'basic-button',
+                }}
+              >
+                <MenuItem onClick={handleRemoveMessage}>Remove</MenuItem>
+              </Menu>
+            </div>
           </div >
           :
           <div >
@@ -160,7 +196,7 @@ export default function Message({ message, logInUserId, hasAvatar, lastMessage, 
                       {message.files.map((file) => {
                         return (
                           <div className="message-file" key={file.id}>
-                            <DescriptionIcon sx={{ color: '#fff', margin: '5px' }} />
+                            <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
                             <span
                               onClick={e => handleFileDownload(e, message.id, file.id)}
                             >

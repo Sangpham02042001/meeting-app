@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
-import { broadcastLocal, socketClient } from "../../utils";
+import { socketClient } from "../../utils";
 import MeetingChatBox from "./MeetingChatBox";
 import MeetingUserList from "./MeetingUserList";
 import MeetingVideo from "./MeetingVideo";
@@ -440,7 +440,6 @@ const Meeting = (props) => {
 
 		window.addEventListener('beforeunload', function (e) {
 			e.preventDefault()
-			// broadcastLocal.postMessage('own-out-meeting')
 		});
 
 	}, []);

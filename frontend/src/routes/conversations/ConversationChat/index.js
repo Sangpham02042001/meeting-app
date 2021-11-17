@@ -330,8 +330,11 @@ const ConversationChat = ({ conversationId, user, participant }) => {
           {messages.length > 0 && messages.slice(0, messages.length - 1)
             .map((message, idx) => {
               return (
-                <Message message={message} key={message.id}
+                <Message message={message}
+                  key={message.id}
                   logInUserId={user.id}
+                  conversationId={conversationId}
+                  participantId={participant.id}
                   hasAvatar={message.userId != messages[idx + 1].userId}
                   userName={user.firstName.concat(' ', user.lastName)}
                 />
@@ -435,7 +438,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               </div>
             }
 
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', position: 'relative' }}>
               <textarea
                 onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}
                 placeholder="Send message"
@@ -444,7 +447,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                 onKeyDown={handleEnterMessage}
                 value={content}
               />
-              <Tooltip title="Choose an emoji">
+              <Tooltip title="Choose an emoji" style={{ position: 'absolute', bottom: 3, right: 3 }}>
                 <IconButton onClick={chooseEmoji} >
                   <InsertEmoticonIcon />
                 </IconButton>

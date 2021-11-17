@@ -7,8 +7,8 @@ import HomeIcon from '@mui/icons-material/Home';
 import MessageIcon from '@mui/icons-material/Message';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { socketClient, broadcastLocal, baseURL } from '../../utils';
-import { sendMessageCv, conversationCalling, cancelCall } from '../../store/reducers/conversation.reducer';
+import { socketClient, baseURL } from '../../utils';
+import { sendMessageCv, conversationCalling, cancelCall, removeMessageCv } from '../../store/reducers/conversation.reducer';
 import {
   sendMessage, updateMeetingState, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, getCurrentMeeting
@@ -42,10 +42,9 @@ export default function Layout({ children }) {
       dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }));
     })
 
-    socketClient.on('conversation-sentMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }) => {
-      dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }));
+    socketClient.on('conversation-removed-message', ({ conversationId, messageId, receiverId, senderId }) => {
+      dispatch(removeMessageCv({ conversationId, messageId, receiverId, senderId }))
     })
-
 
     socketClient.on('conversation-calling', ({ conversationId, senderId, senderName, receiverId }) => {
       //todo
@@ -61,12 +60,6 @@ export default function Layout({ children }) {
     socketClient.on('new-meeting-created', ({ meeting }) => {
       dispatch(setMeetingActive({
         meeting
-      }))
-    })
-
-    socketClient.on('sent-message-team', ({ messageId, teamId, senderId, content, photos, createdAt, files }) => {
-      dispatch(sendMessage({
-        messageId, content, senderId, teamId, photos, files, isMessage: true, createdAt
       }))
     })
 
@@ -89,13 +82,6 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('sent-message-meeting', ({ messageId, meetingId, senderId, content, photo, teamId }) => {
-      dispatch(sendMeetingMessage({
-        messageId, content, senderId, meetingId, photo
-      }))
-      broadcastLocal.postMessage({ messageId, meetingId, senderId, content, photo, teamId })
-    })
-
     socketClient.on('receive-message-meeting', ({ messageId, meetingId, senderId, content, photo, teamId }) => {
       dispatch(sendMeetingMessage({
         messageId, content, senderId, meetingId, photo, teamId
@@ -115,19 +101,6 @@ export default function Layout({ children }) {
     socketClient.on('end-meeting', ({ meeting }) => {
       dispatch(endActiveMeeting({ meeting }))
     })
-
-    broadcastLocal.onmessage = (message) => {
-      console.log(message);
-      if (message.messageType === 'end-meeting') {
-        dispatch(updateMeetingState({
-          meetingId
-        }))
-      } else if (message.data.conversationId) {
-        dispatch(sendMessageCv(message.data))
-      } else if (message.data.teamId) {
-        dispatch(sendMessage(message.data))
-      }
-    }
 
     socketClient.on("disconnect", () => {
       socketClient.connect();
