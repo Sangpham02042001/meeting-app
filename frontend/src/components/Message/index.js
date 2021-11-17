@@ -3,7 +3,7 @@ import {
   Avatar, Tooltip, Dialog, DialogContent, IconButton,
   Menu, MenuItem
 } from '@mui/material';
-import { baseURL, getTime } from '../../utils';
+import { baseURL, getTime,socketClient } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -82,11 +82,27 @@ export default function Message({
   }
 
   return (
-    <>
+    <div className="message-component">
       {
         message.userId === logInUserId ?
           <div className={`own-message ${lastMessage ? 'last-message' : ''}`}
             style={{ marginBottom: '0px' }}>
+            <div>
+              <IconButton onClick={handleOpenMenu}>
+                <MoreHorizIcon className="icon-hover-menu"/>
+              </IconButton>
+              <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleCloseMenu}
+                MenuListProps={{
+                  'aria-labelledby': 'basic-button',
+                }}
+              >
+                <MenuItem onClick={handleRemoveMessage}>Remove</MenuItem>
+              </Menu>
+            </div>
             <Tooltip title={getTime(message.createdAt)} placement="left">
               <div>
                 {message.content &&
@@ -138,22 +154,7 @@ export default function Message({
                 }
               </div>
             </Tooltip>
-            <div>
-              <IconButton onClick={handleOpenMenu}>
-                <MoreHorizIcon />
-              </IconButton>
-              <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleCloseMenu}
-                MenuListProps={{
-                  'aria-labelledby': 'basic-button',
-                }}
-              >
-                <MenuItem onClick={handleRemoveMessage}>Remove</MenuItem>
-              </Menu>
-            </div>
+
           </div >
           :
           <div >
@@ -256,6 +257,6 @@ export default function Message({
           <img width="100%" height="100%" src={imgPreviewUrl} />
         </DialogContent>
       </Dialog >
-    </>
+    </div>
   )
 }

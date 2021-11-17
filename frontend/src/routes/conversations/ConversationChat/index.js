@@ -144,7 +144,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     const previousRows = event.target.rows;
     event.target.rows = minRows; // reset number of rows in textarea 
     const currentRows = ~~(event.target.scrollHeight / textareaLineHeight);
-
+    console.log(previousRows, currentRows)
     if (currentRows === previousRows) {
       event.target.rows = currentRows;
     }
