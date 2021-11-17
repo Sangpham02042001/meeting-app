@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import './conversations.css';
 import { axiosAuth } from '../../utils';
 import { getConversations, createConversation, clearConversation } from '../../store/reducers/conversation.reducer';
 import { Switch, Route } from "react-router-dom";
-import { useHistory, useParams } from 'react-router';
+import { useHistory } from 'react-router';
 import Avatar from '../../components/Avatar';
 import ConversationChat from './ConversationChat';
 import ConversationLink from './ConversationLink';
+import SearchIcon from '@mui/icons-material/Search';
+import LoadingButton from '@mui/lab/LoadingButton';
+import _ from 'lodash'
 
 
 export default function Conversations(props) {
     const [textSearch, setTextSearch] = useState('');
     const [searchUsers, setSearchUsers] = useState([]);
     const [userSearch, setUserSearch] = useState(null);
+    const [searchLoading, setSearchLoading] = useState(false);
     const user = useSelector(state => state.userReducer.user);
     const conversations = useSelector(state => state.conversationReducer.conversations);
     const dispatch = useDispatch();
@@ -26,18 +30,22 @@ export default function Conversations(props) {
         }
     }, [])
 
-
-    const onSearch = async (event) => {
-        let searchUserName = event.target.value.trim();
-        setTextSearch(event.target.value)
-
+    const searchDebounce = useCallback(_.debounce(async (searchUserName) => {
         if (searchUserName !== '') {
             let response = await axiosAuth.post('/api/users/search', {
-                text: searchUserName.trim(),
+                text: searchUserName
             })
+            console.log('Function debounced after 500ms!');
             setSearchUsers(response.data.users)
-            return;
+            setSearchLoading(false);
         }
+    }, 500), [])
+
+    const onSearch = (event) => {
+        let searchUserName = event.target.value.trim();
+        setTextSearch(event.target.value)
+        searchDebounce(searchUserName)
+        setSearchLoading(true)
         setSearchUsers([]);
     }
 
@@ -56,13 +64,18 @@ export default function Conversations(props) {
             dispatch(createConversation({ conversationId: null, participantId: userFind.id }));
         }
 
-        history.replace(`/conversations/${userFind.id}`);
+        history.push(`/conversations/${userFind.id}`);
     }
 
     return (
-        <div className="conversation-page">
+        <div className="conversation-page" onClick={e => {
+            e.preventDefault();
+            setSearchUsers([])
+            setTextSearch('')
+        }}>
             <div className="conversation-list">
                 <div className="search-user">
+                    <SearchIcon color='primary' />
                     <input
                         type="search"
                         placeholder="Search"
@@ -71,22 +84,35 @@ export default function Conversations(props) {
                         onChange={onSearch}
                         value={textSearch}
                     />
+                    {textSearch.length > 0 &&
+                        <div className="search-list" >
+                            {
+                                searchUsers.length > 0 ?
+                                    searchUsers.map(userFind => {
+                                        return (
+                                            <div key={userFind.id} className="user-find" onClick={event => handleChooseUser(userFind, event)}>
+                                                <Avatar width="40px" height="40px" userId={userFind.id} />
+                                                <div style={{ marginLeft: "15px" }}>
+                                                    {userFind.userName}
+                                                </div>
+                                            </div>
+                                        )
+                                    })
+                                    :
+                                    <>
+                                        <LoadingButton loading={searchLoading} variant="text" />
+                                        <div style={{ display: searchLoading && 'none', fontWeight: '600' }}>
+                                            Not user found
+                                        </div>
+                                    </>
+                            }
+
+                        </div>
+                    }
+
                 </div>
 
-                {searchUsers.length > 0 &&
-                    searchUsers.map(userFind => {
-                        return (
-                            <div className="search-list" key={userFind.id} >
-                                <div className="user-find" onClick={event => handleChooseUser(userFind, event)}>
-                                    <Avatar width="40px" height="40px" userId={userFind.id} />
-                                    <div style={{ marginLeft: "15px" }}>
-                                        {userFind.userName}
-                                    </div>
-                                </div>
-                            </div>
-                        )
-                    })
-                }
+
 
                 <div className="conversation-user">
                     {
@@ -98,7 +124,7 @@ export default function Conversations(props) {
                         })
                     }
                 </div>
-            </div>
+            </div >
             <div className="conversation-content">
                 {props.params === '/conversations' ?
                     <div className="conversation-welcome">
@@ -122,7 +148,7 @@ export default function Conversations(props) {
                 }
 
             </div>
-        </div>
+        </div >
     )
 }
 

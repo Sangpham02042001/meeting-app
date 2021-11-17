@@ -113,7 +113,7 @@
 }
 
 .input-message  textarea {
-  width: 100%;
+  width: 95%;
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
