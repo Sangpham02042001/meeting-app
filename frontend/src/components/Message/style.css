@@ -108,7 +108,7 @@
 }
 
 .message-file-list .message-file {
-  background: #3a3b3c;
+  background: #f0f2f5;
   display: flex;
   padding: 10px;
   border-radius: 10px;
@@ -118,7 +118,7 @@
 }
 
 .message-file span {
-  color: #fff;
+  color: #000;
   font-weight: 600;
 }
 

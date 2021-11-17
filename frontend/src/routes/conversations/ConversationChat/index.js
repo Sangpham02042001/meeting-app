@@ -330,16 +330,22 @@ const ConversationChat = ({ conversationId, user, participant }) => {
           {messages.length > 0 && messages.slice(0, messages.length - 1)
             .map((message, idx) => {
               return (
-                <Message message={message} key={message.id}
+                <Message message={message}
+                  key={message.id}
                   logInUserId={user.id}
+                  conversationId={conversationId}
+                  participantId={participant.id}
                   hasAvatar={message.userId != messages[idx + 1].userId}
                   userName={user.firstName.concat(' ', user.lastName)}
                 />
               )
             })}
-          {messages.length > 0 && <Message message={messages[messages.length - 1]}
-            logInUserId={user.id}
-            hasAvatar={true} lastMessage={true} />}
+          {messages.length > 0 &&
+            <Message message={messages[messages.length - 1]}
+              logInUserId={user.id}
+              conversationId={conversationId}
+              participantId={participant.id}
+              hasAvatar={true} lastMessage={true} />}
 
         </div>
         <div className="bottom-message">
@@ -435,7 +441,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               </div>
             }
 
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', position: 'relative' }}>
               <textarea
                 onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}
                 placeholder="Send message"
@@ -444,7 +450,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                 onKeyDown={handleEnterMessage}
                 value={content}
               />
-              <Tooltip title="Choose an emoji">
+              <Tooltip title="Choose an emoji" style={{ position: 'absolute', bottom: 3, right: 3 }}>
                 <IconButton onClick={chooseEmoji} >
                   <InsertEmoticonIcon />
                 </IconButton>
@@ -454,8 +460,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
           <div className="input-btn">
             <div style={{
-              display: content.length ? 'none' : 'flex',
-              alignItems: filesMessageUrl.length > 0 ? 'flex-end' : 'center'
+              display: 'flex'
             }}>
               <Tooltip title="Attach photos">
                 <IconButton >
@@ -515,7 +520,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               </IconButton>
             </Tooltip> */}
             </div>
-            <Tooltip title="Send message" style={{ display: !content.length && 'none' }}>
+            <Tooltip title="Send message" style={{ display: !content.length ? 'none' : 'flex' }}>
               <IconButton onClick={handleSendMessage} >
                 <SendIcon color="primary" />
               </IconButton>

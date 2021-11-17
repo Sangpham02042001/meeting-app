@@ -7,6 +7,7 @@
   flex-direction: column;
   align-items: center;
   transition: display 0.3s;
+  overflow-y: auto;
 }
 
 .conversation-info .custom-info {
@@ -19,6 +20,7 @@
 .conversation-info .conversation-info-detail {
   width: 100%;
   margin-top: 50px;
+  
 }
 
 .conversation-info-detail .accordion-detail {
@@ -26,6 +28,8 @@
   flex-direction: column; 
   align-items: flex-start; 
   padding: 15px; 
+  overflow-y: auto;
+  max-height: 450px;
 }
 
 
@@ -123,6 +127,7 @@
 
 .conversation-message .input-btn {
   display: flex;
+  align-items: flex-end;
 }
 
 .conversation-message .input-btn button {

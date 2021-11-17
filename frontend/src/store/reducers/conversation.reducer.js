@@ -70,7 +70,7 @@ export const conversationSlice = createSlice({
       console.log('Get messages of user fail!')
     },
     [getParticipant.fulfilled]: (state, action) => {
-      
+
       state.conversation.participant = action.payload;
     },
     [getParticipant.rejected]: (state, action) => {
@@ -170,11 +170,18 @@ export const conversationSlice = createSlice({
     clearConversation: (state, action) => {
       state.conversation.participant = null;
       state.conversation.messages = [];
+    },
+    removeMessageCv: (state, action) => {
+      let { conversationId, messageId } = action.payload;
+      let idxMsg = state.conversation.messages.findIndex(m => m.id === messageId);
+      if (idxMsg >= 0) {
+        state.conversation.messages.splice(idxMsg, 1);
+      }
     }
   }
 })
 
 export const { createConversation, sendMessageCv, receiveMessageCv,
-  conversationCalling, clearConversation, cancelCall, startCall } = conversationSlice.actions;
+  conversationCalling, clearConversation, cancelCall, startCall, removeMessageCv } = conversationSlice.actions;
 
 export default conversationSlice.reducer

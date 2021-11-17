@@ -279,10 +279,54 @@ const getFilesMessageCv = async (req, res) => {
     }
 }
 
+const removeMessageCv = async ({ messageId }) => {
+
+    try {
+        let media = await Media.findOne({
+            where: {
+                messageId
+            },
+            attributes: ['id', 'pathName', 'type']
+        })
+
+        await sequelize.query(
+            "DELETE FROM messages " +
+            "WHERE id = :messageId"
+            , {
+                replacements: {
+                    messageId
+                },
+                type: QueryTypes.DELETE
+            })
+
+        if ((media || {}).type === 'image') {
+            fs.unlink(`./src/public/messages-photos/${media.pathName}`, (err) => {
+                if (err) {
+                    console.log(err)
+                    return null;
+                }
+            })
+        } else if ((media || {}).type === 'file') {
+            fs.unlink(`./src/public/messages-files/${media.pathName}`, (err) => {
+                if (err) {
+                    console.log(err)
+                    return null;
+                }
+            })
+        }
+
+        return 'success';
+
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
 
 
 module.exports = {
     getConversations, getMessages, getLastMessage,
     setConversation, setMessage, readConversation, getImagesMessageCv,
-    getFilesMessageCv
+    getFilesMessageCv, removeMessageCv
 }

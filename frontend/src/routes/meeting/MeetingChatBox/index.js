@@ -8,7 +8,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { socketClient, broadcastLocal } from '../../../utils';
+import { socketClient } from '../../../utils';
 import Message from '../../../components/Message';
 
 export default function ChatBox({ chatVisible }) {
@@ -182,7 +182,17 @@ export default function ChatBox({ chatVisible }) {
                                 {fileUrl.name}
                             </span>
                         </div>}
-                    <IconButton className='remove-image-btn'
+                    <IconButton
+                        sx={{
+                            position: 'absolute',
+                            left: '90px',
+                            top: '5px',
+                            zIndex: '10',
+                            width: '24px',
+                            height: '24px',
+                            color: '#fff',
+                            background: '#3e4042 !important'
+                        }}
                         onClick={e => {
                             setFileUrl('')
                         }}>
