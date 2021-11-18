@@ -13,10 +13,6 @@ Message.init({
   content: {
     type: DataTypes.TEXT,
     allowNull: true
-  },
-  photo: {
-    type: DataTypes.STRING,
-    allowNull: true
   }
 }, {
   sequelize,
