@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { Avatar } from "@mui/material";
-import { baseURL } from "../../../utils";
+import { baseURL, socketClient } from "../../../utils";
 import MicOffIcon from '@mui/icons-material/MicOff';
 import './meetingVideo.css'
 
 const MeetingVideo = ({ remoteStreams, remoteVideos, remoteAudios }) => {
-
+  const membersAudio = useSelector(state => state.meetingReducer.meeting.membersAudio)
 
   return (
     <div className="remote-videos">
@@ -13,7 +14,7 @@ const MeetingVideo = ({ remoteStreams, remoteVideos, remoteAudios }) => {
         remoteStreams.current.length && remoteStreams.current.map((remote, idx) => {
           return remote && remote.stream && <Video
             key={remote.userId + ' ' + remoteVideos.current[idx] + ' ' + remoteAudios.current[idx]} userId={remote.userId}
-            stream={remote.stream} name={remote.name} isVideo={remoteVideos.current[idx]} isAudio={remoteAudios.current[idx]} />
+            stream={remote.stream} name={remote.name} isVideo={remoteVideos.current[idx]} isAudio={membersAudio[remote.userId]} />
         })
       }
     </div>

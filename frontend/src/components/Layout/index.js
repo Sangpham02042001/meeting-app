@@ -15,7 +15,7 @@ import {
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
-  sendMeetingMessage, getC
+  sendMeetingMessage, meetingUserAudio
 } from '../../store/reducers/meeting.reducer'
 import './layout.css'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
@@ -25,6 +25,7 @@ export default function Layout({ children }) {
   const dispatch = useDispatch();
   const team = useSelector(state => state.teamReducer.team)
   const userReducer = useSelector(state => state.userReducer)
+  const meeting = useSelector(state => state.meetingReducer.meeting)
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
@@ -70,15 +71,21 @@ export default function Layout({ children }) {
     })
 
     //meetings
-    socketClient.on('user-join-meeting', ({ teamId, meetingId, user }) => {
-      dispatch(userJoinMeeting({ teamId, meetingId, user }))
+    //receive event when new user join meeting => emit state audio for new user 
+    socketClient.on('user-join-meeting', ({ teamId, meetingId, user, isAudioActive }) => {
+      dispatch(userJoinMeeting({ teamId, meetingId, user, isAudioActive }))
+      socketClient.emit('', {
+
+      })
     })
 
-    socketClient.on('joined-meeting', ({ members, meetingId, teamId }) => {
+    socketClient.on('joined-meeting', ({ members, meetingId, teamId, isAudioActive }) => {
       dispatch(getMeetingMembers({
         members,
         meetingId,
-        teamId
+        teamId,
+        isAudioActive,
+        userId: userReducer.user.id
       }))
     })
 
@@ -91,6 +98,12 @@ export default function Layout({ children }) {
     socketClient.on('receive-message-meeting', ({ messageId, meetingId, senderId, content, photos, files, teamId, createdAt }) => {
       dispatch(sendMeetingMessage({
         messageId, content, senderId, meetingId, photos, teamId, files, createdAt
+      }))
+    })
+
+    socketClient.on('meeting-user-audio-changed', ({ userChangeAudio, isAudioActive, meetingId }) => {
+      dispatch(meetingUserAudio({
+        meetingId, userChangeAudio, isAudioActive
       }))
     })
 

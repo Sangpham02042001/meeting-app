@@ -92,7 +92,6 @@ const Meeting = (props) => {
 						publishOwnFeed(false);
 					} else {
 						alert('WebRTC Error')
-						// $('#publish').removeAttr('disabled').click(function () { publishOwnFeed(true); });
 					}
 				}
 			});
@@ -183,7 +182,6 @@ const Meeting = (props) => {
 			},
 
 			onremotestream: stream => {
-				console.log('onremotestream', remoteFeed.rfindex, remoteStreams.current.length)
 				// let idx = remoteStreams.current.findIndex(stream => stream.userId == JSON.parse(remoteFeed.rfdisplay).userId)
 				// if (idx < 0) {
 				remoteStreams.current[remoteFeed.rfindex] = {
@@ -201,12 +199,12 @@ const Meeting = (props) => {
 				} else {
 					remoteVideos.current[remoteFeed.rfindex] = true
 				}
-				if (!audioTracks || !audioTracks.length) {
-					console.log('remote turn off camera')
-					remoteAudios.current[remoteFeed.rfindex] = false
-				} else {
-					remoteAudios.current[remoteFeed.rfindex] = true
-				}
+				// if (!audioTracks || !audioTracks.length) {
+				// 	console.log('remote turn off camera')
+				// 	// remoteAudios.current[remoteFeed.rfindex] = false
+				// } else {
+				// 	remoteAudios.current[remoteFeed.rfindex] = true
+				// }
 				setTrigger(v4())
 				// }
 			},
@@ -431,7 +429,7 @@ const Meeting = (props) => {
 				dispatch(getMeetingMessages({
 					meetingId
 				}))
-				socketClient.emit("join-meeting", { teamId, meetingId, userId: userReducer.user.id })
+				socketClient.emit("join-meeting", { teamId, meetingId, userId: userReducer.user.id, isAudioActive })
 			}
 		}
 	}, [teamReducer.teamLoaded])
@@ -442,23 +440,19 @@ const Meeting = (props) => {
 		Janus.log((muted ? "Unmuting" : "Muting") + " local stream...");
 		if (muted) {
 			sfuRef.current.unmuteAudio();
-			sfuRef.current.createOffer({
-				media: { replaceAudio: true },
-				success: (jsep) => {
-					sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
-				},
-				error: (error) => { console.log(error) }
+			socketClient.emit('meeting-audio-change', {
+				isAudioActive: true,
+				userId: userReducer.user.id,
+				meetingId: Number(meetingReducer.meeting.id)
 			})
 			setIsAudioActive(true)
 		}
 		else {
 			sfuRef.current.muteAudio();
-			sfuRef.current.createOffer({
-				media: { removeAudio: true },
-				success: (jsep) => {
-					sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
-				},
-				error: (error) => { console.log(error) }
+			socketClient.emit('meeting-audio-change', {
+				isAudioActive: false,
+				userId: userReducer.user.id,
+				meetingId: Number(meetingReducer.meeting.id)
 			})
 			setIsAudioActive(false)
 		}

@@ -45,7 +45,7 @@ const socketServer = (socket) => {
         }
     })
 
-    socket.on("join-meeting", async ({ teamId, meetingId, userId }) => {
+    socket.on("join-meeting", async ({ teamId, meetingId, userId, isAudioActive }) => {
         socket.join(`meeting-${meetingId}`);
         console.log('rooms', socket.rooms);
         let user = await getUserMeeting({ meetingId, userId })
@@ -60,7 +60,7 @@ const socketServer = (socket) => {
         user = members.find(m => m.userId === user.userId)
         socket.meetingId = meetingId
 
-        socket.emit('joined-meeting', { members, meetingId, teamId })
+        socket.emit('joined-meeting', { members, meetingId, teamId, isAudioActive })
 
         console.log(`meeting ${members}`)
 
@@ -68,7 +68,7 @@ const socketServer = (socket) => {
             console.log(userSockets[m.userId])
             if (userSockets[m.userId] && userSockets[m.userId].length) {
                 for (const socketId of userSockets[m.userId]) {
-                    socket.to(socketId).emit('user-join-meeting', { teamId, meetingId, user });
+                    socket.to(socketId).emit('user-join-meeting', { teamId, meetingId, user, isAudioActive });
                 }
             }
         }
@@ -86,6 +86,12 @@ const socketServer = (socket) => {
         socket.to(`meeting-${meetingId}`).emit('receive-message-meeting', {
             messageId: message.id, meetingId, senderId, content,
             photos: message.photos, files: message.files, createdAt: message.createdAt
+        })
+    })
+
+    socket.on('meeting-audio-change', async ({ meetingId, userId, isAudioActive }) => {
+        socket.to(`meeting-${meetingId}`).emit('meeting-user-audio-changed', {
+            isAudioActive, userChangeAudio: userId, meetingId
         })
     })
 
