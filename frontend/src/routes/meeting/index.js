@@ -64,6 +64,7 @@ const Meeting = (props) => {
 	const sfuRef = useRef()
 	const feedRefs = useRef([])
 	const remoteStreams = useRef([])
+	const remoteVideos = useRef([])
 
 	function getConnectedDevices(type, callback) {
 		navigator.mediaDevices.enumerateDevices()
@@ -146,73 +147,7 @@ const Meeting = (props) => {
 						console.log("Successfully attached to feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") in room " + msg["room"]);
 					} else if (event === "event") {
 						//**************************************************************************************//
-						if (msg["publishers"]) {
-							let list = msg["publishers"];
-							Janus.debug("Got a list of available publishers/feeds:", list);
-							for (let f in list) {
-								let id = list[f]["id"];
-								let display = list[f]["display"];
-								let audio = list[f]["audio_codec"];
-								let video = list[f]["video_codec"];
-								Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
-								newRemoteFeed(id, display, audio, video);
-							}
-						} else if (msg["leaving"]) {
-							// One of the publishers has gone away?
-							let leaving = msg["leaving"];
-							Janus.log("Publisher left: " + leaving);
-							let remoteFeed = null;
-							for (let i = 0; i < 6; i++) {
-								if (feedRefs.current[i] && feedRefs.current[i].rfid == leaving) {
-									remoteFeed = feedRefs.current[i];
-									break;
-								}
-							}
-							if (remoteFeed != null) {
-								Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
-								// $('#remote'+remoteFeed.rfindex).empty().hide();
-								// $('#videoremote'+remoteFeed.rfindex).empty();
-								remoteStreams.current.splice(remoteFeed.rfindex, 1)
-								setTrigger(v4())
-								feedRefs.current.splice(remoteFeed.rfindex, 1)
-								remoteFeed.detach();
-							}
-						} else if (msg["unpublished"]) {
-							let unpublished = msg["unpublished"];
-							Janus.log("Publisher left: " + unpublished);
-							if (unpublished === 'ok') {
-								sfuRef.current.hangup();
-								return;
-							}
-							let remoteFeed = null;
-							for (let i = 0; i < 6; i++) {
-								if (feedRefs.current[i] && feedRefs.current[i].rfid == unpublished) {
-									remoteFeed = feedRefs.current[i];
-									break;
-								}
-							}
-							if (remoteFeed != null) {
-								Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
-								// $('#remote'+remoteFeed.rfindex).empty().hide();
-								// $('#videoremote'+remoteFeed.rfindex).empty();
-								feedRefs.current.splice(remoteFeed.rfindex, 1)
-								remoteStreams.current.splice(remoteFeed.rfindex, 1)
-								setTrigger(v4())
-								remoteFeed.detach();
-							}
-						} else if (msg["error"]) {
-							if (msg["error_code"] === 426) {
-								// This is a "no such room" error: give a more meaningful description
-								alert(
-									"<p>Apparently room <code>" + meetingId + "</code> (the one this demo uses as a test room) " +
-									"does not exist...</p><p>Do you have an updated <code>janus.plugin.videoroom.jcfg</code> " +
-									"configuration file? If not, make sure you copy the details of room <code>" + meetingId + "</code> " +
-									"from that sample in your current configuration file, then restart Janus and try again."
-								);
-							} else {
-								alert(msg["error"]);
-							}
-						}
+
 						//**************************************************************************************//
 					}
 				}
@@ -245,29 +180,37 @@ const Meeting = (props) => {
 						});
 				}
 			},
+
 			onremotestream: stream => {
 				console.log('onremotestream', remoteFeed.rfindex, remoteStreams.current.length)
-				let idx = remoteStreams.current.findIndex(stream => stream.userId == JSON.parse(remoteFeed.rfdisplay).userId)
-				if (idx < 0) {
-					remoteStreams.current[remoteFeed.rfindex] = {
-						stream,
-						name: JSON.parse(remoteFeed.rfdisplay).name,
-						userId: JSON.parse(remoteFeed.rfdisplay).userId
-					};
-					console.log(`new feed refs ${remoteStreams.current}`)
-					let videoTracks = stream.getVideoTracks();
-					if (!videoTracks || videoTracks.length === 0) {
-						//No remote camera
-						console.log('remote turn off camera')
-					}
-					setTrigger(v4())
+				// let idx = remoteStreams.current.findIndex(stream => stream.userId == JSON.parse(remoteFeed.rfdisplay).userId)
+				// if (idx < 0) {
+				remoteStreams.current[remoteFeed.rfindex] = {
+					stream,
+					name: JSON.parse(remoteFeed.rfdisplay).name,
+					userId: JSON.parse(remoteFeed.rfdisplay).userId
+				};
+				console.log(`new feed refs ${remoteStreams.current}`)
+				let videoTracks = stream.getVideoTracks();
+				let audioTracks = stream.getAudioTracks();
+				if (!videoTracks || videoTracks.length === 0) {
+					//No remote camera
+					console.log('remote turn off camera')
+					remoteVideos.current[remoteFeed.rfindex] = false
+				} else {
+					remoteVideos.current[remoteFeed.rfindex] = true
 				}
+				setTrigger(v4())
+				// }
 			},
 			oncleanup: function () {
-				Janus.log(" ::: Got a cleanup notification (remote feed " + id + ") :::");
+				console.log(" ::: Got a cleanup notification (remote feed " + id + ") :::");
 				remoteFeed.simulcastStarted = false;
-				remoteStreams.current.splice(remoteFeed.rfindex, 1)
 				feedRefs.current.splice(remoteFeed.rfindex, 1)
+				remoteStreams.current.splice(remoteFeed.rfindex, 1)
+				for (let i = remoteFeed.rfindex; i < feedRefs.current.length; i++) {
+					feedRefs.current[i].rfindex--;
+				}
 				setTrigger(v4())
 			}
 		})
@@ -377,11 +320,24 @@ const Meeting = (props) => {
 											// One of the publishers has gone away?
 											let leaving = msg["leaving"];
 											console.log("Publisher left: " + leaving);
-											// let remoteFeed = null;
-											// if(remoteFeed != null) {
-											//     console.log("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
-											//     remoteFeed.detach();
-											// }
+											let remoteFeed = null;
+											for (let i = 0; i < 6; i++) {
+												if (feedRefs.current[i] && feedRefs.current[i].rfid == leaving) {
+													remoteFeed = feedRefs.current[i];
+													break;
+												}
+											}
+											if (remoteFeed != null) {
+												Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
+												console.log(`remote feed leaving ${remoteFeed.rfindex}`)
+												// remoteStreams.current.splice(remoteFeed.rfindex, 1)
+												// setTrigger(v4())
+												// feedRefs.current.splice(remoteFeed.rfindex, 1)
+												// for (let i = remoteFeed.rfindex; i < feedRefs.current.length; i++) {
+												// 	feedRefs.current[i].rfindex--;
+												// }
+												remoteFeed.detach();
+											}
 										}
 									}
 
@@ -412,7 +368,7 @@ const Meeting = (props) => {
 
 								if (sfuRef.current.webrtcStuff.pc.iceConnectionState !== "completed" &&
 									sfuRef.current.webrtcStuff.pc.iceConnectionState !== "connected") {
-									alert("publishing...")
+									// alert("publishing...")
 								}
 								if (!videoTracks || videoTracks.length === 0) {
 									// No webcam
@@ -571,7 +527,7 @@ const Meeting = (props) => {
 				</div>
 				<div className="meeting-remote-videos"
 					style={{ width: isOpenChat || isOpenUsers || isOpenInfo ? '60%' : '80%' }}>
-					<MeetingVideo remoteStreams={remoteStreams} />
+					<MeetingVideo remoteStreams={remoteStreams} remoteVideos={remoteVideos} />
 				</div>
 				<div className="meeting-box" style={{
 					width: isOpenChat || isOpenInfo || isOpenUsers ? '20%' : '0%'

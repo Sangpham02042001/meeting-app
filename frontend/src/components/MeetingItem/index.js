@@ -21,7 +21,6 @@ export default function MeetingItem({ meeting }) {
       (async () => {
         try {
           let response = await axiosAuth.get(`${baseURL}/api/meetings/${meeting.id}/messages`)
-          console.log(response.data.messages)
           setMessages(response.data.messages)
         } catch (error) {
           console.log(error)
