@@ -65,6 +65,7 @@ const Meeting = (props) => {
 	const feedRefs = useRef([])
 	const remoteStreams = useRef([])
 	const remoteVideos = useRef([])
+	const remoteAudios = useRef([])
 
 	function getConnectedDevices(type, callback) {
 		navigator.mediaDevices.enumerateDevices()
@@ -199,6 +200,12 @@ const Meeting = (props) => {
 					remoteVideos.current[remoteFeed.rfindex] = false
 				} else {
 					remoteVideos.current[remoteFeed.rfindex] = true
+				}
+				if (!audioTracks || !audioTracks.length) {
+					console.log('remote turn off camera')
+					remoteAudios.current[remoteFeed.rfindex] = false
+				} else {
+					remoteAudios.current[remoteFeed.rfindex] = true
 				}
 				setTrigger(v4())
 				// }
@@ -365,16 +372,12 @@ const Meeting = (props) => {
 								Janus.attachMediaStream(myVideo.current, stream);
 								myStream.current = stream;
 								let videoTracks = stream.getVideoTracks();
-
 								if (sfuRef.current.webrtcStuff.pc.iceConnectionState !== "completed" &&
 									sfuRef.current.webrtcStuff.pc.iceConnectionState !== "connected") {
 									// alert("publishing...")
 								}
 								if (!videoTracks || videoTracks.length === 0) {
-									// No webcam
-									alert("no webcam")
 									myVideo.current = null;
-									setIsEnableVideo(false)
 								} else {
 									if (!isVideoActive) {
 										sfuRef.current.muteVideo();
@@ -433,27 +436,59 @@ const Meeting = (props) => {
 		}
 	}, [teamReducer.teamLoaded])
 
-	const toggleAudio = () => {
+	const toggleAudio = (event) => {
+		event.preventDefault()
 		let muted = sfuRef.current.isAudioMuted();
 		Janus.log((muted ? "Unmuting" : "Muting") + " local stream...");
-		if (muted)
+		if (muted) {
 			sfuRef.current.unmuteAudio();
-		else
+			sfuRef.current.createOffer({
+				media: { replaceAudio: true },
+				success: (jsep) => {
+					sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+				},
+				error: (error) => { console.log(error) }
+			})
+			setIsAudioActive(true)
+		}
+		else {
 			sfuRef.current.muteAudio();
-		muted = sfuRef.current.isAudioMuted();
-		setIsAudioActive(!isAudioActive);
+			sfuRef.current.createOffer({
+				media: { removeAudio: true },
+				success: (jsep) => {
+					sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+				},
+				error: (error) => { console.log(error) }
+			})
+			setIsAudioActive(false)
+		}
 	}
 
-	const toggleVideo = () => {
+	const toggleVideo = (event) => {
+		event.preventDefault()
 		let muted = sfuRef.current.isVideoMuted();
 		Janus.log((muted ? "Unmuting" : "Muting") + " local stream...");
 		if (muted) {
 			sfuRef.current.unmuteVideo();
+			sfuRef.current.createOffer({
+				media: { replaceVideo: true },
+				success: (jsep) => {
+					sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+				},
+				error: (error) => { console.log(error) }
+			})
+			setIsVideoActive(true)
 		} else {
 			sfuRef.current.muteVideo();
+			sfuRef.current.createOffer({
+				media: { removeVideo: true },
+				success: (jsep) => {
+					sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+				},
+				error: (error) => { console.log(error) }
+			})
+			setIsVideoActive(false)
 		}
-		muted = sfuRef.current.isVideoMuted();
-		setIsVideoActive(!isVideoActive);
 	}
 
 	const handleVisibleChat = () => {
@@ -527,7 +562,7 @@ const Meeting = (props) => {
 				</div>
 				<div className="meeting-remote-videos"
 					style={{ width: isOpenChat || isOpenUsers || isOpenInfo ? '60%' : '80%' }}>
-					<MeetingVideo remoteStreams={remoteStreams} remoteVideos={remoteVideos} />
+					<MeetingVideo remoteStreams={remoteStreams} remoteVideos={remoteVideos} remoteAudios={remoteAudios} />
 				</div>
 				<div className="meeting-box" style={{
 					width: isOpenChat || isOpenInfo || isOpenUsers ? '20%' : '0%'

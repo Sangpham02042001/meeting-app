@@ -1,24 +1,26 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Avatar } from "@mui/material";
 import { baseURL } from "../../../utils";
+import MicOffIcon from '@mui/icons-material/MicOff';
 import './meetingVideo.css'
 
-const MeetingVideo = ({ remoteStreams, remoteVideos }) => {
+const MeetingVideo = ({ remoteStreams, remoteVideos, remoteAudios }) => {
 
 
   return (
     <div className="remote-videos">
       {
         remoteStreams.current.length && remoteStreams.current.map((remote, idx) => {
-          return remote && remote.stream && <Video key={remote.userId + ' ' + remoteVideos.current[idx]} userId={remote.userId}
-            stream={remote.stream} name={remote.name} isVideo={remoteVideos.current[idx]} />
+          return remote && remote.stream && <Video
+            key={remote.userId + ' ' + remoteVideos.current[idx] + ' ' + remoteAudios.current[idx]} userId={remote.userId}
+            stream={remote.stream} name={remote.name} isVideo={remoteVideos.current[idx]} isAudio={remoteAudios.current[idx]} />
         })
       }
     </div>
   );
 }
 
-const Video = ({ stream, name, userId, isVideo }) => {
+const Video = ({ stream, name, userId, isVideo, isAudio }) => {
   const videoRef = useRef();
 
   useEffect(() => {
@@ -34,7 +36,10 @@ const Video = ({ stream, name, userId, isVideo }) => {
         <Avatar sx={{ width: "70px", height: '70px', zIndex: 10 }}
           src={`${baseURL}/api/user/avatar/${userId}`}
           alt={name} />}
-      <h4>{name}</h4>
+      <h4>
+        {name}
+        {!isAudio && <MicOffIcon />}
+      </h4>
     </div>
   );
 }
