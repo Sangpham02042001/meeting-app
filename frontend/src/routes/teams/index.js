@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button, Grid } from '@mui/material'
 import './teams.css';
 import { Link } from 'react-router-dom';
-import { getJoinedTeams } from '../../store/reducers/team.reducer';
+import { getJoinedTeams, getInvitedTeams } from '../../store/reducers/team.reducer';
 import { baseURL } from '../../utils';
 
 export default function Teams(props) {
@@ -13,6 +13,9 @@ export default function Teams(props) {
 	useEffect(() => {
 		if (!teamReducer.joinedTeamLoaded) {
 			dispatch(getJoinedTeams())
+		}
+		if (!teamReducer.invitedTeamLoaded) {
+			dispatch(getInvitedTeams())
 		}
 	}, [])
 

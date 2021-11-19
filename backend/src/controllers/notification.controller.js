@@ -41,4 +41,36 @@ const deleteNotification = async (req, res) => {
   }
 }
 
-module.exports = { updateRead, deleteNotification }
+const createNofication = async ({ userId, content, relativeLink, createdBy, teamId }) => {
+  try {
+    let noti = await Notification.findOne({
+      where: {
+        teamId,
+        userId
+      }
+    })
+    console.log(`noti, ${noti}`)
+    if (!noti) {
+      noti = await Notification.create({
+        userId, createdBy, content, relativeLink, teamId
+      })
+    } else if (noti.createdBy == createdBy) {
+      noti.changed('createdAt', true)
+      noti.set('createdAt', new Date(), { raw: true })
+      noti.set('isRead', false)
+      await noti.save()
+    } else {
+      noti.changed('createdAt', true)
+      noti.set('createdAt', new Date(), { raw: true })
+      noti.set('createdBy', createdBy)
+      noti.set('isRead', false)
+      await noti.save()
+    }
+    noti = noti.dataValues
+    return noti
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+module.exports = { updateRead, deleteNotification, createNofication }

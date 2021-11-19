@@ -10,7 +10,7 @@ import {
 import GroupIcon from '@mui/icons-material/Group';
 import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
-import { axiosAuth, baseURL, getTime } from '../../utils'
+import { axiosAuth, baseURL, getTime, socketClient } from '../../utils'
 import { Link } from 'react-router-dom'
 import { createNewTeam, requestJoinTeam, getJoinedTeams, getRequestTeams, getInvitedTeams } from '../../store/reducers/team.reducer'
 
@@ -115,14 +115,13 @@ export default function TeamDiscover() {
 
   const handleInviteAll = async () => {
     setLoading(true)
-    let response = await axiosAuth.post(`/api/teams/${newTeamId}/users`, {
-      users: invitedUsers.map(user => user.id)
+    socketClient.emit('team-invite-users', {
+      teamId: newTeamId,
+      users: invitedUsers
     })
     setLoading(false)
     setInviteModalShow(false)
-    if (response.status == 200) {
-      history.push('/teams')
-    }
+    history.push('/teams')
   }
 
   const deleteUser = user => e => {

@@ -294,6 +294,39 @@ const inviteUsers = async (req, res) => {
   }
 }
 
+const socketInviteUsers = async ({ teamId, users }) => {
+  try {
+    let arr = users.map(async user => {
+      await sequelize.query('INSERT INTO invited_users_teams VALUES(NOW(), NOW(), :userId, :teamId);', {
+        replacements: {
+          userId: user.id,
+          teamId
+        }
+      })
+    })
+    await Promise.all(arr)
+    let hostName, teamName
+    const team = await Team.findOne({
+      where: {
+        id: teamId
+      },
+      include: [{
+        model: User,
+        as: 'host'
+      }]
+    })
+    if (team) {
+      hostName = team.dataValues.host.firstName + ' ' + team.dataValues.host.lastName
+      teamName = team.dataValues.name
+      hostId = team.dataValues.hostId
+    }
+    return { hostName, teamName, hostId, message: 'success' }
+  } catch (error) {
+    console.log(error)
+    return { error, message: 'error' }
+  }
+}
+
 const removeInvitations = async (req, res) => {
   let { teamId } = req.params
   let { users } = req.body
@@ -677,5 +710,6 @@ module.exports = {
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   sendMessage, getTeamMessages, getMemberTeam,
-  getTeamMeetMess, getMeetings, searchTeamWithCode
+  getTeamMeetMess, getMeetings, searchTeamWithCode,
+  socketInviteUsers
 }

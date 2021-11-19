@@ -19,7 +19,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
-  confirmInvitations, cleanTeamState, getTeamMeetMess
+  confirmInvitations, cleanTeamState, getTeamMeetMess, getInvitedTeams
 } from '../../store/reducers/team.reducer'
 import { baseURL, socketClient, messageTimeDiff, getTime } from '../../utils'
 import Loading from '../../components/Loading'
@@ -131,6 +131,19 @@ export default function Team(props) {
   }, [teamReducer.team.fakeMessageId])
 
   useEffect(() => {
+    if (!teamReducer.invitedTeamLoaded) {
+      dispatch(getInvitedTeams())
+    }
+  }, [teamReducer.invitedTeamLoaded])
+
+  useEffect(() => {
+    if (teamReducer.joinedTeams.map(team => team.id).indexOf(Number(teamId)) >= 0 && isInvitedModalShow && teamReducer.invitedTeamLoaded) {
+      setInvitedModalShow(false)
+      location.reload()
+    }
+  }, [teamReducer.joinedTeams.length])
+
+  useEffect(() => {
     if (filesMessage.length) {
       setMessage({
         type: 'success',
@@ -225,7 +238,6 @@ export default function Team(props) {
   }
 
   const handleConfirmInvitation = () => {
-    setInvitedModalShow(false)
     dispatch(confirmInvitations({
       teams: [teamReducer.team.id]
     }))

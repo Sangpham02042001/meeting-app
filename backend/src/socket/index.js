@@ -2,11 +2,12 @@ const userSockets = {
 
 };
 
-const { getMemberTeam, sendMessage } = require('../controllers/team.controller');
+const { getMemberTeam, sendMessage, socketInviteUsers } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
+const { createNofication } = require('../controllers/notification.controller')
 
 
 
@@ -16,7 +17,10 @@ const socketServer = (socket) => {
     } else {
         userSockets[socket.userId].push(socket.id)
     }
-    //team
+
+
+    //**********************************TEAM*************************************//
+
     socket.on('send-message-team', async ({ teamId, senderId, content, files }) => {
         let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
@@ -31,8 +35,30 @@ const socketServer = (socket) => {
         }
     })
 
+    socket.on('team-invite-users', async ({ teamId, users }) => {
+        let result = await socketInviteUsers({ teamId, users })
+        if (result.message && result.message === 'success') {
+            socket.emit('team-invite-user-success', { users, teamId })
+            let { hostName, teamName, hostId } = result
+            let createdBy = socket.userId
+            let relativeLink = `/teams/${teamId}`
+            let content = `${hostName} has invited you to join ${teamName}`
+            let noti
+            for (const user of users) {
+                noti = await createNofication({ userId: user.id, content, relativeLink, createdBy, teamId })
+                for (const socketId of userSockets[user.id]) {
+                    console.log(socketId, user.id)
+                    socket.to(socketId).emit('receive-team-invitation', { noti, teamId, teamName, hostId })
+                }
+            }
+        }
+    })
 
-    //meeting
+    //**********************************TEAM*************************************//
+
+
+    //**********************************MEETING*************************************//
+
     socket.on('new-meeting', async ({ meeting }) => {
         let { teamId } = meeting
         let members = await getMemberTeam({ teamId });
@@ -95,7 +121,11 @@ const socketServer = (socket) => {
         })
     })
 
-    //conversation
+    //**********************************MEETING*************************************//
+
+
+
+    //**********************************CONVERSATION*************************************//
 
     socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, files }) => {
         const converId = await setConversation({ senderId, receiverId, conversationId });
@@ -147,6 +177,8 @@ const socketServer = (socket) => {
             }
         }
     })
+
+    //**********************************CONVERSATION*************************************//
 
     //disconnect
     socket.on('disconnect', async () => {

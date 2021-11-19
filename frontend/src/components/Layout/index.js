@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { NavLink, useRouteMatch, useHistory } from 'react-router-dom'
+import { NavLink, useRouteMatch, Link } from 'react-router-dom'
 import Navbar from '../Navbar';
-import { Avatar, Snackbar, IconButton, Tooltip } from '@mui/material';
+import { Avatar, Snackbar, Alert, Tooltip } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import MessageIcon from '@mui/icons-material/Message';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
@@ -11,7 +11,7 @@ import { socketClient, baseURL } from '../../utils';
 import { sendMessageCv, conversationCalling, cancelCall, removeMessageCv } from '../../store/reducers/conversation.reducer';
 import {
   sendMessage, updateMeetingState, setMeetingActive, endActiveMeeting,
-  clearMeetingJoined, getCurrentMeeting
+  clearMeetingJoined, getCurrentMeeting, _inviteUsers, receiveTeamInvitation
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
@@ -30,6 +30,7 @@ export default function Layout({ children }) {
   const meetingId = params && Number(params.meetingId)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const [isSkConnected, setIsSkConnected] = useState(false);
+  const [noti, setNoti] = useState(null)
 
   useEffect(() => {
     socketClient.auth = { userId: userReducer.user.id };
@@ -68,6 +69,10 @@ export default function Layout({ children }) {
       dispatch(sendMessage({
         messageId, content, senderId, teamId, photos, files, isMessage: true, createdAt
       }))
+    })
+
+    socketClient.on('team-invite-user-success', ({ users, teamId }) => {
+      dispatch(_inviteUsers({ users, teamId }))
     })
 
     //meetings
@@ -119,6 +124,19 @@ export default function Layout({ children }) {
 
     socketClient.on('end-meeting', ({ meeting }) => {
       dispatch(endActiveMeeting({ meeting }))
+    })
+
+
+    //notifications
+    socketClient.on('receive-team-invitation', ({ noti, teamId, teamName, hostId }) => {
+      if (noti) {
+        dispatch(receiveTeamInvitation({
+          id: Number(teamId), hostId, name: teamName
+        }))
+        setTimeout(() => {
+          setNoti(noti)
+        }, 500)
+      }
     })
 
     socketClient.on("disconnect", () => {
@@ -257,7 +275,15 @@ export default function Layout({ children }) {
               </Button>
             </DialogActions>
           </Dialog>
-
+          {noti && <Snackbar open={noti !== null} autoHideDuration={3000}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            onClose={e => setNoti(null)}>
+            <Alert variant="filled" severity="info">
+              <Link to={noti.relativeLink} style={{ textDecoration: 'none', color: '#FFF' }}>
+                {noti.content}
+              </Link>
+            </Alert>
+          </Snackbar>}
         </div>
       </> :
         <div>

@@ -147,6 +147,7 @@ export const confirmInvitations = createAsyncThunk('teams/confirmInvitations', a
   try {
     let { teamReducer } = getState()
     let { id } = JSON.parse(window.localStorage.getItem('user'))
+    console.log(teams, teamReducer.invitedTeams)
     let _teams = teamReducer.invitedTeams.filter(t => teams.indexOf(t.id) >= 0)
     let response = await axiosAuth.put(`/api/users/${id}/confirm-invitations`, {
       teams: teams
@@ -413,6 +414,18 @@ export const teamSlice = createSlice({
       if (meetingId === (state.meetingJoined || {}).id) {
         state.meetingJoined = null
       }
+    },
+    _inviteUsers: (state, action) => {
+      let { users, teamId } = action.payload
+      if (users && users.length && state.team.id == teamId) {
+        state.team.invitedUsers.push(...users)
+      }
+    },
+    receiveTeamInvitation: (state, action) => {
+      let { id, name, hostId } = action.payload
+      if (id && name && hostId) {
+        state.invitedTeams.push({ id, name, hostId, isMeeting: false })
+      }
     }
   },
   extraReducers: {
@@ -513,9 +526,10 @@ export const teamSlice = createSlice({
     },
     [confirmInvitations.fulfilled]: (state, action) => {
       let { teams } = action.payload
+      console.log(teams)
       state.invitedTeams = state.invitedTeams.filter(team => teams.indexOf(team.id) < 0)
       state.loading = false
-      state.joinedTeams.concat(teams)
+      state.joinedTeams.push(...teams)
     },
     [confirmInvitations.rejected]: (state, action) => {
       state.loading = false
@@ -698,6 +712,6 @@ export const teamSlice = createSlice({
 
 export const { cleanTeamState, sendMessage, updateMeetingState,
   setMeetingJoined, setMeetingActive, endActiveMeeting,
-  clearMeetingJoined } = teamSlice.actions;
+  clearMeetingJoined, _inviteUsers, receiveTeamInvitation } = teamSlice.actions;
 
 export default teamSlice.reducer

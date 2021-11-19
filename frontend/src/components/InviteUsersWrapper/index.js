@@ -8,8 +8,8 @@ import {
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
-import { inviteUsers } from '../../store/reducers/team.reducer'
-import { axiosAuth, baseURL } from '../../utils'
+// import { inviteUsers } from '../../store/reducers/team.reducer'
+import { axiosAuth, baseURL, socketClient } from '../../utils'
 
 export default function InviteUsersWrapper({ users }) {
   const dispatch = useDispatch()
@@ -72,10 +72,14 @@ export default function InviteUsersWrapper({ users }) {
 
   const handleInviteAll = async () => {
     setLoading(true)
-    dispatch(inviteUsers({
-      users: invitedUsers,
-      teamId: teamId
-    }))
+    // dispatch(inviteUsers({
+    //   users: invitedUsers,
+    //   teamId: teamId
+    // }))
+    socketClient.emit('team-invite-users', {
+      teamId,
+      users: invitedUsers
+    })
     setLoading(false)
     setShow(false)
   }
