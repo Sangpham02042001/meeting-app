@@ -3,7 +3,7 @@ import {
   Avatar, Tooltip, Dialog, DialogContent, IconButton,
   Menu, MenuItem
 } from '@mui/material';
-import { baseURL, getTime,socketClient } from '../../utils';
+import { baseURL, getTime, socketClient } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -89,7 +89,7 @@ export default function Message({
             style={{ marginBottom: '0px' }}>
             <div>
               <IconButton onClick={handleOpenMenu}>
-                <MoreHorizIcon className="icon-hover-menu"/>
+                <MoreHorizIcon className="icon-hover-menu" />
               </IconButton>
               <Menu
                 id="basic-menu"

@@ -15,7 +15,7 @@ import {
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
-  sendMeetingMessage, meetingUserAudio
+  sendMeetingMessage, meetingUserAudioChange
 } from '../../store/reducers/meeting.reducer'
 import './layout.css'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
@@ -79,18 +79,14 @@ export default function Layout({ children }) {
     //receive event when new user join meeting => emit state audio for new user 
     socketClient.on('user-join-meeting', ({ teamId, meetingId, user, isAudioActive }) => {
       dispatch(userJoinMeeting({ teamId, meetingId, user, isAudioActive }))
-      socketClient.emit('', {
-
-      })
     })
 
-    socketClient.on('joined-meeting', ({ members, meetingId, teamId, isAudioActive }) => {
+    socketClient.on('joined-meeting', ({ members, meetingId, teamId, usersAudio }) => {
       dispatch(getMeetingMembers({
         members,
         meetingId,
         teamId,
-        isAudioActive,
-        userId: userReducer.user.id
+        usersAudio
       }))
     })
 
@@ -106,9 +102,9 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('meeting-user-audio-changed', ({ userChangeAudio, isAudioActive, meetingId }) => {
-      dispatch(meetingUserAudio({
-        meetingId, userChangeAudio, isAudioActive
+    socketClient.on('meeting-user-audio-changed', ({ userId, isAudioActive, meetingId }) => {
+      dispatch(meetingUserAudioChange({
+        meetingId, userId, isAudioActive
       }))
     })
 

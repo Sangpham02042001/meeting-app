@@ -44,7 +44,7 @@ export const meetingSlice = createSlice({
       messages: [],
       teamId: null,
       messagesLoaded: false,
-      membersAudio: {}
+      usersAudio: {}
     },
     loading: false,
     error: null
@@ -58,7 +58,7 @@ export const meetingSlice = createSlice({
       console.log(action.payload.meeting)
       state.meeting = {
         ...action.payload.meeting,
-        membersAudio: {}
+        usersAudio: {}
       }
       state.loading = false;
     },
@@ -100,7 +100,7 @@ export const meetingSlice = createSlice({
       let _user = state.meeting.members.find(u => u.userId === user.userId);
       if (!_user) {
         state.meeting.members.push(user);
-        state.meeting.membersAudio[user.userId] = isAudioActive
+        state.meeting.usersAudio[user.userId] = isAudioActive
       }
     },
     userOutMeeting: (state, action) => {
@@ -110,29 +110,27 @@ export const meetingSlice = createSlice({
         let idx = state.meeting.members.findIndex(m => m.userId === userId)
         if (idx >= 0) {
           state.meeting.members.splice(idx, 1)
-          delete state.meeting.membersAudio[userId]
+          delete state.meeting.usersAudio[userId]
         }
       }
     },
     getMeetingMembers: (state, action) => {
-      let { members, meetingId, teamId, isAudioActive, userId } = action.payload
+      let { members, meetingId, teamId, usersAudio } = action.payload
       state.meeting.members = members
       state.meeting.id = meetingId
       state.meeting.teamId = teamId
-      state.meeting.membersAudio[userId] = isAudioActive
+      state.meeting.usersAudio = usersAudio
     },
-    meetingUserAudio: (state, action) => {
-      let { meetingId, userChangeAudio, isAudioActive } = action.payload
+    meetingUserAudioChange: (state, action) => {
+      let { meetingId, userId, isAudioActive } = action.payload
       if (state.meeting.id == meetingId) {
-        if (Object.keys(state.meeting.membersAudio).indexOf(userChangeAudio) >= 0) {
-          state.meeting.membersAudio[userChangeAudio] = isAudioActive
-        }
+        state.meeting.usersAudio[userId] = isAudioActive
       }
     }
   }
 })
 
 export const { saveMessage, userJoinMeeting, getMeetingMembers,
-  userOutMeeting, sendMeetingMessage, meetingUserAudio } = meetingSlice.actions;
+  userOutMeeting, sendMeetingMessage, meetingUserAudioChange } = meetingSlice.actions;
 
 export default meetingSlice.reducer

@@ -6,7 +6,7 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import './meetingVideo.css'
 
 const MeetingVideo = ({ remoteStreams, remoteVideos, remoteAudios }) => {
-  const membersAudio = useSelector(state => state.meetingReducer.meeting.membersAudio)
+  const usersAudio = useSelector(state => state.meetingReducer.meeting.usersAudio)
 
   return (
     <div className="remote-videos">
@@ -14,7 +14,7 @@ const MeetingVideo = ({ remoteStreams, remoteVideos, remoteAudios }) => {
         remoteStreams.current.length && remoteStreams.current.map((remote, idx) => {
           return remote && remote.stream && <Video
             key={remote.userId + ' ' + remoteVideos.current[idx] + ' ' + remoteAudios.current[idx]} userId={remote.userId}
-            stream={remote.stream} name={remote.name} isVideo={remoteVideos.current[idx]} isAudio={membersAudio[remote.userId]} />
+            stream={remote.stream} name={remote.name} isVideo={remoteVideos.current[idx]} isAudio={usersAudio[remote.userId]} />
         })
       }
     </div>

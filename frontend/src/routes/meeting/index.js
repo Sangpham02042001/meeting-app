@@ -544,15 +544,15 @@ const Meeting = (props) => {
 							left: '20px',
 							bottom: '-1px',
 							width: '251px',
-							height: '151px',
+							height: '181px',
 							backgroundColor: '#3c4043',
 							borderRadius: '15px'
 						}}>
-							<Avatar sx={{ width: "70px", height: '70px', zIndex: 10, position: 'absolute', bottom: '40px', left: '90px' }}
+							<Avatar sx={{ width: "70px", height: '70px', zIndex: 10, position: 'absolute', bottom: '55px', left: '90px' }}
 								src={`${baseURL}/api/user/avatar/${userReducer.user.id}`}
 								alt={userReducer.user.firstName} />
-							<h4>You</h4>
 						</div>}
+					<h4>You {!isAudioActive && <MicOffIcon />}</h4>
 				</div>
 				<div className="meeting-remote-videos"
 					style={{ width: isOpenChat || isOpenUsers || isOpenInfo ? '60%' : '80%' }}>

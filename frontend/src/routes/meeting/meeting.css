@@ -31,7 +31,7 @@
 .my-video > video {
   position: absolute;
   bottom: 0;
-  height: 150px;
+  height: 180px;
   width: 250px;
   left: 20px;
   object-fit: fill;
@@ -40,11 +40,10 @@
 
 .my-video h4 {
   position: absolute;
-  bottom: 0;
-  left: 10px;
+  bottom: -5px;
+  left: 30px;
   color: #fff;
-  object-fit: cover;
-  border-radius: 15px;
+  font-size: 18px;
 }
 
 .meeting-btn-list {

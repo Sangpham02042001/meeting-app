@@ -2,6 +2,10 @@ const userSockets = {
 
 };
 
+const meetingsAudio = {
+
+}
+
 const { getMemberTeam, sendMessage, socketInviteUsers } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
@@ -69,6 +73,7 @@ const socketServer = (socket) => {
                 }
             }
         }
+        meetingsAudio[meeting.id] = {}
     })
 
     socket.on("join-meeting", async ({ teamId, meetingId, userId, isAudioActive }) => {
@@ -82,13 +87,12 @@ const socketServer = (socket) => {
                 await joinMeeting({ meetingId, userId })
             }
         }
+        meetingsAudio[meetingId][userId] = isAudioActive
         let members = await getActiveMemberMeeting({ meetingId }); // luon lay in Meeting
         user = members.find(m => m.userId === user.userId)
         socket.meetingId = meetingId
 
-        socket.emit('joined-meeting', { members, meetingId, teamId, isAudioActive })
-
-        console.log(`meeting ${members}`)
+        socket.emit('joined-meeting', { members, meetingId, teamId, usersAudio: meetingsAudio[meetingId] })
 
         for (let m of members) {
             console.log(userSockets[m.userId])
@@ -116,8 +120,12 @@ const socketServer = (socket) => {
     })
 
     socket.on('meeting-audio-change', async ({ meetingId, userId, isAudioActive }) => {
+        meetingsAudio[meetingId][userId] = isAudioActive
+        socket.emit('meeting-user-audio-changed', {
+            isAudioActive, userId, meetingId
+        })
         socket.to(`meeting-${meetingId}`).emit('meeting-user-audio-changed', {
-            isAudioActive, userChangeAudio: userId, meetingId
+            isAudioActive, userId, meetingId
         })
     })
 
@@ -206,6 +214,7 @@ const socketServer = (socket) => {
                         }
 
                     }
+                    delete meetingsAudio[socket.meetingId]
                 } else {
                     for (const socketId of userSockets[socket.userId]) {
                         socket.to(socketId).emit('own-out-meeting', {
@@ -213,6 +222,9 @@ const socketServer = (socket) => {
                         })
                     }
                     socket.to(`meeting-${socket.meetingId}`).emit('user-out-meeting', { meetingId: socket.meetingId, userId: socket.userId });
+                    if (meetingsAudio[socket.meetingId]) {
+                        delete meetingsAudio[socket.meetingId][socket.userId]
+                    }
                 }
             }
             delete socket.meetingId;
