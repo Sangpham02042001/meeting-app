@@ -3,7 +3,9 @@ const { QueryTypes } = require('sequelize')
 const sequelize = require('../models')
 const Team = require('../models/team')
 const User = require('../models/user')
+const Media = require('../models/media');
 const Message = require('../models/message')
+const { getMeetingInfo } = require('./meeting.controller')
 
 const fs = require('fs')
 const { v4 } = require('uuid')
@@ -12,7 +14,7 @@ const { Readable } = require('stream')
 const getTeamInfo = async (req, res) => {
   let { teamId } = req.params
   const teams = await sequelize.query(
-    "SELECT t.name, t.teamType, t.id, t.hostId, COUNT(*) as numOfMembers " +
+    "SELECT t.name, t.teamType, t.id, t.hostId, t.coverPhoto, t.teamCode, COUNT(*) as numOfMembers " +
     "FROM teams t " +
     "LEFT JOIN users_teams ut ON t.id = ut.teamId " +
     "WHERE t.id = :teamId",
@@ -24,6 +26,10 @@ const getTeamInfo = async (req, res) => {
       type: sequelize.QueryTypes.SELECT
     }
   )
+  let team = teams[0]
+  if (team.hostId !== req.auth.id) {
+    delete team.teamCode
+  }
   return res.status(200).json({
     team: teams[0]
   })
@@ -71,6 +77,7 @@ const createTeam = async (req, res) => {
         hostId: id
       })
       team.coverPhoto = undefined
+
       return res.status(201).json({ team })
     } catch (error) {
       console.log(error)
@@ -287,6 +294,39 @@ const inviteUsers = async (req, res) => {
   }
 }
 
+const socketInviteUsers = async ({ teamId, users }) => {
+  try {
+    let arr = users.map(async user => {
+      await sequelize.query('INSERT INTO invited_users_teams VALUES(NOW(), NOW(), :userId, :teamId);', {
+        replacements: {
+          userId: user.id,
+          teamId
+        }
+      })
+    })
+    await Promise.all(arr)
+    let hostName, teamName
+    const team = await Team.findOne({
+      where: {
+        id: teamId
+      },
+      include: [{
+        model: User,
+        as: 'host'
+      }]
+    })
+    if (team) {
+      hostName = team.dataValues.host.firstName + ' ' + team.dataValues.host.lastName
+      teamName = team.dataValues.name
+      hostId = team.dataValues.hostId
+    }
+    return { hostName, teamName, hostId, message: 'success' }
+  } catch (error) {
+    console.log(error)
+    return { error, message: 'error' }
+  }
+}
+
 const removeInvitations = async (req, res) => {
   let { teamId } = req.params
   let { users } = req.body
@@ -334,6 +374,36 @@ const searchTeams = async (req, res) => {
       }
     )
     return res.status(200).json({ teams })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const searchTeamWithCode = async (req, res) => {
+  let { code } = req.query
+  console.log(code)
+  try {
+    let team = await Team.findOne({
+      where: {
+        teamCode: code
+      },
+      include: [
+        {
+          model: User,
+          as: 'host'
+        }
+      ]
+    })
+    if (team) {
+      team.dataValues.host = {
+        id: team.dataValues.host.id,
+        name: team.dataValues.host.firstName + ' ' + team.dataValues.host.lastName
+      }
+    } else {
+      throw `Team with code ${code} not found`
+    }
+    return res.status(200).json({ team })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
@@ -435,24 +505,43 @@ const updateBasicTeamInfo = async (req, res) => {
 //   })
 // }
 
-const sendMessage = async ({ teamId, senderId, content, image }) => {
+const sendMessage = async ({ teamId, senderId, content, files }) => {
   try {
-    let photoName = null;
-    if (image) {
-      photoName = v4() + '.png';
-      let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photoName}`);
-      const imageStream = new Readable();
-      imageStream._read = () => { }
-      imageStream.push(image)
-      imageStream.pipe(writeStream)
+    let multiMedia = [];
+    if (files) {
+      for (let file of files) {
+        if (file) {
+          let fileName = v4().concat('-', file.name)
+          const fileStream = new Readable();
+          let writeStream = fs.createWriteStream(`./src/public/messages-${/image\/(?!svg)/.test(file.type) ? 'photos' : 'files'}/${fileName}`)
+          fileStream._read = () => { }
+          fileStream.push(file.data)
+          fileStream.pipe(writeStream)
+          multiMedia.push({
+            pathName: fileName,
+            name: file.name,
+            type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
+          });
+        }
+      }
     }
 
-    const message = await Message.create({
-      content,
-      userId: senderId,
-      teamId,
-      photo: photoName
-    })
+    const message = await Message.create({ content, teamId, userId: senderId });
+    await Promise.all(multiMedia.map(async (m, idx) => {
+      let media = await Media.create({ pathName: m.pathName, name: m.name, messageId: message.id, type: m.type })
+      multiMedia[idx] = media;
+    }))
+    let tmpImages = []
+    let tmpFiles = []
+    for (let media of multiMedia) {
+      if (media.type === "image") {
+        tmpImages.push(media)
+      } else {
+        tmpFiles.push(media)
+      }
+    }
+    message.files = tmpFiles;
+    message.photos = tmpImages
     return message;
   } catch (error) {
     console.log(error)
@@ -507,7 +596,7 @@ const getTeamMessages = async (req, res) => {
 
 const getMemberTeam = async ({ teamId }) => {
   try {
-    const members = await sequelize.query(
+    let members = await sequelize.query(
       "CALL getTeamMembers(:teamId)",
       {
         replacements: {
@@ -523,9 +612,10 @@ const getMemberTeam = async ({ teamId }) => {
 }
 
 const getMeetings = async (req, res) => {
+  let { offset, num } = req.query
   let { teamId } = req.params
   try {
-    const meetings = await sequelize.query(
+    let meetings = await sequelize.query(
       "SELECT * FROM meetings WHERE teamId = :teamId",
       {
         replacements: {
@@ -534,7 +624,79 @@ const getMeetings = async (req, res) => {
         type: QueryTypes.SELECT
       }
     )
+    meetings = meetings.map(meeting => {
+      return getMeetingInfo({ meetingId: meeting.id })
+    })
+    meetings = await Promise.all(meetings)
     return res.status(200).json({ meetings });
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const getTeamMeetMess = async (req, res) => {
+  let { offset, num } = req.query
+  let { teamId } = req.params
+  try {
+    let meetings = await sequelize.query(
+      "SELECT * FROM meetings WHERE teamId = :teamId",
+      {
+        replacements: {
+          teamId
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    meetings = meetings.map(meeting => {
+      return getMeetingInfo({ meetingId: meeting.id })
+    })
+    meetings = await Promise.all(meetings)
+    meetings = meetings.map(meeting => ({
+      ...meeting,
+      isMeeting: true
+    }))
+
+    let messages = await Message.findAll({
+      where: {
+        teamId
+      },
+      include: {
+        model: Media,
+      }
+    })
+
+    for (let m of messages) {
+      m.dataValues.isMessage = true
+    }
+
+
+    let numOfMeetMess = [...messages, ...meetings].length
+    let meetmess = [...messages, ...meetings].sort((item1, item2) => {
+      let time1 = new Date(item1.createdAt).getTime()
+      let time2 = new Date(item2.createdAt).getTime()
+      if (time1 > time2) {
+        return -1;
+      }
+    }).splice(offset, num).reverse()
+
+    for (let m of meetmess) {
+      if (!m.isMeeting) {
+        let tmpFiles = [];
+        let tmpImages = []
+        for (let media of m.dataValues.Media) {
+          if (media.type === "image") {
+            tmpImages.push(media)
+          } else {
+            tmpFiles.push(media)
+          }
+        }
+        m.dataValues.files = tmpFiles;
+        m.dataValues.photos = tmpImages;
+        delete m.dataValues.Media;
+      }
+    }
+    return res.status(200).json({ meetmess, numOfMeetMess });
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
@@ -548,5 +710,6 @@ module.exports = {
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   sendMessage, getTeamMessages, getMemberTeam,
-  getMeetings
+  getTeamMeetMess, getMeetings, searchTeamWithCode,
+  socketInviteUsers
 }

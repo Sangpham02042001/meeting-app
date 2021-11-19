@@ -20,9 +20,13 @@ export const getNotifs = createAsyncThunk('notification/getNotifs', async (offse
 })
 
 export const readNotif = createAsyncThunk('notification/readNotif', async (notifId, { rejectWithValue }) => {
-    let { token } = JSON.parse(window.localStorage.getItem('user'))
-    let response = await axiosAuth.put(`${baseURL}/api/notifications/${notifId}`)
-    return response.data
+    await axiosAuth.put(`${baseURL}/api/notifications/${notifId}`)
+    return { notifId }
+})
+
+export const deleteNoti = createAsyncThunk('notifications/delete', async ({ notiId }, { rejectWithValue }) => {
+    await axiosAuth.delete(`/api/notifications/${notiId}`)
+    return { notiId }
 })
 
 export const notificationSlice = createSlice({
@@ -52,19 +56,57 @@ export const notificationSlice = createSlice({
         [readNotif.pending]: (state, action) => {
         },
         [readNotif.fulfilled]: (state, action) => {
+            let { notifId } = action.payload
+            let idx = state.notifications.findIndex(noti => noti.id === notifId)
+            if (idx >= 0) {
+                state.notifications.splice(idx, 1, {
+                    ...state.notifications[idx],
+                    isRead: 1
+                })
+                if (state.numOf_UnReadNotifications) {
+                    state.numOf_UnReadNotifications = state.numOf_UnReadNotifications - 1;
+                }
+            }
         },
         [readNotif.rejected]: (state, action) => {
             state.error = action.error.message
             console.log(state.error)
+        },
+        [deleteNoti.pending]: () => {
+
+        },
+        [deleteNoti.fulfilled]: (state, action) => {
+            let { notiId } = action.payload
+            if (notiId) {
+                let idx = state.notifications.findIndex(noti => noti.id === notiId)
+                if (idx >= 0) {
+                    state.notifications.splice(idx, 1)
+                }
+            }
+        },
+        [deleteNoti.rejected]: (state, action) => {
+            console.log(action.payload)
         }
     },
     reducers: {
-        // cleanNotificationState: state => {
-        //     state.notifications = []
-        //     state.numOf_UnReadNotifications = 0
-        // }
+        hideNoti: (state, action) => {
+            let { notiId } = action.payload
+            if (notiId) {
+                let idx = state.notifications.findIndex(noti => noti.id === notiId)
+                if (idx >= 0) {
+                    state.notifications.splice(idx, 1)
+                }
+            }
+        },
+        receivceNotification: (state, action) => {
+            let { noti } = action.payload
+            if (!state.notifications.find(n => n.id == noti.id)) {
+                state.notifications.unshift(noti)
+                state.numOf_UnReadNotifications += 1
+            }
+        }
     }
 })
 
-// export const { cleanNotificationState } = notificationSlice.actions;
+export const { hideNoti, receivceNotification } = notificationSlice.actions;
 export default notificationSlice.reducer

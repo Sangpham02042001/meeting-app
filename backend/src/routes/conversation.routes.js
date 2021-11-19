@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const { requireSignin } = require('../controllers/auth.controller')
-const { getConversations, getMessages, getLastMessage, readConversation } = require('../controllers/conversation.controller')
+const { getConversations, getMessages, getLastMessage, readConversation,
+    getImagesMessageCv, getFilesMessageCv } = require('../controllers/conversation.controller')
 const router = Router()
 
 router.route('/api/conversations/users/:userId')
@@ -11,6 +12,12 @@ router.route('/api/conversations/:conversationId/messages')
 
 router.route('/api/conversations/:conversationId')
     .patch(requireSignin, readConversation)
+
+router.route('/api/conversations/:conversationId/messages/images')
+    .get(requireSignin, getImagesMessageCv)
+
+router.route('/api/conversations/:conversationId/messages/files')
+    .get(requireSignin, getFilesMessageCv)
 
 router.route('/api/conversations/:conversationId/messages/lastMessage')
     .get(requireSignin, getLastMessage)

@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './avatar.css';
 import { baseURL } from '../../utils';
+import Avatar from '@mui/material/Avatar';
 
-export default function Avatar({ width, height, userId }) {
+export default function index(props) {
+    const [imageSrc, setImageSrc] = useState('')
+    useEffect(() => {
+        setImageSrc(`${baseURL}/api/user/avatar/${props.userId}`)
+    }, [])
+
     return (
-        <div className='avatar'
-            style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${userId}")`, width: `${width}`, height: `${height}`}}>
-        </div>
+        <Avatar
+            style={props.style}
+            alt={props.alt}
+            src={imageSrc}
+            sx={{ width: props.width, height: props.height }}
+        >{props.children}</Avatar>
     )
 }

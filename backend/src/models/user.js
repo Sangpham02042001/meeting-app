@@ -106,10 +106,12 @@ Team.belongsTo(User, {
 
 Meeting.belongsToMany(User, {
   through: 'Users_Meetings',
+  as: 'members',
   foreignKey: 'meetingId'
 })
 User.belongsToMany(Meeting, {
   through: 'Users_Meetings',
+  as: 'meetings',
   foreignKey: 'userId'
 })
 

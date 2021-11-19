@@ -1,10 +1,11 @@
 .team-header {
+  z-index: 10;
   display: flex;
   padding: 5px;
-  border-bottom: 1px solid var(--gray-shadow);
+  background-color: var(--primary-bg);
+  border-bottom: 2px solid var(--gray-shadow);
   flex-direction: row;
   justify-content: space-between;
-  background-color: #f8f7f7;
 }
 
 .team-header .team-header-coverphoto {
@@ -17,15 +18,7 @@
 }
 
 .team-header .meeting-btn {
-  border: 1px solid gray;
   margin-right: 10px;
-  padding: 5px 10px;
-  background-color: #fff;
-}
-
-.team-header .meeting-btn:hover {
-  background-color: rgb(238, 234, 234);
-  transition: background-color 0.4s ease;
 }
 
 .team-header .dropdown-content {
@@ -47,13 +40,26 @@
 
 .join-meeting-btn {
   color: #fff;
-  margin-right: 20px;
+  margin-right: 20px !important;
 }
 
-.join-meeting-btn a {
+.team-header-menu-btn#basic-button {
   color: #fff;
+  background-color: var(--primary-color);
+  min-width: 0;
+  padding: 10px;
+  border-radius: 50%;
 }
 
-.join-meeting-btn a:hover {
-  color: #fff !important;
+.teamheader-menu {
+}
+
+/* .teamheaer-menu-item {
+  padding: 12px 16px;
+  cursor: pointer;
+} */
+
+.teamheaer-menu-item a {
+  color: #000;
+  text-decoration: none;
 }

@@ -1,33 +1,27 @@
 .team-container {
   display: flex;
+  overflow: hidden;
+  background-color: var(--primary-bg);
 }
 
 .team-container > div {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 125px);
   /* overflow-y: auto; */
 }
 
 .team-body {
   /* background-color: #ebebeb; */
   position: relative;
+  transition: width 0.3s;
+  overflow-x: hidden;
 }
 
 .team-info-container {
-  padding: 10px;
-  /* background-color: #ebebeb; */
-  width: 20%;
-  border-left: 1px solid #cecccc;
-  min-width: 250px;
-}
-
-.team-info-user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  margin-right: 10px;
+  box-sizing: border-box;
+  box-shadow: -3px 0 10px var(--gray-shadow);
+  background-color: var(--primary-bg);
+  transition: width 0.3s;
+  display: flex;
 }
 
 .team-setting-coverphoto {
@@ -40,8 +34,11 @@
   margin-bottom: 10px;
 }
 
+.team-message-input input {
+  padding: 5px;
+}
+
 .team-message-input:focus {
-  width: 100%;
   box-shadow: 0 0 0 1px var(--gray-shadow);
   border-color: transparent;
 }
@@ -52,27 +49,50 @@
   width: 100%;
 }
 
+.team-message-list .time-text {
+  width: 100%;
+  margin: 15px 0;
+  text-align: center;
+  height: 20px;
+  /* border-bottom: 1px solid rgb(179, 176, 176); */
+}
+
+.team-message-list .time-text span {
+  font-size: 16px;
+  padding: 6px;
+  display: inline-block;
+  background-color: var(--primary-bg);
+  color: rgb(179, 176, 176);
+}
+
 .input-list-btn {
   z-index: 10;
   display: flex;
   position: absolute;
-  right: 0;
+  right: 20px;
   top: 0;
+  height: 100%;
+  margin-left: 15px;
+  align-items: flex-end;
+  margin-bottom: 5px;
 }
 
 .input-list-btn > button {
   background-color: transparent !important;
   border: none;
+  min-width: 50px;
 }
 
 .send-image-label {
-  padding: 6px 0;
+  padding-top: 2px;
+  cursor: pointer;
 }
 
 .image-message-upload {
   padding: 10px;
   border-top: 1px solid var(--gray-shadow);
   position: relative;
+  display: flex;
 }
 
 .image-message-upload > div {
@@ -82,12 +102,14 @@
   width: 100px;
   height: 100px;
   border-radius: 10px;
+  margin-right: 20px;
+  position: relative;
 }
 
-.image-message-upload > .remove-image-btn {
+.image-message-upload > div > .remove-image-btn {
   position: absolute;
   top: 2px;
-  left: 100px;
+  right: -10px;
   font-size: 20px;
   z-index: 2;
   cursor: pointer;
@@ -96,4 +118,37 @@
 .image-message-upload > .remove-image-btn:hover {
   color: gray;
   transition: color 0.5s ease;
+}
+
+.search-team-box input {
+  outline: none;
+  border: none;
+  padding: 10px;
+  width: 95%;
+  margin: auto;
+  /* background-color: #cecccc; */
+}
+
+.arrow-expand-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.arrow-expand-container:hover {
+  background-image: linear-gradient(90deg, transparent, #f0f0f0);
+}
+
+.arrow-expand-container .arrow-rotate {
+  transition: transform 0.3s linear;
+  font-size: 30px;
+}
+
+.arrow-expand-container .arrow-rotate-reverse {
+  transition: transform 0.3s linear;
+  transform: rotate(180deg);
+  position: relative;
+  left: -30px;
+  font-size: 35px;
+  z-index: 10;
 }

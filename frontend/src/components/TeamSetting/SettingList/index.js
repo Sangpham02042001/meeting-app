@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { useHistory, useParams, useLocation } from 'react-router'
+import React from 'react'
+import { useParams, useLocation } from 'react-router'
 import { Link } from 'react-router-dom'
 import './style.css'
 

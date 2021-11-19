@@ -1,10 +1,16 @@
 .navbar {
   display: flex;
   justify-content: space-between;
+  padding: 8px;
+  background-color: var(--primary-color);
+  z-index: 10;
 }
 
 .navbar .nav-brand {
-  margin-left: 100px;
+  color: white;
+  text-decoration: none;
+  font-size: 24px;
+  margin-left: 30px;
 }
 
 .navbar-btn {
@@ -14,21 +20,20 @@
 
 .navbar-username {
   white-space: nowrap;
-  width: 50px;
+  width: 80px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: #fff;
-  margin-right: 10px;
 }
 
-.dropdown {
+.navbar .dropdown {
   position: relative;
   margin-right: 20px;
   display: flex;
   justify-content: center;
 }
 
-.dropdown-btn {
+.navbar .dropdown-btn {
   background-color: #212529;
   color: white;
   font-size: 20px;
@@ -40,7 +45,7 @@
   padding: 0;
 }
 
-.dropdown-content {
+.navbar .dropdown-content {
   display: none;
   position: absolute;
   background-color: #f9f9f9;
@@ -52,14 +57,14 @@
   padding: 5px;
 }
 
-.dropdown-notification {
+.navbar .dropdown-notification {
   max-height: 250px;
   overflow-y: scroll;
   min-width: 400px;
   transform: translateX(-50px);
 }
 
-.dropdown-notification .notification {
+.navbar .dropdown-notification .notification {
   color: black;
   padding: 12px 16px;
   text-decoration: none;
@@ -68,20 +73,19 @@
   border-radius: 10px;
 }
 
-.dropdown-notification .notification:hover {
+.navbar .dropdown-notification .notification:hover {
   color: black;
   background-color: rgb(238, 235, 235);
   transition: background-color 0.3s ease;
 }
 
-.dropdown-notification .notification span {
-  width: 100%;
+.notification p {
   text-align: right;
+  margin: 0;
 }
 
-.dropdown-content > Link,
-a,
-span {
+.navbar .dropdown-content > a,
+.navbar .dropdown-content > span {
   color: black;
   /* padding: 12px 16px; */
   text-decoration: none;
@@ -89,24 +93,19 @@ span {
   cursor: pointer;
 }
 
-.dropdown > .dropdown-btn:focus + .dropdown-content {
+.navbar .dropdown > .dropdown-btn:focus + .dropdown-content {
   display: block;
 }
 
-.dropdown-content:hover {
+.navbar .dropdown-content:hover {
   display: block;
 }
 
-/* .dropdown-content > *:hover {
-  background-color: #f1f1f1;
-  color: #000;
-} */
-
-.dropdown > .dropdown-btn:hover {
+.navbar .dropdown > .dropdown-btn:hover {
   background-color: #8f8c8c9a;
 }
 
-.nav-user-avatar {
+.navbar.nav-user-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -115,19 +114,43 @@ span {
   background-repeat: no-repeat;
 }
 
-.notificationImg {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
+.navbar .notificationImg {
+  width: 40px;
+  height: 40px;
   margin-right: 10px;
 }
 
-.loadingNotification {
+.navbar.loadingNotification {
   width: 36px;
   height: 36px;
   margin: auto;
   display: block;
+}
+
+/* .logout-container {
+  padding: 15px 0;
+} */
+
+.navbar.logout-container > div {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.navbar.logout-container > div:hover {
+  background-color: rgb(202, 202, 202);
+  transition: background-color 0.3s ease;
+}
+
+.navbar.logout-container > div > a:hover {
+  color: #000;
+}
+
+.notification-menu {
+  max-height: 400px;
+}
+
+.notification-menu a {
+  color: #000;
+  text-decoration: none;
 }

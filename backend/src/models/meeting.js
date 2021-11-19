@@ -1,4 +1,5 @@
 const { DataTypes, Model } = require('sequelize')
+const Message = require('./message')
 const sequelize = require('./index')
 
 class Meeting extends Model {
@@ -10,9 +11,6 @@ Meeting.init({
     autoIncrement: true,
     primaryKey: true
   },
-  time: {
-    type: DataTypes.INTEGER,
-  },
   active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
@@ -21,5 +19,11 @@ Meeting.init({
   sequelize,
   modelName: 'Meeting'
 })
+
+Meeting.hasMany(Message, {
+  as: 'messages',
+  foreignKey: 'meetingId'
+})
+
 
 module.exports = Meeting

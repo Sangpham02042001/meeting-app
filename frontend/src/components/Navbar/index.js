@@ -1,20 +1,39 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Container, Navbar as Nav, Col, Row } from 'react-bootstrap'
 import { Link, useHistory } from 'react-router-dom'
 import { baseURL, timeDiff } from '../../utils'
-import Dropdown from '../Dropdown'
 import './navbar.css'
-import { cleanUser } from '../../store/reducers/user.reducer'
-import { getNotifs, readNotif } from '../../store/reducers/notification.reducer'
+import { getNotifs, readNotif, hideNoti, deleteNoti } from '../../store/reducers/notification.reducer'
 import InfiniteScroll from 'react-infinite-scroll-component'
-import Loading from '../Loading'
+import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Avatar, Menu, MenuItem, Badge, Button } from '@mui/material'
 
 export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
+  const [profileAnchorEl, setProfileAnchorEl] = useState(null)
+  let isOpenProfileMenu = Boolean(profileAnchorEl)
+  const [notiListAnchorEl, setNotiListAnchorEl] = useState(null)
+  let isOpenNofiListMenu = Boolean(notiListAnchorEl)
+  const [notiAnchorEl, setNotiAnchorEl] = useState(null)
+  let isOpenNotiMenu = Boolean(notiAnchorEl)
+  const [currentNotiId, setNotiId] = useState(null)
   const dispatch = useDispatch()
   const history = useHistory()
-  const [isDropdown, setIsDropdown] = useState(false);
+
+  const handleCloseProfileMenu = () => {
+    setProfileAnchorEl(null)
+  }
+
+  const handleCloseNotiListMenu = () => {
+    setNotiListAnchorEl(null)
+  }
+
+  const handleCloseNotiMenu = () => {
+    setNotiAnchorEl(null)
+  }
 
   let notifications = useSelector(state => state.notificationReducer.notifications)
   let numOf_UnReadNotifications = useSelector(state => state.notificationReducer.numOf_UnReadNotifications)
@@ -24,11 +43,16 @@ export default function Navbar() {
     // dispatch(cleanNotificationState)
   }, [])
 
+  const handleProfile = e => {
+    e.preventDefault()
+    history.push('/profile')
+    setProfileAnchorEl(null)
+  }
+
   const handleLogout = e => {
     e.preventDefault()
     window.localStorage.removeItem('user')
-    history.push('/login')
-    // dispatch(cleanUser())
+    history.push('/')
     location.reload()
   }
 
@@ -39,106 +63,170 @@ export default function Navbar() {
     }, 500)
   }
 
-  const handleReadNotif = (e, notifId) => {
-    e.preventDefault()
+  const handleReadNotif = (notifId) => {
     dispatch(readNotif(notifId))
   }
 
+  const handleHideNoti = () => {
+    dispatch(hideNoti({
+      notiId: currentNotiId
+    }))
+    setNotiAnchorEl(null)
+  }
+
+  const handleDeleteNoti = () => {
+    dispatch(deleteNoti({
+      notiId: currentNotiId
+    }))
+    setNotiAnchorEl(null)
+  }
+
   return (
-    <Nav bg="dark" variant="dark" className="navbar">
-      <Nav.Brand href="/" className="nav-brand">
-        MEETING APP
-      </Nav.Brand>
+    <nav className="navbar">
+      <div style={{ display: 'flex' }}>
+        <Link to='/home'>
+          <Avatar src='meeting-logo.png' style={{
+            width: '40px',
+            height: '40px',
+          }} />
+        </Link>
+        <Link to="/home" className="nav-brand">
+          MEETING APP
+        </Link>
+      </div>
+
       <div className="navbar-btn">
-        {/* <Dropdown
-          style={{ marginRight: '30px' }}
-          icon={
-            <i style={{ color: '#fff', cursor: 'pointer', fontSize: '20px' }} className="fas fa-bell"></i>
-          }
-        >
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {noti}
-          </div>
-        </Dropdown>
-
-        <Dropdown
-          style={{ marginRight: '20px' }}
-          icon={
-            <div className='nav-user-avatar'
-              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }}>
-            </div>
-          }
-        >
-
-          <Link to="/profile">Profile</Link>
-          <a href="#">Link 2</a>
-          <a href="#">Link 3</a>
-
-        </Dropdown> */}
-        <div className="dropdown" >
-          <button className="dropdown-btn" style={{ color: "white" }} >
+        <button
+          style={{
+            marginRight: '15px',
+            outline: "none",
+            border: 'none',
+            background: 'transparent',
+            color: '#FFF'
+          }}
+          onClick={e => {
+            e.preventDefault()
+            setNotiListAnchorEl(e.currentTarget)
+          }}>
+          <Badge badgeContent={numOf_UnReadNotifications} color="error">
             <i className="fas fa-bell"></i>
-            {numOf_UnReadNotifications > 0 && <span className="position-absolute top-3 start-100 translate-middle badge rounded-pill bg-danger">{numOf_UnReadNotifications}</span>}
-          </button>
-          <div className="dropdown-notification dropdown-content" id="dropdown-notification">
-            <InfiniteScroll
-              dataLength={notifications.length}
-              next={handleNotif}
-              hasMore={hasMore}
-              loader={<div className="notification justify-content-center"><img src="/loading.gif" className="loadingNotification" /></div>}
-              scrollableTarget="dropdown-notification"
-              endMessage={<p style={{ textAlign: 'center' }}>
-                <b>There is no more notification!</b>
-              </p>}>
-              {notifications.map((notification) => {
-                let imgSrc = `${baseURL}/api/user/avatar/${notification.createdBy}`
-                let style = {}
-                if (notification.isRead == 1) {
-                  style = {
-                    // 'borderLeft': "4px solid var(--white)",
-                    'position': "relative",
-                    'borderRadius': "5px",
-                    // 'fontWeight': "normal"
-                  }
-                } else if (notification.isRead == 0) {
-                  style = {
-                    // 'borderLeft': "4px solid #85C1E9",
-                    'position': "relative",
-                    'borderRadius': "5px",
-                    // 'fontWeight': "bold"
-                  }
-                }
-                return (
-                  <Link className="notification" onClick={() => handleReadNotif(event, notification.id)} to={notification.relativeLink} key={notification.id} style={style}>
-                    {notification.isRead ? null : (<i className="bi bi-circle-fill" style={{ color: "rbg(0,312,255,1)", position: "absolute", top: "3px" }}></i>)}
-                    <img className="notificationImg" src={imgSrc}></img>
-                    {notification.content}
-                    <br />
-                    <span style={{ fontSize: '15px' }}>{timeDiff(notification.timeDifferent)}</span>
-                    <div />
-                  </Link>
-                )
-              })}
-            </InfiniteScroll>
-          </div>
-        </div>
+          </Badge>
+        </button>
+        <Menu
+          className="notification-menu"
+          anchorEl={notiListAnchorEl}
+          open={isOpenNofiListMenu}
+          onClose={handleCloseNotiListMenu}
+          MenuListProps={{
+            'aria-labelledby': 'basic-button',
+          }}
+          PaperProps={{
+            style: {
+              minWidth: 400,
+            }
+          }}>
+          {
+            notifications.length === 0 ? <p style={{ textAlign: 'center', fontWeight: '600' }}>
+              No new notifications</p>
+              : <InfiniteScroll
+                dataLength={notifications.length}
+                next={handleNotif}
+                hasMore={hasMore}
+                loader={<div className="notification justify-content-center"
+                  style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Avatar src="loading.gif" className="loadingNotification" />
+                </div>}
+                scrollableTarget="dropdown-notification"
+                endMessage={<p style={{ textAlign: 'center' }}>
+                  <b>There is no more notification!</b>
+                </p>}>
+                {notifications.map((notification) => {
+                  let imgSrc = `${baseURL}/api/user/avatar/${notification.createdBy}`
+                  return (
+                    <MenuItem key={notification.id}>
+                      <Link className="notification" onClick={(e) => {
+                        !notification.isRead && handleReadNotif(notification.id)
+                        setNotiListAnchorEl(null)
+                      }} to={notification.relativeLink} style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex' }}>
+                            {notification.isRead ?
+                              <Avatar className="notificationImg" src={imgSrc} style={{ marginRight: '10px' }} />
+                              : <Badge anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'left',
+                              }} badgeContent=" " color="primary" overlap="circular">
+                                <Avatar className="notificationImg" src={imgSrc} style={{ marginRight: '10px' }} />
+                              </Badge>}
+                            {notification.content}
+                          </div>
+                          <Button
+                            id="basic-button"
+                            aria-controls="basic-menu"
+                            aria-haspopup="true"
+                            style={{
+                              minWidth: '40px',
+                              zIndex: 5
+                            }}
+                            onClick={e => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              setNotiAnchorEl(e.currentTarget)
+                              setNotiId(notification.id)
+                            }}
+                          >
+                            <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
+                          </Button>
+                        </div>
+                        <p style={{ fontSize: '15px', color: 'gray' }}>
+                          {timeDiff(notification.createdAt)}
+                        </p>
+                        <div />
+                      </Link>
+                    </MenuItem>
+                  )
+                })}
+              </InfiniteScroll>
+          }
+        </Menu>
 
-        <div className="dropdown" >
-          <button className="dropdown-btn" style={{ color: "white", padding: 0 }}>
-            <div className='nav-user-avatar'
-              style={{ backgroundImage: `url("${baseURL}/api/user/avatar/${user.id}")` }} >
-            </div>
-          </button>
-          <div className="dropdown-content">
-            <Link to="/profile">Profile</Link>
-            <a href="#">Link 2</a>
-            <span onClick={handleLogout}>Logout</span>
-          </div>
-        </div>
+        <Avatar sx={{ width: "40px", height: "40px", cursor: 'pointer', marginRight: '15px' }}
+          onClick={e => {
+            e.preventDefault()
+            setProfileAnchorEl(e.currentTarget)
+          }}
+          src={`${baseURL}/api/user/avatar/${user.id}?id=${user.avatar}`} />
+        <Menu
+          anchorEl={profileAnchorEl}
+          open={isOpenProfileMenu}
+          onClose={handleCloseProfileMenu}
+          MenuListProps={{
+            'aria-labelledby': 'basic-button',
+          }}
+        >
+          <MenuItem onClick={handleProfile}>
+            <PersonIcon /> My profile</MenuItem>
+          <MenuItem onClick={handleLogout}>
+            <LogoutIcon /> Logout
+          </MenuItem>
+        </Menu>
+
+        <Menu
+          anchorEl={notiAnchorEl}
+          open={isOpenNotiMenu}
+          onClose={handleCloseNotiMenu}
+          MenuListProps={{
+            'aria-labelledby': 'basic-button',
+          }}
+        >
+          <MenuItem onClick={handleHideNoti}> <CloseIcon />Hide</MenuItem>
+          <MenuItem onClick={handleDeleteNoti}> <DeleteIcon /> Delete
+          </MenuItem>
+        </Menu>
 
         <strong className="navbar-username">{user.firstName}</strong>
       </div>
-    </Nav >
+    </nav >
 
   )
 }

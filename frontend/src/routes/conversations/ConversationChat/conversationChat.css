@@ -1,0 +1,137 @@
+.conversation-info {
+  height: 100%;
+  width: 25%;
+  background-color: var(--primary-bg);
+  border-left: 2px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: display 0.3s;
+  overflow-y: auto;
+}
+
+.conversation-info .custom-info {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.conversation-info .conversation-info-detail {
+  width: 100%;
+  margin-top: 50px;
+  
+}
+
+.conversation-info-detail .accordion-detail {
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start; 
+  padding: 15px; 
+  overflow-y: auto;
+  max-height: 450px;
+}
+
+
+.conversation-message {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: width 0.3s;
+}
+
+.conversation-message .header-message {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+  width: 100%;
+  padding-left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.conversation-message .header-left {
+  display: flex;
+  align-items: center;
+}
+
+.conversation-message .header-btn-list {
+  display: flex;
+  position: relative;
+}
+
+.header-btn-list > button {
+  margin: 0 15px;
+  width: 36px;
+  height: 36px;
+}
+
+.header-btn:hover {
+  background-color: #dfdfdf;
+}
+
+.conversation-message .content-message {
+  width: 100%;
+  height: 85%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 5%;
+  overflow-y: auto;
+}
+
+.info-beginner-content {
+  margin: auto;
+  font-size: 36px;
+  padding-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.conversation-message .bottom-message {
+  display: flex;
+  position: relative;
+  width: 100%;
+  padding: 15px 10%;
+}
+
+.conversation-message .input-message {
+  position: relative;
+  border-radius: 24px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  margin: 0 auto;
+  background-color: #f0f2f5;
+  width: 100%;
+}
+
+.conversation-message .input-file {
+  display: flex;
+  padding: 5px;
+  overflow-y: auto;
+}
+
+.input-message  textarea {
+  width: 95%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 10px 10px 24px;
+  outline: none;
+  border: none;
+  resize: none;
+  background-color: #f0f2f5;
+  display: flex;
+}
+
+.conversation-message .input-btn {
+  display: flex;
+  align-items: flex-end;
+}
+
+.conversation-message .input-btn button {
+  margin: 0 10px;
+  width: 36px;
+  height: 36px;
+}

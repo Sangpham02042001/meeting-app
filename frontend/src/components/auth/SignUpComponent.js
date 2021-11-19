@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Form, Button, Modal } from "react-bootstrap";
+import {
+    TextField, Button, Dialog,
+    DialogTitle, DialogContent, DialogActions,
+    Alert, Snackbar, Typography, Avatar
+} from '@mui/material';
 import { Link, Redirect } from 'react-router-dom';
 import Loading from "../Loading";
 import { isAuthenticated } from "../../store/reducers/user.reducer";
 import { axiosInstance } from "../../utils";
 import './auth.css'
+import Copyright from "./CopyRight";
 
 export default function SignUp() {
     const userReducer = useSelector(state => state.userReducer)
@@ -22,9 +27,7 @@ export default function SignUp() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
-    const [passwordError, setPasswordError] = useState('')
-    const [passwordCfError, setPasswordCfError] = useState('')
-    const [isModalShow, setModalShow] = useState(false)
+    const [isDialogShow, setModalShow] = useState(false)
     const [signupError, setSignupError] = useState('')
 
     const handleChange = type => event => {
@@ -42,30 +45,30 @@ export default function SignUp() {
             case "password":
                 setPassword(val)
                 if (val.length >= 6) {
-                    setPasswordError('')
+                    setSignupError('')
                 }
                 break;
             case "passwordConfirmation":
                 setPasswordConfirmation(val)
                 if (val === password) {
-                    setPasswordCfError('')
+                    setSignupError('')
                 }
                 break;
         }
     }
 
-    const handleCloseModal = () => {
+    const handleCloseDialog = () => {
         setModalShow(false)
     }
 
     const handleSubmit = (event) => {
         event.preventDefault()
         if (password.length < 6) {
-            setPasswordError('Password must has at least 6 characters')
+            setSignupError('Password must has at least 6 characters')
             return
         }
         if (password !== passwordConfirmation) {
-            setPasswordCfError("Confirm password doesn't match")
+            setSignupError("Confirm password doesn't match")
             return
         }
         let data = {
@@ -94,98 +97,92 @@ export default function SignUp() {
     return (
         !userReducer.loaded ? <Loading />
             : (userReducer.authenticated ? <Redirect to="/" />
-                : <div style={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
+                : <div className="auth-page">
                     <div className="form-container">
-                        <h1 style={{ marginBottom: '30px' }}>Meeting App</h1>
-                        <Form onSubmit={handleSubmit} className="auth-form">
-                            <Form.Group className="mb-3">
-                                <Form.Label>First Name</Form.Label>
-                                <Form.Control
-                                    name="firstName"
-                                    placeholder="First Name"
-                                    value={firstName}
-                                    onChange={handleChange("firstName")}
-                                    required
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Last Name</Form.Label>
-                                <Form.Control
-                                    name="lastName"
-                                    placeholder="Last Name"
-                                    value={lastName}
-                                    onChange={handleChange("lastName")}
-                                    required
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Email</Form.Label>
-                                <Form.Control
-                                    type="email"
-                                    name="email"
-                                    placeholder="Email"
-                                    value={email}
-                                    onChange={handleChange("email")}
-                                    required
-                                />
-                            </Form.Group>
-                            {signupError && <p className="error-message">
-                                {signupError}
-                            </p>}
-                            <Form.Group className="mb-3">
-                                <Form.Label>Password</Form.Label>
-                                <Form.Control
-                                    type="password"
-                                    name="password"
-                                    placeholder="Password"
-                                    value={password}
-                                    onChange={handleChange("password")}
-                                    required
-                                    autoComplete="off"
-                                />
-                            </Form.Group>
-                            {passwordError && <p className="error-message">
-                                {passwordError}
-                            </p>}
-                            <Form.Group className="mb-3">
-                                <Form.Label>Confirm Password</Form.Label>
-                                <Form.Control
-                                    type="password"
-                                    name="password"
-                                    placeholder="Confirm Password"
-                                    value={passwordConfirmation}
-                                    onChange={handleChange("passwordConfirmation")}
-                                    required
-                                    autoComplete="off"
-                                />
-                            </Form.Group>
-                            {passwordCfError && <p className="error-message">
-                                {passwordCfError}
-                            </p>}
-                            <div>
-                                <Button className="mb-3 submit-btn" type="submit">Sign up</Button> <br />
-                                <p style={{ textAlign: 'center', marginBottom: 0 }}>
-                                    Have account ? <Link to="/login">Sign in here</Link>
+                        <Avatar sx={{ m: 1, width: 56, height: 56 }}
+                            src="meeting-logo.png" />
+                        <Typography component="h1" variant="h4" sx={{ marginBottom: '50px' }}>
+                            Meeting App
+                        </Typography>
+                        <form onSubmit={handleSubmit} className="auth-form">
+                            <TextField
+                                name="firstName"
+                                label="First Name"
+                                required
+                                value={firstName}
+                                onChange={handleChange("firstName")}
+                                variant="standard"
+                            />
+                            <TextField
+                                name="lastName"
+                                label="Last Name"
+                                required
+                                value={lastName}
+                                onChange={handleChange("lastName")}
+                                variant="standard"
+                            />
+                            <TextField
+                                type="email"
+                                name="email"
+                                label="Email"
+                                required
+                                value={email}
+                                onChange={handleChange("email")}
+                                variant="standard"
+                            />
+                            <TextField
+                                type="password"
+                                name="password"
+                                label="Password"
+                                required
+                                value={password}
+                                onChange={handleChange("password")}
+                                autoComplete="off"
+                                variant="standard"
+                            />
+                            <TextField
+                                type="password"
+                                name="password"
+                                label="Confirm Password"
+                                required
+                                value={passwordConfirmation}
+                                onChange={handleChange("passwordConfirmation")}
+                                variant="standard"
+                            />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <p style={{ marginBottom: 0 }}>
+                                    Have account? <Link to="/login">Sign in</Link>
                                 </p>
+                                <Button variant="contained" type="submit">
+                                    Sign up
+                                </Button>
                             </div>
-                        </Form>
+                        </form>
+                        <Copyright sx={{ mt: 5 }} />
                     </div>
-                    <Modal show={isModalShow} onHide={handleCloseModal}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Welcome to Meeting App</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>Sign up successfully.</Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={handleCloseModal}>
+
+                    <Dialog open={isDialogShow} onClose={handleCloseDialog}>
+                        <DialogTitle>Welcome to Meeting App</DialogTitle>
+                        <DialogContent>
+                            Sign up successfully.
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleCloseDialog}>
                                 Close
                             </Button>
-                            <Button variant="primary">
-                                <Link style={{ color: '#fff', textDecoration: 'none' }} to='/login'>
+                            <Button>
+                                <Link style={{ textDecoration: 'none' }} to='/login'>
                                     Log in now
                                 </Link>
                             </Button>
-                        </Modal.Footer>
-                    </Modal>
+                        </DialogActions>
+                    </Dialog>
+
+                    <Snackbar open={signupError.length > 0} autoHideDuration={3000} onClose={e => setSignupError('')}>
+                        <Alert severity="error">
+                            {signupError}
+                        </Alert>
+                    </Snackbar>
                 </div>)
     )
 }

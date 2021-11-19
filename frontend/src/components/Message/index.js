@@ -1,39 +1,262 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
-  Tooltip, OverlayTrigger, Popover, Image
-} from 'react-bootstrap'
-import Avatar from '../Avatar'
-import { convertDate, baseURL } from '../../utils'
+  Avatar, Tooltip, Dialog, DialogContent, IconButton,
+  Menu, MenuItem
+} from '@mui/material';
+import { baseURL, getTime, socketClient } from '../../utils';
+import CloseIcon from '@mui/icons-material/Close';
+import DownloadIcon from '@mui/icons-material/Download';
+import DescriptionIcon from '@mui/icons-material/Description';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import './style.css'
 
-export default function Message({ message, logInUserId, hasAvatar, lastMessage }) {
-  return (message.userId === logInUserId ?
-    <div className={`own-message ${lastMessage ? 'last-message' : ''}`}>
-      <div>
-        {message.content && <p>
-          {message.content}
-        </p>}
-        {message.photo && <div className='message-photo' style={{
-          backgroundImage: `url(${baseURL}/api/messages/${message.id}/image)`
-        }}>
-        </div>}
-      </div>
-    </div> :
-    <div className={`message  ${lastMessage ? 'last-message' : ''}`}
-      style={{
-        marginBottom: hasAvatar ? '5px' : 0
-      }}>
-      {hasAvatar && <span className='avatar-message'>
-        <Avatar width="30px" height="30px" userId={message.userId} />
-      </span>}
-      <div className={message.photo ? 'message-with-photo' : ''}>
-        {message.content && <p className={hasAvatar ? 'user-last-message' : ''}>
-          {message.content}
-        </p>}
-        {message.photo && <div className={`message-photo ${hasAvatar ? 'photo-last-message' : ''}`} style={{
-          backgroundImage: `url(${baseURL}/api/messages/${message.id}/image)`
-        }}></div>}
-      </div>
+
+export default function Message({
+  message, logInUserId, hasAvatar, lastMessage,
+  userName, conversationId, participantId }) {
+  const [isPreviewImg, setIsPreviewImg] = useState(false);
+  const [imgPreviewUrl, setImgPreviewUrl] = useState(null);
+  const [selectedPhotoId, setPhotoId] = useState(null)
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const [isContentOptionShow, setContentOptionShow] = useState('none')
+
+  const handleRemoveMessage = () => {
+    setAnchorEl(null);
+    socketClient.emit('conversation-remove-message', { conversationId, messageId: message.id, senderId: logInUserId, receiverId: participantId })
+  }
+
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null)
+  }
+
+  const handlePreviewImg = (e, messageId, photoId) => {
+    e.preventDefault();
+    setIsPreviewImg(true);
+    setImgPreviewUrl(`${baseURL}/api/messages/${messageId}/${photoId}`)
+    setPhotoId(photoId)
+  }
+
+  const handleClose = () => {
+    setIsPreviewImg(false)
+    setImgPreviewUrl(null)
+    setPhotoId(null)
+  }
+
+  const getImageSize = (numOfPhotos) => {
+    let itemWidth, height, width
+    if (numOfPhotos == 1) {
+      if (message.meetingId) {
+        itemWidth = '200px',
+          width = '200px',
+          height = '200px'
+      } else {
+        itemWidth = '350px';
+        width = '350px';
+        height = '400px'
+      }
+    } else if (numOfPhotos <= 3) {
+      width = '410px';
+      itemWidth = '200px'
+      height = '200px'
+    } else {
+      width = '470px';
+      itemWidth = '150px'
+      height = '150px'
+    }
+    return { itemWidth, height, width }
+  }
+
+  const handleFileDownload = (event, messageId, fileId) => {
+    event.preventDefault();
+    window.open(`${baseURL}/api/messages/files/${messageId}/${fileId}`)
+  }
+
+  const handleImageDownload = (event) => {
+    event.preventDefault()
+    window.open(`${baseURL}/api/messages/photos/${message.id}/${selectedPhotoId}`)
+  }
+
+  return (
+    <div className="message-component">
+      {
+        message.userId === logInUserId ?
+          <div className={`own-message ${lastMessage ? 'last-message' : ''}`}
+            style={{ marginBottom: '0px' }}>
+            <div>
+              <IconButton onClick={handleOpenMenu}>
+                <MoreHorizIcon className="icon-hover-menu" />
+              </IconButton>
+              <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleCloseMenu}
+                MenuListProps={{
+                  'aria-labelledby': 'basic-button',
+                }}
+              >
+                <MenuItem onClick={handleRemoveMessage}>Remove</MenuItem>
+              </Menu>
+            </div>
+            <Tooltip title={getTime(message.createdAt)} placement="left">
+              <div>
+                {message.content &&
+                  <p>
+                    {message.content}
+                  </p>
+                }
+                {message.photos && message.photos.length > 0 &&
+
+                  <div className='message-photo-list'>
+                    {message.photos.map((photo, idx) => {
+                      return (message.photos.length > 1 ?
+                        <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                          src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                          className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                          style={{
+                            width: getImageSize(message.photos.length).itemWidth,
+                            height: getImageSize(message.photos.length).height,
+                          }} />
+                        :
+                        <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                          src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                          className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                          style={{
+                            maxWidth: getImageSize(message.photos.length).itemWidth,
+                            maxHeight: getImageSize(message.photos.length).height,
+                          }} />
+                      )
+                    })}
+                  </div>
+                }
+                {message.files && message.files.length > 0 &&
+
+                  <div className="message-file-list">
+                    {message.files.map((file) => {
+                      return (
+                        <div className="message-file" key={file.id} >
+                          <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                          <span
+                            onClick={e => handleFileDownload(e, message.id, file.id)}
+                          >
+                            {file.name}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                }
+              </div>
+            </Tooltip>
+
+          </div >
+          :
+          <div >
+            <div className={`message  ${lastMessage ? 'last-message' : ''}`}
+              style={{ marginBottom: hasAvatar ? '10px' : 0 }}>
+              {hasAvatar && (userName ?
+                <Tooltip title={userName}>
+                  <Avatar sx={{ width: '40px', height: '40px' }}
+                    src={`${baseURL}/api/user/avatar/${message.userId}`} />
+                </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
+                  src={`${baseURL}/api/user/avatar/${message.userId}`} />)}
+              <Tooltip title={getTime(message.createdAt)} placement='right'>
+                <div className={message.photos && message.photos.length > 0 ? 'message-with-photo' : ''}>
+                  {message.content &&
+                    <p className={hasAvatar ? 'user-last-message' : ''}>
+                      {message.content}
+                    </p>
+                  }
+                  {message.photos && message.photos.length > 0 &&
+                    <div className='message-photo-list'
+                      style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
+                      {message.photos.map((photo, idx) => {
+                        return (message.photos.length > 1 ?
+                          <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                            src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                            style={{
+                              width: getImageSize(message.photos.length).itemWidth,
+                              height: getImageSize(message.photos.length).height,
+                            }} />
+                          :
+                          <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                            src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                            style={{
+                              maxWidth: getImageSize(message.photos.length).itemWidth,
+                              maxHeight: getImageSize(message.photos.length).height,
+                            }} />
+                        )
+                      })}
+                    </div>
+                  }
+                  {message.files && message.files.length > 0 &&
+                    <div
+                      className="message-file-list"
+                      style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
+                      {message.files.map((file) => {
+                        return (
+                          <div className="message-file" key={file.id}>
+                            <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                            <span
+                              onClick={e => handleFileDownload(e, message.id, file.id)}
+                            >
+                              {file.name}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  }
+                </div>
+              </Tooltip>
+            </div>
+          </div>
+      }
+
+      <Dialog
+        open={isPreviewImg}
+        onClose={handleClose}
+        maxWidth='xl'
+        style={{ backgroundColor: 'rgba(10, 10, 10, 0.5)' }}
+      >
+        <DialogContent style={{ padding: 0 }}>
+          <Tooltip title="Close" placement="bottom">
+            <IconButton
+              sx={{
+                position: 'fixed',
+                right: '20px',
+                top: '20px',
+                padding: '5px',
+                background: '#fff !important'
+              }}
+              onClick={handleClose}>
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Download" placement="bottom">
+            <IconButton
+              sx={{
+                position: 'fixed',
+                right: '70px',
+                top: '20px',
+                padding: '5px',
+                background: '#fff !important'
+              }}
+              onClick={handleImageDownload}>
+              <DownloadIcon />
+            </IconButton>
+          </Tooltip>
+          <img width="100%" height="100%" src={imgPreviewUrl} />
+        </DialogContent>
+      </Dialog >
     </div>
   )
 }

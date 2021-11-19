@@ -1,0 +1,70 @@
+/* .container {
+  display: flex;
+  margin-left: 0px;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(245, 245, 245, 0.808);
+  flex-direction: row;
+} */
+
+.profile-layout {
+  display: flex;
+  height: calc(100vh - 56px);
+  margin-left: 50px;
+  background-color: var(--primary-bg);
+  padding-top: 10vh;
+}
+
+.profile-content {
+  float: left;
+  padding-left: 10px;
+  width: 50%;
+}
+.teams {
+  float: left;
+  width: 50%;
+  margin-left: 50px;
+}
+.info {
+  margin-top: 50px;
+  font-size: 125%;
+  display: block;
+}
+.input-info {
+  width: 70%;
+  border: none;
+  background-color: #f3f3f3;
+  outline: none;
+}
+.input-info:hover {
+  background-color: #e2e2e2;
+}
+.card-info {
+  width: 30%;
+}
+
+.profile-avatar-container {
+  position: relative;
+  width: 200px;
+  margin: auto;
+}
+
+.new-avatar-btn {
+  position: absolute;
+  padding: 5px 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  background-color: #e9e7e7;
+  right: 0;
+  bottom: 30px;
+}
+
+.new-avatar-btn:hover {
+  background-color: #f3f3f3;
+  transition: background-color 0.5s ease;
+}
+
+.team-action-btn {
+  max-height: 40px;
+}

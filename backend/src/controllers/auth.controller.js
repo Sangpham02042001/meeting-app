@@ -24,13 +24,13 @@ const signin = async (req, res) => {
         company: 'SPICY_CODE'
       }, process.env.JWT_SECRET_KEY)
 
-      user.avatar = undefined
       user.hash_password = undefined
       return res.status(200).json({
         token,
         lastName: user.lastName,
         firstName: user.firstName,
-        id: user.id
+        id: user.id,
+        avatar: user.avatar
       })
     } else {
       return res.status(401).json({ error: 'Email not found' })

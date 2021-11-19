@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Form, Button, Spinner } from 'react-bootstrap'
+import {
+  TextField, MenuItem, Button, Avatar,
+  Alert, Snackbar, Tooltip, IconButton
+} from '@mui/material'
 import { baseURL } from '../../../utils'
 import { updateBasicTeamInfo } from '../../../store/reducers/team.reducer'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 export default function TeamGeneralSetting() {
   const dispatch = useDispatch()
@@ -10,6 +14,9 @@ export default function TeamGeneralSetting() {
   const [teamName, setTeamName] = useState(() => teamReducer.team.name)
   const [teamType, setTeamType] = useState(() => teamReducer.team.teamType)
   const [teamCoverPhoto, setTeamCoverPhoto] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
+  const [message, setMessage] = useState({})
+  const [editted, setEditted] = useState(false)
 
   const handleUpdateTeamInfo = (e) => {
     e.preventDefault()
@@ -21,51 +28,91 @@ export default function TeamGeneralSetting() {
       data: formData,
       teamId: teamReducer.team.id
     }))
+    setEditted(true)
+  }
+
+  useEffect(() => {
+    if (editted) {
+      setImageUrl('')
+      setMessage({
+        type: 'success',
+        content: 'Edit team successfully'
+      })
+      setTimeout(() => {
+        setEditted(false)
+      }, 3000)
+    }
+  }, [teamReducer.team.name, teamReducer.team.teamType, teamReducer.team.coverPhoto])
+
+  const handleImageChange = (e) => {
+    if (e.target.files.length) {
+      setTeamCoverPhoto(e.target.files[0])
+      let reader = new FileReader()
+      let url = reader.readAsDataURL(e.target.files[0])
+      reader.onloadend = e => {
+        setImageUrl(reader.result)
+      }
+    }
+  }
+
+  const copyTeamCode = () => {
+    navigator.clipboard.writeText(teamReducer.team.teamCode)
+    setMessage({
+      type: 'success',
+      content: 'Copied to clipboard'
+    })
   }
 
   return (
-    <div style={{ margin: 'auto' }}>
-      <Form>
-        <Form.Group className="mb-3" controlId="formTeamName">
-          <Form.Label>Team Name</Form.Label>
-          <Form.Control
-            name="name"
-            value={teamName}
-            onChange={e => setTeamName(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="formTeamPrivacy">
-          <Form.Label>Change Team Visibility</Form.Label>
-          <Form.Select aria-label="Default select example"
-            name="teamType"
-            value={teamType}
-            onChange={e => setTeamType(e.target.value)}>
-            <option value="public">Public - Anyone can request to join and find this team</option>
-            <option value="private">Private - Only team owners can add members</option>
-          </Form.Select>
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="formTeamCoverPhoto">
-          <Form.Label>Change Team Cover Photo</Form.Label>
-          {teamReducer.team.id && <div className='team-setting-coverphoto'
-            style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${teamReducer.team.id}")` }}>
-          </div>}
-          <Form.Control
-            type="file"
-            name="coverPhoto"
-            accept='image/*'
-            onChange={(e) => setTeamCoverPhoto(e.target.files[0])}
-            required />
-        </Form.Group>
-        <Button variant="secondary"
-          onClick={handleUpdateTeamInfo}
-          disabled={(teamName && teamName.trim() === teamReducer.team.name)
-            && !teamCoverPhoto && (teamType === teamReducer.team.teamType)}>
-          Save the change
-        </Button>
-        {teamReducer.loading && <Spinner animation="border" role="status">
-        </Spinner>}
-      </Form>
+    <div style={{ margin: 'auto', maxWidth: '450px' }}>
+      <div>
+        <div className='profile-avatar-container'>
+          <Avatar
+            key={teamReducer.team.coverPhoto}
+            alt="Remy Sharp"
+            src={imageUrl || `${baseURL}/api/team/coverphoto/${teamReducer.team.id}?id=${teamReducer.team.coverPhoto}`}
+            sx={{ width: 200, height: 200, margin: 'auto', border: '5px solid #f7f7f7' }} />
+          <label className='new-avatar-btn' htmlFor='newAvatar'><i className="fas fa-camera"></i></label>
+          <input id="newAvatar" type="file" accept='image/*' style={{ display: 'none' }}
+            onChange={handleImageChange}></input>
+        </div>
+      </div>
+      <div style={{ margin: '10px 0', fontSize: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          Team code: <strong>{teamReducer.team.teamCode}</strong>
+        </div>
+        <Tooltip title="Copy to clipboard">
+          <IconButton onClick={copyTeamCode}>
+            <ContentCopyIcon />
+          </IconButton>
+        </Tooltip>
+      </div>
+      <TextField variant="standard"
+        style={{ width: '100%', marginBottom: '20px' }}
+        label="Team Name"
+        name="name"
+        value={teamName}
+        onChange={e => setTeamName(e.target.value)}
+      />
+      <TextField variant="standard"
+        select label="Change Team Visibility"
+        style={{ width: '100%', marginBottom: '20px' }}
+        value={teamType}
+        onChange={e => setTeamType(e.target.value)}>
+        <MenuItem value="public">Public - Anyone can request to join and find this team</MenuItem>
+        <MenuItem value="private">Private - Only team owners can add members</MenuItem>
+      </TextField>
+      <Button variant="text"
+        onClick={handleUpdateTeamInfo}
+        disabled={(teamName && teamName.trim() === teamReducer.team.name)
+          && !imageUrl && (teamType === teamReducer.team.teamType)}>
+        Save the change
+      </Button>
+      <Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000} onClose={e => setMessage({})}>
+        <Alert severity={message.type}>
+          {message.content}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

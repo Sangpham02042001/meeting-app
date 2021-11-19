@@ -20,12 +20,11 @@ export const createTeamMeeting = createAsyncThunk('/createTeamMeeting', async ({
   }
 })
 
-export const getMeetingMessages = createAsyncThunk('meeting/getMessages', async ({ teamId, offset, num }, { rejectWithValue }) => {
+export const getMeetingMessages = createAsyncThunk('meeting/getMessages', async ({ meetingId }, { rejectWithValue }) => {
   try {
-    let response = await axiosAuth.get(`/api/teams/${teamId}/messages?offset=${offset}&num=${num}`)
+    let response = await axiosAuth.get(`/api/meetings/${meetingId}/messages`)
     return {
       messages: response.data.messages,
-      numOfMessages: response.data.numOfMessages
     }
   } catch (error) {
     let { data } = error.response
@@ -39,30 +38,33 @@ export const getMeetingMessages = createAsyncThunk('meeting/getMessages', async 
 export const meetingSlice = createSlice({
   name: 'Meeting',
   initialState: {
-    // meetings: {
-    //   teams: [],
-    //   conversations: []
-    // },
     meeting: {
-      id: 0,
+      id: null,
       members: [],
       messages: [],
-      numOfMessages: 0,
-      teamId: 0,
-      messagesLoaded: false
+      teamId: null,
+      messagesLoaded: false,
+      usersAudio: {}
     },
+    loading: false,
     error: null
   },
   extraReducers: {
     [createTeamMeeting.pending]: (state, action) => {
       console.log('create meeting pending')
+      state.loading = true;
     },
     [createTeamMeeting.fulfilled]: (state, action) => {
       console.log(action.payload.meeting)
-      state.meeting = action.payload.meeting
+      state.meeting = {
+        ...action.payload.meeting,
+        usersAudio: {}
+      }
+      state.loading = false;
     },
     [createTeamMeeting.rejected]: (state, action) => {
       state.error = action.payload.error;
+      state.loading = false;
     },
     [getMeetingMessages.pending]: (state) => {
       // state.loading = true;
@@ -70,14 +72,11 @@ export const meetingSlice = createSlice({
     },
     [getMeetingMessages.fulfilled]: (state, action) => {
       // state.loading = false;
-      if (state.meeting.messages.length === 0) {
-        state.meeting.messages.push(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
-      } else {
-        state.meeting.messages.unshift(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
-      }
-      if (action.payload.numOfMessages) {
-        state.meeting.numOfMessages = action.payload.numOfMessages
-      }
+      // if (state.meeting.messages.length === 0) {
+      //   state.meeting.messages.push(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
+      // } else {
+      state.meeting.messages.unshift(...action.payload.messages.sort((mess1, mess2) => mess1.id - mess2.id))
+      // }
       state.meeting.messagesLoaded = true
     },
     [getMeetingMessages.rejected]: (state, action) => {
@@ -91,16 +90,17 @@ export const meetingSlice = createSlice({
       state.messages.push({ message, userId, userName });
     },
     sendMeetingMessage: (state, action) => {
-      let { messageId, content, senderId, meetingId, photo } = action.payload;
+      let { messageId, content, senderId, meetingId, photos, files, createdAt } = action.payload;
       if (state.meeting.id && state.meeting.id == meetingId) {
-        state.meeting.messages.push({ id: messageId, content, userId: senderId, photo })
+        state.meeting.messages.push({ id: messageId, content, userId: senderId, photos, files, meetingId, createdAt })
       }
     },
     userJoinMeeting: (state, action) => {
-      let { teamId, meetingId, user } = action.payload;
+      let { teamId, meetingId, user, isAudioActive } = action.payload;
       let _user = state.meeting.members.find(u => u.userId === user.userId);
       if (!_user) {
         state.meeting.members.push(user);
+        state.meeting.usersAudio[user.userId] = isAudioActive
       }
     },
     userOutMeeting: (state, action) => {
@@ -110,19 +110,27 @@ export const meetingSlice = createSlice({
         let idx = state.meeting.members.findIndex(m => m.userId === userId)
         if (idx >= 0) {
           state.meeting.members.splice(idx, 1)
+          delete state.meeting.usersAudio[userId]
         }
       }
     },
     getMeetingMembers: (state, action) => {
-      let { members, meetingId, teamId } = action.payload
+      let { members, meetingId, teamId, usersAudio } = action.payload
       state.meeting.members = members
       state.meeting.id = meetingId
       state.meeting.teamId = teamId
+      state.meeting.usersAudio = usersAudio
+    },
+    meetingUserAudioChange: (state, action) => {
+      let { meetingId, userId, isAudioActive } = action.payload
+      if (state.meeting.id == meetingId) {
+        state.meeting.usersAudio[userId] = isAudioActive
+      }
     }
   }
 })
 
 export const { saveMessage, userJoinMeeting, getMeetingMembers,
-  userOutMeeting, sendMeetingMessage } = meetingSlice.actions;
+  userOutMeeting, sendMeetingMessage, meetingUserAudioChange } = meetingSlice.actions;
 
 export default meetingSlice.reducer

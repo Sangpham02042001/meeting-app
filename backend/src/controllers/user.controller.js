@@ -72,8 +72,6 @@ const updateUserInfo = async (req, res) => {
         avatar = `${v4()}.${fileType}`
         fs.createReadStream(files.avatar.path)
           .pipe(fs.createWriteStream(`./src/public/users-avatars/${avatar}`))
-      } else {
-        avatar = ''
       }
       let firstName = fields.firstName || ''
       let lastName = fields.lastName || ''
@@ -91,6 +89,9 @@ const updateUserInfo = async (req, res) => {
           }
         })
       }
+      if (!avatar) {
+        avatar = user.avatar
+      }
       const result = await sequelize.query(
         'CALL updateBasicUserInfo(:userId, :firstName, :lastName, :avatar)',
         {
@@ -103,7 +104,12 @@ const updateUserInfo = async (req, res) => {
         }
       )
       let updatedUser = result[0]
-      return res.status(200).json({ user: updatedUser })
+      return res.status(200).json({
+        user: {
+          ...updatedUser,
+          avatar
+        }
+      })
     } catch (error) {
       if (error.name === 'SequelizeDatabaseError') {
         if (error.parent.errno == 1406) {
@@ -130,8 +136,7 @@ const getUserAvatar = async (req, res) => {
   if (user.avatar) {
     fs.createReadStream(`./src/public/users-avatars/${user.avatar}`).pipe(res)
   } else {
-    const readStream = fs.createReadStream('./src/public/images/default_avatar.png')
-    readStream.pipe(res)
+    fs.createReadStream('./src/public/images/default_avatar.png').pipe(res)
   }
 }
 
@@ -181,6 +186,7 @@ const getJoinedTeams = async (req, res) => {
   let teams = await user.getTeams({
     attributes: ['id', 'hostId', 'name'],
   })
+
   teams = teams.map(team => {
     return {
       id: team.id,
@@ -240,7 +246,7 @@ const cancelJoinRequest = async (req, res) => {
   try {
     await sequelize.query(
       "DELETE FROM request_users_teams rut " +
-      "WHERE rut.requestUserId = :userId AND FIND_IN_SET(rut.teamId, ':teams')",
+      "WHERE rut.requestUserId = :userId AND FIND_IN_SET(rut.teamId, :teams)",
       {
         replacements: {
           userId,
@@ -338,7 +344,7 @@ const getNotifications = async (req, res) => {
     numOf_UnReadNotifications = numOf_UnReadNotifications[0]['numOf_UnReadNotifications']
     if (isNaN(offset) || isNaN(num)) {
       let notifications = await sequelize.query(
-        "SELECT *, TIME_TO_SEC(TIMEDIFF(NOW(), createdAt)) AS timeDifferent FROM notifications WHERE userId = :id ORDER BY createdAt DESC;",
+        "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt DESC;",
         {
           replacements: {
             id
@@ -364,7 +370,7 @@ const getNotifications = async (req, res) => {
       return res.status(200).json({ notifications, numOfNotifications, numOf_UnReadNotifications })
     } else {
       let notifications = await sequelize.query(
-        "SELECT *, TIME_TO_SEC(TIMEDIFF(NOW(), createdAt)) AS timeDifferent FROM notifications WHERE userId = :id ORDER BY createdAt ASC LIMIT :offset, :num;",
+        "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt DESC LIMIT :offset, :num;",
         {
           replacements: {
             id, offset: Number(offset), num: Number(num)
@@ -372,9 +378,6 @@ const getNotifications = async (req, res) => {
           type: QueryTypes.SELECT
         }
       )
-      if (notifications.length == 0) {
-        return res.status(400).json({ error: 'error' })
-      }
       return res.status(200).json({ notifications, numOf_UnReadNotifications })
     }
   } catch (error) {

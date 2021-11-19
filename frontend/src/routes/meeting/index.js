@@ -2,395 +2,688 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { socketClient } from "../../utils";
-import Peer from "simple-peer";
-import './meeting.css';
-import { Row, Col, Button } from "react-bootstrap";
-import Video from "../../components/MeetingVideo";
-import MeetingChatBox from "../../components/MeetingChatBox";
-import MeetingUserList from "../../components/MeetingUserList";
+import MeetingChatBox from "./MeetingChatBox";
+import MeetingUserList from "./MeetingUserList";
+import MeetingVideo from "./MeetingVideo";
 import { isAuthenticated } from '../../store/reducers/user.reducer';
 import {
-    getTeamMessages,
-    getTeamInfo,
+	getTeamInfo,
 } from '../../store/reducers/team.reducer'
 import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
+import Janus from '../../janus'
+import { janusServer, baseURL } from '../../utils'
+// import Avatar from '../../components/Avatar'
+import { v4 } from 'uuid'
+
+// ***React Material***
+import './meeting.css';
+import { Button, IconButton, Tooltip, Snackbar, Alert, Badge, Avatar } from '@mui/material';
+import CallEndIcon from '@mui/icons-material/CallEnd';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InfoIcon from '@mui/icons-material/Info';
+import ChatIcon from '@mui/icons-material/Chat';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+
+
 
 function useQuery() {
-    return new URLSearchParams(useLocation().search);
+	return new URLSearchParams(useLocation().search);
 }
 
-
 const Meeting = (props) => {
-    let query = useQuery()
-    const history = useHistory()
-    const { teamId, meetingId } = useParams()
-    const dispatch = useDispatch()
-    const userReducer = useSelector(state => state.userReducer)
-    const teamReducer = useSelector(state => state.teamReducer)
-    const meetingReducer = useSelector(state => state.meetingReducer)
-    const [peers, setPeers] = useState([]);
-    const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
-    const [isAudioActive, setIsAudioActive] = useState(query.get('audio') == 'true' || false);
-    const [isEnableVideo, setIsEnableVideo] = useState(false);
-    const [isEnableAudio, setIsEnableAudio] = useState(false);
-    const [isMeetingEnd, setIsMeetingEnd] = useState(false);
-    const userVideo = useRef();
-    let peersRef = useRef([]);
+	let query = useQuery()
+	const history = useHistory()
+	const { teamId, meetingId } = useParams()
+	const dispatch = useDispatch()
+	const userReducer = useSelector(state => state.userReducer)
+	const teamReducer = useSelector(state => state.teamReducer)
+	const meetingReducer = useSelector(state => state.meetingReducer)
+	const [members, setMembers] = useState([])
+	const [isOpenInfo, setIsOpenInfo] = useState(false);
+	const [isOpenUsers, setIsOpenUsers] = useState(false);
+	const [isOpenChat, setIsOpenChat] = useState(false);
+	const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
+	const [isAudioActive, setIsAudioActive] = useState(query.get('audio') == 'true' || false);
+	const [isEnableVideo, setIsEnableVideo] = useState(false);
+	const [isEnableAudio, setIsEnableAudio] = useState(false);
+	const [isMeetingEnd, setIsMeetingEnd] = useState(false);
+	const [message, setMessage] = useState('')
+	const [trigger, setTrigger] = useState(v4())
 
-    // const meetingId = props.match.params.meetingId;
+	//******************janus************
+	let janus = null;
+	let myId = null;
+	let mypvtId = null;
+	const opaqueId = "videoroomtest-" + Janus.randomString(12)
+	const myVideo = useRef();
+	const myStream = useRef();
+	const sfuRef = useRef()
+	const feedRefs = useRef([])
+	const remoteStreams = useRef([])
+	const remoteVideos = useRef([])
+	const remoteAudios = useRef([])
 
-    function getConnectedDevices(type, callback) {
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                const filtered = devices.filter(device => device.kind === type);
-                callback(filtered);
-            });
-    }
+	function getConnectedDevices(type, callback) {
+		navigator.mediaDevices.enumerateDevices()
+			.then(devices => {
+				const filtered = devices.filter(device => device.kind === type);
+				callback(filtered);
+			});
+	}
 
-    useEffect(() => {
-        if (!userReducer.loaded) {
-            dispatch(isAuthenticated())
-        }
-        dispatch(getTeamInfo({ teamId }))
+	const publishOwnFeed = (useAudio) => {
+		sfuRef.current && sfuRef.current.createOffer(
+			{
+				media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true },
+				// simulcast: doSimulcast,
+				// simulcast2: doSimulcast2,
+				success: function (jsep) {
+					Janus.debug("Got publisher SDP!", jsep);
+					const publish = { request: "configure", audio: useAudio, video: true };
+					sfuRef.current.send({ message: publish, jsep: jsep });
+				},
+				error: function (error) {
+					Janus.error("WebRTC error:", error);
+					if (useAudio) {
+						publishOwnFeed(false);
+					} else {
+						alert('WebRTC Error')
+					}
+				}
+			});
+	}
 
-        socketClient.emit("join-meeting", { teamId, meetingId, userId: userReducer.user.id })
+	const newRemoteFeed = (id, display, audio, video) => {
+		let remoteFeed = null;
+		janus.attach({
+			plugin: "janus.plugin.videoroom",
+			opaqueId: opaqueId,
+			success: function (pluginHandle) {
+				console.log(`new remote feed, ${pluginHandle}`)
+				remoteFeed = pluginHandle;
+				remoteFeed.simulcastStarted = false;
+				Janus.log("Plugin attached! (" + remoteFeed.getPlugin() + ", id=" + remoteFeed.getId() + ")");
+				Janus.log("  -- This is a subscriber");
+				let subscribe = {
+					request: "join",
+					room: Number(meetingId),
+					ptype: "subscriber",
+					feed: id,
+					private_id: mypvtId
+				};
+				remoteFeed.videoCodec = video;
+				remoteFeed.send({ message: subscribe });
+			},
+			error: function (error) {
+				Janus.error("  -- Error attaching plugin...", error);
+				alert("Error attaching plugin... " + error.message);
+			},
+			iceState: function (state) {
+				console.log("ICE state of this WebRTC PeerConnection (feed #" + remoteFeed.rfindex + ") changed to " + state);
+			},
+			webrtcState: function (on) {
+				console.log("Janus says this WebRTC PeerConnection (feed #" + remoteFeed.rfindex + ") is " + (on ? "up" : "down") + " now");
+			},
+			onmessage: function (msg, jsep) {
+				let event = msg["videoroom"];
+				if (msg["error"]) {
+					alert(msg["error"]);
+				} else if (event) {
+					if (event === "attached") {
+						console.log('new remote attach', msg)
+						for (let i = 0; i < 6; i++) {
+							if (!feedRefs.current[i]) {
+								feedRefs.current[i] = remoteFeed;
+								remoteFeed.rfindex = i;
+								break;
+							}
+						}
+						remoteFeed.rfid = msg["id"];
+						remoteFeed.rfdisplay = msg["display"];
+						console.log("Successfully attached to feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") in room " + msg["room"]);
+					} else if (event === "event") {
+						//**************************************************************************************//
 
-        getConnectedDevices('videoinput', (cameras) => {
-            if (cameras.length) setIsEnableVideo(true);
-        })
+						//**************************************************************************************//
+					}
+				}
+				if (jsep) {
+					console.log('jsep answer ')
+					Janus.debug("Handling SDP as well...", jsep);
+					let stereo = (jsep.sdp.indexOf("stereo=1") !== -1);
+					// Answer and attach
+					remoteFeed.createAnswer(
+						{
+							jsep: jsep,
+							// Add data:true here if you want to subscribe to datachannels as well
+							// (obviously only works if the publisher offered them in the first place)
+							media: { audioSend: false, videoSend: false },	// We want recvonly audio/video
+							customizeSdp: function (jsep) {
+								if (stereo && jsep.sdp.indexOf("stereo=1") == -1) {
+									// Make sure that our offer contains stereo too
+									jsep.sdp = jsep.sdp.replace("useinbandfec=1", "useinbandfec=1;stereo=1");
+								}
+							},
+							success: function (jsep) {
+								Janus.debug("Got SDP!", jsep);
+								let body = { request: "start", room: Number(meetingId) };
+								remoteFeed.send({ message: body, jsep: jsep });
+							},
+							error: function (error) {
+								Janus.error("WebRTC error:", error);
+								alert("WebRTC error... " + error.message);
+							}
+						});
+				}
+			},
 
-        getConnectedDevices('audioinput', (audios) => {
-            if (audios.length) setIsEnableAudio(true);
-        })
+			onremotestream: stream => {
+				// let idx = remoteStreams.current.findIndex(stream => stream.userId == JSON.parse(remoteFeed.rfdisplay).userId)
+				// if (idx < 0) {
+				remoteStreams.current[remoteFeed.rfindex] = {
+					stream,
+					name: JSON.parse(remoteFeed.rfdisplay).name,
+					userId: JSON.parse(remoteFeed.rfdisplay).userId
+				};
+				console.log(`new feed refs ${remoteStreams.current}`)
+				let videoTracks = stream.getVideoTracks();
+				let audioTracks = stream.getAudioTracks();
+				if (!videoTracks || videoTracks.length === 0) {
+					//No remote camera
+					console.log('remote turn off camera')
+					remoteVideos.current[remoteFeed.rfindex] = false
+				} else {
+					remoteVideos.current[remoteFeed.rfindex] = true
+				}
+				// if (!audioTracks || !audioTracks.length) {
+				// 	console.log('remote turn off camera')
+				// 	// remoteAudios.current[remoteFeed.rfindex] = false
+				// } else {
+				// 	remoteAudios.current[remoteFeed.rfindex] = true
+				// }
+				setTrigger(v4())
+				// }
+			},
+			oncleanup: function () {
+				console.log(" ::: Got a cleanup notification (remote feed " + id + ") :::");
+				remoteFeed.simulcastStarted = false;
+				feedRefs.current.splice(remoteFeed.rfindex, 1)
+				remoteStreams.current.splice(remoteFeed.rfindex, 1)
+				for (let i = remoteFeed.rfindex; i < feedRefs.current.length; i++) {
+					feedRefs.current[i].rfindex--;
+				}
+				setTrigger(v4())
+			}
+		})
+	}
 
-        // window.addEventListener('beforeunload', (ev) => {
-        //     ev.preventDefault();
-        //     console.log(meetingId, userReducer.user.id)
-        //     socketClient.connect()
-        //     //disconnect: true
-        //     socketClient.emit('out-meeting', {
-        //         userId: userReducer.user.id,
-        //         meetingId
-        //     })
-        //     // socketClient.disconnect()
-        //     return ev.returnValue = 'Are you sure you want to close?';
-        // })
+	useEffect(() => {
+		if (meetingReducer.meeting.members.length) {
+			let length = meetingReducer.meeting.members.length
+			if (length > members.length) {
+				setMessage(`${meetingReducer.meeting.members[length - 1].userName} join`)
+			} else if (length < members.length) {
+				setMessage(`${members[members.length - 1].userName} out`)
+			}
+			setMembers([...meetingReducer.meeting.members])
+		}
+	}, [meetingReducer.meeting.members.length])
 
-        return () => {
-            setIsEnableAudio(false);
-            setIsEnableVideo(false);
-        }
-    }, []);
+	useEffect(() => {
+		if (!userReducer.loaded) {
+			dispatch(isAuthenticated())
+		}
+		dispatch(getTeamInfo({ teamId }))
 
-    useEffect(() => {
-        if (teamReducer.teamLoaded) {
-            dispatch(getMeetingMessages({
-                teamId,
-                offset: 0,
-                num: 15
-            }))
+		getConnectedDevices('videoinput', (cameras) => {
+			if (cameras.length) setIsEnableVideo(true);
+		})
 
-            let members = teamReducer.team.members
-            if (localStorage.getItem('user')) {
-                let userId = JSON.parse(localStorage.getItem('user')).id
-                let member = members.find(member => member.id === userId)
-                if (!member) {
-                    history.push('/notfound')
-                }
-            } else {
-                history.push('/notfound')
-            }
+		getConnectedDevices('audioinput', (audios) => {
+			if (audios.length) setIsEnableAudio(true);
+		})
 
-            let meetings = teamReducer.team.meetings
-            let meeting = meetings.find(meeting => meeting.id == meetingId)
-            if (!meeting) {
-                history.push(`/notfound`)
-            }
-            if (!meeting.active) {
-                setIsMeetingEnd(true)
-            }
-            if (meeting.active) {
-                (isEnableVideo || isEnableAudio) && navigator.mediaDevices.getUserMedia({ video: isEnableVideo, audio: isEnableAudio })
-                    .then(stream => {
-                        userVideo.current.srcObject = stream;
-                        // socketClient.emit("join-meeting", meetingId);
-                        socketClient.on("all-users", users => {
-                            console.log(users);
-                            const peers = [];
-                            users.forEach(userID => {
-                                const peer = createPeer(userID, socketClient.id, stream);
-                                peersRef.current.push({
-                                    peerID: userID,
-                                    peer,
-                                })
-                                peers.push({
-                                    peerID: userID,
-                                    peer,
-                                });
-                            })
-                            setPeers(peers);
-                        })
+		Janus.init({
+			debug: 'all', callback: () => {
+				janus = new Janus({
+					server: janusServer,
+					iceServers: [{
+						url: 'turn:numb.viagenie.ca',
+						credential: 'muazkh',
+						username: 'webrtc@live.com'
+					},],
+					success: function () {
+						janus.attach({
+							plugin: "janus.plugin.videoroom",
+							opaqueId,
+							success: (pluginHandle) => {
+								sfuRef.current = pluginHandle;
+								const register = {
+									request: "join",
+									room: Number(meetingId),
+									ptype: "publisher",
+									display: JSON.stringify({
+										name: userReducer.user.firstName + ' ' + userReducer.user.lastName,
+										userId: userReducer.user.id
+									}),
+								};
+								sfuRef.current.send({ message: register });
 
-                        // socketClient.on("joined-meeting", ({ signal, callerID }) => {
-                        //     const peer = addPeer(signal, callerID, stream);
-                        //     peersRef.current.push({
-                        //         peerID: callerID,
-                        //         peer,
-                        //     })
-                        //     setPeers(peers => [...peers, {
-                        //         peerID: callerID,
-                        //         peer,
-                        //     }]);
-                        // });
+							},
+							iceState: function (state) {
+								Janus.log("ICE state changed to " + state);
+							},
+							mediaState: function (medium, on) {
+								Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
+							},
+							webrtcState: function (on) {
+								Janus.log("Janus says our WebRTC PeerConnection is " + (on ? "up" : "down") + " now");
+								if (!on) {
+									console.log('no on')
+									return;
+								}
+							},
+							onmessage: (msg, jsep) => {
+								console.log(msg);
+								const event = msg["videoroom"];
+								if (event) {
+									if (event === 'joined') {
 
-                        socketClient.on("receiving-returned-signal", ({ signal, callerID, userId }) => {
-                            const item = peersRef.current.find(p => p.peerID === userId);
-                            item.peer.signal(signal);
-                        });
+										myId = msg["id"];
+										mypvtId = msg["private_id"];
+										publishOwnFeed(true);
 
+										if (msg["publishers"]) {
+											let list = msg["publishers"];
+											Janus.debug("Got a list of available publishers/feeds:", list);
+											for (let f in list) {
+												let id = list[f]["id"];
+												let display = list[f]["display"];
+												let audio = list[f]["audio_codec"];
+												let video = list[f]["video_codec"];
+												Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
+												newRemoteFeed(id, display, audio, video);
+											}
+										}
+									} else if (event === 'event') {
+										if (msg["publishers"]) {
+											let list = msg["publishers"];
+											Janus.debug("Got a list of available publishers/feeds:", list);
+											for (let f in list) {
+												let id = list[f]["id"];
+												let display = list[f]["display"];
+												let audio = list[f]["audio_codec"];
+												let video = list[f]["video_codec"];
+												Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
+												newRemoteFeed(id, display, audio, video);
+											}
+										} else if (msg["leaving"]) {
+											// One of the publishers has gone away?
+											let leaving = msg["leaving"];
+											console.log("Publisher left: " + leaving);
+											let remoteFeed = null;
+											for (let i = 0; i < 6; i++) {
+												if (feedRefs.current[i] && feedRefs.current[i].rfid == leaving) {
+													remoteFeed = feedRefs.current[i];
+													break;
+												}
+											}
+											if (remoteFeed != null) {
+												Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
+												console.log(`remote feed leaving ${remoteFeed.rfindex}`)
+												// remoteStreams.current.splice(remoteFeed.rfindex, 1)
+												// setTrigger(v4())
+												// feedRefs.current.splice(remoteFeed.rfindex, 1)
+												// for (let i = remoteFeed.rfindex; i < feedRefs.current.length; i++) {
+												// 	feedRefs.current[i].rfindex--;
+												// }
+												remoteFeed.detach();
+											}
+										}
+									}
 
+									if (jsep) {
+										Janus.debug("Handling SDP as well...", jsep);
+										sfuRef.current.handleRemoteJsep({ jsep: jsep });
+										// Check if any of the media we wanted to publish has
+										// been rejected (e.g., wrong or unsupported codec)
+										let audio = msg["audio_codec"];
+										if (myStream.current && myStream.current.getAudioTracks() && myStream.current.getAudioTracks().length > 0 && !audio) {
+											// Audio has been rejected
+											console.warning("Our audio stream has been rejected, viewers won't hear us");
+										}
+										let video = msg["video_codec"];
+										if (myStream.current && myStream.current.getVideoTracks() && myStream.current.getVideoTracks().length > 0 && !video) {
+											// Video has been rejected
+											console.warning("Our video stream has been rejected, viewers won't see us");
+											// Hide the webcam video
+											myVideo.current = null;
+										}
+									}
+								}
+							},
+							onlocalstream: (stream) => {
+								Janus.attachMediaStream(myVideo.current, stream);
+								myStream.current = stream;
+								let videoTracks = stream.getVideoTracks();
+								if (sfuRef.current.webrtcStuff.pc.iceConnectionState !== "completed" &&
+									sfuRef.current.webrtcStuff.pc.iceConnectionState !== "connected") {
+									// alert("publishing...")
+								}
+								if (!videoTracks || videoTracks.length === 0) {
+									myVideo.current = null;
+								} else {
+									if (!isVideoActive) {
+										sfuRef.current.muteVideo();
+									}
+								}
+							},
+							oncleanup: function () {
+								Janus.log(" ::: Got a cleanup notification: we are unpublished now :::");
+								myStream.current = null;
+							},
+							error: (error) => {
+								console.log(error)
+							},
+							destroyed: function () {
+								window.location.reload();
+							}
+						})
+					}
+				})
+			}
+		})
 
-                        socketClient.on("disconnected-meeting", userId => {
-                            console.log('disssconneccctteee')
-                            const item = peersRef.current.find(p => p.peerID === userId);
-                            item.peer.destroy()
-                            console.log(item);
-                            setPeers(peers => {
-                                return peers.filter(p => p.peerID !== userId);
-                            })
+		window.addEventListener('beforeunload', function (e) {
+			e.preventDefault()
+		});
 
-                        })
-                    })
-                    .catch(error => {
-                        console.error('Error accessing media devices.', error);
-                    })
-                    .finally(() => {
-                        if (isEnableVideo && !isVideoActive) {
-                            userVideo.current && userVideo.current.srcObject.getVideoTracks().forEach(track => {
-                                track.enabled = false
-                            })
-                        }
-                        if (isEnableAudio && !isAudioActive) {
-                            userVideo.current && userVideo.current.srcObject.getAudioTracks().forEach(track => {
-                                track.enabled = false
-                            })
-                        }
-                    })
-            }
-        }
-    }, [teamReducer.teamLoaded])
+	}, []);
 
-    const createPeer = (userToSignal, callerID, stream) => {
-        const peer = new Peer({
-            initiator: true,
-            trickle: false,
-            stream,
-        });
+	useEffect(() => {
+		if (teamReducer.teamLoaded) {
+			let members = teamReducer.team.members;
+			let meetingId = teamReducer.team.meetingActive && teamReducer.team.meetingActive.id;
+			if (localStorage.getItem('user')) {
+				let userId = JSON.parse(localStorage.getItem('user')).id
+				let member = members.find(member => member.id === userId)
+				if (!member) {
+					history.push('/notfound')
+				}
+			} else {
+				history.push('/notfound')
+			}
 
-        peer.on("signal", signal => {
-            //server emit user joined
-            socketClient.emit("sending-signal", { signal, callerID, userToSignal })
-        })
+			let meetings = teamReducer.team.meetings
+			let meeting = teamReducer.team.meetingActive && meetings.find(meeting => meeting.id == meetingId)
+			// if (!meeting) {
+			//     history.push(`/notfound`)
+			// }
+			if (!meeting || !meeting.active) {
+				setIsMeetingEnd(true)
+			} else {
+				dispatch(getMeetingMessages({
+					meetingId
+				}))
+				socketClient.emit("join-meeting", { teamId, meetingId, userId: userReducer.user.id, isAudioActive })
+			}
+		}
+	}, [teamReducer.teamLoaded])
 
-        return peer;
-    }
+	const toggleAudio = (event) => {
+		event.preventDefault()
+		let muted = sfuRef.current.isAudioMuted();
+		Janus.log((muted ? "Unmuting" : "Muting") + " local stream...");
+		if (muted) {
+			sfuRef.current.unmuteAudio();
+			socketClient.emit('meeting-audio-change', {
+				isAudioActive: true,
+				userId: userReducer.user.id,
+				meetingId: Number(meetingReducer.meeting.id)
+			})
+			setIsAudioActive(true)
+		}
+		else {
+			sfuRef.current.muteAudio();
+			socketClient.emit('meeting-audio-change', {
+				isAudioActive: false,
+				userId: userReducer.user.id,
+				meetingId: Number(meetingReducer.meeting.id)
+			})
+			setIsAudioActive(false)
+		}
+	}
 
-    const addPeer = (incomingSignal, callerID, stream) => {
-        const peer = new Peer({
-            initiator: false,
-            trickle: false,
-            stream,
-        })
+	const toggleVideo = (event) => {
+		event.preventDefault()
+		let muted = sfuRef.current.isVideoMuted();
+		Janus.log((muted ? "Unmuting" : "Muting") + " local stream...");
+		if (muted) {
+			sfuRef.current.unmuteVideo();
+			sfuRef.current.createOffer({
+				media: { replaceVideo: true },
+				success: (jsep) => {
+					sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+				},
+				error: (error) => { console.log(error) }
+			})
+			setIsVideoActive(true)
+		} else {
+			sfuRef.current.muteVideo();
+			sfuRef.current.createOffer({
+				media: { removeVideo: true },
+				success: (jsep) => {
+					sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+				},
+				error: (error) => { console.log(error) }
+			})
+			setIsVideoActive(false)
+		}
+	}
 
-        peer.on("signal", signal => {
-            socketClient.emit("returning-signal", { signal, callerID })
-        })
+	const handleVisibleChat = () => {
+		if (isOpenUsers) {
+			setIsOpenUsers(false);
+		}
 
-        peer.signal(incomingSignal);
+		if (isOpenInfo) {
+			setIsOpenInfo(false);
+		}
+		setIsOpenChat(!isOpenChat);
+	}
 
-        return peer;
-    }
+	const handleVisibleUsers = () => {
+		if (isOpenChat) {
+			setIsOpenChat(false);
+		}
 
-    const handleActiveVideo = () => {
-        userVideo.current.srcObject.getVideoTracks().forEach(track => {
-            track.enabled = !track.enabled
-        })
+		if (isOpenInfo) {
+			setIsOpenInfo(false);
+		}
+		setIsOpenUsers(!isOpenUsers);
+	}
 
-        setIsVideoActive(!isVideoActive);
-    }
+	const handleVisibleInfo = () => {
+		if (isOpenUsers) {
+			setIsOpenUsers(false);
+		}
 
-    const handleActiveAudio = () => {
-        userVideo.current.srcObject.getAudioTracks().forEach(track => {
-            track.enabled = !track.enabled
-        })
-        let checkAudioActive = userVideo.current.srcObject.getAudioTracks()[0].enabled;
-        console.log(checkAudioActive);
-        // userVideo.current.srcObject.getAudioTracks()[0].enabled = !checkAudioActive;
+		if (isOpenChat) {
+			setIsOpenChat(false);
+		}
+		setIsOpenInfo(!isOpenInfo);
+	}
 
-        setIsAudioActive(!isAudioActive);
-    }
+	const handleEndMeeting = () => {
+		// console.log(myVideo.current.srcObject)
+		// myVideo.current.srcObject.getTracks().forEach((track) => {
+		//     console.log(track)
+		//     track.stop();
+		// });
+		// socketClient.emit('disconnect-meeting');
+		window.open("", "_self").close();
+	}
 
-    const handleVisibleChat = () => {
-        if (isOpenUsers) {
-            setIsOpenUsers(false);
-        }
+	const getTimeInfo = () => {
 
-        if (isOpenInfo) {
-            setIsOpenInfo(false);
-        }
-        setIsOpenChat(!isOpenChat);
-    }
+		return new Date().getHours() + ':' + new Date().getMinutes().toPrecision(2);
+	}
 
-    const handleVisibleUsers = () => {
-        if (isOpenChat) {
-            setIsOpenChat(false);
-        }
+	return (
+		!isMeetingEnd ? <div className="room-meeting">
+			<div className="room-content">
+				<div className="my-video">
+					<video ref={myVideo} muted autoPlay />
+					{(!isEnableVideo || !isVideoActive) &&
+						<div style={{
+							position: 'absolute',
+							left: '20px',
+							bottom: '-1px',
+							width: '251px',
+							height: '181px',
+							backgroundColor: '#3c4043',
+							borderRadius: '15px'
+						}}>
+							<Avatar sx={{ width: "70px", height: '70px', zIndex: 10, position: 'absolute', bottom: '55px', left: '90px' }}
+								src={`${baseURL}/api/user/avatar/${userReducer.user.id}`}
+								alt={userReducer.user.firstName} />
+						</div>}
+					<h4>You {!isAudioActive && <MicOffIcon />}</h4>
+				</div>
+				<div className="meeting-remote-videos"
+					style={{ width: isOpenChat || isOpenUsers || isOpenInfo ? '60%' : '80%' }}>
+					<MeetingVideo remoteStreams={remoteStreams} remoteVideos={remoteVideos} remoteAudios={remoteAudios} />
+				</div>
+				<div className="meeting-box" style={{
+					width: isOpenChat || isOpenInfo || isOpenUsers ? '20%' : '0%'
+				}}>
+					{isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
-        if (isOpenInfo) {
-            setIsOpenInfo(false);
-        }
-        setIsOpenUsers(!isOpenUsers);
-    }
+					{isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} members={meetingReducer.meeting.members} />}
+				</div>
 
-    const handleVisibleInfo = () => {
-        if (isOpenUsers) {
-            setIsOpenUsers(false);
-        }
+			</div>
+			<div className="meeting-btn-list" >
+				<div style={{
+					width: "30%",
+					color: '#fff',
+					fontSize: "18px",
+					display: 'flex',
+					alignItems: 'center'
+				}}>
+					<strong>
+						Time: {getTimeInfo()}
+					</strong>
+				</div>
+				<div className="btn-mid" style={{
+					display: 'flex',
+					justifyContent: 'center',
+					width: '40%'
+				}} >
+					{
+						!isEnableVideo ?
+							<Tooltip placement="top" title="No camera found">
+								<div>
+									<IconButton aria-label="No camera" disabled>
+										<i className="fas fa-video-slash"></i>
+									</IconButton>
+								</div>
+							</Tooltip >
+							:
+							<IconButton onClick={toggleVideo} >
+								{!isVideoActive ?
+									<Tooltip placement="top" title="Turn on camera">
+										<i className="fas fa-video-slash"></i>
+									</Tooltip>
+									:
+									<Tooltip placement="top" title="Turn off camera">
+										<i className="fas fa-video"></i>
+									</Tooltip>}
+							</IconButton>
+					}
+					{
+						!isEnableAudio ?
+							<Tooltip placement="top" title="No micro found">
+								<div>
+									<IconButton disabled >
+										<MicOffIcon />
+									</IconButton>
+								</div>
+							</Tooltip>
+							:
+							<IconButton onClick={toggleAudio} >
+								{!isAudioActive ?
+									<Tooltip placement="top" title="Turn on mic">
+										<MicOffIcon />
+									</Tooltip>
+									:
+									<Tooltip placement="top" title="Turn off mic">
+										<MicIcon />
+									</Tooltip>}
+							</IconButton>
+					}
+					<Tooltip placement="top" title="End the call">
+						<IconButton style={{ backgroundColor: 'red', border: 'red' }} onClick={handleEndMeeting} >
+							<CallEndIcon />
+						</IconButton>
+					</Tooltip>
+				</div>
+				<div className="btn-right" style={{
+					flex: '1',
+					textAlign: 'right'
+				}}>
+					<Tooltip placement="top" title="Meeting details">
+						<IconButton onClick={handleVisibleInfo} >
+							{isOpenInfo ?
+								<InfoIcon /> : <InfoOutlinedIcon />}
+						</IconButton>
+					</Tooltip>
 
-        if (isOpenChat) {
-            setIsOpenChat(false);
-        }
-        setIsOpenInfo(!isOpenInfo);
-    }
+					<Tooltip placement="top" title="Show everyone">
 
-    const handleEndMeeting = () => {
-        peers.map(peer => {
-            peer.peer.destroy();
-        })
-        console.log(userVideo.current.srcObject)
-        userVideo.current.srcObject.getTracks().forEach((track) => {
-            console.log(track)
-            track.stop();
-        });
-        socketClient.emit('disconnect-meeting');
-        window.open("", "_self").close();
-    }
+						<IconButton onClick={handleVisibleUsers} >
+							<Badge badgeContent={meetingReducer.meeting.members.length} color="info">
+								{isOpenUsers ? <PeopleAltIcon style={{ color: '#fff' }} /> :
+									<PeopleAltOutlinedIcon style={{ color: '#fff' }} />}
+							</Badge>
+						</IconButton>
 
-    const [isOpenInfo, setIsOpenInfo] = useState(false);
+					</Tooltip>
 
-    const [isOpenUsers, setIsOpenUsers] = useState(false);
-
-    const [isOpenChat, setIsOpenChat] = useState(false);
-
-
-    return (
-        !isMeetingEnd ? <div className="room-meeting">
-            <div className="room-content">
-                <div className="users-content">
-                    <div className="user-frame">
-                        <video width="100%" height="100%" ref={userVideo} muted autoPlay />
-                        {/* {!isVideoActive && <div style={{ width: "320px", height: "320px", color: "white", border: "2px solid white", textAlign: "center" }}>{socketClient.id}</div>} */}
-                    </div>
-
-                    {peers.length > 0 && peers.map((peerObj) => {
-                        return (
-                            <div key={peerObj.peerID} className="user-frame">
-                                <Video peer={peerObj.peer} peerId={peerObj.peerID} />
-                            </div>
-                        );
-                    })}
-
-                </div>
-                {isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
-
-                {isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} members={meetingReducer.meeting.members} />}
-
-                {isOpenInfo &&
-                    <Col className="meeting-chatbox" md="4">
-                        <div className="chatbox-header">
-                            Info
-                            <span>
-                                <Button variant="outline-light" onClick={handleVisibleInfo}>
-                                    <i style={{ color: "black" }} className="fas fa-times"></i>
-                                </Button>
-                            </span>
-                        </div>
-                        <div className="chatbox-content">
-
-                        </div>
-                    </Col>
-                }
-
-            </div>
-            <Row className="btn-list">
-                <Col md={{ span: 3, offset: 5 }} >
-                    {
-                        !isEnableVideo ?
-                            <Button variant="outline-light" onClick={handleActiveVideo}
-                                disabled={!isEnableVideo}
-                            >
-                                <i className="fas fa-video-slash"></i>
-                            </Button>
-                            :
-                            <Button variant="outline-light" onClick={handleActiveVideo}>
-                                {!isVideoActive ? <i className="fas fa-video-slash"></i> : <i className="fas fa-video"></i>}
-                            </Button>
-                    }
-
-                    {
-                        !isEnableAudio ?
-                            <Button variant="outline-light" disabled={!isEnableAudio} onClick={handleActiveAudio}>
-                                <i className="fas fa-microphone-slash"></i>
-                            </Button>
-                            :
-                            <Button variant="outline-light" onClick={handleActiveAudio}>
-                                {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
-                            </Button>
-                    }
-
-                    <Button variant="danger" onClick={handleEndMeeting}>
-                        {/* <Link to="/"><i style={{ color: "white" }} className="fas fa-phone" ></i></Link> */}
-                        <i style={{ color: "white" }} className="fas fa-phone" ></i>
-                    </Button>
-                </Col>
-
-                <Col md={{ span: 2, offset: 2 }} >
-                    <Button variant="outline-light" onClick={handleVisibleInfo} >
-                        {isOpenInfo ? <i className="fas fa-question-circle"></i> : <i className="far fa-question-circle"></i>}
-                    </Button>
-
-                    <Button variant="outline-light" onClick={handleVisibleUsers} >
-
-                        {isOpenUsers ? <i className="fas fa-user"></i> : <i className="far fa-user"></i>}
-                    </Button>
-
-                    <Button variant="outline-light" onClick={handleVisibleChat}>
-                        {isOpenChat ? <i className="fas fa-comment-dots"></i> : <i className="far fa-comment-dots"></i>}
-                    </Button>
-                </Col>
-            </Row>
-        </div> : <div style={{
-            background: "#202124",
-            width: '100vw',
-            height: '100vh',
-            position: 'absolute',
-            top: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column'
-        }}>
-            <h1 style={{ color: '#fff' }}>Meeting has already ended</h1>
-            <div>
-                <Button variant="primary" onClick={e => {
-                    e.preventDefault()
-                    window.open("", "_self").close();
-                }}>
-                    Close
-                </Button>
-            </div>
-        </div>
-    );
+					<Tooltip placement="top" title="Go message">
+						<IconButton onClick={handleVisibleChat}>
+							{isOpenChat ? <ChatIcon /> :
+								<ChatOutlinedIcon />}
+						</IconButton>
+					</Tooltip>
+				</div>
+			</div>
+			<Snackbar open={message.length > 0} autoHideDuration={3000} onClose={e => setMessage('')}>
+				<Alert variant="filled" severity="info">
+					{message}
+				</Alert>
+			</Snackbar>
+		</div >
+			:
+			<div className="room-meeting" style={{
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+				flexDirection: 'column'
+			}}>
+				<h1 style={{ color: '#fff' }}>Meeting has already ended</h1>
+				<Button color="primary" variant="contained" onClick={e => {
+					e.preventDefault()
+					window.open("", "_self").close();
+				}}>
+					Close
+				</Button>
+			</div>
+	);
 };
 
 export default Meeting;

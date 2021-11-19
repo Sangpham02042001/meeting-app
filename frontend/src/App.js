@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter, Route, Switch, Redirect, HashRouter } from "react-router-dom";
 import Home from "./routes/home";
 import Teams from "./routes/teams";
 import Conversations from "./routes/conversations";
@@ -8,6 +8,7 @@ import Profile from "./routes/profile";
 import TeamDiscover from './routes/teams/discover';
 import Login from './components/auth/LoginComponent';
 import SignUp from './components/auth/SignUpComponent';
+import Welcome from './components/Welcome';
 import Meeting from './routes/meeting'
 import './App.css'
 import PrivateRoute from './routes/private';
@@ -17,11 +18,12 @@ import TeamSetting from './routes/team/setting';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter >
       <Switch>
+        <Route exact path="/" component={() => <Welcome />} />
         <Route exact path="/login" component={() => <Login />} />
         <Route exact path="/signup" component={() => <SignUp />} />
-        <PrivateRoute exact path="/" >
+        <PrivateRoute path="/home" >
           <Home />
         </PrivateRoute>
         <PrivateRoute path="/profile">
@@ -55,7 +57,7 @@ function App() {
         </PrivateRoute>
         <Route component={() => <NotFound />} />
       </Switch>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

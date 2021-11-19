@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux'
-import { Button } from 'react-bootstrap';
-import Avatar from '../Avatar';
+import { IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import Avatar from '../../../components/Avatar';
 import './meetingUserList.css';
-
-import { socketClient } from '../../utils';
 
 export default function MeetingUserList({ usersVisible, members }) {
     let user = useSelector(state => state.userReducer.user)
     return (
-        <div className="user-list">
+        <>
             <div className="user-list-header">
-                <div className="user-list-title">
+                <div>
                     Participants
                 </div>
                 <div>
-                    <Button variant="outline-light" onClick={usersVisible}>
-                        <i style={{ color: "black" }} className="fas fa-times"></i>
-                    </Button>
+                    <IconButton onClick={usersVisible}>
+                        <CloseIcon />
+                    </IconButton>
                 </div>
+
             </div>
             <div className="user-list-container">
                 {[...members].sort((a, b) => {
@@ -35,7 +35,7 @@ export default function MeetingUserList({ usersVisible, members }) {
                 })}
             </div>
 
-        </div>
+        </>
     )
 }
 

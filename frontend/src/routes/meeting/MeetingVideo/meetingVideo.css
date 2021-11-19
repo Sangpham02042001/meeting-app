@@ -1,0 +1,31 @@
+.remote-videos {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.remote-video-item {
+  margin: 5px 10px;
+  position: relative;
+  width: 250px;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+  background-color: #3c4043;
+}
+
+.remote-video-item > video {
+  height: 180px;
+  width: 100%;
+  object-fit: fill;
+  border-radius: 15px;
+}
+
+.remote-video-item > h4 {
+  position: absolute;
+  bottom: -5px;
+  left: 10px;
+  color: #fff;
+  font-size: 18px;
+}

@@ -24,7 +24,7 @@ router.route('/api/users/:userId/notifications')
   .get(requireSignin, getNotifications)
 
 router.route('/api/users/:userId/confirm-invitations')
-  .post(requireSignin, confirmInvitations)
+  .put(requireSignin, confirmInvitations)
 
 router.route('/api/users/:userId/remove-invitations')
   .put(requireSignin, removeInvitations)

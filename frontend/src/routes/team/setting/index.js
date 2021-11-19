@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Route, Switch, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
-import { Container, Col, Row } from 'react-bootstrap'
+import { Grid } from '@mui/material';
 import { Link } from 'react-router-dom'
 import { useHistory, useParams } from 'react-router'
 import {
@@ -24,7 +24,6 @@ export default function TeamSetting(props) {
 
   useEffect(() => {
     if (!teamReducer.teamLoaded) {
-      console.log('call in setting')
       dispatch(getTeamInfo({ teamId }))
     }
   }, [teamId])
@@ -35,38 +34,38 @@ export default function TeamSetting(props) {
     }
   }, [teamReducer.teamLoaded])
 
-  return (
-    teamReducer.loading ? <Loading /> :
-      <Container fluid style={{ paddingTop: '15px' }}>
-        <Col sm={12}>
-          <Link to={`/teams/${teamId}`} style={{ color: '#000', textDecoration: 'none' }}>
-            <strong>&lt; Back</strong>
-          </Link>
-        </Col>
-        <h3 style={{ margin: '15px 0 20px 0' }}>Setting</h3>
-        <Row style={{ display: 'flex', alignItems: 'flex-start' }}>
-          <Col sm={2} style={{ paddingLeft: '30px' }}>
-            <SettingList />
-          </Col>
-          <Col sm={6}>
-            <Switch>
-              <Route path="/teams/:teamId/setting/members">
-                <TeamMembers />
-              </Route>
-              <Route path="/teams/:teamId/setting/requestusers">
-                <TeamRequestUsers />
-              </Route>
-              <Route path="/teams/:teamId/setting/invitedusers">
-                <TeamInvitedUsers />
-              </Route>
-              <Route exact path="/teams/:teamId/setting">
-                <TeamGeneralSetting />
-              </Route>
-              <Route render={() => <Redirect to="/notfound" />}>
-              </Route>
-            </Switch>
-          </Col>
-        </Row>
-      </Container>
+  return (teamReducer.teamLoaded && <Grid container style={{ paddingTop: '15px' }}>
+    <Grid item sm={12} style={{ paddingLeft: '30px' }}>
+      <div>
+        <Link to={`/teams/${teamId}`} style={{ color: '#000', textDecoration: 'none' }}>
+          <strong>&lt; Back</strong>
+        </Link>
+      </div>
+      <h3 style={{ margin: '15px 0 20px 0' }}>Setting</h3>
+      <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+        <div style={{ marginRight: '40px' }}>
+          <SettingList />
+        </div>
+        <div style={{ width: '500px' }}>
+          <Switch>
+            <Route path="/teams/:teamId/setting/members">
+              <TeamMembers />
+            </Route>
+            <Route path="/teams/:teamId/setting/requestusers">
+              <TeamRequestUsers />
+            </Route>
+            <Route path="/teams/:teamId/setting/invitedusers">
+              <TeamInvitedUsers />
+            </Route>
+            <Route exact path="/teams/:teamId/setting">
+              <TeamGeneralSetting />
+            </Route>
+            <Route render={() => <Redirect to="/notfound" />}>
+            </Route>
+          </Switch>
+        </div>
+      </div>
+    </Grid>
+  </Grid>
   )
 }

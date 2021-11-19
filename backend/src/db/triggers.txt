@@ -137,17 +137,3 @@ BEGIN
     WHERE ut.meetingId = OLD.id;
 END $$
 DELIMITER ;
-
-DROP TRIGGER IF EXISTS after_create_meeting;
-DELIMITER $$
-CREATE TRIGGER after_create_meeting
-AFTER INSERT ON meetings
-FOR EACH ROW
-BEGIN 
-	INSERT INTO users_meetings
-    SET userId = NEW.hostId,
-		meetingId = NEW.id,
-        createdAt = NOW(),
-        updatedAt = NOW();
-END $$
-DELIMITER ;

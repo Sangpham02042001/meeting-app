@@ -2,6 +2,7 @@ const { DataTypes, Model } = require('sequelize')
 const Meeting = require('./meeting')
 const sequelize = require('./index')
 const Message = require('./message')
+const { v4 } = require('uuid')
 
 class Team extends Model {
 }
@@ -22,6 +23,10 @@ Team.init({
   teamType: {
     type: DataTypes.STRING,
     defaultValue: 'public',
+  },
+  teamCode: {
+    type: DataTypes.STRING,
+    defaultValue: `${v4().toString().slice(0, 8)}`,
   }
 }, {
   sequelize,

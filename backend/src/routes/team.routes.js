@@ -5,13 +5,17 @@ const { getTeamInfo, createTeam, getTeamCoverPhoto,
   confirmUserRequests, removeUserRequests, removeMembers,
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
-  sendMessage, getTeamMessages, getMeetings } = require('../controllers/team.controller')
+  sendMessage, getTeamMessages, getMeetings,
+  getTeamMeetMess, searchTeamWithCode } = require('../controllers/team.controller')
 const { isAdmin, isMember } = require('../controllers/auth.controller')
 
 const router = Router()
 
 router.route('/api/teams/search')
   .post(requireSignin, searchTeams)
+
+router.route('/api/teams/search-with-code')
+  .get(requireSignin, searchTeamWithCode);
 
 router.route('/api/teams/:teamId/members')
   .get(requireSignin, getTeamMembers)
@@ -39,11 +43,14 @@ router.route('/api/teams/:teamId/messages')
   .post(requireSignin, isMember, sendMessage)
   .get(requireSignin, isMember, getTeamMessages)
 
+router.route('/api/teams/:teamId/meetmess')
+  .get(requireSignin, isMember, getTeamMeetMess)
+
 router.route('/api/teams/:teamId/remove-members')
   .put(requireSignin, isAdmin, removeMembers)
 
 router.route('/api/teams/:teamId')
-  .get(getTeamInfo)
+  .get(requireSignin, getTeamInfo)
   .put(requireSignin, isAdmin, updateBasicTeamInfo)
   .delete(requireSignin, isAdmin, removeTeam)
 

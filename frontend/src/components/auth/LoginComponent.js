@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Form, Button, Modal } from "react-bootstrap";
+import {
+    TextField, Button, Snackbar, Alert, Avatar,
+    Typography
+} from '@mui/material';
 import { useHistory } from "react-router";
 import { Link, Redirect } from "react-router-dom";
 import Loading from "../Loading";
 import { isAuthenticated, signin } from "../../store/reducers/user.reducer";
 import './auth.css'
-// import "frontend/src/App.css";
+import Copyright from "./CopyRight";
 
-export default function Login(...rest) {
+
+export default function Login() {
     const userReducer = useSelector(state => state.userReducer)
     const dispatch = useDispatch()
     const history = useHistory()
@@ -18,7 +22,7 @@ export default function Login(...rest) {
             dispatch(isAuthenticated())
         } else {
             if (userReducer.authenticated) {
-                history.push('/')
+                history.push('/home')
             } else if (userReducer.error) {
                 setLoginError(userReducer.error)
             } else {
@@ -40,56 +44,45 @@ export default function Login(...rest) {
 
     return (
         !userReducer.loaded ? <Loading />
-            : (userReducer.authenticated ? <Redirect to="/" />
-                : <div className="container-fluid loginPage d-flex vh-100 vw-100 justify-content-center align-items-center">
-                    <div className="row vw-100 mx-5 align-items-center form-container">
-                        <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Meeting App</h1>
-                        <div className="row col-6 col-md-5 auth-form align-items-center d-flex justify-content-center">
-                            <Form onSubmit={handleSubmit}>
-                                <Form.Group className="mb-3" controlId="formEmail">
-                                    <Form.Label>Email</Form.Label>
-                                    <Form.Control
-                                        type="email"
-                                        name="email"
-                                        placeholder="Email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Password</Form.Label>
-                                    <Form.Control
-                                        type="password"
-                                        name="password"
-                                        placeholder="Password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        autoComplete="off"
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="formBasicCheckbox">
-                                    <Form.Check type="checkbox" label="Remember me" />
-                                </Form.Group>
-                                {loginError && <p className='error-message'>{loginError}</p>}
-                                <div className="d-grid gap-2 mb-3">
-                                    <Button className="mb-3 submit" type="submit">
-                                        <h4 style={{ margin: 0 }}>Log in</h4>
-                                    </Button>
-                                </div>
-                                <div className="d-flex otherLogin mb-1">
-                                    <div>Or log in with:</div>
-                                    <a href="#" className="btn btn-secondary"><i className="bi bi-facebook"></i></a>
-                                    <a href="#" className="btn btn-info"><i className="bi bi-twitter"></i></a>
-                                    <a href="#" className="btn btn-danger"><i className="bi bi-google"></i></a>
-                                </div>
-                            </Form> <br /> <br />
-                            <p style={{ textAlign: 'center', marginBottom: 0 }}>
-                                Don't have account? <Link to="/signup">Sign up here</Link>
+            : (userReducer.authenticated ? <Redirect to="/home" />
+                : <div className="auth-page">
+                    <Avatar sx={{ m: 1, width: 56, height: 56 }}
+                        src="meeting-logo.png" />
+                    <Typography component="h1" variant="h4" sx={{ marginBottom: '50px' }}>
+                        Meeting App
+                    </Typography>
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        <TextField
+                            type="email"
+                            name="email"
+                            value={email}
+                            variant="standard"
+                            required
+                            label="Email"
+                            onChange={(e) => setEmail(e.target.value)} />
+                        <TextField
+                            type="password"
+                            name="password"
+                            label="Password"
+                            required
+                            value={password}
+                            variant="standard"
+                            onChange={(e) => setPassword(e.target.value)} />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <p style={{ marginBottom: 0 }}>
+                                Don't have account?{"\t"}
+                                <Link to="/signup" style={{ display: 'inline-block' }}>Sign up</Link>
                             </p>
+                            <Button type="submit" variant="contained"
+                            >Log in</Button>
                         </div>
-                    </div>
+                    </form>
+                    <Copyright sx={{ mt: 5 }} />
+                    <Snackbar open={loginError.length > 0} autoHideDuration={3000}>
+                        <Alert severity="error">
+                            {loginError}
+                        </Alert>
+                    </Snackbar>
                 </div>
             )
     )
