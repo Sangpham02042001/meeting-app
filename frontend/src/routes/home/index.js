@@ -28,25 +28,21 @@ export default function Home() {
                 <img src="Remote-team-bro.svg" id="home-image"></img>
                 <div id="profile">
                     <a
-                        href="something.php"
+                        href="#"
                         className="contact-links"
-                        target="_blank"
                     ><i className="fab fa-facebook-square"></i></a>
                     <a
                         id="profile-link"
-                        href="something.php"
+                        href="#"
                         className="contact-links"
-                        target="_blank"
                     ><i className="fab fa-github"></i></a>
                     <a
-                        href="something.php"
+                        href="#"
                         className="contact-links"
-                        target="_blank"
                     ><i className="fab fa-twitter"></i></a>
                     <a
-                        href="something.php"
+                        href="#"
                         className="contact-links"
-                        target="_blank"
                     ><i className="fas fa-at"></i></a>
                 </div>
             </div>

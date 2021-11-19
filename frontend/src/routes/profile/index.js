@@ -285,7 +285,7 @@ export default function Profile() {
 											onClick={handleDeleteTeam(team.id)}>Delete team</Button>}
 								</div>
 							})
-							: <h1>No team for show</h1>}
+							: <h3>No team for show</h3>}
 					</div>
 				</TabPanel>
 				<TabPanel value={currentTab} index={2}>
@@ -308,7 +308,7 @@ export default function Profile() {
 									</div>
 								</div>
 							})
-							: <h1>No invited team for show</h1>}
+							: <h3>No invited team for show</h3>}
 					</div>
 				</TabPanel>
 				<TabPanel value={currentTab} index={3}>
@@ -328,7 +328,7 @@ export default function Profile() {
 									>Cancel</Button>
 								</div>
 							})
-							: <h1>No request team for show</h1>}
+							: <h3>No request team for show</h3>}
 					</div>
 				</TabPanel>
 			</div>
