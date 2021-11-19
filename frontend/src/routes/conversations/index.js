@@ -69,7 +69,8 @@ export default function Conversations(props) {
 
     return (
         <div className="conversation-page" onClick={e => {
-            e.preventDefault();
+            // e.preventDefault();
+            e.stopPropagation();
             setSearchUsers([])
             setTextSearch('')
         }}>
