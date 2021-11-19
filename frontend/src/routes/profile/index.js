@@ -239,7 +239,7 @@ export default function Profile() {
 				<Tab label="Invited Teams" {...a11yProps(2)} />
 				<Tab label="Requesting Teams" {...a11yProps(3)} />
 			</Tabs>
-			<div style={{ minWidth: '500px', justifyContent: 'center' }}>
+			<div className='profile-right-tab'>
 				<TabPanel value={currentTab} index={0}>
 					<div>
 						<div>

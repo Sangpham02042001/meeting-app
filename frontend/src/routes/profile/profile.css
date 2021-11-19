@@ -15,6 +15,17 @@
   padding-top: 10vh;
 }
 
+.profile-right-tab {
+  min-width: 500px;
+  max-height: 550px;
+  overflow: auto;
+  margin-left: 50px;
+}
+
+.profile-right-tab .css-19kzrtu {
+  padding: 10px 24px;
+}
+
 .profile-content {
   float: left;
   padding-left: 10px;

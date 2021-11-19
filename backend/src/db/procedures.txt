@@ -177,27 +177,3 @@ BEGIN
 	WHERE t.id = teamId;
 END$$
 DELIMITER ;
-
-DELIMITER $$
-DROP PROCEDURE IF EXISTS getTeamMessages;
-CREATE PROCEDURE getTeamMessages(
-	IN teamId INT,
-    IN myOffset INT,
-    IN num INT
-)
-BEGIN 
-	IF CONVERT(myOffset, SIGNED INT) = 0 THEN
-        SELECT m.id, m.content, m.photo, m.createdAt, m.userId
-        FROM messages m
-        WHERE m.teamId = teamId
-        ORDER BY m.createdAt DESC
-        LIMIT 15;
-    ELSE
-		SELECT m.id, m.content, m.photo, m.createdAt, m.userId
-        FROM messages m
-        WHERE m.teamId = teamId
-        ORDER BY m.createdAt DESC
-        LIMIT myOffset, num;
-    END IF;
-END $$
-DELIMITER ;

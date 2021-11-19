@@ -119,7 +119,7 @@ export default function InviteUsersWrapper({ users }) {
           setShow(true)
         }}>Invite</Button>
       </div>
-      <Dialog open={isShow} onClose={handleInviteModalClose} minWidth="sm" fullWidth={true}>
+      <Dialog open={isShow} onClose={handleInviteModalClose} minWidth={`sm`} fullWidth={true}>
         <DialogTitle>
           Invite users to join your team
         </DialogTitle>
@@ -131,6 +131,7 @@ export default function InviteUsersWrapper({ users }) {
               </InputLabel>
               <Input
                 id="search-teams"
+                autoComplete='off'
                 value={searchUserName}
                 onChange={onSearch}
                 startAdornment={

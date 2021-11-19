@@ -12,7 +12,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import { deleteTeam, outTeam, createTeamMeeting, setMeetingJoined } from '../../store/reducers/team.reducer'
-// import { createTeamMeeting } from '../../store/reducers/meeting.reducer'
 
 export default function TeamHeader({ showTeamInfo }) {
   // const { teamId } = useParams()
@@ -57,7 +56,6 @@ export default function TeamHeader({ showTeamInfo }) {
       if (audios.length) setIsEnableAudio(true);
 
     })
-
   }, [])
 
 
@@ -152,8 +150,8 @@ export default function TeamHeader({ showTeamInfo }) {
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
-        <LoadingButton loading={createMeetingPending} variant="text">
-        </LoadingButton>
+        {createMeetingPending && <LoadingButton loading={createMeetingPending} variant="text">
+        </LoadingButton>}
         {
           teamReducer.team.meetingActive
           && <Button variant="contained"

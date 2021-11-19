@@ -474,37 +474,6 @@ const updateBasicTeamInfo = async (req, res) => {
   })
 }
 
-// const sendMessage = async (req, res) => {
-//   let { id } = req.auth
-//   let { teamId } = req.params
-//   const form = formidable.IncomingForm()
-//   form.keepExtensions = true
-//   form.parse(req, async (err, fields, files) => {
-//     let content = fields.content || null
-//     let photo
-//     if (files.photo) {
-//       let fileType = files.photo.path.split('.')[files.photo.path.split('.').length - 1]
-//       photo = `${v4()}.${fileType}`
-//       let writeStream = fs.createWriteStream(`./src/public/messages-photos/${photo}`)
-//       fs.createReadStream(files.photo.path).pipe(writeStream)
-//     } else {
-//       photo = null
-//     }
-//     try {
-//       const message = await Message.create({
-//         content,
-//         userId: id,
-//         teamId,
-//         photo
-//       })
-//       return res.status(201).json({ message })
-//     } catch (error) {
-//       console.log(error)
-//       return res.status(400).json({ error })
-//     }
-//   })
-// }
-
 const sendMessage = async ({ teamId, senderId, content, files }) => {
   try {
     let multiMedia = [];
@@ -546,51 +515,6 @@ const sendMessage = async ({ teamId, senderId, content, files }) => {
   } catch (error) {
     console.log(error)
     return null;
-  }
-}
-
-const getTeamMessages = async (req, res) => {
-  let { offset, num } = req.query
-  let { teamId } = req.params
-  try {
-    if (offset == 0) {
-      let numOfMessages = await sequelize.query(
-        "SELECT COUNT(*) as num FROM messages m WHERE m.teamId = :teamId",
-        {
-          replacements: {
-            teamId
-          },
-          type: QueryTypes.SELECT
-        }
-      )
-      let messages = await sequelize.query(
-        "CALL getTeamMessages(:teamId, 0, 15)",
-        {
-          replacements: {
-            teamId
-          }
-        }
-      )
-      return res.status(200).json({
-        numOfMessages: numOfMessages[0].num,
-        messages
-      })
-    } else {
-      let messages = await sequelize.query(
-        "CALL getTeamMessages(:teamId, :offset, :num)",
-        {
-          replacements: {
-            teamId, offset: Number(offset), num: Number(num)
-          }
-        }
-      )
-      return res.status(200).json({
-        messages
-      })
-    }
-  } catch (error) {
-    console.log(error)
-    return res.status(400).json({ error })
   }
 }
 
@@ -709,7 +633,7 @@ module.exports = {
   confirmUserRequests, removeUserRequests, removeMembers,
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
-  sendMessage, getTeamMessages, getMemberTeam,
+  sendMessage, getMemberTeam,
   getTeamMeetMess, getMeetings, searchTeamWithCode,
   socketInviteUsers
 }
