@@ -17,6 +17,7 @@ import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
   sendMeetingMessage, meetingUserAudioChange
 } from '../../store/reducers/meeting.reducer'
+import { receivceNotification, readNotif } from '../../store/reducers/notification.reducer'
 import './layout.css'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 // import Avatar from '../Avatar/index'
@@ -129,6 +130,7 @@ export default function Layout({ children }) {
         dispatch(receiveTeamInvitation({
           id: Number(teamId), hostId, name: teamName
         }))
+        dispatch(receivceNotification({ noti }))
         setTimeout(() => {
           setNoti(noti)
         }, 500)
@@ -274,7 +276,11 @@ export default function Layout({ children }) {
           {noti && <Snackbar open={noti !== null} autoHideDuration={3000}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             onClose={e => setNoti(null)}>
-            <Alert variant="filled" severity="info">
+            <Alert variant="filled" severity="info"
+              onClick={(e) => {
+                e.preventDefault()
+                dispatch(readNotif(noti.id))
+              }}>
               <Link to={noti.relativeLink} style={{ textDecoration: 'none', color: '#FFF' }}>
                 {noti.content}
               </Link>

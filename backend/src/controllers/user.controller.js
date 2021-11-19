@@ -344,7 +344,7 @@ const getNotifications = async (req, res) => {
     numOf_UnReadNotifications = numOf_UnReadNotifications[0]['numOf_UnReadNotifications']
     if (isNaN(offset) || isNaN(num)) {
       let notifications = await sequelize.query(
-        "SELECT *, TIME_TO_SEC(TIMEDIFF(NOW(), createdAt)) AS timeDifferent FROM notifications WHERE userId = :id ORDER BY createdAt DESC;",
+        "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt DESC;",
         {
           replacements: {
             id
@@ -370,7 +370,7 @@ const getNotifications = async (req, res) => {
       return res.status(200).json({ notifications, numOfNotifications, numOf_UnReadNotifications })
     } else {
       let notifications = await sequelize.query(
-        "SELECT *, TIME_TO_SEC(TIMEDIFF(NOW(), createdAt)) AS timeDifferent FROM notifications WHERE userId = :id ORDER BY createdAt DESC LIMIT :offset, :num;",
+        "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt DESC LIMIT :offset, :num;",
         {
           replacements: {
             id, offset: Number(offset), num: Number(num)

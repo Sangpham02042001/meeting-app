@@ -6,7 +6,9 @@ const convertDate = (mysqlDate) => {
   return mysqlDate.split('T')[0]
 }
 
-const timeDiff = (second) => {
+const timeDiff = (mysqlTime) => {
+  let _time = new Date(mysqlTime).getTime()
+  let second = Math.round((Date.now() - _time) / 1000)
   let time = 0;
   if (second < 60) {
     return "Just now";

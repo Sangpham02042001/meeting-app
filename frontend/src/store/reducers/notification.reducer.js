@@ -97,9 +97,16 @@ export const notificationSlice = createSlice({
                     state.notifications.splice(idx, 1)
                 }
             }
+        },
+        receivceNotification: (state, action) => {
+            let { noti } = action.payload
+            if (!state.notifications.find(n => n.id == noti.id)) {
+                state.notifications.unshift(noti)
+                state.numOf_UnReadNotifications += 1
+            }
         }
     }
 })
 
-export const { hideNoti } = notificationSlice.actions;
+export const { hideNoti, receivceNotification } = notificationSlice.actions;
 export default notificationSlice.reducer

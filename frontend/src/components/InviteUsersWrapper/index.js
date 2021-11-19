@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router'
 import {
@@ -8,8 +8,8 @@ import {
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
-// import { inviteUsers } from '../../store/reducers/team.reducer'
 import { axiosAuth, baseURL, socketClient } from '../../utils'
+import _ from 'lodash'
 
 export default function InviteUsersWrapper({ users }) {
   const dispatch = useDispatch()
@@ -48,6 +48,27 @@ export default function InviteUsersWrapper({ users }) {
     setInvitedUsers([])
   }
 
+  const searchDebounce = useCallback(_.debounce(async (searchUserName) => {
+    if (searchUserName !== '') {
+      let response = await axiosAuth.post('/api/users/search', {
+        text: searchUserName
+      })
+      let users = response.data.users.filter(u => {
+        return teamMembers.indexOf(u.id) < 0 && teamInvitedUsers.indexOf(u.id) < 0
+          && teamRequestUsers.indexOf(u.id) < 0
+      })
+      setSearchUsers(users)
+      setLoading(false)
+    }
+  }, 500), [])
+
+  const onSearch = (event) => {
+    let searchUserName = event.target.value.trim();
+    setSearchUserName(event.target.value)
+    searchDebounce(searchUserName)
+    setLoading(true)
+  }
+
   const handleSearchUser = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -67,15 +88,11 @@ export default function InviteUsersWrapper({ users }) {
       ...invitedUsers,
       user
     ])
-    setSearchUsers(searchUsers.filter(u => u.id !== user.id))
+    // setSearchUsers(searchUsers.filter(u => u.id !== user.id))
   }
 
   const handleInviteAll = async () => {
     setLoading(true)
-    // dispatch(inviteUsers({
-    //   users: invitedUsers,
-    //   teamId: teamId
-    // }))
     socketClient.emit('team-invite-users', {
       teamId,
       users: invitedUsers
@@ -115,7 +132,7 @@ export default function InviteUsersWrapper({ users }) {
               <Input
                 id="search-teams"
                 value={searchUserName}
-                onChange={e => setSearchUserName(e.target.value)}
+                onChange={onSearch}
                 startAdornment={
                   <InputAdornment position="start">
                     <SearchIcon onClick={handleSearchUser} />
@@ -147,10 +164,9 @@ export default function InviteUsersWrapper({ users }) {
                   ))}
               </div>)
             )}
-            {invitedUsers.length > 0 && <>
-              <hr />
-              <h4>User list</h4>
-            </>}
+            {!loading && !searchUsers.length && searchUserName &&
+              <h4 style={{ textAlign: 'center' }}>No user founded</h4>}
+            {invitedUsers.length > 0 && <h4>User list</h4>}
             {<div className="invited-user-list">
               {invitedUsers.map(user => (
                 <div key={user.id} className="invited-user-item">

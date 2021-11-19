@@ -179,7 +179,7 @@ export default function Navbar() {
                           </Button>
                         </div>
                         <p style={{ fontSize: '15px', color: 'gray' }}>
-                          {timeDiff(notification.timeDifferent)}
+                          {timeDiff(notification.createdAt)}
                         </p>
                         <div />
                       </Link>
