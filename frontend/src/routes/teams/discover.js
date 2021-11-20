@@ -7,6 +7,7 @@ import {
   TextField, InputLabel, InputAdornment, FormControl,
   MenuItem, Alert, Snackbar
 } from '@mui/material';
+import _ from 'lodash'
 import GroupIcon from '@mui/icons-material/Group';
 import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -93,6 +94,31 @@ export default function TeamDiscover() {
     setSearchUserName('')
     setSearchUsers([])
     setInvitedUsers([])
+  }
+  const searchDebounce = useCallback(_.debounce(async (searchUserName) => {
+    if (searchUserName !== '') {
+      try {
+        let response = await axiosAuth.post('/api/users/search', {
+          text: searchUserName
+        })
+        let users = response.data.users || []
+        setSearchUsers(users)
+        setLoading(false)
+      } catch (error) {
+        console.log(error)
+        setMessage({
+          type: 'error',
+          content: 'Something wrong when search user. Try again'
+        })
+      }
+    }
+  }, 500), [])
+
+  const onSearch = (event) => {
+    let searchUserName = event.target.value.trim();
+    setSearchUserName(event.target.value)
+    searchDebounce(searchUserName)
+    setLoading(true)
   }
 
   const handleSearchUser = async (e) => {
@@ -349,7 +375,7 @@ export default function TeamDiscover() {
               <Input
                 id="search-teams"
                 value={searchUserName}
-                onChange={e => setSearchUserName(e.target.value)}
+                onChange={onSearch}
                 startAdornment={
                   <InputAdornment position="start">
                     <SearchIcon onClick={handleSearchUser} />

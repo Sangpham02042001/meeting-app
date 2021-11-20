@@ -2,7 +2,7 @@ const { Router } = require('express')
 const { requireSignin } = require('../controllers/auth.controller')
 const { getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers,
-  confirmUserRequests, removeUserRequests, removeMembers,
+  removeUserRequests, removeMembers,
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   getMeetings, getTeamMeetMess, searchTeamWithCode } = require('../controllers/team.controller')
@@ -32,8 +32,6 @@ router.route('/api/teams/:teamId/users')
   .post(requireSignin, isAdmin, inviteUsers)
   .put(requireSignin, isAdmin, removeInvitations)
 
-router.route('/api/teams/:teamId/confirm-requests')
-  .put(requireSignin, isAdmin, confirmUserRequests)
 
 router.route('/api/teams/:teamId/remove-requests')
   .put(requireSignin, isAdmin, removeUserRequests)

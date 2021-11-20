@@ -5,7 +5,7 @@ import {
   Avatar, Button, Dialog, DialogActions,
   DialogTitle, Snackbar, Alert
 } from '@mui/material'
-import { confirmJoinRequests, refuseJoinRequests } from '../../../store/reducers/team.reducer'
+import { refuseJoinRequests } from '../../../store/reducers/team.reducer'
 import { baseURL, socketClient } from '../../../utils'
 import '../team-setting.css'
 
@@ -35,10 +35,6 @@ export default function TeamRequestUsers() {
   }, [team.requestUsers.length])
 
   const handleConfirm = () => {
-    dispatch(confirmJoinRequests({
-      userId: selectedUser,
-      teamId: team.id
-    }))
     socketClient.emit('team-confirm-request', {
       userId: selectedUser,
       teamId: Number(team.id)

@@ -50,15 +50,23 @@ export default function InviteUsersWrapper({ users }) {
 
   const searchDebounce = useCallback(_.debounce(async (searchUserName) => {
     if (searchUserName !== '') {
-      let response = await axiosAuth.post('/api/users/search', {
-        text: searchUserName
-      })
-      let users = response.data.users.filter(u => {
-        return teamMembers.indexOf(u.id) < 0 && teamInvitedUsers.indexOf(u.id) < 0
-          && teamRequestUsers.indexOf(u.id) < 0
-      })
-      setSearchUsers(users)
-      setLoading(false)
+      try {
+        let response = await axiosAuth.post('/api/users/search', {
+          text: searchUserName
+        })
+        let users = (response.data.users || []).filter(u => {
+          return teamMembers.indexOf(u.id) < 0 && teamInvitedUsers.indexOf(u.id) < 0
+            && teamRequestUsers.indexOf(u.id) < 0
+        })
+        setSearchUsers(users)
+        setLoading(false)
+      } catch (error) {
+        console.log(error)
+        setMessage({
+          type: 'error',
+          content: 'Something wrong when search user. Try again'
+        })
+      }
     }
   }, 500), [])
 

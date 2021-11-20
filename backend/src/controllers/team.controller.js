@@ -156,33 +156,6 @@ const getTeamInvitedUsers = async (req, res) => {
   }
 }
 
-const confirmUserRequests = async (req, res) => {
-  let { teamId } = req.params
-  let { users } = req.body
-  let stringifyUsers = ''
-  users.forEach(userId => stringifyUsers += `${userId},`)
-  try {
-    const messages = await sequelize.query(
-      "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
-      {
-        replacements: {
-          users: stringifyUsers,
-          teamId,
-          confirmFlag: true
-        }
-      }
-    )
-    if (messages[0]) {
-      return res.status(200).json(messages[0])
-    } else {
-      return res.status(400).json({ error: 'Some thing wrong' })
-    }
-  } catch (error) {
-    console.log(error)
-    return res.status(400).json({ error })
-  }
-}
-
 const removeUserRequests = async (req, res) => {
   let { teamId } = req.params
   let { users } = req.body
@@ -190,13 +163,11 @@ const removeUserRequests = async (req, res) => {
     throw `You are the admin of this group, can't remove yourself!`
   }
   try {
-    for (const userId of users) {
-      await sequelize.query('DELETE FROM request_users_teams WHERE teamId = :teamId AND requestUserId= :userId',
-        {
-          replacements: {
-            teamId, userId
-          }
-        })
+    let team = await Team.findByPk(Number(teamId))
+    if (team) {
+      for (const userId of users) {
+        await team.removeRequestUser(userId)
+      }
     }
     return res.status(200).json({ message: 'Remove request successfully' })
   } catch (error) {
@@ -334,6 +305,7 @@ const socketConfirmRequest = async ({ teamId, userId, hostId }) => {
     if (!requestUsers.find(user => user.id == userId)) {
       throw "You haven't request to join this team"
     }
+    await team.removeRequestUser(userId)
     await team.addMember(userId)
     team = await Team.findOne({
       where: {
@@ -662,7 +634,7 @@ const getTeamMeetMess = async (req, res) => {
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers,
-  confirmUserRequests, removeUserRequests, removeMembers,
+  removeUserRequests, removeMembers,
   removeTeam, inviteUsers, removeInvitations,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   sendMessage, getMemberTeam,

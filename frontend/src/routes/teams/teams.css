@@ -96,6 +96,11 @@
   background-color: var(--primary-bg);
 }
 
+.invited-user-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 .invited-user-item {
   display: flex;
   align-items: center;
