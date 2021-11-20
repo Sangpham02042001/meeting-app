@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router'
 import {
@@ -189,7 +189,11 @@ export default function TeamDiscover() {
 
   const handleRequestJoin = team => e => {
     e.preventDefault()
-    dispatch(requestJoinTeam({ team }))
+    socketClient.emit("request-join-team", {
+      team,
+      userName: user.firstName + ' ' + user.lastName
+    })
+    // dispatch(requestJoinTeam({ team }))
     setSearchTeams(searchTeams.filter(t => t.id != team.id))
     setTeam({})
   }

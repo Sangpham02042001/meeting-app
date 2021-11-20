@@ -407,6 +407,19 @@ export const teamSlice = createSlice({
       if (id && name && hostId) {
         state.joinedTeams.push({ id, name, hostId })
       }
+    },
+    joinRequest: (state, action) => {
+      let { team } = action.payload
+      state.requestingTeams.push(team)
+    },
+    receviceTeamRequest: (state, action) => {
+      let { teamId, userName, userId } = action.payload
+      if (state.team.id == teamId) {
+        state.team.requestUsers.push({
+          id: userId,
+          userName
+        })
+      }
     }
   },
   extraReducers: {
@@ -674,6 +687,7 @@ export const teamSlice = createSlice({
 export const { cleanTeamState, sendMessage, updateMeetingState,
   setMeetingJoined, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, inviteUsers, receiveTeamInvitation,
-  confirmRequest, receiveTeamConfirm } = teamSlice.actions;
+  confirmRequest, receiveTeamConfirm, joinRequest,
+  receviceTeamRequest } = teamSlice.actions;
 
 export default teamSlice.reducer

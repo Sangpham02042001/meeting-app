@@ -12,7 +12,7 @@ import { sendMessageCv, conversationCalling, cancelCall, removeMessageCv } from 
 import {
   sendMessage, updateMeetingState, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, getCurrentMeeting, inviteUsers, receiveTeamInvitation,
-  confirmRequest, receiveTeamConfirm
+  confirmRequest, receiveTeamConfirm, joinRequest, receviceTeamRequest
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
@@ -81,6 +81,10 @@ export default function Layout({ children }) {
       dispatch(confirmRequest({ teamId, userId }))
     })
 
+    socketClient.on('request-join-team-success', ({ team }) => {
+      dispatch(joinRequest({ team }))
+    })
+
     //meetings
     //receive event when new user join meeting => emit state audio for new user 
     socketClient.on('user-join-meeting', ({ teamId, meetingId, user, isAudioActive }) => {
@@ -146,6 +150,18 @@ export default function Layout({ children }) {
       if (noti) {
         dispatch(receiveTeamConfirm({
           id: Number(teamId), hostId, name: teamName
+        }))
+        dispatch(receivceNotification({ noti }))
+        setTimeout(() => {
+          setNoti(noti)
+        }, 500)
+      }
+    })
+
+    socketClient.on('receive-team-request', ({ noti, teamId, userName, userId }) => {
+      if (noti) {
+        dispatch(receviceTeamRequest({
+          teamId, userName, userId
         }))
         dispatch(receivceNotification({ noti }))
         setTimeout(() => {

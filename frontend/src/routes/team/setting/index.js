@@ -5,8 +5,7 @@ import { Grid } from '@mui/material';
 import { Link } from 'react-router-dom'
 import { useHistory, useParams } from 'react-router'
 import {
-  getTeamInfo, requestJoinTeam, refuseInvitations,
-  confirmInvitations
+  getTeamInfo
 } from '../../../store/reducers/team.reducer'
 import SettingList from '../../../components/TeamSetting/SettingList'
 import TeamGeneralSetting from '../../../components/TeamSetting/General'
@@ -23,9 +22,7 @@ export default function TeamSetting(props) {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (!teamReducer.teamLoaded) {
-      dispatch(getTeamInfo({ teamId }))
-    }
+    dispatch(getTeamInfo({ teamId }))
   }, [teamId])
 
   useEffect(() => {

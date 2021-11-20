@@ -6,12 +6,14 @@ const meetingsAudio = {
 
 }
 
-const { getMemberTeam, sendMessage, socketInviteUsers, socketConfirmRequest } = require('../controllers/team.controller');
+const { getMemberTeam, sendMessage, socketInviteUsers,
+    socketConfirmRequest } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
-const { createNofication } = require('../controllers/notification.controller')
+const { createTeamNofication } = require('../controllers/notification.controller')
+const { socketRequestTeam } = require('../controllers/user.controller')
 
 
 
@@ -49,7 +51,7 @@ const socketServer = (socket) => {
             let content = `${hostName} has invited you to join ${teamName}`
             let noti
             for (const user of users) {
-                noti = await createNofication({ userId: user.id, content, relativeLink, createdBy, teamId })
+                noti = await createTeamNofication({ userId: user.id, content, relativeLink, createdBy, teamId })
                 for (const socketId of userSockets[user.id]) {
                     socket.to(socketId).emit('receive-team-invitation', { noti, teamId, teamName, hostId })
                 }
@@ -65,9 +67,31 @@ const socketServer = (socket) => {
             let createdBy = socket.userId
             let relativeLink = `/teams/${teamId}`
             let content = `${hostName} has confirmed your join request to ${teamName}`
-            let noti = await createNofication({ userId, content, relativeLink, createdBy, teamId })
+            let noti = await createTeamNofication({ userId, content, relativeLink, createdBy, teamId })
             for (const socketId of userSockets[userId]) {
                 socket.to(socketId).emit('receive-team-confirm', { noti, teamId, teamName, hostId: Number(socket.userId) })
+            }
+        }
+    })
+
+    socket.on('request-join-team', async ({ team, userName }) => {
+        console.log(`userName ${userName} ${socket.userId}`)
+        let result = await socketRequestTeam({ team, userId: Number(socket.userId) })
+        if (result.message && result.message === 'success') {
+            socket.emit('request-join-team-success', {
+                team
+            })
+            let { hostId, teamName } = result
+            let createdBy = socket.userId
+            let relativeLink = `/teams/${team.id}/setting/requestusers`
+            let content = `${userName} has requested to join ${teamName}`
+            let noti = await createTeamNofication({ userId: hostId, content, relativeLink, teamId: team.id, createdBy })
+            if (userSockets[hostId] && userSockets[hostId].length) {
+                for (const socketId of userSockets[hostId]) {
+                    socket.to(socketId).emit('receive-team-request', {
+                        noti, teamId: team.id, userName, userId: Number(socket.userId)
+                    })
+                }
             }
         }
     })

@@ -180,6 +180,51 @@ const requestJoinTeam = async (req, res) => {
   }
 }
 
+const socketRequestTeam = async ({ team, userId }) => {
+  let teamId = Number(team.id)
+  try {
+    let _team = await Team.findOne({
+      where: {
+        id: teamId
+      },
+      attributes: ['hostId', 'name']
+    })
+    if (!_team) {
+      throw `Team with id ${teamId} not found`
+    }
+    if (_team.hostId == userId) {
+      throw 'You are the admin of this group'
+    }
+    let teamName = _team.name
+    let hostId = _team.hostId
+    _team = await Team.findByPk(teamId)
+    let requestUsers = await _team.getRequestUsers({
+      attributes: ['id']
+    })
+    let members = await _team.getMembers({
+      attributes: ['id']
+    })
+    if (members.length && members.map(m => m.id).indexOf(userId) >= 0) {
+      throw `You are the member of ${teamName} team`
+    }
+    if (requestUsers.map(user => user.id).indexOf(userId) >= 0) {
+      throw `You are requesting to join this team`
+    }
+    await _team.addRequestUser(userId)
+    return {
+      message: 'success',
+      teamName,
+      hostId
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      message: 'error',
+      error
+    }
+  }
+}
+
 const getJoinedTeams = async (req, res) => {
   const { id } = req.auth
   let user = await User.findByPk(id)
@@ -427,5 +472,5 @@ module.exports = {
   requestJoinTeam, getJoinedTeams, getRequestingTeams,
   outTeam, cancelJoinRequest, confirmInvitations,
   removeInvitations, getInvitations, getNotifications,
-  searchUsers
+  searchUsers, socketRequestTeam
 }

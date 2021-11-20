@@ -76,6 +76,7 @@ const Meeting = (props) => {
 	}
 
 	const publishOwnFeed = (useAudio) => {
+		console.log(`PUBLISH OWN FEED CALL`)
 		sfuRef.current && sfuRef.current.createOffer(
 			{
 				media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true },
@@ -90,6 +91,8 @@ const Meeting = (props) => {
 					Janus.error("WebRTC error:", error);
 					if (useAudio) {
 						publishOwnFeed(false);
+						// setIsVideoActive(true)
+						// setIsAudioActive(false)
 					} else {
 						alert('WebRTC Error')
 					}
@@ -301,7 +304,7 @@ const Meeting = (props) => {
 								const event = msg["videoroom"];
 								if (event) {
 									if (event === 'joined') {
-
+										console.log(`JOINED MESSAGE CALL`)
 										myId = msg["id"];
 										mypvtId = msg["private_id"];
 										publishOwnFeed(true);
@@ -364,12 +367,13 @@ const Meeting = (props) => {
 											// Video has been rejected
 											console.warning("Our video stream has been rejected, viewers won't see us");
 											// Hide the webcam video
-											myVideo.current = null;
+											// myVideo.current = null;
 										}
 									}
 								}
 							},
 							onlocalstream: (stream) => {
+								console.log(`ON LOCAL STREAM CALL`)
 								Janus.attachMediaStream(myVideo.current, stream);
 								myStream.current = stream;
 								let videoTracks = stream.getVideoTracks();
@@ -378,16 +382,32 @@ const Meeting = (props) => {
 									// alert("publishing...")
 								}
 								if (!videoTracks || videoTracks.length === 0) {
-									myVideo.current = null;
+									// myVideo.current = null;
 								} else {
 									if (!isVideoActive) {
 										sfuRef.current.muteVideo();
+										sfuRef.current.createOffer({
+											media: { removeVideo: true },
+											success: (jsep) => {
+												sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+											},
+											error: (error) => { console.log(error) }
+										})
 									} else {
 										sfuRef.current.unmuteVideo();
 									}
+									// if (!isVideoActive) {
+									// 	sfuRef.current.muteVideo()
+									// 	sfuRef.current.createOffer({
+									// 		media: { removeVideo: true },
+									// 		success: (jsep) => {
+									// 			sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+									// 		},
+									// 		error: (error) => { console.log(error) }
+									// 	})
+									// }
 								}
 								if (!isAudioActive) {
-									console.log('fdsf fasdf fdasfasd ')
 									sfuRef.current.muteAudio()
 								}
 							},
@@ -470,6 +490,7 @@ const Meeting = (props) => {
 	const toggleVideo = (event) => {
 		event.preventDefault()
 		let muted = sfuRef.current.isVideoMuted();
+		console.log(`MUTED ${muted}`)
 		Janus.log((muted ? "Unmuting" : "Muting") + " local stream...");
 		if (muted) {
 			sfuRef.current.unmuteVideo();
