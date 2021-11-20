@@ -4,7 +4,7 @@ import { useParams, Link, useHistory } from 'react-router-dom'
 import {
   Button, Dialog, DialogActions, DialogContent,
   DialogTitle, IconButton, Tooltip,
-  Menu, MenuItem
+  Menu, MenuItem, Avatar
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
@@ -12,6 +12,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import { baseURL } from '../../utils'
 import './teamheader.css'
 import { deleteTeam, outTeam, createTeamMeeting, setMeetingJoined } from '../../store/reducers/team.reducer'
+import { width } from '@mui/system'
 
 export default function TeamHeader({ showTeamInfo }) {
   // const { teamId } = useParams()
@@ -20,7 +21,6 @@ export default function TeamHeader({ showTeamInfo }) {
   const dispatch = useDispatch()
   const history = useHistory()
   const teamReducer = useSelector(state => state.teamReducer)
-  const meetingReducer = useSelector(state => state.meetingReducer)
   const user = useSelector(state => state.userReducer.user)
   const [isDeleteModalShow, setDeleteModalShow] = useState(false)
   const [isOutModalShow, setOutModalShow] = useState(false)
@@ -264,11 +264,20 @@ export default function TeamHeader({ showTeamInfo }) {
           </DialogActions>
         </Dialog>
 
-        <Dialog open={isJoinMeetingShow} centered="true" onClose={handleCloseJoinMeeting}>
+        <Dialog open={isJoinMeetingShow} centered="true" onClose={handleCloseJoinMeeting} minWidth="sm" fullWidth={true}>
           <DialogTitle>Join meeting
           </DialogTitle>
           <DialogContent>
-            <video width="100%" height="320px" muted ref={userVideo} autoPlay />
+            <div style={{ position: 'relative', width: '100%' }}>
+              {isEnableVideo && <video width="100%" height="320px" muted ref={userVideo} autoPlay />}
+              {(!isVideoActive || !isEnableVideo) && <div style={{
+                width: '78%', height: '320px', display: 'flex',
+                position: 'absolute', top: 0, left: '11%', background: '#FFF',
+                justifyContent: 'center', alignItems: 'center'
+              }}>
+                <Avatar sx={{ width: '120px', height: '120px' }} src={`${baseURL}/api/user/avatar/${user.id}`} />
+              </div>}
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
               {
                 !isEnableVideo ?

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { socketClient } from "../../utils";
@@ -12,7 +12,7 @@ import {
 import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
 import Janus from '../../janus'
 import { janusServer, baseURL } from '../../utils'
-// import Avatar from '../../components/Avatar'
+import { debounce } from 'lodash'
 import { v4 } from 'uuid'
 
 // ***React Material***
@@ -182,31 +182,23 @@ const Meeting = (props) => {
 			},
 
 			onremotestream: stream => {
-				// let idx = remoteStreams.current.findIndex(stream => stream.userId == JSON.parse(remoteFeed.rfdisplay).userId)
-				// if (idx < 0) {
 				remoteStreams.current[remoteFeed.rfindex] = {
 					stream,
 					name: JSON.parse(remoteFeed.rfdisplay).name,
 					userId: JSON.parse(remoteFeed.rfdisplay).userId
 				};
-				console.log(`new feed refs ${remoteStreams.current}`)
 				let videoTracks = stream.getVideoTracks();
-				let audioTracks = stream.getAudioTracks();
-				if (!videoTracks || videoTracks.length === 0) {
-					//No remote camera
-					console.log('remote turn off camera')
-					remoteVideos.current[remoteFeed.rfindex] = false
-				} else {
-					remoteVideos.current[remoteFeed.rfindex] = true
-				}
-				// if (!audioTracks || !audioTracks.length) {
-				// 	console.log('remote turn off camera')
-				// 	// remoteAudios.current[remoteFeed.rfindex] = false
-				// } else {
-				// 	remoteAudios.current[remoteFeed.rfindex] = true
-				// }
-				setTrigger(v4())
-				// }
+				// let debounceFunc = debounce((videoTracks) => {
+				// 	console.log(`remotestream debounce call ${Date.now()}`)
+				// 	if (!videoTracks || videoTracks.length === 0) {
+				// 		remoteVideos.current[remoteFeed.rfindex] = false
+				// 	} else {
+				// 		remoteVideos.current[remoteFeed.rfindex] = true
+				// 	}
+				// 	setTrigger(v4())
+				// }, 1000)
+
+				debounceFunc(videoTracks, remoteFeed.rfindex)
 			},
 			oncleanup: function () {
 				console.log(" ::: Got a cleanup notification (remote feed " + id + ") :::");
@@ -221,16 +213,34 @@ const Meeting = (props) => {
 		})
 	}
 
-	useEffect(() => {
-		if (meetingReducer.meeting.members.length) {
-			let length = meetingReducer.meeting.members.length
-			if (length > members.length) {
-				setMessage(`${meetingReducer.meeting.members[length - 1].userName} join`)
-			} else if (length < members.length) {
-				setMessage(`${members[members.length - 1].userName} out`)
+	let debounceFunc = useCallback(
+		debounce((videoTracks, rfindex) => {
+			console.log(`remotestream debounce call ${Date.now()}`)
+			if (!videoTracks || videoTracks.length === 0) {
+				remoteVideos.current[rfindex] = false
+			} else {
+				remoteVideos.current[rfindex] = true
 			}
-			setMembers([...meetingReducer.meeting.members])
+			setTrigger(v4())
+		}, 1000), [])
+
+	useEffect(() => {
+		if (meetingReducer.meeting.members.length && members.length) {
+			let length = meetingReducer.meeting.members.length
+			let users
+			if (length > members.length) {
+				users = meetingReducer.meeting.members.filter(user => members.findIndex(u => u.userId == user.userId) < 0)
+				if (users && users.length) {
+					setMessage(`${users[0].userName} join`)
+				}
+			} else if (length < members.length) {
+				users = members.filter(user => meetingReducer.meeting.members.findIndex(u => u.userId == user.userId) < 0)
+				if (users && users.length) {
+					setMessage(`${users[0].userName} out`)
+				}
+			}
 		}
+		setMembers([...meetingReducer.meeting.members])
 	}, [meetingReducer.meeting.members.length])
 
 	useEffect(() => {
@@ -272,7 +282,6 @@ const Meeting = (props) => {
 									}),
 								};
 								sfuRef.current.send({ message: register });
-
 							},
 							iceState: function (state) {
 								Janus.log("ICE state changed to " + state);
@@ -335,12 +344,6 @@ const Meeting = (props) => {
 											if (remoteFeed != null) {
 												Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
 												console.log(`remote feed leaving ${remoteFeed.rfindex}`)
-												// remoteStreams.current.splice(remoteFeed.rfindex, 1)
-												// setTrigger(v4())
-												// feedRefs.current.splice(remoteFeed.rfindex, 1)
-												// for (let i = remoteFeed.rfindex; i < feedRefs.current.length; i++) {
-												// 	feedRefs.current[i].rfindex--;
-												// }
 												remoteFeed.detach();
 											}
 										}
@@ -379,7 +382,13 @@ const Meeting = (props) => {
 								} else {
 									if (!isVideoActive) {
 										sfuRef.current.muteVideo();
+									} else {
+										sfuRef.current.unmuteVideo();
 									}
+								}
+								if (!isAudioActive) {
+									console.log('fdsf fasdf fdasfasd ')
+									sfuRef.current.muteAudio()
 								}
 							},
 							oncleanup: function () {
