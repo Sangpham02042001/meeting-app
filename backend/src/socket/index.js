@@ -6,7 +6,7 @@ const meetingsAudio = {
 
 }
 
-const { getMemberTeam, sendMessage, socketInviteUsers } = require('../controllers/team.controller');
+const { getMemberTeam, sendMessage, socketInviteUsers, socketConfirmRequest } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
@@ -51,9 +51,23 @@ const socketServer = (socket) => {
             for (const user of users) {
                 noti = await createNofication({ userId: user.id, content, relativeLink, createdBy, teamId })
                 for (const socketId of userSockets[user.id]) {
-                    console.log(socketId, user.id)
                     socket.to(socketId).emit('receive-team-invitation', { noti, teamId, teamName, hostId })
                 }
+            }
+        }
+    })
+
+    socket.on('team-confirm-request', async ({ teamId, userId }) => {
+        let result = await socketConfirmRequest({ teamId, userId, hostId: Number(socket.userId) })
+        if (result.message && result.message === 'success') {
+            socket.emit('team-confirm-user-success', { userId, teamId })
+            let { hostName, teamName } = result
+            let createdBy = socket.userId
+            let relativeLink = `/teams/${teamId}`
+            let content = `${hostName} has confirmed your join request to ${teamName}`
+            let noti = await createNofication({ userId, content, relativeLink, createdBy, teamId })
+            for (const socketId of userSockets[userId]) {
+                socket.to(socketId).emit('receive-team-confirm', { noti, teamId, teamName, hostId: Number(socket.userId) })
             }
         }
     })

@@ -395,7 +395,7 @@ export const teamSlice = createSlice({
         state.meetingJoined = null
       }
     },
-    _inviteUsers: (state, action) => {
+    inviteUsers: (state, action) => {
       let { users, teamId } = action.payload
       if (users && users.length && state.team.id == teamId) {
         state.team.invitedUsers.push(...users)
@@ -405,6 +405,22 @@ export const teamSlice = createSlice({
       let { id, name, hostId } = action.payload
       if (id && name && hostId) {
         state.invitedTeams.push({ id, name, hostId, isMeeting: false })
+      }
+    },
+    confirmRequest: (state, action) => {
+      let { userId, teamId } = action.payload
+      if (state.team.id == teamId) {
+        let idx = state.team.requestUsers.findIndex(user => user.id == userId)
+        if (idx >= 0) {
+          state.team.members.push(state.team.requestUsers[idx])
+          state.team.requestUsers.splice(idx, 1)
+        }
+      }
+    },
+    receiveTeamConfirm: (state, action) => {
+      let { id, name, hostId } = action.payload
+      if (id && name && hostId) {
+        state.joinedTeams.push({ id, name, hostId })
       }
     }
   },
@@ -681,6 +697,7 @@ export const teamSlice = createSlice({
 
 export const { cleanTeamState, sendMessage, updateMeetingState,
   setMeetingJoined, setMeetingActive, endActiveMeeting,
-  clearMeetingJoined, _inviteUsers, receiveTeamInvitation } = teamSlice.actions;
+  clearMeetingJoined, inviteUsers, receiveTeamInvitation,
+  confirmRequest, receiveTeamConfirm } = teamSlice.actions;
 
 export default teamSlice.reducer

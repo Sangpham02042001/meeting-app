@@ -189,27 +189,22 @@ const removeUserRequests = async (req, res) => {
   if (users.indexOf(req.hostId) >= 0) {
     throw `You are the admin of this group, can't remove yourself!`
   }
-  let stringifyUsers = ''
-  users.forEach(userId => stringifyUsers += `${userId},`)
   try {
-    const messages = await sequelize.query(
-      "CALL removeRequestUsers(:users, :teamId, :confirmFlag)",
-      {
-        replacements: {
-          users: stringifyUsers,
-          teamId,
-          confirmFlag: false
-        }
-      }
-    )
-    if (messages[0]) {
-      return res.status(200).json(messages[0])
+    for (const userId of users) {
+      await sequelize.query('DELETE FROM request_users_teams WHERE teamId = :teamId AND requestUserId= :userId',
+        {
+          replacements: {
+            teamId, userId
+          }
+        })
     }
+    return res.status(200).json({ message: 'Remove request successfully' })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
   }
 }
+
 
 const removeMembers = async (req, res) => {
   let { teamId } = req.params
@@ -324,6 +319,43 @@ const socketInviteUsers = async ({ teamId, users }) => {
   } catch (error) {
     console.log(error)
     return { error, message: 'error' }
+  }
+}
+
+const socketConfirmRequest = async ({ teamId, userId, hostId }) => {
+  try {
+    let team = await Team.findByPk(teamId)
+    if (hostId !== team.hostId) {
+      throw "You aren't the admin of this team"
+    }
+    let requestUsers = await team.getRequestUsers({
+      attributes: ['id']
+    })
+    if (!requestUsers.find(user => user.id == userId)) {
+      throw "You haven't request to join this team"
+    }
+    await team.addMember(userId)
+    team = await Team.findOne({
+      where: {
+        id: teamId
+      },
+      include: [{
+        model: User,
+        as: 'host'
+      }]
+    })
+    let hostName, teamName
+    if (team) {
+      hostName = team.dataValues.host.firstName + ' ' + team.dataValues.host.lastName
+      teamName = team.dataValues.name
+    }
+    return { hostName, teamName, message: 'success' }
+  } catch (error) {
+    console.log(error)
+    return {
+      message: 'error',
+      error
+    }
   }
 }
 
@@ -635,5 +667,5 @@ module.exports = {
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   sendMessage, getMemberTeam,
   getTeamMeetMess, getMeetings, searchTeamWithCode,
-  socketInviteUsers
+  socketInviteUsers, socketConfirmRequest
 }

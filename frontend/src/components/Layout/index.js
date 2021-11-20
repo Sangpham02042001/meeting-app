@@ -11,7 +11,8 @@ import { socketClient, baseURL } from '../../utils';
 import { sendMessageCv, conversationCalling, cancelCall, removeMessageCv } from '../../store/reducers/conversation.reducer';
 import {
   sendMessage, updateMeetingState, setMeetingActive, endActiveMeeting,
-  clearMeetingJoined, getCurrentMeeting, _inviteUsers, receiveTeamInvitation
+  clearMeetingJoined, getCurrentMeeting, inviteUsers, receiveTeamInvitation,
+  confirmRequest, receiveTeamConfirm
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
@@ -73,7 +74,11 @@ export default function Layout({ children }) {
     })
 
     socketClient.on('team-invite-user-success', ({ users, teamId }) => {
-      dispatch(_inviteUsers({ users, teamId }))
+      dispatch(inviteUsers({ users, teamId }))
+    })
+
+    socketClient.on('team-confirm-user-success', ({ teamId, userId }) => {
+      dispatch(confirmRequest({ teamId, userId }))
     })
 
     //meetings
@@ -128,6 +133,18 @@ export default function Layout({ children }) {
     socketClient.on('receive-team-invitation', ({ noti, teamId, teamName, hostId }) => {
       if (noti) {
         dispatch(receiveTeamInvitation({
+          id: Number(teamId), hostId, name: teamName
+        }))
+        dispatch(receivceNotification({ noti }))
+        setTimeout(() => {
+          setNoti(noti)
+        }, 500)
+      }
+    })
+
+    socketClient.on('receive-team-confirm', ({ noti, teamId, teamName, hostId }) => {
+      if (noti) {
+        dispatch(receiveTeamConfirm({
           id: Number(teamId), hostId, name: teamName
         }))
         dispatch(receivceNotification({ noti }))

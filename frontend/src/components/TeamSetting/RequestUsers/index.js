@@ -6,7 +6,7 @@ import {
   DialogTitle, Snackbar, Alert
 } from '@mui/material'
 import { confirmJoinRequests, refuseJoinRequests } from '../../../store/reducers/team.reducer'
-import { baseURL } from '../../../utils'
+import { baseURL, socketClient } from '../../../utils'
 import '../team-setting.css'
 
 
@@ -39,6 +39,10 @@ export default function TeamRequestUsers() {
       userId: selectedUser,
       teamId: team.id
     }))
+    socketClient.emit('team-confirm-request', {
+      userId: selectedUser,
+      teamId: Number(team.id)
+    })
     setUser(null)
   }
 
@@ -47,6 +51,7 @@ export default function TeamRequestUsers() {
       userId: selectedUser,
       teamId: team.id
     }))
+
     setUser(null)
   }
 
