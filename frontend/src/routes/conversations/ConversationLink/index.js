@@ -8,6 +8,7 @@ import Avatar from '../../../components/Avatar';
 import ImageIcon from '@mui/icons-material/Image';
 import AttachFile from '@mui/icons-material/AttachFile';
 
+
 const getElementLastMessage = (lastMessage) => {
     if (lastMessage.photos && lastMessage.photos.length) {
         return (
@@ -48,14 +49,17 @@ export default function ConversationLink({ conversation, user }) {
         }
     }, [lastMessageChange])
 
-    const changeConversation = () => {
+    const changeConversation = (event) => {
+        event.preventDefault();
         history.replace(`/conversations/${participant.id}`)
+        console.log(history)
     }
 
     return (
         <>
             {participant &&
-                <div className={`${curParticipant && participant.id === curParticipant.id ? 'link-selected' : ''} conversation-link`} onClick={changeConversation}>
+                <div className={`${curParticipant && participant.id === curParticipant.id ? 'link-selected' : ''} conversation-link`}
+                    onClick={changeConversation}>
                     <Avatar width="40px" height="40px" userId={participant.id} />
 
                     <div className="link-content">

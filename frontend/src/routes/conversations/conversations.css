@@ -49,7 +49,7 @@
   left: 0px;
   box-shadow: var(--box-shadow);
   padding: 7px;
-  border-radius: 15px;
+  border-radius: 10px;
   max-height: 450px;
   overflow-y: auto;
   z-index: 10;

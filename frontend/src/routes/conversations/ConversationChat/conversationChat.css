@@ -135,3 +135,7 @@
   width: 36px;
   height: 36px;
 }
+
+.conversation-message .emoji-mart-preview {
+  display: none;
+}

@@ -16,7 +16,6 @@ import _ from 'lodash'
 export default function Conversations(props) {
     const [textSearch, setTextSearch] = useState('');
     const [searchUsers, setSearchUsers] = useState([]);
-    const [userSearch, setUserSearch] = useState(null);
     const [searchLoading, setSearchLoading] = useState(false);
     const user = useSelector(state => state.userReducer.user);
     const conversations = useSelector(state => state.conversationReducer.conversations);
@@ -24,7 +23,6 @@ export default function Conversations(props) {
     const history = useHistory();
     useEffect(() => {
         dispatch(getConversations({ userId: user.id }));
-
         return () => {
             dispatch(clearConversation())
         }
@@ -53,36 +51,36 @@ export default function Conversations(props) {
         setSearchUsers([]);
         setTextSearch('');
 
-        if (userSearch && userFind.id === userSearch.id) {
-            return;
-        }
-
-        setUserSearch(userFind)
 
         const participant = conversations.find(conv => conv.participantId === userFind.id);
         if (!participant) {
             dispatch(createConversation({ conversationId: null, participantId: userFind.id }));
         }
 
-        history.push(`/conversations/${userFind.id}`);
+
+        history.replace(`/conversations/${userFind.id}`);
     }
 
     return (
-        <div className="conversation-page" onClick={e => {
+        <div className="conversation-page" 
+        onClick={e => {
             // e.preventDefault();
-            e.stopPropagation();
+            // e.stopPropagation();
             setSearchUsers([])
             setTextSearch('')
-        }}>
+        }}
+        >
             <div className="conversation-list">
                 <div className="search-user">
                     <SearchIcon color='primary' />
                     <input
-                        type="search"
                         placeholder="Search"
                         className="input-search"
                         aria-label="Search"
                         onChange={onSearch}
+                        onClick={e => {
+                            e.stopPropagation();
+                        }}
                         value={textSearch}
                     />
                     {textSearch.length > 0 &&
@@ -103,7 +101,7 @@ export default function Conversations(props) {
                                     <>
                                         <LoadingButton loading={searchLoading} variant="text" />
                                         <div style={{ display: searchLoading && 'none', fontWeight: '600' }}>
-                                            Not user found
+                                            No user found
                                         </div>
                                     </>
                             }

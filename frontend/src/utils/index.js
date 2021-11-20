@@ -80,4 +80,6 @@ const getTime = mysqlTime => {
   return `${WEEK_DAYS[time.getDay()]}, ${MONTHS[time.getMonth()]} ${time.getDate()} ${time.getFullYear()} ${hour}:${minute}`
 }
 
-export { convertDate, timeDiff, messageTimeDiff, getTime }
+const emotionRegex = /[:;=]+["^'-]*[()pPdD*oO]+/g;
+
+export { convertDate, timeDiff, messageTimeDiff, getTime, emotionRegex }

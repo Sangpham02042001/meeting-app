@@ -1,24 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import {
   Avatar, Tooltip, Dialog, DialogContent, IconButton,
   Menu, MenuItem
 } from '@mui/material';
-import { baseURL, getTime, socketClient } from '../../utils';
+import { baseURL, getTime, socketClient, emotionRegex } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import emojiRegex from 'emoji-regex';
+import joypixels from 'emojione';
+import parse from 'html-react-parser';
 import './style.css'
 
 
-export default function Message({
+const Message = React.memo(({
   message, logInUserId, hasAvatar, lastMessage,
-  userName, conversationId, participantId }) {
+  userName, conversationId, participantId
+}) => {
   const [isPreviewImg, setIsPreviewImg] = useState(false);
   const [imgPreviewUrl, setImgPreviewUrl] = useState(null);
   const [selectedPhotoId, setPhotoId] = useState(null)
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+  const regex = emojiRegex();
   const [isContentOptionShow, setContentOptionShow] = useState('none')
 
   const handleRemoveMessage = () => {
@@ -81,6 +86,42 @@ export default function Message({
     window.open(`${baseURL}/api/messages/photos/${message.id}/${selectedPhotoId}`)
   }
 
+  const parseMessage = (content) => {
+    if (content) {
+      let emojiList = [...content.matchAll(regex)];
+      if (content.replaceAll(regex, '').trim().length === 0) {
+        let emojiRenderList = []
+        for (let emoji of emojiList) {
+          emojiRenderList.push(joypixels.toImage(emoji[0]))
+        }
+        console.log('render')
+        return (
+          <div className="emoji-message">
+            {emojiRenderList.map((e, idx) => {
+              return (
+                <span key={idx} >{parse(e)}</span>
+              )
+            })}
+          </div>
+        )
+      } else {
+        let newContent = content;
+        if (emojiList[0]) {
+          newContent = content.replaceAll(regex, `<span className="img-emoji">${joypixels.toImage(emojiList[0][0])}</span>`)
+          console.log(newContent, emojiList)
+        }
+
+        return (
+          <p>
+            {parse(newContent)}
+          </p>
+        )
+      }
+    }
+
+  }
+
+
   return (
     <div className="message-component">
       {
@@ -106,9 +147,8 @@ export default function Message({
             <Tooltip title={getTime(message.createdAt)} placement="left">
               <div>
                 {message.content &&
-                  <p>
-                    {message.content}
-                  </p>
+                  parseMessage(message.content)
+
                 }
                 {message.photos && message.photos.length > 0 &&
 
@@ -169,9 +209,9 @@ export default function Message({
               <Tooltip title={getTime(message.createdAt)} placement='right'>
                 <div className={message.photos && message.photos.length > 0 ? 'message-with-photo' : ''}>
                   {message.content &&
-                    <p className={hasAvatar ? 'user-last-message' : ''}>
-                      {message.content}
-                    </p>
+                    <div className={'text-message ' + (hasAvatar ? 'user-last-message' : '')}>
+                      {parseMessage(message.content)}
+                    </div>
                   }
                   {message.photos && message.photos.length > 0 &&
                     <div className='message-photo-list'
@@ -259,4 +299,6 @@ export default function Message({
       </Dialog >
     </div>
   )
-}
+})
+
+export default Message;

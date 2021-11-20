@@ -26,11 +26,12 @@ import MicNoneIcon from '@mui/icons-material/MicNone';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import Picker, { SKIN_TONE_MEDIUM_DARK } from 'emoji-picker-react';
-import { socketClient, baseURL } from '../../../utils';
+import 'emoji-mart/css/emoji-mart.css'
+import { Picker, emojiIndex } from 'emoji-mart';
+import { socketClient, baseURL, emotionRegex } from '../../../utils';
 import {
   getMessages, readConversation, startCall, cancelCall, getAllImages,
-  getParticipant, getAllFiles
+  getParticipant, getAllFiles, clearConversation
 } from '../../../store/reducers/conversation.reducer';
 import { v4 } from 'uuid';
 import './conversationChat.css';
@@ -84,12 +85,13 @@ export default function Index({ conversation, user }) {
 
   useEffect(() => {
     dispatch(getParticipant({ participantId: conversation.participantId }));
+
   }, [conversation.participantId])
 
   return (
     <>
       {participant &&
-        <ConversationChat conversationId={conversation.conversationId} user={user} participant={participant} key={participant.id} />
+        <ConversationChat conversationId={conversation.conversationId} user={user} participant={participant} />
       }
     </>
   )
@@ -101,7 +103,8 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const [rows, setRows] = useState(1);
   const minRows = 1;
   const maxRows = 5;
-  const filePath = `${baseURL}/api/messages`
+ 
+  const filePath = `${baseURL}/api/messages`;
   const [filesMessage, setFilesMessage] = useState([]);
   const [filesMessageUrl, setFilesMessageUrl] = useState([]);
   const [showInfo, setShowInfo] = useState(false);
@@ -127,6 +130,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       dispatch(getAllImages({ conversationId }))
       dispatch(getAllFiles({ conversationId }))
     }
+    console.log('show info')
   }, [showInfo])
 
   useEffect(() => {
@@ -134,8 +138,11 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   }, [messages.length])
 
   useEffect(() => {
+
     dispatch(getMessages({ conversationId }))
     dispatch(readConversation({ conversationId, userId: user.id }))
+
+    console.log(conversationId)
   }, [conversationId])
 
   const onWriteMessage = (event) => {
@@ -144,7 +151,6 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     const previousRows = event.target.rows;
     event.target.rows = minRows; // reset number of rows in textarea 
     const currentRows = ~~(event.target.scrollHeight / textareaLineHeight);
-    console.log(previousRows, currentRows)
     if (currentRows === previousRows) {
       event.target.rows = currentRows;
     }
@@ -154,10 +160,12 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       event.target.scrollTop = event.target.scrollHeight;
     }
     setRows(currentRows < maxRows ? currentRows : maxRows)
+
+    // let emotions = [...event.target.value.matchAll(emotionRegex)];
+    // console.log(emotions)
+
     setContent(event.target.value);
   }
-
-
 
   const handleEnterMessage = (event) => {
     if (event.key === "Enter") {
@@ -169,8 +177,20 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
   const handleSendMessage = (event) => {
     if (content !== '' || filesMessage) {
-      console.log(filesMessage);
-      socketClient.emit('conversation-sendMessage', { content, senderId: user.id, receiverId: participant.id, conversationId, files: filesMessage });
+      let tContent = content;
+      let emotions = [...tContent.matchAll(emotionRegex)];
+      for (let emotion of emotions) {
+
+        if (emotion) {
+          let emojiList = emojiIndex.search(emotion[0]);
+          if (emojiList.length) {
+            console.log(emojiList)
+            tContent = tContent.replace(emotion[0], emojiList[0].native)
+          }
+        }
+      }
+
+      socketClient.emit('conversation-sendMessage', { content: tContent, senderId: user.id, receiverId: participant.id, conversationId, files: filesMessage });
       setContent('');
       setFilesMessage([]);
       setFilesMessageUrl([]);
@@ -183,9 +203,9 @@ const ConversationChat = ({ conversationId, user, participant }) => {
 
   }
 
-  const onEmojiClick = (event, emojiObject) => {
+  const onEmojiClick = (emojiObject) => {
     console.log(emojiObject);
-    setContent(content.concat(emojiObject.emoji));
+    setContent(content.concat(emojiObject.native));
   };
 
   const handleVoiceCall = () => {
@@ -327,6 +347,9 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               Welcome to me!!!
             </div>
           </div>
+          {messages.length === 0 && <div>
+            Loading
+          </div>}
           {messages.length > 0 && messages.slice(0, messages.length - 1)
             .map((message, idx) => {
               return (
@@ -350,13 +373,14 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         </div>
         <div className="bottom-message">
           {isOpenEmojiList &&
-            <div style={{
-              position: 'absolute',
-              top: '-315px',
-              right: '150px',
-            }}>
-              <Picker onEmojiClick={onEmojiClick} skinTone={SKIN_TONE_MEDIUM_DARK} />
-            </div>}
+            <Picker set='facebook'
+              style={{
+                position: 'absolute',
+                top: '-350px',
+                right: '200px',
+              }}
+              onSelect={onEmojiClick} />
+          }
 
           <div className="input-message" >
             {filesMessageUrl.length > 0 &&
@@ -553,7 +577,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
               <Typography>Shared Media</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <ImageList sx={{ width: '100%', maxHeight: 450 }}
+              <ImageList sx={{ width: '100%', maxHeight: 450, margin: '5px' }}
                 cols={3}
                 rowHeight={130}
               >
