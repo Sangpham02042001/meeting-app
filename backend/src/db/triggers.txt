@@ -51,27 +51,6 @@ BEGIN
 END $$
 DELIMITER ;
 
-DELIMITER $$
-DROP TRIGGER IF EXISTS after_request_team;
-CREATE TRIGGER after_request_team
-AFTER INSERT ON request_users_teams FOR EACH ROW 
-BEGIN 
-	DECLARE userName VARCHAR(255);
-    DECLARE teamName VARCHAR(255);
-    DECLARE tmp VARCHAR(10);
-    DECLARE hostId INT;
-    SELECT t.name, t.hostId INTO teamName, hostId
-    FROM teams t
-    WHERE t.id = NEW.teamId;
-    SELECT CONCAT(u.firstName, ' ', u.lastName) INTO userName
-    FROM users u
-    WHERE u.id = NEW.requestUserId;
-    SET @content = CONCAT(userName, ' requests to join ', teamName);
-    SET @relativeLink = CONCAT('/teams/', NEW.teamId, '/setting/requestusers');
-    SET tmp = createTeamNotification(@content, @relativeLink, hostId, NEW.teamId, NEW.requestUserId);
-END $$ 
-DELIMITER ;
-
 DROP TRIGGER IF EXISTS after_create_message;
 DELIMITER $$
 CREATE TRIGGER after_create_message
