@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Message from '../../../components/Message';
-import Avatar from '../../../components/Avatar/index';
+import Avatar from '../../../components/Avatar';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
   DialogContent, DialogContentText, DialogTitle, Typography,
-  Snackbar, Alert, ImageList, ImageListItem
+  Snackbar, Alert, ImageList, ImageListItem, Badge
 } from '@mui/material';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
@@ -31,7 +31,7 @@ import { Picker, emojiIndex } from 'emoji-mart';
 import { socketClient, baseURL, emotionRegex } from '../../../utils';
 import {
   getMessages, readConversation, startCall, cancelCall, getAllImages,
-  getParticipant, getAllFiles, clearConversation
+  getParticipant, getAllFiles
 } from '../../../store/reducers/conversation.reducer';
 import { v4 } from 'uuid';
 import './conversationChat.css';
@@ -77,33 +77,14 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 
-
-
-export default function Index({ conversation, user }) {
-  const participant = useSelector(state => state.conversationReducer.conversation.participant);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(getParticipant({ participantId: conversation.participantId }));
-
-  }, [conversation.participantId])
-
-  return (
-    <>
-      {participant &&
-        <ConversationChat conversationId={conversation.conversationId} user={user} participant={participant} />
-      }
-    </>
-  )
-}
-
-const ConversationChat = ({ conversationId, user, participant }) => {
+export default function ConversationChat({ conversation, user }) {
 
   const [content, setContent] = useState('');
   const [rows, setRows] = useState(1);
   const minRows = 1;
   const maxRows = 5;
 
+  const [conversationId, setConversationId] = useState(null);
   const filePath = `${baseURL}/api/messages`;
   const [filesMessage, setFilesMessage] = useState([]);
   const [filesMessageUrl, setFilesMessageUrl] = useState([]);
@@ -130,7 +111,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       dispatch(getAllImages({ conversationId }))
       dispatch(getAllFiles({ conversationId }))
     }
-    console.log('show info')
+
   }, [showInfo])
 
   useEffect(() => {
@@ -138,11 +119,11 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   }, [messages.length])
 
   useEffect(() => {
-
-    dispatch(getMessages({ conversationId }))
-    dispatch(readConversation({ conversationId, userId: user.id }))
-
-    console.log(conversationId)
+    let converId = conversation.conversationId;
+    dispatch(getParticipant({ participantId: conversation.participantId }))
+    dispatch(getMessages({ conversationId: converId }))
+    dispatch(readConversation({ conversationId: converId, userId: user.id }))
+    setConversationId(converId)
   }, [conversationId])
 
   const onWriteMessage = (event) => {
@@ -176,6 +157,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   }
 
   const handleSendMessage = (event) => {
+    event.preventDefault();
     if (content !== '' || filesMessage) {
       let tContent = content;
       let emotions = [...tContent.matchAll(emotionRegex)];
@@ -191,7 +173,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       }
 
       socketClient.emit('conversation-sendMessage', {
-        content: tContent, senderId: user.id, receiverId: participant.id, conversationId,
+        content: tContent, senderId: user.id, receiverId: conversation.participantId, conversationId,
         files: filesMessage, senderName: user.firstName + ' ' + user.lastName
       });
       setContent('');
@@ -212,12 +194,12 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   };
 
   const handleVoiceCall = () => {
-    socketClient.emit('conversation-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: participant.id });
-    dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: participant.id }))
+    socketClient.emit('conversation-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId });
+    dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId }))
   }
 
   const handleCancelCall = () => {
-    socketClient.emit('conversation-cancel-call', { conversationId, senderId: user.id, receiverId: participant.id })
+    socketClient.emit('conversation-cancel-call', { conversationId, senderId: user.id, receiverId: conversation.participantId })
     dispatch(cancelCall({ conversationId }))
   }
 
@@ -289,7 +271,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       console.log(transcript, confidence * 100 + '%')
       if (confidence < 0.6 && transcript.length) {
         socketClient.emit('conversation-sendMessage', {
-          content: transcript, senderId: user.id, receiverId: participant.id,
+          content: transcript, senderId: user.id, receiverId: conversation.participantId,
           conversationId, files: null, senderName: user.firstName + ' ' + user.lastName
         });
       } else {
@@ -314,14 +296,44 @@ const ConversationChat = ({ conversationId, user, participant }) => {
     console.log(audioURL);
   }
 
+  const getColorStatus = (status) => {
+    if (status === 'active') {
+      return 'success';
+    } else if (status === 'inactive') {
+      return 'error';
+    }
+  }
+
+  const getStatusString = (status) => {
+    if (status === 'active') {
+      return 'Online';
+    } else if (status === 'inactive') {
+      return 'Offline';
+    }
+  }
+
   return (
     <>
       <div className="conversation-message" style={{ width: !showInfo ? '100%' : '75%' }} >
         <div className="header-message">
           <div className="header-left">
-            <Avatar width='40px' height='40px'
-              userId={participant.id} />
-            <span style={{ marginLeft: '15px', fontSize: '1.2em', fontWeight: '500' }}>{participant.userName}</span>
+            <Badge
+              badgeContent=" "
+              variant="dot"
+              color={getColorStatus(conversation.status)}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              invisible={conversation.status === 'inactive'}
+            >
+              <Avatar width="40px" height="40px" userId={conversation.participantId} />
+            </Badge>
+            <div style={{ marginLeft: '15px' }}>
+              <div style={{ fontSize: '1.2em', fontWeight: '500' }}>{conversation.participantName}</div>
+              <div>{getStatusString(conversation.status)}</div>
+            </div>
+
           </div>
           <div className="header-btn-list">
             <Tooltip title="Start a voice call">
@@ -344,18 +356,14 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         </div>
         <div className="content-message" ref={scrollRef} onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}>
           <div className="info-beginner-content">
-            <Avatar width='80px' height='80px'
-              userId={participant.id} />
+            <Avatar width="40px" height="40px" userId={conversation.participantId} />
             <div >
-              {participant.userName}
+              {conversation.participantName}
             </div>
             <div style={{ fontSize: "18px", opacity: "0.7" }}>
               Welcome to me!!!
             </div>
           </div>
-          {messages.length === 0 && <div>
-            Loading
-          </div>}
           {messages.length > 0 && messages.slice(0, messages.length - 1)
             .map((message, idx) => {
               return (
@@ -363,7 +371,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
                   key={message.id}
                   logInUserId={user.id}
                   conversationId={conversationId}
-                  participantId={participant.id}
+                  participantId={conversation.participantId}
                   hasAvatar={message.userId != messages[idx + 1].userId}
                   userName={user.firstName.concat(' ', user.lastName)}
                 />
@@ -373,7 +381,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
             <Message message={messages[messages.length - 1]}
               logInUserId={user.id}
               conversationId={conversationId}
-              participantId={participant.id}
+              participantId={conversation.participantId}
               hasAvatar={true} lastMessage={true} />}
 
         </div>
@@ -561,9 +569,9 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       <div className="conversation-info" style={{ display: !showInfo ? 'none' : 'flex' }}>
         <div className="custom-info">
           <Avatar width='80px' height='80px'
-            userId={participant.id} />
+            userId={conversation.participantId} />
           <div style={{ fontSize: "36px" }}>
-            {participant.userName}
+            {conversation.participantName}
           </div>
         </div>
         <div className="conversation-info-detail">
@@ -637,8 +645,9 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       >
         <DialogTitle id="alert-dialog-title">
           <Avatar width='40px' height='40px'
-            userId={participant.id} />
-          {participant.userName}
+            userId={conversation.participantId} />
+
+          {conversation.participantName}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">

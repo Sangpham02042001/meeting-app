@@ -8,7 +8,7 @@ const initialState = {
   error: null,
   loading: false,
   authenticated: false,
-  loaded: false
+  loaded: false,
 }
 
 export const signin = createAsyncThunk('user/signin', async ({ email, password }, { rejectWithValue }) => {

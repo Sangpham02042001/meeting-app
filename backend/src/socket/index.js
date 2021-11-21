@@ -1,11 +1,3 @@
-const userSockets = {
-
-};
-
-const meetingsAudio = {
-
-}
-
 const { getMemberTeam, sendMessage, socketInviteUsers,
     socketConfirmRequest } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
@@ -13,17 +5,32 @@ const { getActiveMemberMeeting, addMemberMeeting,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification } = require('../controllers/notification.controller')
-const { socketRequestTeam } = require('../controllers/user.controller')
+const { socketRequestTeam, setUserStatus } = require('../controllers/user.controller')
+const userSockets = {};
+
+const meetingsAudio = {};
 
 
+const status = {
+    active: 'active',
+    inActive: 'inactive'
+}
 
-const socketServer = (socket) => {
+const socketServer = (io, socket) => {
     if (!userSockets[socket.userId]) {
         userSockets[socket.userId] = [socket.id]
     } else {
         userSockets[socket.userId].push(socket.id)
     }
 
+
+    //**********************************USER*************************************//
+    socket.on('user-connect', async ({ userId }) => {
+        let report = await setUserStatus({ userId, status: status.active })
+        if (report) {
+            io.emit('user-connected', { userId, status: status.active })
+        }
+    })
 
     //**********************************TEAM*************************************//
 
@@ -184,13 +191,14 @@ const socketServer = (socket) => {
                 conversationId: converId, files: message.files, photos: message.photos,
                 createdAt: message.createdAt
             })
-            const { noti } = await createMessageNotification({ conversationId, senderId, receiverId, senderName })
+            // const { noti } = await createMessageNotification({ conversationId, senderId, receiverId, senderName })
+
             if (userSockets[receiverId] && userSockets[receiverId].length) {
                 for (const socketId of userSockets[receiverId]) {
                     socket.to(socketId).emit('conversation-receiveMessage', {
                         messageId: message.id, content, senderId, receiverId,
                         conversationId: converId, files: message.files, photos: message.photos,
-                        createdAt: message.createdAt, noti
+                        createdAt: message.createdAt
                     });
                 }
             }
@@ -230,7 +238,7 @@ const socketServer = (socket) => {
 
     //disconnect
     socket.on('disconnect', async () => {
-        console.log(`disconnect with meetingId: ${socket.meetingId} ${socket.id}`)
+        //meeting
         if (socket.meetingId) {
             let { message } = await outMeeting({
                 meetingId: socket.meetingId,
@@ -270,6 +278,13 @@ const socketServer = (socket) => {
             delete socket.meetingId;
             socket.leave(`meeting-${socket.meetingId}`)
         }
+
+        //user
+        let report = await setUserStatus({ userId: socket.userId, status: status.inActive });
+        if (report) {
+            socket.broadcast.emit('user-disconnect', { userId: socket.userId, status: status.inActive })
+        }
+
         userSockets[socket.userId] = userSockets[socket.userId].filter(socketId => socketId != socket.id)
     });
 }

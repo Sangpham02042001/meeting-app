@@ -147,7 +147,6 @@ const Message = React.memo(({
               <div>
                 {message.content &&
                   parseMessage(message.content)
-
                 }
                 {message.photos && message.photos.length > 0 &&
 

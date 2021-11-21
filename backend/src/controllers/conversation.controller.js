@@ -12,9 +12,10 @@ const getConversations = async (req, res) => {
     try {
         const { userId } = req.params;
         const conversations = await sequelize.query(
-            "SELECT conversationId, userId as participantId, tb1.isRead " +
+            "SELECT uc.conversationId, uc.userId as participantId, concat(u.firstName, ' ', u.lastName) as participantName, u.status,tb1.isRead " +
             "FROM users_conversations uc " +
             "JOIN (SELECT conversationId, isRead FROM users_conversations WHERE userId = :userId) tb1 using(conversationId) " +
+            "JOIN users u on uc.userId = u.id " +
             "WHERE uc.userId NOT LIKE :userId " +
             "ORDER BY uc.updatedAt DESC;",
             {

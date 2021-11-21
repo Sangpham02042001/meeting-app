@@ -7,6 +7,7 @@ import { useHistory } from 'react-router';
 import Avatar from '../../../components/Avatar';
 import ImageIcon from '@mui/icons-material/Image';
 import AttachFile from '@mui/icons-material/AttachFile';
+import Badge from '@mui/material/Badge';
 
 
 const getElementLastMessage = (lastMessage) => {
@@ -30,16 +31,14 @@ const getElementLastMessage = (lastMessage) => {
 
 }
 
+
 export default function ConversationLink({ conversation, user }) {
-    const [participant, setParticipant] = useState(null);
     const [lastMessage, setLastMessage] = useState(null);
     const lastMessageChange = useSelector(state => state.conversationReducer.lastMessageChange);
     const curParticipant = useSelector(state => state.conversationReducer.conversation.participant);
     const history = useHistory();
     useEffect(async () => {
         try {
-            const response = await axiosAuth.get(`/api/users/${conversation.participantId}`);
-            setParticipant(response.data);
             if (conversation.conversationId) {
                 const response = await axiosAuth.get(`/api/conversations/${conversation.conversationId}/messages/lastMessage`);
                 setLastMessage(response.data.lastMessage);
@@ -51,35 +50,54 @@ export default function ConversationLink({ conversation, user }) {
 
     const changeConversation = (event) => {
         event.preventDefault();
-        history.replace(`/conversations/${participant.id}`)
+        history.replace(`/conversations/${conversation.participantId}`)
         console.log(history)
     }
 
-    return (
-        <>
-            {participant &&
-                <div className={`${curParticipant && participant.id === curParticipant.id ? 'link-selected' : ''} conversation-link`}
-                    onClick={changeConversation}>
-                    <Avatar width="40px" height="40px" userId={participant.id} />
 
-                    <div className="link-content">
-                        <div className="link-name" style={{
-                            opacity: curParticipant && participant.id === curParticipant.id ? '1' : '0.7'
-                        }}>
-                            {participant.userName}
-                        </div>
-                        <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
-                            {lastMessage &&
-                                (lastMessage.userId === user.id ?
-                                    <span>You: {getElementLastMessage(lastMessage)}</span>
-                                    :
-                                    <span> {getElementLastMessage(lastMessage)}</span>
-                                )
-                            }
-                        </div>
-                    </div>
+    const getColorStatus = (status) => {
+        if (status === 'active') {
+            return 'success';
+        } else if (status === 'inactive') {
+            return 'error';
+        }
+    }
+
+    return (
+
+        <div className={`${curParticipant && conversation.participantId === curParticipant.id ? 'link-selected' : ''} conversation-link`}
+            onClick={changeConversation}>
+            <Badge 
+                badgeContent=" "
+                variant="dot"
+                color={getColorStatus(conversation.status)}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+                invisible={conversation.status === 'inactive'}
+                
+            >
+                <Avatar width="40px" height="40px" userId={conversation.participantId} />
+            </Badge>
+
+            <div className="link-content">
+                <div className="link-name" style={{
+                    opacity: curParticipant && conversation.participantId === curParticipant.id ? '1' : '0.7'
+                }}>
+                    {conversation.participantName}
                 </div>
-            }
-        </>
+                <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
+                    {lastMessage &&
+                        (lastMessage.userId === user.id ?
+                            <span>You: {getElementLastMessage(lastMessage)}</span>
+                            :
+                            <span> {getElementLastMessage(lastMessage)}</span>
+                        )
+                    }
+                </div>
+            </div>
+        </div>
+
     )
 }

@@ -35,6 +35,10 @@ User.init({
   },
   avatar: {
     type: DataTypes.STRING,
+  },
+  status: {
+    defaultValue: 'inactive',
+    type: DataTypes.STRING(10)
   }
 }, {
   sequelize,

@@ -87,6 +87,11 @@
   margin-bottom: 6px;
 }
 
+.message > div > .user-last-message > .emoji-message {
+  margin-left: 6px;
+  margin-bottom: 6px;
+}
+
 .message-photo-list {
   display: flex;
   max-width: 470px;

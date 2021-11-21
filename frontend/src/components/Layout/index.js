@@ -8,9 +8,12 @@ import MessageIcon from '@mui/icons-material/Message';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { socketClient, baseURL } from '../../utils';
-import { sendMessageCv, conversationCalling, cancelCall, removeMessageCv } from '../../store/reducers/conversation.reducer';
 import {
-  sendMessage, updateMeetingState, setMeetingActive, endActiveMeeting,
+  sendMessageCv, conversationCalling, cancelCall,
+  removeMessageCv, setConversationStatus
+} from '../../store/reducers/conversation.reducer';
+import {
+  sendMessage, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, getCurrentMeeting, inviteUsers, receiveTeamInvitation,
   confirmRequest, receiveTeamConfirm, joinRequest, receviceTeamRequest
 } from '../../store/reducers/team.reducer';
@@ -20,14 +23,11 @@ import {
 } from '../../store/reducers/meeting.reducer'
 import { receivceNotification, readNotif } from '../../store/reducers/notification.reducer'
 import './layout.css'
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-// import Avatar from '../Avatar/index'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 export default function Layout({ children }) {
   const dispatch = useDispatch();
-  const team = useSelector(state => state.teamReducer.team)
   const userReducer = useSelector(state => state.userReducer)
-  const meeting = useSelector(state => state.meetingReducer.meeting)
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
@@ -37,22 +37,38 @@ export default function Layout({ children }) {
   useEffect(() => {
     socketClient.auth = { userId: userReducer.user.id };
     socketClient.connect();
+
     setIsSkConnected(true);
 
     dispatch(getCurrentMeeting())
 
+    //user
+    socketClient.emit('user-connect', { userId: userReducer.user.id })
+
+    socketClient.on('user-connected', ({ userId, status }) => {
+      dispatch(setConversationStatus({ userId, status }))
+    })
+
+    socketClient.on('user-disconnect', ({ userId, status }) => {
+      console.log(userId, status)
+      dispatch(setConversationStatus({ userId, status }))
+    })
+
     //conversation
-    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt, noti }) => {
-      dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }));
-      if (noti && noti.id) {
-        dispatch(receivceNotification({ noti }))
-        if (!currentNoti || !currentNoti.isNotiMess
-          || (currentNoti.createdBy != noti.createdBy && currentNoti.conversationId != noti.conversationId)) {
-          setTimeout(() => {
-            setNoti(noti)
-          }, 500)
-        }
-      }
+    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }) => {
+      dispatch(sendMessageCv({
+        messageId, content, senderId, receiverId,
+        conversationId, files, photos, createdAt
+      }));
+      // if (noti && noti.id) {
+      //   dispatch(receivceNotification({ noti }))
+      //   if (!currentNoti || !currentNoti.isNotiMess
+      //     || (currentNoti.createdBy != noti.createdBy && currentNoti.conversationId != noti.conversationId)) {
+      //     setTimeout(() => {
+      //       setNoti(noti)
+      //     }, 500)
+      //   }
+      // }
     })
 
     socketClient.on('conversation-removed-message', ({ conversationId, messageId, receiverId, senderId }) => {

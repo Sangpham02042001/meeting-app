@@ -465,6 +465,39 @@ const searchUsers = async (req, res) => {
   }
 }
 
+const getUserStatusList = async () => {
+  try {
+    let statusList = await User.findAll({
+      attributes: ['id', 'status']
+    })
+
+    return statusList
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
+
+const setUserStatus = async ({ userId, status }) => {
+  try {
+    await sequelize.query(
+      "UPDATE users SET status = :status " +
+      "WHERE id = :userId",
+      {
+        replacements: {
+          status, userId
+        }
+      })
+
+
+    return {
+      message: 'update done'
+    }
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
 
 
 module.exports = {
@@ -472,5 +505,6 @@ module.exports = {
   requestJoinTeam, getJoinedTeams, getRequestingTeams,
   outTeam, cancelJoinRequest, confirmInvitations,
   removeInvitations, getInvitations, getNotifications,
-  searchUsers, socketRequestTeam
+  searchUsers, socketRequestTeam, getUserStatusList,
+  setUserStatus
 }

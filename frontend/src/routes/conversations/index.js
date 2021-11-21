@@ -54,7 +54,7 @@ export default function Conversations(props) {
 
         const participant = conversations.find(conv => conv.participantId === userFind.id);
         if (!participant) {
-            dispatch(createConversation({ conversationId: null, participantId: userFind.id }));
+            dispatch(createConversation({ conversationId: null, participantId: userFind.id, participantName: userFind.userName }));
         }
 
 
@@ -116,7 +116,8 @@ export default function Conversations(props) {
                 <div className="conversation-user">
                     {
                         conversations.map(conv => {
-                            return <ConversationLink key={conv.participantId}
+                            return <ConversationLink
+                                key={conv.participantId}
                                 conversation={conv}
                                 user={user}
                             />

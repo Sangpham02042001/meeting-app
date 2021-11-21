@@ -53,7 +53,7 @@ io.use((socket, next) => {
 })
 
 io.on('connection', socket => {
-    socketServer(socket)
+    socketServer(io, socket)
 
 });
 
