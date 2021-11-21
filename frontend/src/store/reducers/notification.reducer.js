@@ -15,8 +15,8 @@ const initialState = {
 export const getNotifs = createAsyncThunk('notification/getNotifs', async (offset, { rejectWithValue }) => {
     let { token, id } = JSON.parse(window.localStorage.getItem('user'))
     let response = await axiosAuth.get(`${baseURL}/api/users/${id}/notifications?offset=${offset}&num=3`)
-    let { notifications, numOf_UnReadNotifications } = response.data
-    return { notifications, numOf_UnReadNotifications }
+    let { notifications, numOf_UnReadNotifications, numOfNotifications } = response.data
+    return { notifications, numOf_UnReadNotifications, numOfNotifications }
 })
 
 export const readNotif = createAsyncThunk('notification/readNotif', async (notifId, { rejectWithValue }) => {
@@ -45,6 +45,7 @@ export const notificationSlice = createSlice({
             state.hasMore = true
             state.notifications = state.notifications.concat(notifications)
             state.numOf_UnReadNotifications = action.payload.numOf_UnReadNotifications
+            state.numOfNotifications = action.payload.numOfNotifications
             // window.localStorage.setItem('notifications', JSON.stringify(notifications))
         },
         [getNotifs.rejected]: (state, action) => {
@@ -100,8 +101,13 @@ export const notificationSlice = createSlice({
         },
         receivceNotification: (state, action) => {
             let { noti } = action.payload
-            if (!state.notifications.find(n => n.id == noti.id)) {
+            let idx = state.notifications.findIndex(n => n.id == noti.id)
+            if (idx < 0) {
                 state.notifications.unshift(noti)
+                state.numOf_UnReadNotifications += 1
+                state.numOfNotifications += 1
+            } else {
+                state.notifications.splice(idx, 1, noti)
                 state.numOf_UnReadNotifications += 1
             }
         }

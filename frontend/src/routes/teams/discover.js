@@ -171,7 +171,7 @@ export default function TeamDiscover() {
     let response = await axiosAuth.post('/api/teams/search', {
       name: searchTeamName
     })
-    setSearchTeams(response.data.teams)
+    setSearchTeams(response.data.teams.splice(0, 4))
     setLoading(false)
   }
 

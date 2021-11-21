@@ -378,7 +378,7 @@ const getNotifications = async (req, res) => {
   let { offset, num } = req.query
   try {
     let numOf_UnReadNotifications = await sequelize.query(
-      "SELECT COUNT(*) as numOf_UnReadNotifications FROM notifications WHERE userid = :id AND isRead = 0;",
+      "SELECT COUNT(*) as numOf_UnReadNotifications FROM notifications WHERE userId = :id AND isRead = 0;",
       {
         replacements: {
           id
@@ -387,7 +387,7 @@ const getNotifications = async (req, res) => {
       }
     )
     numOf_UnReadNotifications = numOf_UnReadNotifications[0]['numOf_UnReadNotifications']
-    if (isNaN(offset) || isNaN(num)) {
+    if (offset == 0 || isNaN(num)) {
       let notifications = await sequelize.query(
         "SELECT * FROM notifications WHERE userId = :id ORDER BY createdAt DESC;",
         {

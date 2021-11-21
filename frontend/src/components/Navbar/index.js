@@ -37,6 +37,7 @@ export default function Navbar() {
 
   let notifications = useSelector(state => state.notificationReducer.notifications)
   let numOf_UnReadNotifications = useSelector(state => state.notificationReducer.numOf_UnReadNotifications)
+  let numOfNotifications = useSelector(state => state.notificationReducer.numOfNotifications)
   let hasMore = useSelector(state => state.notificationReducer.hasMore)
   useEffect(() => {
     dispatch(getNotifs(0))
