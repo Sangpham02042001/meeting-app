@@ -16,6 +16,8 @@ const initialState = {
     meetings: [],
     meetingActive: null,
     meetmess: [],
+    files: [],
+    images: [],
     numOfMessages: 0,
     numOfMeetMess: 0,
     fakeMessageId: v4()
@@ -89,10 +91,22 @@ export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId
   let { requestUsers } = response.data
   team.requestUsers = requestUsers
   //get meetings
-  response = await axiosAuth.get(`/api/teams/${teamId}/meetings`)
-  let { meetings } = response.data
-  team.meetings = meetings
-  team.meetingActive = meetings.filter(meeting => meeting.active)[0] || null
+  // response = await axiosAuth.get(`/api/teams/${teamId}/meetings`)
+  // let { meetings } = response.data
+  // team.meetings = meetings
+  // team.meetingActive = meetings.filter(meeting => meeting.active)[0] || null
+  //get meetingActive 
+  response = await axiosAuth.get(`/api/teams/${teamId}/meetingactive`)
+  let { meetingActive } = response.data
+  team.meetingActive = meetingActive
+  //get shared files
+  response = await axiosAuth.get(`/api/teams/${teamId}/files`)
+  let { files } = response.data
+  team.files = files
+  //get shared images
+  response = await axiosAuth.get(`/api/teams/${teamId}/images`)
+  let { images } = response.data
+  team.images = images
   return { team }
 })
 
@@ -356,7 +370,7 @@ export const teamSlice = createSlice({
       if (meeting) {
         let { teamId } = meeting
         if (teamId == state.team.id) {
-          state.team.meetings.push(meeting)
+          // state.team.meetings.push(meeting)
           state.team.meetingActive = meeting
         }
       }
@@ -365,10 +379,10 @@ export const teamSlice = createSlice({
       let { meeting } = action.payload
       if (state.team.meetingActive.id == meeting.id) {
         state.team.meetingActive = null
-        let idx = state.team.meetings.findIndex(m => m.id == meeting.id)
-        if (idx >= 0) {
-          state.team.meetings.splice(idx, 1, meeting)
-        }
+        // let idx = state.team.meetings.findIndex(m => m.id == meeting.id)
+        // if (idx >= 0) {
+        //   state.team.meetings.splice(idx, 1, meeting)
+        // }
       }
       if ((state.meetingJoined || {}).id === meeting.id) {
         state.meetingJoined = null
@@ -625,7 +639,7 @@ export const teamSlice = createSlice({
       socketClient.emit('new-meeting', {
         meeting: meeting
       })
-      state.team.meetings.push(action.payload.meeting)
+      // state.team.meetings.push(action.payload.meeting)
       state.loading = false
     },
     [createTeamMeeting.rejected]: (state, action) => {

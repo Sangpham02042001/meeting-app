@@ -9,19 +9,6 @@ import './team-info.css'
 
 export default function TeamInfo() {
   const teamReducer = useSelector(state => state.teamReducer)
-  const images = [...teamReducer.team.meetmess]
-    .filter(item => item.isMessage)
-    .map(item => item.photos)
-    .reduce((value, currentArr, idx) => {
-      return [...value, ...currentArr]
-    }, [])
-
-  const files = [...teamReducer.team.meetmess]
-    .filter(item => item.isMessage)
-    .map(item => item.files)
-    .reduce((value, currentArr) => {
-      return [...value, ...currentArr]
-    }, [])
 
   const [isPreview, setIsPreview] = useState(false)
   const imgPath = `${baseURL}/api/messages`
@@ -79,7 +66,7 @@ export default function TeamInfo() {
         </AccordionSummary>
         <AccordionDetails>
           <div className='shared-media-list'>
-            {images.map((img, idx) => {
+            {teamReducer.team.images.map((img, idx) => {
               return (
                 <div key={idx}
                   style={{
@@ -104,7 +91,7 @@ export default function TeamInfo() {
         </AccordionSummary>
         <AccordionDetails>
           <div className='shared-file-list'>
-            {files.map((file, idx) => {
+            {teamReducer.team.files.map((file, idx) => {
               return <div key={file.id} >
                 <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
                 <span

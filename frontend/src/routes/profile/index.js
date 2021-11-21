@@ -417,7 +417,7 @@ export default function Profile() {
 					</Button>
 				</DialogActions>
 			</Dialog>
-			<Snackbar open={message.content && message.content.length} autoHideDuration={3000} onClose={e => setMessage({})}>
+			<Snackbar open={message.content && message.content.length > 0} autoHideDuration={3000} onClose={e => setMessage({})}>
 				<Alert severity={message.type}>
 					{message.content}
 				</Alert>

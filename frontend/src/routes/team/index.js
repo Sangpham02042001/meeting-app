@@ -6,7 +6,7 @@ import {
   DialogContent, Snackbar, Tooltip,
   Alert, IconButton
 } from '@mui/material';
-import Picker, { SKIN_TONE_MEDIUM_DARK } from 'emoji-picker-react';
+//icons 
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import MicNoneIcon from '@mui/icons-material/MicNone';
@@ -17,11 +17,15 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CloseIcon from '@mui/icons-material/Close';
+
+import 'emoji-mart/css/emoji-mart.css'
+import { Picker, emojiIndex } from 'emoji-mart';
+
 import {
   getTeamInfo, requestJoinTeam, refuseInvitations,
   confirmInvitations, cleanTeamState, getTeamMeetMess, getInvitedTeams
 } from '../../store/reducers/team.reducer'
-import { baseURL, socketClient, messageTimeDiff, getTime } from '../../utils'
+import { baseURL, socketClient, messageTimeDiff, getTime, emotionRegex } from '../../utils'
 import Loading from '../../components/Loading'
 import './team.css'
 import TeamHeader from '../../components/TeamHeader'
@@ -252,9 +256,20 @@ export default function Team(props) {
     if (!input && !filesMessage.length) {
       return
     }
+    let _input = input
+    let emotions = [..._input.matchAll(emotionRegex)];
+    for (let emotion of emotions) {
+
+      if (emotion) {
+        let emojiList = emojiIndex.search(emotion[0]);
+        if (emojiList.length) {
+          _input = _input.replace(emotion[0], emojiList[0].native)
+        }
+      }
+    }
     setIsOpenEmojiList(false)
 
-    socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, files: filesMessage, senderName: user.firstName + ' ' + user.lastName });
+    socketClient.emit("send-message-team", { teamId, senderId: user.id, content: _input, files: filesMessage, senderName: user.firstName + ' ' + user.lastName });
     setInput('')
     setFilesMessage([]);
     setFilesMessageUrl([]);
@@ -291,10 +306,8 @@ export default function Team(props) {
     setIsOpenEmojiList(!isOpenEmojiList)
   }
 
-  const onEmojiClick = (event, emojiObject) => {
-    event.preventDefault()
-    event.stopPropagation()
-    setInput(input.concat(emojiObject.emoji))
+  const onEmojiClick = (emojiObject) => {
+    setInput(input.concat(emojiObject.native))
   };
 
   const onWriteMessage = (event) => {
@@ -499,10 +512,10 @@ export default function Team(props) {
             {isOpenEmojiList &&
               <div style={{
                 position: 'absolute',
-                top: filesMessage.length ? '-220px' : '-330px',
+                top: filesMessage.length ? '-330px' : '-440px',
                 right: '100px',
               }}>
-                <Picker onEmojiClick={onEmojiClick} skinTone={SKIN_TONE_MEDIUM_DARK} />
+                <Picker onSelect={onEmojiClick} set='facebook' />
               </div>}
 
             <div className="search-team-box">

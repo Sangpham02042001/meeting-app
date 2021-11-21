@@ -540,7 +540,6 @@ const getMemberTeam = async ({ teamId }) => {
 }
 
 const getMeetings = async (req, res) => {
-  let { offset, num } = req.query
   let { teamId } = req.params
   try {
     let meetings = await sequelize.query(
@@ -557,6 +556,29 @@ const getMeetings = async (req, res) => {
     })
     meetings = await Promise.all(meetings)
     return res.status(200).json({ meetings });
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
+const getMeetingActive = async (req, res) => {
+  let { teamId } = req.params
+  try {
+    let meeting = await sequelize.query(
+      "SELECT * FROM meetings WHERE teamId = :teamId AND active = true",
+      {
+        replacements: {
+          teamId
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    let meetingActive = null
+    if (meeting && meeting.length) {
+      meetingActive = await getMeetingInfo({ meetingId: meeting[0].id })
+    }
+    return res.status(200).json({ meetingActive });
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
@@ -631,6 +653,58 @@ const getTeamMeetMess = async (req, res) => {
   }
 }
 
+const getTeamSharedFiles = async (req, res) => {
+  try {
+    let { teamId } = req.params
+
+    const files = await sequelize.query(
+      "SELECT m.id, m.messageId, m.name, m.type, m.createdAt FROM media m " +
+      "INNER JOIN messages msg ON msg.id = m.messageId " +
+      "INNER JOIN teams t ON t.id = msg.teamId " +
+      "WHERE msg.teamId = :teamId AND m.type = 'file' " +
+      "ORDER BY m.updatedAt DESC",
+      {
+        replacements: {
+          teamId
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    return res.status(200).json({ files })
+  } catch (error) {
+    console.log(error)
+    return res.status(403).json({
+      message: "Could not get files!"
+    })
+  }
+}
+
+const getTeamSharedImages = async (req, res) => {
+  try {
+    let { teamId } = req.params
+
+    const images = await sequelize.query(
+      "SELECT m.id, m.messageId, m.name, m.type, m.createdAt FROM media m " +
+      "INNER JOIN messages msg ON msg.id = m.messageId " +
+      "INNER JOIN teams t ON t.id = msg.teamId " +
+      "WHERE msg.teamId = :teamId AND m.type = 'image' " +
+      "ORDER BY m.updatedAt DESC",
+      {
+        replacements: {
+          teamId
+        },
+        type: QueryTypes.SELECT
+      }
+    )
+    return res.status(200).json({ images })
+  } catch (error) {
+    console.log(error)
+    return res.status(403).json({
+      message: "Could not get images!"
+    })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers,
@@ -639,5 +713,6 @@ module.exports = {
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   sendMessage, getMemberTeam,
   getTeamMeetMess, getMeetings, searchTeamWithCode,
-  socketInviteUsers, socketConfirmRequest
+  socketInviteUsers, socketConfirmRequest, getTeamSharedFiles,
+  getTeamSharedImages, getMeetingActive
 }

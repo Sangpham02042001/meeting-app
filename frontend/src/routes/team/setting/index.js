@@ -13,6 +13,7 @@ import TeamRequestUsers from '../../../components/TeamSetting/RequestUsers'
 import TeamMembers from '../../../components/TeamSetting/Members'
 import TeamInvitedUsers from '../../../components/TeamSetting/InvitedUsers'
 import Loading from '../../../components/Loading'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export default function TeamSetting(props) {
   const teamReducer = useSelector(state => state.teamReducer)
@@ -35,7 +36,7 @@ export default function TeamSetting(props) {
     <Grid item sm={12} style={{ paddingLeft: '30px' }}>
       <div>
         <Link to={`/teams/${teamId}`} style={{ color: '#000', textDecoration: 'none' }}>
-          <strong>&lt; Back</strong>
+          <strong><ArrowBackIcon style={{ position: 'relative', bottom: '1px' }} /> Back</strong>
         </Link>
       </div>
       <h3 style={{ margin: '15px 0 20px 0' }}>Setting</h3>

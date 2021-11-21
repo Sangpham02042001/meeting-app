@@ -274,8 +274,28 @@ const sendMessageMeeting = async ({ senderId, content, file, meetingId }) => {
 const getMeetingMessages = async (req, res) => {
   const { meetingId } = req.params
   try {
-    const meeting = await Meeting.findByPk(meetingId)
-    const messages = await meeting.getMessages()
+    let messages = await Message.findAll({
+      where: {
+        meetingId
+      },
+      include: {
+        model: Media,
+      }
+    })
+    for (let m of messages) {
+      let tmpFiles = [];
+      let tmpImages = []
+      for (let media of m.dataValues.Media) {
+        if (media.type === "image") {
+          tmpImages.push(media)
+        } else {
+          tmpFiles.push(media)
+        }
+      }
+      m.dataValues.files = tmpFiles;
+      m.dataValues.photos = tmpImages;
+      delete m.dataValues.Media;
+    }
     return res.status(200).json({
       messages
     })

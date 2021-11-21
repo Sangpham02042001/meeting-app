@@ -108,7 +108,6 @@ const Message = React.memo(({
         let newContent = content;
         if (emojiList[0]) {
           newContent = content.replaceAll(regex, `<span className="img-emoji">${joypixels.toImage(emojiList[0][0])}</span>`)
-          console.log(newContent, emojiList)
         }
 
         return (

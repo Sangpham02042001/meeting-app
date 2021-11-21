@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
 import { getJoinedTeams } from '../../store/reducers/team.reducer'
 import { baseURL } from '../../utils'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import './style.css'
 
 export default function TeamList() {
@@ -19,7 +20,7 @@ export default function TeamList() {
   return (
     <div className="teamlist-container">
       <Link to={`/teams`} className="back-to-teams-link">
-        <strong>&lt; &nbsp; &nbsp; All teams</strong>
+        <strong><ArrowBackIcon style={{ position: 'relative', bottom: '1px' }} /> All teams</strong>
       </Link>
       {teamReducer.joinedTeams.map(team => (
         <Link to={`/teams/${team.id}`} key={team.id}

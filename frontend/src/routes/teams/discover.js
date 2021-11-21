@@ -11,6 +11,7 @@ import _ from 'lodash'
 import GroupIcon from '@mui/icons-material/Group';
 import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { axiosAuth, baseURL, getTime, socketClient } from '../../utils'
 import { Link } from 'react-router-dom'
 import { createNewTeam, requestJoinTeam, getJoinedTeams, getRequestTeams, getInvitedTeams } from '../../store/reducers/team.reducer'
@@ -249,7 +250,7 @@ export default function TeamDiscover() {
     <Grid container>
       <Grid item sm={12} style={{ padding: '15px' }}>
         <Link to='/teams' style={{ color: '#000', textDecoration: 'none', fontWeight: '700' }}>
-          &lt; &nbsp; &nbsp; All teams
+          <ArrowBackIcon style={{ position: 'relative', bottom: '1px' }} /> All teams
         </Link>
         <h3 style={{ margin: '15px 0' }}>Join or create a team</h3>
         <div style={{ display: 'flex', width: '100%' }}>
