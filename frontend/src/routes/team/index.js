@@ -254,7 +254,7 @@ export default function Team(props) {
     }
     setIsOpenEmojiList(false)
 
-    socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, files: filesMessage });
+    socketClient.emit("send-message-team", { teamId, senderId: user.id, content: input, files: filesMessage, senderName: user.firstName + ' ' + user.lastName });
     setInput('')
     setFilesMessage([]);
     setFilesMessageUrl([]);

@@ -1,4 +1,5 @@
 const Notification = require('../models/notification')
+const Team = require('../models/team')
 
 const updateRead = async (req, res) => {
   let { notiId } = req.params
@@ -75,4 +76,97 @@ const createTeamNofication = async ({ userId, content, relativeLink, createdBy, 
   }
 }
 
-module.exports = { updateRead, deleteNotification, createTeamNofication }
+const createMessageNotification = async ({ teamId, senderId, conversationId, receiverId, senderName }) => {
+  try {
+    console.log(`senderId ${senderId}`)
+    if (teamId) {
+      let team = await Team.findOne({
+        where: {
+          id: teamId,
+        },
+        attributes: ['name']
+      })
+      let teamName = team.name
+      let content = `${senderName} sent message to team ${teamName}`
+      let relativeLink = `/teams/${teamId}`
+      team = await Team.findByPk(teamId)
+      let members = await team.getMembers({
+        attributes: ['id']
+      })
+      members = members = members.filter(m => m.id !== senderId);
+      let noti
+      for (const member of members) {
+        noti = await Notification.findOne({
+          where: {
+            teamId, userId: member.id
+          }
+        })
+        if (!noti || !noti.createdBy) {
+          noti = await Notification.create({
+            relativeLink, userId: member.id,
+            content, teamId, createdBy: senderId
+          })
+        } else if (noti.createdBy == senderId) {
+          noti.changed('createdAt', true)
+          noti.set('createdAt', new Date(), { raw: true })
+          noti.set('isRead', false)
+          await noti.save()
+        } else if (noti.createdBy) {
+          noti.changed('createdAt', true)
+          noti.set('createdAt', new Date(), { raw: true })
+          noti.set('isRead', false)
+          noti.set('content', content)
+          noti.set('createdBy', senderId)
+          await noti.save()
+        }
+      }
+      noti = {
+        ...noti.dataValues,
+        isNotiMess: true
+      }
+      console.log(noti)
+      return {
+        message: 'success',
+        noti
+      }
+    }
+    if (conversationId && receiverId) {
+      console.log(conversationId, receiverId)
+      let noti = await Notification.findOne({
+        where: {
+          conversationId, userId: receiverId
+        }
+      })
+      let content = `${senderName} sent message to you.`
+      let relativeLink = `conversations/${receiverId}`
+      if (!noti || !noti.id) {
+        noti = await Notification.create({
+          content, relativeLink, userId: receiverId,
+          createdBy: senderId, conversationId
+        })
+      } else if (noti.createdBy == senderId) {
+        noti.changed('createdAt', true)
+        noti.set('createdAt', new Date(), { raw: true })
+        noti.set('isRead', false)
+        await noti.save()
+      }
+      noti = {
+        ...noti.dataValues,
+        isNotiMess: true
+      }
+      console.log(noti)
+      return {
+        message: 'success',
+        noti
+      }
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      message: 'error',
+      error
+    }
+  }
+}
+
+module.exports = { updateRead, deleteNotification, createTeamNofication, createMessageNotification }

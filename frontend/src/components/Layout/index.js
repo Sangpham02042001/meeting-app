@@ -32,7 +32,7 @@ export default function Layout({ children }) {
   const meetingId = params && Number(params.meetingId)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const [isSkConnected, setIsSkConnected] = useState(false);
-  const [noti, setNoti] = useState(null)
+  const [currentNoti, setNoti] = useState(null)
 
   useEffect(() => {
     socketClient.auth = { userId: userReducer.user.id };
@@ -42,8 +42,17 @@ export default function Layout({ children }) {
     dispatch(getCurrentMeeting())
 
     //conversation
-    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }) => {
+    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt, noti }) => {
       dispatch(sendMessageCv({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }));
+      if (noti && noti.id) {
+        dispatch(receivceNotification({ noti }))
+        if (!currentNoti || !currentNoti.isNotiMess
+          || (currentNoti.createdBy != noti.createdBy && currentNoti.conversationId != noti.conversationId)) {
+          setTimeout(() => {
+            setNoti(noti)
+          }, 500)
+        }
+      }
     })
 
     socketClient.on('conversation-removed-message', ({ conversationId, messageId, receiverId, senderId }) => {
@@ -67,10 +76,19 @@ export default function Layout({ children }) {
       }))
     })
 
-    socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, files, photos, createdAt }) => {
+    socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, files, photos, createdAt, noti }) => {
       dispatch(sendMessage({
         messageId, content, senderId, teamId, photos, files, isMessage: true, createdAt
       }))
+      if (noti && noti.id) {
+        dispatch(receivceNotification({ noti }))
+        if (!currentNoti || !currentNoti.isNotiMess
+          || (currentNoti.createdBy != noti.createdBy && currentNoti.teamId != noti.id)) {
+          setTimeout(() => {
+            setNoti(noti)
+          }, 500)
+        }
+      }
     })
 
     socketClient.on('team-invite-user-success', ({ users, teamId }) => {
@@ -306,16 +324,16 @@ export default function Layout({ children }) {
               </Button>
             </DialogActions>
           </Dialog>
-          {noti && <Snackbar open={noti !== null} autoHideDuration={3000}
+          {currentNoti && <Snackbar open={currentNoti !== null} autoHideDuration={3000}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             onClose={e => setNoti(null)}>
             <Alert variant="filled" severity="info"
               onClick={(e) => {
                 e.preventDefault()
-                dispatch(readNotif(noti.id))
+                dispatch(readNotif(currentNoti.id))
               }}>
-              <Link to={noti.relativeLink} style={{ textDecoration: 'none', color: '#FFF' }}>
-                {noti.content}
+              <Link to={currentNoti.relativeLink} style={{ textDecoration: 'none', color: '#FFF' }}>
+                {currentNoti.content}
               </Link>
             </Alert>
           </Snackbar>}

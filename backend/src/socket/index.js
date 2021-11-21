@@ -12,7 +12,7 @@ const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
-const { createTeamNofication } = require('../controllers/notification.controller')
+const { createTeamNofication, createMessageNotification } = require('../controllers/notification.controller')
 const { socketRequestTeam } = require('../controllers/user.controller')
 
 
@@ -27,15 +27,16 @@ const socketServer = (socket) => {
 
     //**********************************TEAM*************************************//
 
-    socket.on('send-message-team', async ({ teamId, senderId, content, files }) => {
+    socket.on('send-message-team', async ({ teamId, senderId, content, files, senderName }) => {
         let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, files })
         socket.emit('receive-message-team', { messageId: message.id, content, teamId, senderId, files: message.files, photos: message.photos, createdAt: message.createdAt })
+        const { noti } = await createMessageNotification({ teamId, senderId, senderName })
         for (let m of members) {
             if (userSockets[m.id] && userSockets[m.id].length) {
                 for (const socketId of userSockets[m.id]) {
-                    socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, files: message.files, photos: message.photos, createdAt: message.createdAt });
+                    socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, files: message.files, photos: message.photos, createdAt: message.createdAt, noti });
                 }
             }
         }
@@ -173,7 +174,7 @@ const socketServer = (socket) => {
 
     //**********************************CONVERSATION*************************************//
 
-    socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, files }) => {
+    socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, files, senderName }) => {
         const converId = await setConversation({ senderId, receiverId, conversationId });
         console.log(files);
         const message = await setMessage({ content, conversationId: converId, senderId, files });
@@ -183,12 +184,13 @@ const socketServer = (socket) => {
                 conversationId: converId, files: message.files, photos: message.photos,
                 createdAt: message.createdAt
             })
+            const { noti } = await createMessageNotification({ conversationId, senderId, receiverId, senderName })
             if (userSockets[receiverId] && userSockets[receiverId].length) {
                 for (const socketId of userSockets[receiverId]) {
                     socket.to(socketId).emit('conversation-receiveMessage', {
                         messageId: message.id, content, senderId, receiverId,
                         conversationId: converId, files: message.files, photos: message.photos,
-                        createdAt: message.createdAt
+                        createdAt: message.createdAt, noti
                     });
                 }
             }

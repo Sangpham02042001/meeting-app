@@ -103,7 +103,7 @@ const ConversationChat = ({ conversationId, user, participant }) => {
   const [rows, setRows] = useState(1);
   const minRows = 1;
   const maxRows = 5;
- 
+
   const filePath = `${baseURL}/api/messages`;
   const [filesMessage, setFilesMessage] = useState([]);
   const [filesMessageUrl, setFilesMessageUrl] = useState([]);
@@ -190,7 +190,10 @@ const ConversationChat = ({ conversationId, user, participant }) => {
         }
       }
 
-      socketClient.emit('conversation-sendMessage', { content: tContent, senderId: user.id, receiverId: participant.id, conversationId, files: filesMessage });
+      socketClient.emit('conversation-sendMessage', {
+        content: tContent, senderId: user.id, receiverId: participant.id, conversationId,
+        files: filesMessage, senderName: user.firstName + ' ' + user.lastName
+      });
       setContent('');
       setFilesMessage([]);
       setFilesMessageUrl([]);
@@ -285,7 +288,10 @@ const ConversationChat = ({ conversationId, user, participant }) => {
       let confidence = event.results[0][0].confidence;
       console.log(transcript, confidence * 100 + '%')
       if (confidence < 0.6 && transcript.length) {
-        socketClient.emit('conversation-sendMessage', { content: transcript, senderId: user.id, receiverId: participant.id, conversationId, files: null });
+        socketClient.emit('conversation-sendMessage', {
+          content: transcript, senderId: user.id, receiverId: participant.id,
+          conversationId, files: null, senderName: user.firstName + ' ' + user.lastName
+        });
       } else {
         speechReplyRef.current = "Could not understand!";
         setForceRender(v4());

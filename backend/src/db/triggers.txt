@@ -51,61 +51,6 @@ BEGIN
 END $$
 DELIMITER ;
 
-DROP TRIGGER IF EXISTS after_create_message;
-DELIMITER $$
-CREATE TRIGGER after_create_message
-AFTER INSERT ON messages FOR EACH ROW
-BEGIN 
-	DECLARE done INT DEFAULT FALSE;
-	DECLARE userName VARCHAR(255);
-    DECLARE teamName VARCHAR(255);
-    DECLARE _userId INT;
-    DECLARE tmp VARCHAR(5);
-    DECLARE tmp_userId INT;
-    DECLARE my_cursor CURSOR FOR SELECT userId FROM users_teams ut WHERE ut.teamId = NEW.teamId AND ut.userId != NEW.userId;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    IF NEW.conversationId IS NOT NULL THEN
-		SELECT CONCAT(u.firstName, ' ', u.lastName) INTO userName 
-        FROM users_conversations uc
-        INNER JOIN users u ON uc.userId  = u.id
-        WHERE u.id = NEW.userId AND uc.conversationId = NEW.conversationId;
-        
-        SELECT us.userId INTO _userId
-        FROM users_conversations us
-        WHERE us.conversationId = NEW.conversationId AND us.userId != NEW.userId;
-        
-        SET @content = CONCAT(userName, ' sent message to you');
-        SET @relativeLink = CONCAT('/conversations/', NEW.userId);
-        SET tmp = createMessageNotification(@content, @relativeLink, _userId, NEW.userId, null, NEW.conversationId);
-    END IF;
-    
-    IF NEW.teamId IS NOT NULL THEN
-		SELECT CONCAT(u.firstName, ' ', u.lastName) INTO userName
-        FROM users u
-        WHERE u.id = NEW.userId;
-        
-        SELECT t.name INTO teamName
-        FROM teams t
-        WHERE t.id = NEW.teamId;
-       
-		SET @content = CONCAT(userName, ' sent message to ', teamName);
-        SET @relativeLink = CONCAT('/teams/', NEW.teamId);
-        
-        OPEN my_cursor;
-		
-        read_loop: LOOP 
-			FETCH my_cursor INTO tmp_userId;
-            IF done THEN
-				LEAVE read_loop;
-			END IF;
-            SET tmp = createMessageNotification(@content, @relativeLink, tmp_userId, NEW.userId, NEW.teamId, null);
-        END LOOP;
-            
-        CLOSE my_cursor;
-    END IF;
-END $$
-DELIMITER ;
-
 DROP TRIGGER IF EXISTS before_delete_meeting;
 DELIMITER $$
 CREATE TRIGGER before_delete_meeting

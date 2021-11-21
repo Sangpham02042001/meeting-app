@@ -101,6 +101,29 @@ export const notificationSlice = createSlice({
         },
         receivceNotification: (state, action) => {
             let { noti } = action.payload
+            if (noti.isNotiMess) {
+                if (noti.teamId) {
+                    let idx = state.notifications.findIndex(n => n.teamId == noti.teamId
+                        && n.content.includes('sent message to team'))
+                    if (idx >= 0) {
+                        state.notifications.splice(idx, 1, noti)
+                    } else {
+                        state.notifications.unshift(noti)
+                        state.numOf_UnReadNotifications += 1
+                        state.numOfNotifications += 1
+                    }
+                } else if (noti.conversationId) {
+                    let idx = state.notifications.findIndex(n => n.conversationId == noti.conversationId)
+                    if (idx >= 0) {
+                        state.notifications.splice(idx, 1, noti)
+                    } else {
+                        state.notifications.unshift(noti)
+                        state.numOf_UnReadNotifications += 1
+                        state.numOfNotifications += 1
+                    }
+                }
+                return
+            }
             let idx = state.notifications.findIndex(n => n.id == noti.id)
             if (idx < 0) {
                 state.notifications.unshift(noti)
