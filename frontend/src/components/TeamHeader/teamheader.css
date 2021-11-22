@@ -19,6 +19,11 @@
 
 .team-header .meeting-btn {
   margin-right: 10px;
+  border-color: var(--icon-color);
+}
+
+.team-header .meeting-btn:hover {
+  border-color: var(--icon-color);
 }
 
 .team-header .dropdown-content {

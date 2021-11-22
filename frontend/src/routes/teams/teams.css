@@ -218,6 +218,14 @@
   background-color: var(--primary-bg);
 }
 
+.create-team-dialog label {
+  color: var(--text-color) !important;
+}
+
+.create-team-dialog input {
+  color: var(--text-color);
+}
+
 ul {
   background-color: var(--primary-bg);
 }

@@ -167,13 +167,13 @@ export default function TeamHeader({ showTeamInfo }) {
             e.preventDefault()
             showTeamInfo()
           }}>
-            <InfoIcon color='primary' />
+            <InfoIcon style={{ color: 'var(--icon-color)' }} />
           </IconButton>
         </Tooltip>
         <Button variant="outlined" className="meeting-btn"
-          style={{ backgroundColor: '#fff' }}
+          style={{ backgroundColor: 'var(--primary-bg)', color: 'var(--icon-color)' }}
           disabled={teamReducer.team.meetingActive || teamReducer.meetingJoined}
-          startIcon={<VideoCameraFrontIcon style={{ color: 'var(--primary-color)' }} />}
+          startIcon={<VideoCameraFrontIcon style={{ color: 'var(--icon-color)' }} />}
           onClick={e => {
             e.preventDefault()
             setShowCreateMeeting(true)
@@ -192,7 +192,7 @@ export default function TeamHeader({ showTeamInfo }) {
               setAnchorEl(e.currentTarget)
             }}
           >
-            <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
+            <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer', }}></i>
           </Button>
         </Tooltip>
         <Menu

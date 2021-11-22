@@ -61,5 +61,5 @@ span,
 button,
 strong,
 label {
-  color: var(--text-color) !important;
+  color: var(--text-color);
 }

@@ -106,6 +106,7 @@ export default function Navbar() {
 
   const handleOpenStatus = (event) => {
     event.preventDefault();
+    event.stopPropagation();
     setStatusAnchorEl(event.currentTarget)
   }
 
@@ -151,6 +152,7 @@ export default function Navbar() {
           }}
           onClick={e => {
             e.preventDefault()
+            e.stopPropagation()
             setNotiListAnchorEl(e.currentTarget)
           }}>
           <Badge badgeContent={numOf_UnReadNotifications} color="error">
@@ -258,6 +260,7 @@ export default function Navbar() {
           <Avatar sx={{ width: "40px", height: "40px", cursor: 'pointer', marginRight: '15px' }}
             onClick={e => {
               e.preventDefault()
+              e.stopPropagation()
               setProfileAnchorEl(e.currentTarget)
             }}
             src={`${baseURL}/api/user/avatar/${user.id}?id=${user.avatar}`} />

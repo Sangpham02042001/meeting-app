@@ -390,13 +390,14 @@ export default function TeamDiscover() {
         <DialogContent style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>
           <form onSubmit={handleSearchUser}>
             <FormControl variant="outlined" style={{ margin: '15px 0', width: '100%' }}>
-              <InputLabel htmlFor="search-teams">
+              <InputLabel htmlFor="search-teams" style={{ color: 'var(--text-color)' }}>
                 Enter user name or email
               </InputLabel>
               <Input
                 id="search-teams"
                 value={searchUserName}
                 onChange={onSearch}
+                style={{ color: 'var(--text-color)' }}
                 startAdornment={
                   <InputAdornment position="start">
                     <SearchIcon onClick={handleSearchUser} style={{ color: 'var(--text-color)' }} />
@@ -421,7 +422,7 @@ export default function TeamDiscover() {
                         </span>
                       </span>
                       <Button variant='text' title="Add to the list of invited users"
-                        onClick={handleAddInvitedUser(user)}>
+                        onClick={handleAddInvitedUser(user)} style={{ color: 'var(--icon-color)' }}>
                         Add
                       </Button>
                     </div>
@@ -442,7 +443,7 @@ export default function TeamDiscover() {
                     </span>
                   </span>
                   <Button variant='text' title="Remove"
-                    onClick={deleteUser(user)}>
+                    onClick={deleteUser(user)} style={{ color: 'var(--icon-color)' }}>
                     Remove
                   </Button>
                 </div>
@@ -451,10 +452,10 @@ export default function TeamDiscover() {
           </div>
         </DialogContent>
         <DialogActions style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>
-          <Button variant='text' onClick={handleInviteModalClose}>
+          <Button variant='text' onClick={handleInviteModalClose} style={{ color: 'var(--icon-color)' }}>
             Skip
           </Button>
-          <Button variant='text' onClick={handleInviteAll}>
+          <Button variant='text' onClick={handleInviteAll} style={{ color: 'var(--icon-color)' }}>
             Invite
           </Button>
         </DialogActions>

@@ -2,6 +2,10 @@
   padding: 10px;
   background-color: var(--primary-bg);
   height: 100%;
+}
+
+.teamlist-container > div {
+  height: 90%;
   overflow-y: auto;
 }
 
@@ -19,26 +23,27 @@
 
 .teamlist-link {
   display: flex;
-  color: #000;
+  color: var(--text-color);
   text-decoration: none;
   padding: 10px 5px;
   border-radius: 10px;
   align-items: center;
+  margin-bottom: 5px;
 }
 
 .teamlist-link.current-team {
-  background-color: #fff;
+  background-color: var(--hover-bg-color);
   font-weight: 600;
 }
 
 .teamlist-link.current-team:hover {
-  background-color: #fff;
+  background-color: var(--hover-bg-color);
   font-weight: 600;
 }
 
 .teamlist-link:hover {
-  color: #000;
-  background-color: #fff;
+  color: var(--text-color);
+  background-color: var(--hover-bg-color);
   transition: background-color 0.3s ease;
 }
 

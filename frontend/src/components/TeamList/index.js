@@ -22,15 +22,17 @@ export default function TeamList() {
       <Link to={`/teams`} className="back-to-teams-link">
         <strong><ArrowBackIcon style={{ position: 'relative', bottom: '1px' }} /> All teams</strong>
       </Link>
-      {teamReducer.joinedTeams.map(team => (
-        <Link to={`/teams/${team.id}`} key={team.id}
-          className={`teamlist-link ${team.id == teamId ? 'current-team' : ''}`}>
-          <div className='team-list-coverphoto'
-            style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${team.id}")` }}>
-          </div>
-          {team.name}
-        </Link>
-      ))}
+      <div>
+        {teamReducer.joinedTeams.map(team => (
+          <Link to={`/teams/${team.id}`} key={team.id}
+            className={`teamlist-link ${team.id == teamId ? 'current-team' : ''}`}>
+            <div className='team-list-coverphoto'
+              style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${team.id}")` }}>
+            </div>
+            {team.name}
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }
