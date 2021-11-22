@@ -28,7 +28,6 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/
 export default function Layout({ children }) {
   const dispatch = useDispatch();
   const userReducer = useSelector(state => state.userReducer)
-  const teamReducer = useSelector(state => state.teamReducer)
   const settingReducer = useSelector(state => state.settingReducer)
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)

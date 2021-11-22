@@ -60,7 +60,6 @@ const createMeeting = async (req, res) => {
       transaction: 'meeting_app',
       id: Number(meeting.id)
     })
-    console.log(response.data, response.status)
     if (response.data && response.data.janus === 'success') {
       let sessionId = response.data.data.id
       response = await axios.post(`${janusServer}/${sessionId}`, {
@@ -68,7 +67,6 @@ const createMeeting = async (req, res) => {
         transaction: 'meeting_app',
         plugin: 'janus.plugin.videoroom'
       })
-      console.log(response.data, response.status)
       _id = response.data.data.id
       if (response.data && response.data.janus === 'success') {
         response = await axios.post(`${janusServer}/${sessionId}/${_id}`, {
@@ -76,7 +74,8 @@ const createMeeting = async (req, res) => {
           transaction: 'meeting_app',
           body: {
             request: 'create',
-            room: Number(meeting.id)
+            room: Number(meeting.id),
+            publishers: 6
           }
         })
       }

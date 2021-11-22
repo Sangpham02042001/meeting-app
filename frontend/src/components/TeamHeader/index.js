@@ -8,6 +8,8 @@ import {
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
 import InfoIcon from '@mui/icons-material/Info';
 import { baseURL } from '../../utils'
 import './teamheader.css'
@@ -110,7 +112,7 @@ export default function TeamHeader({ showTeamInfo }) {
   const handleActiveVideo = () => {
     let checkVideoActive = userVideo.current.srcObject.getVideoTracks()[0].enabled;
     userVideo.current.srcObject.getVideoTracks()[0].enabled = !checkVideoActive;
-    setVideoActive(!checkVideoActive)
+    // setVideoActive(!checkVideoActive)
 
 
   }
@@ -270,7 +272,7 @@ export default function TeamHeader({ showTeamInfo }) {
           <DialogContent>
             <div style={{ position: 'relative', width: '100%' }}>
               {isEnableVideo && <video width="100%" height="320px" muted ref={userVideo} autoPlay />}
-              {(!isVideoActive || !isEnableVideo) && <div style={{
+              {!isEnableVideo && <div style={{
                 width: '78%', height: '320px', display: 'flex',
                 position: 'absolute', top: 0, left: '11%', background: '#FFF',
                 justifyContent: 'center', alignItems: 'center'
@@ -278,7 +280,7 @@ export default function TeamHeader({ showTeamInfo }) {
                 <Avatar sx={{ width: '120px', height: '120px' }} src={`${baseURL}/api/user/avatar/${user.id}`} />
               </div>}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
+            {/* <div style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
               {
                 !isEnableVideo ?
                   <Button variant="outlined" disabled={!isEnableVideo} onClick={handleActiveVideo} style={{ border: 'none', color: '#000' }}>
@@ -290,10 +292,10 @@ export default function TeamHeader({ showTeamInfo }) {
                   </Button>
               }
               <span>Join with camera</span>
-            </div>
+            </div> */}
 
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {
+            <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
+              {/* {
                 !isEnableAudio ?
                   <Button variant="outlined" disabled={!isEnableAudio} onClick={handleActiveAudio} style={{ border: 'none', color: '#000' }}>
                     <i className="fas fa-microphone-slash"></i>
@@ -302,6 +304,27 @@ export default function TeamHeader({ showTeamInfo }) {
                   <Button variant="outlined" onClick={handleActiveAudio} style={{ border: 'none', color: '#000' }}>
                     {!isAudioActive ? <i className="fas fa-microphone-slash"></i> : <i className="fas fa-microphone"></i>}
                   </Button>
+              } */}
+              {
+                !isEnableAudio ?
+                  <Tooltip placement="top" title="No micro found">
+                    <div>
+                      <IconButton disabled >
+                        <MicOffIcon />
+                      </IconButton>
+                    </div>
+                  </Tooltip>
+                  :
+                  <IconButton onClick={handleActiveAudio} >
+                    {!isAudioActive ?
+                      <Tooltip placement="top" title="Turn on mic">
+                        <MicOffIcon />
+                      </Tooltip>
+                      :
+                      <Tooltip placement="top" title="Turn off mic">
+                        <MicIcon />
+                      </Tooltip>}
+                  </IconButton>
               }
 
               <span>Join with audio</span>
@@ -322,7 +345,7 @@ export default function TeamHeader({ showTeamInfo }) {
                     }))
                   }}
                   style={{ textDecoration: 'none' }}
-                  to={`/teams/${teamId}/meeting/${teamReducer.team.meetingActive.id}?video=${isVideoActive}&audio=${isAudioActive}`}>
+                  to={`/teams/${teamId}/meeting/${teamReducer.team.meetingActive.id}?audio=${isAudioActive}`}>
                   Join
                 </Link>}
             </Button>

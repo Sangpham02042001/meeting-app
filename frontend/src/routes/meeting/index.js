@@ -46,7 +46,7 @@ const Meeting = (props) => {
 	const [isOpenInfo, setIsOpenInfo] = useState(false);
 	const [isOpenUsers, setIsOpenUsers] = useState(false);
 	const [isOpenChat, setIsOpenChat] = useState(false);
-	const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
+	const [isVideoActive, setIsVideoActive] = useState(true);
 	const [isAudioActive, setIsAudioActive] = useState(query.get('audio') == 'true' || false);
 	const [isEnableVideo, setIsEnableVideo] = useState(false);
 	const [isEnableAudio, setIsEnableAudio] = useState(false);
@@ -367,7 +367,7 @@ const Meeting = (props) => {
 											// Video has been rejected
 											console.warning("Our video stream has been rejected, viewers won't see us");
 											// Hide the webcam video
-											// myVideo.current = null;
+											myVideo.current = null;
 										}
 									}
 								}
@@ -382,31 +382,20 @@ const Meeting = (props) => {
 									// alert("publishing...")
 								}
 								if (!videoTracks || videoTracks.length === 0) {
-									// myVideo.current = null;
-								} else {
-									if (!isVideoActive) {
-										sfuRef.current.muteVideo();
-										sfuRef.current.createOffer({
-											media: { removeVideo: true },
-											success: (jsep) => {
-												sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
-											},
-											error: (error) => { console.log(error) }
-										})
-									} else {
-										sfuRef.current.unmuteVideo();
-									}
-									// if (!isVideoActive) {
-									// 	sfuRef.current.muteVideo()
-									// 	sfuRef.current.createOffer({
-									// 		media: { removeVideo: true },
-									// 		success: (jsep) => {
-									// 			sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
-									// 		},
-									// 		error: (error) => { console.log(error) }
-									// 	})
-									// }
+									myVideo.current = null;
 								}
+								// if (!isVideoActive) {
+								// 	sfuRef.current.muteVideo();
+								// 	sfuRef.current.createOffer({
+								// 		media: { removeVideo: true },
+								// 		success: (jsep) => {
+								// 			sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+								// 		},
+								// 		error: (error) => { console.log(error) }
+								// 	})
+								// } else {
+								// 	sfuRef.current.unmuteVideo();
+								// }
 								if (!isAudioActive) {
 									sfuRef.current.muteAudio()
 								}
@@ -447,8 +436,7 @@ const Meeting = (props) => {
 				history.push('/notfound')
 			}
 
-			let meetings = teamReducer.team.meetings
-			let meeting = teamReducer.team.meetingActive && meetings.find(meeting => meeting.id == meetingId)
+			let meeting = teamReducer.team.meetingActive
 			// if (!meeting) {
 			//     history.push(`/notfound`)
 			// }
