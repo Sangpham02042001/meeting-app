@@ -67,7 +67,7 @@ export default function ConversationLink({ conversation, user }) {
 
         <div className={`${curParticipant && conversation.participantId === curParticipant.id ? 'link-selected' : ''} conversation-link`}
             onClick={changeConversation}>
-            <Badge 
+            <Badge
                 badgeContent=" "
                 variant="dot"
                 color={getColorStatus(conversation.status)}
@@ -76,7 +76,7 @@ export default function ConversationLink({ conversation, user }) {
                     horizontal: 'right',
                 }}
                 invisible={conversation.status === 'inactive'}
-                
+
             >
                 <Avatar width="40px" height="40px" userId={conversation.participantId} />
             </Badge>
@@ -85,7 +85,7 @@ export default function ConversationLink({ conversation, user }) {
                 <div className="link-name" style={{
                     opacity: curParticipant && conversation.participantId === curParticipant.id ? '1' : '0.7'
                 }}>
-                    {conversation.participantName}
+                    <span>{conversation.participantName}</span>
                 </div>
                 <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
                     {lastMessage &&

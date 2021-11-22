@@ -18,6 +18,10 @@
   align-items: center;
 }
 
+.navbar-btn span {
+  color: #fff;
+}
+
 .navbar-username {
   white-space: nowrap;
   width: 80px;

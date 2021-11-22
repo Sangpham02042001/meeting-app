@@ -139,8 +139,7 @@
 }
 
 .team-item:hover {
-  color: #000;
-  background-color: rgb(240, 238, 238);
+  background-color: rgb(151, 148, 148);
   transition: background-color 0.3s ease;
 }
 

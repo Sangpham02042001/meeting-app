@@ -2,8 +2,10 @@
   /* --main-color: linear-gradient(to right, #0d6efd 0%, #031633 100%); */
   --gray-shadow: rgb(199, 196, 196);
   --primary-color: #1962a7;
+  --icon-color: #1962a7;
   --primary-bg: #fafafa;
   --box-shadow: 2px 2px 5px #dadcdf;
+  --text-color: #000;
 }
 
 .otherLogin > * {
@@ -43,4 +45,18 @@ html {
 
 label.Mui-required > span {
   color: red;
+}
+
+p,
+a,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+input,
+span,
+button {
+  color: var(--text-color);
 }

@@ -32,7 +32,7 @@
   border-style: none;
   border-radius: 5px;
   background-color: transparent;
-  color: var(--primary-color);
+  color: var(--icon-color);
   font-size: 20px;
   cursor: pointer;
   position: relative;
@@ -42,7 +42,7 @@
   content: "";
   position: absolute;
   height: 60px;
-  border-left: solid 0.2rem var(--primary-color);
+  border-left: solid 0.2rem var(--icon-color);
   left: 0.1rem;
 }
 

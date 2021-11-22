@@ -28,11 +28,27 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/
 export default function Layout({ children }) {
   const dispatch = useDispatch();
   const userReducer = useSelector(state => state.userReducer)
+  const settingReducer = useSelector(state => state.settingReducer)
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const [isSkConnected, setIsSkConnected] = useState(false);
   const [currentNoti, setNoti] = useState(null)
+
+  useEffect(() => {
+    let r = document.querySelector(':root');
+    if (settingReducer.darkMode) {
+      r.style.setProperty('--text-color', '#FFF')
+      r.style.setProperty('--primary-bg', '#292929')
+      r.style.setProperty('--primary-color', '#0a0a0a')
+      r.style.setProperty('--icon-color', '#FFF')
+    } else {
+      r.style.setProperty('--text-color', '#000')
+      r.style.setProperty('--primary-bg', '#fafafa')
+      r.style.setProperty('--primary-color', '#1962a7')
+      r.style.setProperty('--icon-color', '#1962a7')
+    }
+  }, [settingReducer.darkMode])
 
   useEffect(() => {
     socketClient.auth = { userId: userReducer.user.id };

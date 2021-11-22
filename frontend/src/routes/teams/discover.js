@@ -444,7 +444,7 @@ export default function TeamDiscover() {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={team && team.name} onClose={closeTeam}>
+      <Dialog open={team && team.name !== undefined} onClose={closeTeam}>
         {team.name && <>
           <DialogTitle>Team Info</DialogTitle>
           <DialogContent>
