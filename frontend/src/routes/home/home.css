@@ -34,10 +34,10 @@
 }
 .contact-links {
   font-size: 40px;
-  color: var(--primary-color);
+  color: var(--icon-color);
 }
 .contact-links:hover {
-  color: var(--primary-color);
+  color: var(--icon-color);
 }
 
 #end-item {
@@ -57,11 +57,11 @@
 }
 #help {
   left: 110px;
-  color: var(--primary-color);
+  color: var(--icon-color);
   text-decoration: none;
 }
 #customize {
   right: 40px;
-  color: var(--primary-color);
+  color: var(--icon-color);
   text-decoration: none;
 }

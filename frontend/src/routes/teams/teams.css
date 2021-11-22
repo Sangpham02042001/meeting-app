@@ -63,8 +63,8 @@
 
 .create-team-box {
   width: 250px;
-  background-color: #fff;
-  box-shadow: 0 0 1px 1px #dddddd;
+  background-color: var(--primary-bg);
+  box-shadow: 0 0 1px 1px var(--gray-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -112,7 +112,7 @@
 }
 
 .invited-user-item:hover {
-  background-color: #e3e4e6;
+  background-color: var(--hover-bg-color);
 }
 
 .invited-user-item p {
@@ -140,7 +140,7 @@
 }
 
 .team-item:hover {
-  background-color: rgb(230, 230, 230);
+  background-color: var(--hover-bg-color);
   transition: background-color 0.3s ease;
 }
 
@@ -200,4 +200,28 @@
   resize: none;
   background-color: #f0f2f5;
   border-radius: 20px;
+}
+
+.search-teams-form > div::before {
+  border-bottom: 1px solid var(--text-color);
+}
+
+.search-teams-form > div:hover:before {
+  border-bottom: 1px solid var(--text-color) !important;
+}
+
+.search-teams-form > div:focus:before {
+  border-bottom: 1px solid var(--text-color) !important;
+}
+
+.create-team-dialog {
+  background-color: var(--primary-bg);
+}
+
+ul {
+  background-color: var(--primary-bg);
+}
+
+.team-type-select div {
+  color: var(--text-color) !important;
 }

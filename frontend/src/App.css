@@ -6,6 +6,7 @@
   --primary-bg: #fafafa;
   --box-shadow: 2px 2px 5px #dadcdf;
   --text-color: #000;
+  --hover-bg-color: rgb(112, 112, 112);
 }
 
 .otherLogin > * {
@@ -58,6 +59,7 @@ h6,
 input,
 span,
 button,
-strong {
-  color: var(--text-color);
+strong,
+label {
+  color: var(--text-color) !important;
 }

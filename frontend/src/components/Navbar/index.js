@@ -124,6 +124,7 @@ export default function Navbar() {
           PaperProps={{
             style: {
               minWidth: 400,
+              backgroundColor: 'var(--primary-bg)'
             }
           }}>
           {
@@ -144,7 +145,7 @@ export default function Navbar() {
                 {notifications.map((notification) => {
                   let imgSrc = `${baseURL}/api/user/avatar/${notification.createdBy}`
                   return (
-                    <MenuItem key={notification.id}>
+                    <MenuItem key={notification.id} className='notification-item'>
                       <Link className="notification" onClick={(e) => {
                         !notification.isRead && handleReadNotif(notification.id)
                         setNotiListAnchorEl(null)
@@ -159,7 +160,7 @@ export default function Navbar() {
                               }} badgeContent=" " color="primary" overlap="circular">
                                 <Avatar className="notificationImg" src={imgSrc} style={{ marginRight: '10px' }} />
                               </Badge>}
-                            {notification.content}
+                            <span>{notification.content}</span>
                           </div>
                           <Button
                             id="basic-button"
@@ -167,7 +168,8 @@ export default function Navbar() {
                             aria-haspopup="true"
                             style={{
                               minWidth: '40px',
-                              zIndex: 5
+                              zIndex: 5,
+                              color: 'var(--text-color)'
                             }}
                             onClick={e => {
                               e.preventDefault()
@@ -204,6 +206,12 @@ export default function Navbar() {
           MenuListProps={{
             'aria-labelledby': 'basic-button',
           }}
+          PaperProps={{
+            style: {
+              backgroundColor: 'var(--primary-bg)',
+              color: 'var(--text-color)'
+            }
+          }}
         >
           <MenuItem onClick={handleProfile}>
             <PersonIcon /> My profile</MenuItem>
@@ -218,6 +226,12 @@ export default function Navbar() {
           onClose={handleCloseNotiMenu}
           MenuListProps={{
             'aria-labelledby': 'basic-button',
+          }}
+          PaperProps={{
+            style: {
+              backgroundColor: 'var(--primary-bg)',
+              color: 'var(--text-color)'
+            }
           }}
         >
           <MenuItem onClick={handleHideNoti}> <CloseIcon />Hide</MenuItem>

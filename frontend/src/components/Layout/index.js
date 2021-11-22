@@ -42,11 +42,13 @@ export default function Layout({ children }) {
       r.style.setProperty('--primary-bg', '#292929')
       r.style.setProperty('--primary-color', '#0a0a0a')
       r.style.setProperty('--icon-color', '#FFF')
+      r.style.setProperty('--hover-bg-color', 'rgb(112, 112, 112)')
     } else {
       r.style.setProperty('--text-color', '#000')
       r.style.setProperty('--primary-bg', '#fafafa')
       r.style.setProperty('--primary-color', '#1962a7')
       r.style.setProperty('--icon-color', '#1962a7')
+      r.style.setProperty('--hover-bg-color', 'rgb(240, 240, 240)')
     }
   }, [settingReducer.darkMode])
 

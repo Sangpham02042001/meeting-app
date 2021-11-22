@@ -19,6 +19,7 @@ import { createNewTeam, requestJoinTeam, getJoinedTeams, getRequestTeams, getInv
 export default function TeamDiscover() {
   const user = useSelector(state => state.userReducer.user)
   const teamReducer = useSelector(state => state.teamReducer)
+  const settingReducer = useSelector(state => state.settingReducer)
   const dispatch = useDispatch()
   const history = useHistory()
   const [teamName, setTeamName] = useState('')
@@ -250,20 +251,26 @@ export default function TeamDiscover() {
     <Grid container>
       <Grid item sm={12} style={{ padding: '15px' }}>
         <Link to='/teams' style={{ color: '#000', textDecoration: 'none', fontWeight: '700' }}>
-          <ArrowBackIcon style={{ position: 'relative', bottom: '1px' }} /> All teams
+          <ArrowBackIcon style={{ position: 'relative', bottom: '1px', color: 'var(--text-color)' }} /> <span>All teams</span>
         </Link>
         <h3 style={{ margin: '15px 0' }}>Join or create a team</h3>
         <div style={{ display: 'flex', width: '100%' }}>
           <span className='create-team-box'>
             <img className="create-team-empty-img" src="teamimage-empty.svg" alt="Team Image" />
-            <h5>Create Team</h5>
-            <div style={{ marginBottom: '15px', display: 'flex' }}>
-              <Avatar className='create-team-box-user' src="create-team-user1.svg" alt="Team Image" />
-              <Avatar className='create-team-box-user' src="create-team-user2.svg" alt="Team Image" />
-              <Avatar className='create-team-box-user' src="create-team-user3.svg" alt="Team Image" />
-            </div>
+            <h5 style={{ color: 'var(--text-color)' }}>Create Team</h5>
+            {settingReducer.darkMode ?
+              <div style={{ marginBottom: '15px', display: 'flex' }}>
+                <Avatar className='create-team-box-user' src="create-team-user1-dark.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user2-dark.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user3-dark.svg" alt="Team Image" />
+              </div> : <div style={{ marginBottom: '15px', display: 'flex' }}>
+                <Avatar className='create-team-box-user' src="create-team-user1.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user2.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user3.svg" alt="Team Image" />
+              </div>}
             <Button variant="text" onClick={handleCreateTeam}
-              startIcon={<GroupIcon style={{ color: 'rgb(25, 118, 210)' }} />}>
+              style={{ color: 'var(--icon-color)' }}
+              startIcon={<GroupIcon style={{ color: 'var(--icon-color)' }} />}>
               Create team
             </Button>
           </span>
@@ -276,7 +283,8 @@ export default function TeamDiscover() {
                 onChange={e => setTeamCode(e.target.value)}
                 placeholder='Enter code' />
             </div>
-            <Button variant="text" onClick={findTeamWithCode} disabled={!teamCode}>
+            <Button variant="text" onClick={findTeamWithCode}
+              disabled={!teamCode} style={{ color: 'var(--icon-color)' }}>
               Join team
             </Button>
           </span>
@@ -289,17 +297,18 @@ export default function TeamDiscover() {
             {loading && <div style={{ textAlign: 'center', marginRight: '10px' }}>
               <CircularProgress />
             </div>}
-            <FormControl variant="outlined">
+            <FormControl variant="outlined" className='search-teams-form'>
               <InputLabel htmlFor="search-teams">
-                Find teams
+                <span>Find teams</span>
               </InputLabel>
               <Input
                 id="search-teams"
                 value={searchTeamName}
                 onChange={e => setSearchTeamName(e.target.value)}
+                style={{ color: 'var(--text-color)' }}
                 startAdornment={
                   <InputAdornment position="start">
-                    <SearchIcon />
+                    <SearchIcon style={{ color: 'var(--text-color)' }} />
                   </InputAdornment>
                 }
               />
@@ -312,8 +321,10 @@ export default function TeamDiscover() {
               <Avatar src={`${baseURL}/api/team/coverphoto/${team.id}`} sx={{ width: '80px', height: '80px' }} />
               <h5>{team.name}</h5>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '80%' }}>
-                <Button variant='text' onClick={handleRequestJoin(team)}>Request</Button>
+                <Button variant='text' style={{ color: 'var(--icon-color)' }}
+                  onClick={handleRequestJoin(team)}>Request</Button>
                 <Button variant='text'
+                  style={{ color: 'var(--icon-color)' }}
                   onClick={e => {
                     e.preventDefault()
                     setSearchTeams(searchTeams.filter(t => t.id !== team.id))
@@ -325,24 +336,28 @@ export default function TeamDiscover() {
         </div>
       </Grid>
       <Dialog open={isCreateModalShow} onClose={handleCreateModalClose}>
-        <DialogContent>
+        <DialogContent className="create-team-dialog">
           <h4>Create your team</h4>
           <p>Collaborate closely with a group of people inside your
             organization based on project, initiative, or common interest.</p>
           <TextField label="Team name" variant="standard"
-            style={{ width: '100%', marginBottom: '20px' }}
+            style={{ width: '100%', marginBottom: '20px', color: 'var(--text-color)' }}
             value={teamName} onChange={e => setTeamName(e.target.value)} />
 
           <TextField
             select
             label="Privacy"
-            style={{ width: '100%', marginBottom: '20px' }}
+            style={{ width: '100%', marginBottom: '20px', color: 'var(--text-color)' }}
             value={isPublicTeam}
             onChange={e => setPublicTeam(e.target.value === 'true' ? true : false)}
-            variant="standard"
+            variant="standard" className='team-type-select'
           >
-            <MenuItem value='true'>Public - Anyone can request to join and find this team</MenuItem>
-            <MenuItem value='false'>Private - Only team owners can add members</MenuItem>
+            <MenuItem style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }} value='true'>
+              Public - Anyone can request to join and find this team
+            </MenuItem>
+            <MenuItem style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }} value='false'>
+              Private - Only team owners can add members
+            </MenuItem>
           </TextField>
           <p>Team CoverPhoto</p>
           <FormControl variant="outlined" label="outlined" style={{ width: '100%', marginBottom: '20px' }}>
@@ -354,11 +369,12 @@ export default function TeamDiscover() {
             />
           </FormControl>
         </DialogContent>
-        <DialogActions>
-          <Button variant='text' onClick={handleCreateModalClose}>
+        <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+          <Button variant='text' onClick={handleCreateModalClose} style={{ color: 'var(--icon-color)' }}>
             Close
           </Button>
           <Button variant='text'
+            style={{ color: 'var(--icon-color)' }}
             disabled={!teamName || !teamCoverPhoto}
             onClick={createTeamAndInviteUsers}>
             Next
@@ -368,10 +384,10 @@ export default function TeamDiscover() {
 
 
       <Dialog open={isInviteModalShow} onClose={handleInviteModalClose} maxWidth='sm' fullWidth={true}>
-        <DialogTitle>
+        <DialogTitle style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>
           Invite users to join your team
         </DialogTitle>
-        <DialogContent>
+        <DialogContent style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>
           <form onSubmit={handleSearchUser}>
             <FormControl variant="outlined" style={{ margin: '15px 0', width: '100%' }}>
               <InputLabel htmlFor="search-teams">
@@ -383,7 +399,7 @@ export default function TeamDiscover() {
                 onChange={onSearch}
                 startAdornment={
                   <InputAdornment position="start">
-                    <SearchIcon onClick={handleSearchUser} />
+                    <SearchIcon onClick={handleSearchUser} style={{ color: 'var(--text-color)' }} />
                   </InputAdornment>
                 }
               />
@@ -434,7 +450,7 @@ export default function TeamDiscover() {
             </div>}
           </div>
         </DialogContent>
-        <DialogActions>
+        <DialogActions style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>
           <Button variant='text' onClick={handleInviteModalClose}>
             Skip
           </Button>
@@ -446,8 +462,8 @@ export default function TeamDiscover() {
 
       <Dialog open={team && team.name !== undefined} onClose={closeTeam}>
         {team.name && <>
-          <DialogTitle>Team Info</DialogTitle>
-          <DialogContent>
+          <DialogTitle style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>Team Info</DialogTitle>
+          <DialogContent style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>
             <h4>Team name: {team.name}</h4>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
               <Avatar sx={{ width: '100px', height: '100px' }} src={`${baseURL}/api/team/coverphoto/${team.id}`} />
@@ -464,7 +480,7 @@ export default function TeamDiscover() {
               {isRequestOfTeam(team.id)}
             </div>
           </DialogContent>
-          <DialogActions>
+          <DialogActions style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>
             <Button variant='text' onClick={closeTeam}>
               Close
             </Button>
