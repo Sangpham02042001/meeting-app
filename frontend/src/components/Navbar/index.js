@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useHistory } from 'react-router-dom'
-import { baseURL, timeDiff } from '../../utils'
+import { baseURL, socketClient, timeDiff } from '../../utils'
 import './navbar.css'
 import { getNotifs, readNotif, hideNoti, deleteNoti } from '../../store/reducers/notification.reducer'
 import InfiniteScroll from 'react-infinite-scroll-component'
@@ -9,17 +9,35 @@ import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Avatar, Menu, MenuItem, Badge, Button } from '@mui/material'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import Check from '@mui/icons-material/Check';
+import {
+  Avatar, Menu, MenuItem, Badge, Button, IconButton,
+  ListItemIcon, ListItemText
+} from '@mui/material'
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import { setMyStatus } from '../../store/reducers/user.reducer'
+
+const statusOptions = {
+  'Active': 'active',
+  'Sleep': 'sleep',
+  'Do not disturb': 'busy',
+  'Invisible': 'inactive',
+};
 
 export default function Navbar() {
   let user = useSelector(state => state.userReducer.user);
+  const myStatus = useSelector(state => state.userReducer.status);
   const [profileAnchorEl, setProfileAnchorEl] = useState(null)
   let isOpenProfileMenu = Boolean(profileAnchorEl)
   const [notiListAnchorEl, setNotiListAnchorEl] = useState(null)
   let isOpenNofiListMenu = Boolean(notiListAnchorEl)
   const [notiAnchorEl, setNotiAnchorEl] = useState(null)
   let isOpenNotiMenu = Boolean(notiAnchorEl)
+  const [statusAnchorEl, setStatusAnchorEl] = useState(null)
+  const [statusSelectedIdx, setStatusSelectedIdx] = useState(0);
   const [currentNotiId, setNotiId] = useState(null)
+
   const dispatch = useDispatch()
   const history = useHistory()
 
@@ -41,8 +59,12 @@ export default function Navbar() {
   let hasMore = useSelector(state => state.notificationReducer.hasMore)
   useEffect(() => {
     dispatch(getNotifs(0))
-    // dispatch(cleanNotificationState)
+
   }, [])
+
+  useEffect(() => {
+    setStatusSelectedIdx(Object.values(statusOptions).findIndex(s => s === myStatus))
+  }, [myStatus])
 
   const handleProfile = e => {
     e.preventDefault()
@@ -82,6 +104,32 @@ export default function Navbar() {
     setNotiAnchorEl(null)
   }
 
+  const handleOpenStatus = (event) => {
+    event.preventDefault();
+    setStatusAnchorEl(event.currentTarget)
+  }
+
+  const handleSetStatus = (event, index) => {
+    let status = Object.values(statusOptions)[index];
+    dispatch(setMyStatus({ userId: user.id, status }));
+    socketClient.emit('user-change-status', { userId: user.id, status })
+    setStatusAnchorEl(null);
+    setStatusSelectedIdx(index);
+  }
+
+  const getColorStatus = (idx) => {
+    let status = Object.values(statusOptions)[idx];
+    if (status === 'active') {
+      return 'success';
+    } else if (status === 'sleep') {
+      return 'warning';
+    } else if (status === 'busy') {
+      return 'error';
+    } else if (status === 'inactive') {
+      return 'info';
+    }
+  }
+
   return (
     <nav className="navbar">
       <div style={{ display: 'flex' }}>
@@ -97,22 +145,18 @@ export default function Navbar() {
       </div>
 
       <div className="navbar-btn">
-        <button
+        <IconButton
           style={{
             marginRight: '15px',
-            outline: "none",
-            border: 'none',
-            background: 'transparent',
-            color: '#FFF'
           }}
           onClick={e => {
             e.preventDefault()
             setNotiListAnchorEl(e.currentTarget)
           }}>
           <Badge badgeContent={numOf_UnReadNotifications} color="error">
-            <i className="fas fa-bell"></i>
+            <NotificationsIcon />
           </Badge>
-        </button>
+        </IconButton>
         <Menu
           className="notification-menu"
           anchorEl={notiListAnchorEl}
@@ -156,19 +200,16 @@ export default function Navbar() {
                               : <Badge anchorOrigin={{
                                 vertical: 'top',
                                 horizontal: 'left',
-                              }} badgeContent=" " color="primary" overlap="circular">
+                              }} badgeContent=" "
+                                variant="dot"
+                                color="primary"
+                                overlap="circular">
+
                                 <Avatar className="notificationImg" src={imgSrc} style={{ marginRight: '10px' }} />
                               </Badge>}
                             {notification.content}
                           </div>
-                          <Button
-                            id="basic-button"
-                            aria-controls="basic-menu"
-                            aria-haspopup="true"
-                            style={{
-                              minWidth: '40px',
-                              zIndex: 5
-                            }}
+                          <IconButton
                             onClick={e => {
                               e.preventDefault()
                               e.stopPropagation()
@@ -176,8 +217,8 @@ export default function Navbar() {
                               setNotiId(notification.id)
                             }}
                           >
-                            <i className="fas fa-ellipsis-h" style={{ cursor: 'pointer' }}></i>
-                          </Button>
+                            <MoreHorizIcon />
+                          </IconButton>
                         </div>
                         <p style={{ fontSize: '15px', color: 'gray' }}>
                           {timeDiff(notification.createdAt)}
@@ -191,12 +232,52 @@ export default function Navbar() {
           }
         </Menu>
 
-        <Avatar sx={{ width: "40px", height: "40px", cursor: 'pointer', marginRight: '15px' }}
-          onClick={e => {
-            e.preventDefault()
-            setProfileAnchorEl(e.currentTarget)
+        <Badge
+          badgeContent=" "
+          variant="dot"
+          color={getColorStatus(statusSelectedIdx)}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
           }}
-          src={`${baseURL}/api/user/avatar/${user.id}?id=${user.avatar}`} />
+          onClick={handleOpenStatus}
+          overlap='circular'
+          sx={{
+            cursor: 'pointer'
+          }}
+        >
+          <Avatar sx={{ width: "40px", height: "40px", cursor: 'pointer', marginRight: '15px' }}
+            onClick={e => {
+              e.preventDefault()
+              setProfileAnchorEl(e.currentTarget)
+            }}
+            src={`${baseURL}/api/user/avatar/${user.id}?id=${user.avatar}`} />
+        </Badge>
+
+        <Menu
+          anchorEl={statusAnchorEl}
+          open={Boolean(statusAnchorEl)}
+          onClose={e => {
+            setStatusAnchorEl(null)
+          }}
+        >
+          {Object.keys(statusOptions).map((status, index) => {
+            return (
+              <MenuItem
+                key={status}
+                onClick={e => handleSetStatus(e, index)}
+                selected={index === statusSelectedIdx}>
+                <ListItemIcon>
+                  {statusSelectedIdx === index &&
+                    <Check fontSize="small" />
+                  }
+                </ListItemIcon>
+                <ListItemText>{status}</ListItemText>
+              </MenuItem>
+            )
+          })}
+        </Menu>
+
         <Menu
           anchorEl={profileAnchorEl}
           open={isOpenProfileMenu}
@@ -206,9 +287,16 @@ export default function Navbar() {
           }}
         >
           <MenuItem onClick={handleProfile}>
-            <PersonIcon /> My profile</MenuItem>
+            <ListItemIcon>
+              <PersonIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Profile</ListItemText>
+          </MenuItem>
           <MenuItem onClick={handleLogout}>
-            <LogoutIcon /> Logout
+            <ListItemIcon>
+              <LogoutIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Logout</ListItemText>
           </MenuItem>
         </Menu>
 
@@ -220,13 +308,21 @@ export default function Navbar() {
             'aria-labelledby': 'basic-button',
           }}
         >
-          <MenuItem onClick={handleHideNoti}> <CloseIcon />Hide</MenuItem>
-          <MenuItem onClick={handleDeleteNoti}> <DeleteIcon /> Delete
+          <MenuItem onClick={handleHideNoti}>
+            <ListItemIcon>
+              <CloseIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Hide</ListItemText></MenuItem>
+          <MenuItem onClick={handleDeleteNoti}>
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Delete</ListItemText>
           </MenuItem>
         </Menu>
 
         <strong className="navbar-username">{user.firstName}</strong>
-      </div>
+      </div >
     </nav >
 
   )

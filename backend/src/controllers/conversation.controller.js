@@ -38,11 +38,24 @@ const getConversations = async (req, res) => {
 
 const setConversation = async ({ senderId, receiverId, conversationId }) => {
     try {
-        const conversation = await Conversation.findByPk(conversationId);
-        if (!conversation) {
+        let conversation = await sequelize.query(
+            "SELECT distinct conversationId " +
+            "FROM users_conversations uc " +
+            "JOIN (SELECT conversationId FROM users_conversations WHERE userId = :senderId) tb1 using(conversationId) " +
+            "WHERE userId = :receiverId ",
+            {
+                replacements: {
+                    senderId, receiverId
+                },
+                type: QueryTypes.SELECT
+            }
+        )  
+        // const conversation = await Conversation.findByPk(conversationId);
+        if (!conversation.length) {
             const newConversation = await Conversation.create({});
             await sequelize.query(
-                "INSERT INTO users_conversations(createdAt, updatedAt, userId, conversationId) VALUES (NOW(), NOW(), :senderId, :cvId), (NOW(), NOW(), :receiverId, :cvId)",
+                "INSERT INTO users_conversations(createdAt, updatedAt, userId, conversationId) " +
+                "VALUES (NOW(), NOW(), :senderId, :cvId), (NOW(), NOW(), :receiverId, :cvId)",
                 {
                     replacements: {
                         cvId: newConversation.id,

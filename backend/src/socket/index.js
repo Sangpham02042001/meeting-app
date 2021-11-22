@@ -5,16 +5,11 @@ const { getActiveMemberMeeting, addMemberMeeting,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification } = require('../controllers/notification.controller')
-const { socketRequestTeam, setUserStatus } = require('../controllers/user.controller')
-const userSockets = {};
+const { socketRequestTeam, setUserStatus, getUserStatus } = require('../controllers/user.controller')
 
+const userSockets = {};
 const meetingsAudio = {};
 
-
-const status = {
-    active: 'active',
-    inActive: 'inactive'
-}
 
 const socketServer = (io, socket) => {
     if (!userSockets[socket.userId]) {
@@ -26,9 +21,21 @@ const socketServer = (io, socket) => {
 
     //**********************************USER*************************************//
     socket.on('user-connect', async ({ userId }) => {
-        let report = await setUserStatus({ userId, status: status.active })
+        let status = await getUserStatus({ userId });
+        if (status === 'inactive') {
+            status = 'active';
+        }
+        console.log(status)
+        let report = await setUserStatus({ userId, status })
         if (report) {
-            io.emit('user-connected', { userId, status: status.active })
+            io.emit('user-changed-status', { userId, status })
+        }
+    })
+
+    socket.on('user-change-status', async ({ userId, status }) => {
+        let report = await setUserStatus({ userId, status })
+        if (report) {
+            io.emit('user-changed-status', { userId, status })
         }
     })
 
@@ -182,23 +189,26 @@ const socketServer = (io, socket) => {
     //**********************************CONVERSATION*************************************//
 
     socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, files, senderName }) => {
-        const converId = await setConversation({ senderId, receiverId, conversationId });
-        console.log(files);
-        const message = await setMessage({ content, conversationId: converId, senderId, files });
+        let converId = await setConversation({ senderId, receiverId, conversationId });
+        let message;
+        if (converId) {
+            message = await setMessage({ content, conversationId: converId, senderId, files });
+        }
         if (message) {
             socket.emit('conversation-receiveMessage', {
                 messageId: message.id, content, senderId, receiverId,
                 conversationId: converId, files: message.files, photos: message.photos,
-                createdAt: message.createdAt
+                createdAt: message.createdAt, senderName
             })
-            const { noti } = await createMessageNotification({ conversationId, senderId, receiverId, senderName })
+
+            const { noti } = await createMessageNotification({ conversationId: converId, senderId, receiverId, senderName })
 
             if (userSockets[receiverId] && userSockets[receiverId].length) {
                 for (const socketId of userSockets[receiverId]) {
                     socket.to(socketId).emit('conversation-receiveMessage', {
                         messageId: message.id, content, senderId, receiverId,
                         conversationId: converId, files: message.files, photos: message.photos,
-                        createdAt: message.createdAt, noti
+                        createdAt: message.createdAt, senderName, noti
                     });
                 }
             }
@@ -280,9 +290,13 @@ const socketServer = (io, socket) => {
         }
 
         //user
-        let report = await setUserStatus({ userId: socket.userId, status: status.inActive });
+        let status = await getUserStatus({ userId: socket.userId });
+        if (status === 'active') {
+            status = 'inactive';
+        }
+        let report = await setUserStatus({ userId: socket.userId, status });
         if (report) {
-            socket.broadcast.emit('user-disconnect', { userId: socket.userId, status: status.inActive })
+            socket.broadcast.emit('user-disconnect', { userId: socket.userId, status })
         }
 
         userSockets[socket.userId] = userSockets[socket.userId].filter(socketId => socketId != socket.id)

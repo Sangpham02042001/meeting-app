@@ -118,13 +118,15 @@ export default function ConversationChat({ conversation, user }) {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages.length])
 
+  useEffect
+
   useEffect(() => {
     let converId = conversation.conversationId;
     dispatch(getParticipant({ participantId: conversation.participantId }))
     dispatch(getMessages({ conversationId: converId }))
     dispatch(readConversation({ conversationId: converId, userId: user.id }))
     setConversationId(converId)
-  }, [conversationId])
+  }, [conversation.conversationId])
 
   const onWriteMessage = (event) => {
     const textareaLineHeight = 24;
@@ -174,7 +176,7 @@ export default function ConversationChat({ conversation, user }) {
 
       socketClient.emit('conversation-sendMessage', {
         content: tContent, senderId: user.id, receiverId: conversation.participantId, conversationId,
-        files: filesMessage, senderName: user.firstName + ' ' + user.lastName
+        files: filesMessage, senderName: user.firstName.concat(' ', user.lastName)
       });
       setContent('');
       setFilesMessage([]);
@@ -299,14 +301,22 @@ export default function ConversationChat({ conversation, user }) {
   const getColorStatus = (status) => {
     if (status === 'active') {
       return 'success';
-    } else if (status === 'inactive') {
+    } else if (status === 'sleep') {
+      return 'warning';
+    } else if (status === 'busy') {
       return 'error';
+    } else if (status === 'inactive') {
+      return 'info';
     }
   }
 
   const getStatusString = (status) => {
     if (status === 'active') {
-      return 'Online';
+      return 'Active now';
+    } else if (status === 'sleep') {
+      return 'Away';
+    } else if (status === 'busy') {
+      return 'Do not disturb';
     } else if (status === 'inactive') {
       return 'Offline';
     }
@@ -356,7 +366,7 @@ export default function ConversationChat({ conversation, user }) {
         </div>
         <div className="content-message" ref={scrollRef} onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}>
           <div className="info-beginner-content">
-            <Avatar width="40px" height="40px" userId={conversation.participantId} />
+            <Avatar width="80px" height="80px" userId={conversation.participantId} />
             <div >
               {conversation.participantName}
             </div>

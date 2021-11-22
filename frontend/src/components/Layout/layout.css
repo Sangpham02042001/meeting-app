@@ -32,10 +32,13 @@
   border-style: none;
   border-radius: 5px;
   background-color: transparent;
-  color: var(--icon-color);
   font-size: 20px;
   cursor: pointer;
   position: relative;
+}
+
+.list-selection .btn-default svg {
+  color: var(--icon-color);
 }
 
 .list-selection .btn-active::before {

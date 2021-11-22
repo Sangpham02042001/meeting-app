@@ -488,14 +488,31 @@ const setUserStatus = async ({ userId, status }) => {
           status, userId
         }
       })
-
-
     return {
       message: 'update done'
     }
   } catch (error) {
     console.log(error);
     return null;
+  }
+}
+
+const getUserStatus = async ({ userId }) => {
+  try {
+    let userStatus = await sequelize.query(
+      "SELECT status FROM users " +
+      "WHERE id = :userId",
+      {
+        replacements: {
+          userId
+        },
+        type: QueryTypes.SELECT
+      })
+    if (!userStatus.length) return 'inactive'
+    return userStatus[0].status;
+  } catch (error) {
+    console.log(error);
+    return 'inactive';
   }
 }
 
@@ -506,5 +523,5 @@ module.exports = {
   outTeam, cancelJoinRequest, confirmInvitations,
   removeInvitations, getInvitations, getNotifications,
   searchUsers, socketRequestTeam, getUserStatusList,
-  setUserStatus
+  setUserStatus, getUserStatus
 }
