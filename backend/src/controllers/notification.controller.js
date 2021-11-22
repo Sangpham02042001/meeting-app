@@ -10,9 +10,9 @@ const updateRead = async (req, res) => {
         id: notiId
       }
     })
-    if (notification.userId != id) {
-      throw `Not authorized`
-    }
+    // if (notification.userId != id) {
+    //   throw `Not authorized`
+    // }
     notification.isRead = true
     await notification.save()
     return res.status(200).json({ notification })
@@ -31,9 +31,9 @@ const deleteNotification = async (req, res) => {
         id: notiId
       }
     })
-    if (notification.userId != id) {
-      throw `Not authorized`
-    }
+    // if (notification.userId != id) {
+    //   throw `Not authorized`
+    // }
     await notification.destroy()
     return res.status(200).json({ message: 'Delete notification successfully' })
   } catch (error) {

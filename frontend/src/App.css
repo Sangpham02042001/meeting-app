@@ -57,6 +57,7 @@ h5,
 h6,
 input,
 span,
-button {
+button,
+strong {
   color: var(--text-color);
 }

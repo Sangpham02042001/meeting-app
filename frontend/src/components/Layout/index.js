@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { NavLink, useRouteMatch, Link } from 'react-router-dom'
+import { NavLink, useRouteMatch, Link, useParams } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { Avatar, Snackbar, Alert, Tooltip } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
@@ -28,6 +28,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/
 export default function Layout({ children }) {
   const dispatch = useDispatch();
   const userReducer = useSelector(state => state.userReducer)
+  const teamReducer = useSelector(state => state.teamReducer)
   const settingReducer = useSelector(state => state.settingReducer)
   let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
@@ -71,20 +72,20 @@ export default function Layout({ children }) {
     })
 
     //conversation
-    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt }) => {
+    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt, noti }) => {
       dispatch(sendMessageCv({
         messageId, content, senderId, receiverId,
         conversationId, files, photos, createdAt
       }));
-      // if (noti && noti.id) {
-      //   dispatch(receivceNotification({ noti }))
-      //   if (!currentNoti || !currentNoti.isNotiMess
-      //     || (currentNoti.createdBy != noti.createdBy && currentNoti.conversationId != noti.conversationId)) {
-      //     setTimeout(() => {
-      //       setNoti(noti)
-      //     }, 500)
-      //   }
-      // }
+      if (noti && noti.id) {
+        dispatch(receivceNotification({ noti }))
+        // if (!currentNoti || !currentNoti.isNotiMess
+        //   || (currentNoti.createdBy != noti.createdBy && currentNoti.conversationId != noti.conversationId)) {
+        //   setTimeout(() => {
+        //     setNoti(noti)
+        //   }, 500)
+        // }
+      }
     })
 
     socketClient.on('conversation-removed-message', ({ conversationId, messageId, receiverId, senderId }) => {
@@ -114,12 +115,12 @@ export default function Layout({ children }) {
       }))
       if (noti && noti.id) {
         dispatch(receivceNotification({ noti }))
-        if (!currentNoti || !currentNoti.isNotiMess
-          || (currentNoti.createdBy != noti.createdBy && currentNoti.teamId != noti.id)) {
-          setTimeout(() => {
-            setNoti(noti)
-          }, 500)
-        }
+        // if (!currentNoti || !currentNoti.isNotiMess
+        //   || (currentNoti.createdBy != noti.createdBy && currentNoti.teamId != noti.id)) {
+        //   setTimeout(() => {
+        //     setNoti(noti)
+        //   }, 500)
+        // }
       }
     })
 

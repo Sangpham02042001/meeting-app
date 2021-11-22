@@ -191,14 +191,14 @@ const socketServer = (io, socket) => {
                 conversationId: converId, files: message.files, photos: message.photos,
                 createdAt: message.createdAt
             })
-            // const { noti } = await createMessageNotification({ conversationId, senderId, receiverId, senderName })
+            const { noti } = await createMessageNotification({ conversationId, senderId, receiverId, senderName })
 
             if (userSockets[receiverId] && userSockets[receiverId].length) {
                 for (const socketId of userSockets[receiverId]) {
                     socket.to(socketId).emit('conversation-receiveMessage', {
                         messageId: message.id, content, senderId, receiverId,
                         conversationId: converId, files: message.files, photos: message.photos,
-                        createdAt: message.createdAt
+                        createdAt: message.createdAt, noti
                     });
                 }
             }

@@ -52,12 +52,13 @@
 }
 
 .teams-header button {
-  background-color: #fff;
+  color: var(--text-color);
+  background-color: var(--primary-bg);
   box-shadow: 0 0 1px 1px #dddddd;
 }
 
 .teams-header button:hover {
-  background-color: #efeff0;
+  /* background-color: #efeff0; */
 }
 
 .create-team-box {
@@ -139,7 +140,7 @@
 }
 
 .team-item:hover {
-  background-color: rgb(151, 148, 148);
+  background-color: rgb(230, 230, 230);
   transition: background-color 0.3s ease;
 }
 

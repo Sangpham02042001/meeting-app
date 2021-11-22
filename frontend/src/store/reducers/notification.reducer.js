@@ -43,7 +43,13 @@ export const notificationSlice = createSlice({
             state.loading = false
             state.loaded = true
             state.hasMore = true
-            state.notifications = state.notifications.concat(notifications)
+            state.notifications = state.notifications.concat(notifications.sort((noti1) => {
+                if (!noti1.isRead) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }))
             state.numOf_UnReadNotifications = action.payload.numOf_UnReadNotifications
             state.numOfNotifications = action.payload.numOfNotifications
             // window.localStorage.setItem('notifications', JSON.stringify(notifications))
@@ -106,7 +112,11 @@ export const notificationSlice = createSlice({
                     let idx = state.notifications.findIndex(n => n.teamId == noti.teamId
                         && n.content.includes('sent message to team'))
                     if (idx >= 0) {
-                        state.notifications.splice(idx, 1, noti)
+                        if (state.notifications[idx].isRead) {
+                            state.numOf_UnReadNotifications += 1
+                        }
+                        state.notifications.splice(idx, 1)
+                        state.notifications.unshift(noti)
                     } else {
                         state.notifications.unshift(noti)
                         state.numOf_UnReadNotifications += 1
@@ -115,7 +125,11 @@ export const notificationSlice = createSlice({
                 } else if (noti.conversationId) {
                     let idx = state.notifications.findIndex(n => n.conversationId == noti.conversationId)
                     if (idx >= 0) {
-                        state.notifications.splice(idx, 1, noti)
+                        if (state.notifications[idx].isRead) {
+                            state.numOf_UnReadNotifications += 1
+                        }
+                        state.notifications.splice(idx, 1)
+                        state.notifications.unshift(noti)
                     } else {
                         state.notifications.unshift(noti)
                         state.numOf_UnReadNotifications += 1
