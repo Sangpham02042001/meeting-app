@@ -44,7 +44,6 @@ export const conversationSlice = createSlice({
       files: [],
       participant: null,
     },
-    conversationStatus: [],
     conversationCall: {
       isRinging: false,
       isCalling: false,
@@ -107,12 +106,13 @@ export const conversationSlice = createSlice({
   reducers: {
     sendMessageCv: (state, action) => {
       const { messageId, content, senderId, receiverId,
-        conversationId, files, photos, createdAt } = action.payload;
+        conversationId, files, photos, createdAt, senderName } = action.payload;
       let convParticipant = state.conversations.find(conv => {
         return (conv.participantId === receiverId || conv.participantId === senderId)
       });
 
       if (convParticipant) {
+        console.log('replaceeeeee id', convParticipant)
         convParticipant.conversationId = conversationId;
       }
 
@@ -120,7 +120,7 @@ export const conversationSlice = createSlice({
       if (!conversation && !convParticipant) {
         state.conversations.unshift({
           conversationId, participantId: senderId,
-          participantName: 'Anonymous', isRead: false
+          participantName: senderName, isRead: false, status: false
         })
       }
 
@@ -128,9 +128,15 @@ export const conversationSlice = createSlice({
         state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, files, photos, createdAt });
       }
 
-      //check is read?
       const pIdx = state.conversations.findIndex(conv => conv.conversationId === conversationId);
+
+      
+
+
+      
+      
       if (pIdx >= 0) {
+        //check is read?
         conversation = state.conversations[pIdx];
         conversation.isRead = true;
         if (!state.conversation.participant || state.conversation.participant.id !== receiverId) {
@@ -138,6 +144,11 @@ export const conversationSlice = createSlice({
         }
         state.conversations.splice(pIdx, 1);
         state.conversations.unshift(conversation);
+
+        //check status
+        if (conversation.participantId === senderId) {
+          conversation.status = 'active';
+        }
       }
 
       state.lastMessageChange = !state.lastMessageChange;
@@ -176,6 +187,7 @@ export const conversationSlice = createSlice({
     },
     clearConversation: (state, action) => {
       state.conversation.messages = [];
+      state.conversation.participant = null;
     },
     removeMessageCv: (state, action) => {
       let { conversationId, messageId } = action.payload;

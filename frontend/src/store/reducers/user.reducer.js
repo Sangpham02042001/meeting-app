@@ -9,6 +9,7 @@ const initialState = {
   loading: false,
   authenticated: false,
   loaded: false,
+  status: 'active',
 }
 
 export const signin = createAsyncThunk('user/signin', async ({ email, password }, { rejectWithValue }) => {
@@ -67,6 +68,10 @@ export const userSlice = createSlice({
       }
       state.loaded = true
     },
+    setMyStatus: (state, action) => {
+      const { userId, status } = action.payload;
+      if (userId === state.user.id) state.status = status;
+    }
   },
   extraReducers: {
     [signin.pending]: (state, action) => {
@@ -106,6 +111,6 @@ export const userSlice = createSlice({
   }
 })
 
-export const { isAuthenticated } = userSlice.actions;
+export const { isAuthenticated, setMyStatus } = userSlice.actions;
 
 export default userSlice.reducer

@@ -164,6 +164,7 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
     console.log(error)
     return {
       message: 'error',
+      noti: {},
       error
     }
   }

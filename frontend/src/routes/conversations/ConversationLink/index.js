@@ -58,8 +58,12 @@ export default function ConversationLink({ conversation, user }) {
     const getColorStatus = (status) => {
         if (status === 'active') {
             return 'success';
-        } else if (status === 'inactive') {
+        } else if (status === 'sleep') {
+            return 'warning';
+        } else if (status === 'busy') {
             return 'error';
+        } else if (status === 'inactive') {
+            return 'info';
         }
     }
 

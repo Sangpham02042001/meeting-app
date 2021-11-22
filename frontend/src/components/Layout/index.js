@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { NavLink, useRouteMatch, Link, useParams } from 'react-router-dom'
+import { NavLink, useRouteMatch, Link } from 'react-router-dom'
 import Navbar from '../Navbar';
-import { Avatar, Snackbar, Alert, Tooltip } from '@mui/material';
+import { Avatar, Snackbar, Alert, Tooltip, Badge } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import MessageIcon from '@mui/icons-material/Message';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { socketClient, baseURL } from '../../utils';
+import { setMyStatus } from '../../store/reducers/user.reducer'
 import {
   sendMessageCv, conversationCalling, cancelCall,
   removeMessageCv, setConversationStatus
@@ -29,7 +30,7 @@ export default function Layout({ children }) {
   const dispatch = useDispatch();
   const userReducer = useSelector(state => state.userReducer)
   const settingReducer = useSelector(state => state.settingReducer)
-  let params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
+  const params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const [isSkConnected, setIsSkConnected] = useState(false);
@@ -63,9 +64,12 @@ export default function Layout({ children }) {
     //user
     socketClient.emit('user-connect', { userId: userReducer.user.id })
 
-    socketClient.on('user-connected', ({ userId, status }) => {
+    socketClient.on('user-changed-status', ({ userId, status }) => {
       dispatch(setConversationStatus({ userId, status }))
+      dispatch(setMyStatus({ userId, status }))
     })
+
+
 
     socketClient.on('user-disconnect', ({ userId, status }) => {
       console.log(userId, status)
@@ -73,19 +77,15 @@ export default function Layout({ children }) {
     })
 
     //conversation
-    socketClient.on('conversation-receiveMessage', ({ messageId, content, senderId, receiverId, conversationId, files, photos, createdAt, noti }) => {
+    socketClient.on('conversation-receiveMessage', ({
+      messageId, content, senderId, receiverId, conversationId,
+      files, photos, createdAt, senderName, noti }) => {
       dispatch(sendMessageCv({
         messageId, content, senderId, receiverId,
-        conversationId, files, photos, createdAt
+        conversationId, files, photos, createdAt, senderName
       }));
       if (noti && noti.id) {
         dispatch(receivceNotification({ noti }))
-        // if (!currentNoti || !currentNoti.isNotiMess
-        //   || (currentNoti.createdBy != noti.createdBy && currentNoti.conversationId != noti.conversationId)) {
-        //   setTimeout(() => {
-        //     setNoti(noti)
-        //   }, 500)
-        // }
       }
     })
 
@@ -116,12 +116,6 @@ export default function Layout({ children }) {
       }))
       if (noti && noti.id) {
         dispatch(receivceNotification({ noti }))
-        // if (!currentNoti || !currentNoti.isNotiMess
-        //   || (currentNoti.createdBy != noti.createdBy && currentNoti.teamId != noti.id)) {
-        //   setTimeout(() => {
-        //     setNoti(noti)
-        //   }, 500)
-        // }
       }
     })
 
@@ -293,11 +287,20 @@ export default function Layout({ children }) {
             </NavLink>
             <NavLink to='/conversations' activeClassName="btn-active">
               <button className="btn-default" >
-                <Tooltip title='Messages' placement='right'>
-                  <MessageIcon />
-                </Tooltip>
+                <Badge
+                  badgeContent={6}
+                  max={5}
+                  color='error'
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                >
+                  <Tooltip title='Messages' placement='right'>
+                    <MessageIcon />
+                  </Tooltip>
+                </Badge>
               </button>
-
             </NavLink>
             <NavLink to='/teams' activeClassName="btn-active">
               <button className="btn-default">
