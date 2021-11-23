@@ -372,7 +372,7 @@ export default function Team(props) {
   }
 
 
-  return (teamReducer.teamLoaded && <Grid container>
+  return (teamReducer.teamLoaded ? <Grid container className='team-page-container'>
     <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--gray-shadow)' }}>
       <TeamList />
     </Grid>
@@ -662,6 +662,7 @@ export default function Team(props) {
         {message.content}
       </Alert>
     </Snackbar>
-  </Grid>
+  </Grid> :
+    <Loading />
   )
 }

@@ -140,7 +140,7 @@ const Message = React.memo(({
                   'aria-labelledby': 'basic-button',
                 }}
               >
-                <MenuItem onClick={handleRemoveMessage}>Remove</MenuItem>
+                <MenuItem onClick={handleRemoveMessage} style={{ color: 'var(--text-color)' }}>Remove</MenuItem>
               </Menu>
             </div>
             <Tooltip title={getTime(message.createdAt)} placement="left">

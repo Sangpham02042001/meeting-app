@@ -232,12 +232,12 @@ export default function TeamHeader({ showTeamInfo }) {
             Confirm delete this team
           </DialogTitle>
           <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
-            <Button variant="contained" onClick={handleCloseDeleteModal}
-              style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="text" onClick={handleCloseDeleteModal}
+              style={{ color: 'var(--icon-color)' }}>
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleDeleteTeam}
-              style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="text" onClick={handleDeleteTeam}
+              style={{ color: 'var(--icon-color)' }}>
               Delete</Button>
           </DialogActions>
         </Dialog>
@@ -247,12 +247,12 @@ export default function TeamHeader({ showTeamInfo }) {
             <h4>Confirm out this team</h4>
           </DialogTitle>
           <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
-            <Button variant="contained" onClick={handleCloseOutModal}
-              style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="text" onClick={handleCloseOutModal}
+              style={{ color: 'var(--icon-color)' }}>
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleOutTeam}
-              style={{ backgroundColor: 'var(--primary-bg)' }}>Out</Button>
+            <Button variant="text" onClick={handleOutTeam}
+              style={{ color: 'var(--icon-color)' }}>Out</Button>
           </DialogActions>
         </Dialog>
 
@@ -262,12 +262,12 @@ export default function TeamHeader({ showTeamInfo }) {
             Create new meeting
           </DialogTitle>
           <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
-            <Button variant="contained" onClick={handleCloseCreateMeeting}
-              style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="text" onClick={handleCloseCreateMeeting}
+              style={{ color: 'var(--icon-color)' }}>
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleCreateMeeting}
-              style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="text" onClick={handleCreateMeeting}
+              style={{ color: 'var(--icon-color)' }}>
               Create
             </Button>
           </DialogActions>

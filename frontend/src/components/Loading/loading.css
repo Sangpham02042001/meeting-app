@@ -9,9 +9,9 @@
   align-items: center;
   overflow: hidden;
   z-index: 100;
-  background-color: #ffffffc9;
+  /* background-color: #fffffff0; */
 }
 
 .loading-container img {
-  width: 100px;
+  width: 200px;
 }
