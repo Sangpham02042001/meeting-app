@@ -105,6 +105,7 @@
 
 .profile-info input {
   color: var(--text-color) !important;
+  -webkit-text-fill-color: var(--text-color) !important;
 }
 
 /* .profile-info label.Mui-disabled {

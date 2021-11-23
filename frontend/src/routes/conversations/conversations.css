@@ -24,7 +24,7 @@
   margin: 15px;
   align-items: center;
   padding: 5px;
-  background-color: #f0f2f5;
+  background-color: var(--primary-bg);
 }
 
 .conversation-list .input-search {
@@ -35,7 +35,8 @@
   outline: none;
   border: none;
   resize: none;
-  background-color: #f0f2f5;
+  /* background-color: #f0f2f5; */
+  background-color: var(--primary-bg);
   display: flex;
 }
 
@@ -43,7 +44,7 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
+  background-color: var(--primary-bg);
   width: 100%;
   top: 50px;
   left: 0px;

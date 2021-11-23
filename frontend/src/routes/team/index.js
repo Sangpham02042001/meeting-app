@@ -523,7 +523,6 @@ export default function Team(props) {
               <div style={{
                 marginLeft: isTeamInfoShow ? '3%' : '5%',
                 width: '100%',
-                marginRight: input.length ? '3%' : 0
               }}>
                 <textarea
                   variant="outlined"
@@ -544,7 +543,7 @@ export default function Team(props) {
                 </Tooltip>
               </div>
               <div className="input-list-btn" >
-                <div style={{ display: input.length ? 'none' : 'flex' }}>
+                <div style={{ display: 'flex' }}>
                   <Tooltip title="Attach photos">
                     <IconButton >
                       <label style={{

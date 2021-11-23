@@ -18,6 +18,7 @@ export default function Conversations(props) {
     const [searchUsers, setSearchUsers] = useState([]);
     const [searchLoading, setSearchLoading] = useState(false);
     const user = useSelector(state => state.userReducer.user);
+    const settingReducer = useSelector(state => state.settingReducer)
     const conversations = useSelector(state => state.conversationReducer.conversations);
     const dispatch = useDispatch();
     const history = useHistory();
@@ -62,17 +63,19 @@ export default function Conversations(props) {
     }
 
     return (
-        <div className="conversation-page" 
-        onClick={e => {
-            // e.preventDefault();
-            // e.stopPropagation();
-            setSearchUsers([])
-            setTextSearch('')
-        }}
+        <div className="conversation-page"
+            onClick={e => {
+                // e.preventDefault();
+                // e.stopPropagation();
+                setSearchUsers([])
+                setTextSearch('')
+            }}
         >
             <div className="conversation-list">
-                <div className="search-user">
-                    <SearchIcon color='primary' />
+                <div className="search-user" style={{
+                    border: settingReducer ? '1px solid var(--gray-shadow)' : 'none'
+                }}>
+                    <SearchIcon style={{ color: 'var(--icon-color)' }} />
                     <input
                         placeholder="Search"
                         className="input-search"
@@ -92,7 +95,7 @@ export default function Conversations(props) {
                                             <div key={userFind.id} className="user-find" onClick={event => handleChooseUser(userFind, event)}>
                                                 <Avatar width="40px" height="40px" userId={userFind.id} />
                                                 <div style={{ marginLeft: "15px" }}>
-                                                    {userFind.userName}
+                                                    <span>{userFind.userName}</span>
                                                 </div>
                                             </div>
                                         )
@@ -101,7 +104,7 @@ export default function Conversations(props) {
                                     <>
                                         <LoadingButton loading={searchLoading} variant="text" />
                                         <div style={{ display: searchLoading && 'none', fontWeight: '600' }}>
-                                            No user found
+                                            <span>No user found</span>
                                         </div>
                                     </>
                             }

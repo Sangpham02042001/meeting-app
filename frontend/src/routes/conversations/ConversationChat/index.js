@@ -42,7 +42,6 @@ import useRecorder from '../../../hooks/useRecorder';
 const Accordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
-  border: `1px solid ${theme.palette.divider}`,
   '&:not(:last-child)': {
     borderBottom: 0,
   },
@@ -340,25 +339,25 @@ export default function ConversationChat({ conversation, user }) {
               <Avatar width="40px" height="40px" userId={conversation.participantId} />
             </Badge>
             <div style={{ marginLeft: '15px' }}>
-              <div style={{ fontSize: '1.2em', fontWeight: '500' }}>{conversation.participantName}</div>
-              <div>{getStatusString(conversation.status)}</div>
+              <div style={{ fontSize: '1.2em', fontWeight: '500' }}><span>{conversation.participantName}</span></div>
+              <div><span>{getStatusString(conversation.status)}</span></div>
             </div>
 
           </div>
           <div className="header-btn-list">
             <Tooltip title="Start a voice call">
               <IconButton onClick={handleVoiceCall}>
-                <PhoneIcon color='primary' />
+                <PhoneIcon style={{ color: 'var(--icon-color)' }} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Start a video call">
               <IconButton >
-                <VideocamIcon color='primary' />
+                <VideocamIcon style={{ color: 'var(--icon-color)' }} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Conversation info">
               <IconButton onClick={e => setShowInfo(!showInfo)}>
-                <InfoIcon color='primary' />
+                <InfoIcon style={{ color: 'var(--icon-color)' }} />
               </IconButton>
             </Tooltip>
 
@@ -537,7 +536,7 @@ export default function ConversationChat({ conversation, user }) {
                     display: 'flex'
                   }}
                     htmlFor="files">
-                    <AttachFileIcon color="primary" />
+                    <AttachFileIcon style={{ color: 'var(--icon-color)' }} />
                   </label>
                   <input type="file"
                     onChange={onFileInputChange}
@@ -552,9 +551,9 @@ export default function ConversationChat({ conversation, user }) {
               <Tooltip title="Speech to text">
                 <IconButton onClick={runSpeechRecognition}>
                   {voiceDetectRef.current ?
-                    <MicNoneIcon color="primary" />
+                    <MicNoneIcon style={{ color: 'var(--icon-color)' }} />
                     :
-                    <MicIcon color="primary" />
+                    <MicIcon style={{ color: 'var(--icon-color)' }} />
                   }
                 </IconButton>
               </Tooltip>
@@ -570,7 +569,7 @@ export default function ConversationChat({ conversation, user }) {
             </div>
             <Tooltip title="Send message" style={{ display: !content.length ? 'none' : 'flex' }}>
               <IconButton onClick={handleSendMessage} >
-                <SendIcon color="primary" />
+                <SendIcon style={{ color: 'var(--icon-color)' }} />
               </IconButton>
             </Tooltip>
           </div>
@@ -585,18 +584,18 @@ export default function ConversationChat({ conversation, user }) {
           </div>
         </div>
         <div className="conversation-info-detail">
-          <Accordion>
+          <Accordion className='cv-info-expand-container'>
             <AccordionSummary aria-controls="custom-chat-content" id="custom-chat-header">
               <Typography>Customize Chat</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <div className="accordion-detail">
-                <Button startIcon={<DarkModeIcon color="primary" />}>Dark Mode</Button>
-                <Button startIcon={<ColorLensIcon color="primary" />}>Change Themes</Button>
+                <Button startIcon={<DarkModeIcon style={{ color: 'var(--icon-color)' }} />}>Dark Mode</Button>
+                <Button startIcon={<ColorLensIcon style={{ color: 'var(--icon-color)' }} />}>Change Themes</Button>
               </div>
             </AccordionDetails>
           </Accordion>
-          <Accordion >
+          <Accordion className='cv-info-expand-container'>
             <AccordionSummary aria-controls="shared-media-content" id="shared-media-header">
               <Typography>Shared Media</Typography>
             </AccordionSummary>
@@ -622,7 +621,7 @@ export default function ConversationChat({ conversation, user }) {
 
             </AccordionDetails>
           </Accordion>
-          <Accordion >
+          <Accordion className='cv-info-expand-container'>
             <AccordionSummary aria-controls="shared-file-content" id="shared-file-header">
               <Typography>Shared Files</Typography>
             </AccordionSummary>
