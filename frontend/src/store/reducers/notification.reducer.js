@@ -43,13 +43,7 @@ export const notificationSlice = createSlice({
             state.loading = false
             state.loaded = true
             state.hasMore = true
-            state.notifications = state.notifications.concat(notifications.sort((noti1) => {
-                if (!noti1.isRead) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            }))
+            state.notifications = state.notifications.concat(notifications)
             state.numOf_UnReadNotifications = action.payload.numOf_UnReadNotifications
             state.numOfNotifications = action.payload.numOfNotifications
             // window.localStorage.setItem('notifications', JSON.stringify(notifications))

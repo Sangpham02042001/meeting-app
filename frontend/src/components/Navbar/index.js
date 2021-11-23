@@ -281,7 +281,7 @@ export default function Navbar() {
                 selected={index === statusSelectedIdx}>
                 <ListItemIcon>
                   {statusSelectedIdx === index &&
-                    <Check fontSize="small" />
+                    <Check fontSize="small" style={{ color: 'var(--text-color)' }} />
                   }
                 </ListItemIcon>
                 <ListItemText>{status}</ListItemText>
@@ -306,13 +306,13 @@ export default function Navbar() {
         >
           <MenuItem onClick={handleProfile}>
             <ListItemIcon>
-              <PersonIcon fontSize="small" />
+              <PersonIcon fontSize="small" style={{ color: 'var(--text-color)' }} />
             </ListItemIcon>
             <ListItemText>Profile</ListItemText>
           </MenuItem>
           <MenuItem onClick={handleLogout}>
             <ListItemIcon>
-              <LogoutIcon fontSize="small" />
+              <LogoutIcon fontSize="small" style={{ color: 'var(--text-color)' }} />
             </ListItemIcon>
             <ListItemText>Logout</ListItemText>
           </MenuItem>
@@ -334,12 +334,12 @@ export default function Navbar() {
         >
           <MenuItem onClick={handleHideNoti}>
             <ListItemIcon>
-              <CloseIcon fontSize="small" />
+              <CloseIcon fontSize="small" style={{ color: 'var(--text-color)' }} />
             </ListItemIcon>
             <ListItemText>Hide</ListItemText></MenuItem>
           <MenuItem onClick={handleDeleteNoti}>
             <ListItemIcon>
-              <DeleteIcon fontSize="small" />
+              <DeleteIcon fontSize="small" style={{ color: 'var(--text-color)' }} />
             </ListItemIcon>
             <ListItemText>Delete</ListItemText>
           </MenuItem>

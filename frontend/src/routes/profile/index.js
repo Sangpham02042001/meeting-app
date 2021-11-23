@@ -232,6 +232,7 @@ export default function Profile() {
 				value={currentTab}
 				onChange={handleTabChange}
 				aria-label="Vertical tabs example"
+				className='profile-tabs'
 				sx={{ borderRight: 1, borderColor: 'divider', height: 195 }}
 			>
 				<Tab label="Profile" {...a11yProps(0)} />
@@ -241,7 +242,7 @@ export default function Profile() {
 			</Tabs>
 			<div className='profile-right-tab'>
 				<TabPanel value={currentTab} index={0}>
-					<div>
+					<div className='profile-info'>
 						<div>
 							<div className='profile-avatar-container'>
 								<Avatar
@@ -261,13 +262,16 @@ export default function Profile() {
 						<TextField fullWidth label="Last Name" id="lastName" margin="dense"
 							variant="standard" value={lastName} onChange={e => setLastName(e.target.value)} />
 						<div style={{ marginTop: '15px', textAlign: 'right' }}>
-							<Button variant="text" disabled={isDisableSave()} onClick={handleSave}>Save</Button>
-							<Button variant="text" onClick={cancelChange}>Cancel</Button>
+							<Button variant="text" disabled={isDisableSave()}
+								style={{ color: 'var(--icon-color)' }}
+								onClick={handleSave}>Save</Button>
+							<Button variant="text" onClick={cancelChange}
+								style={{ color: 'var(--icon-color)' }}>Cancel</Button>
 						</div>
 					</div>
 				</TabPanel>
 				<TabPanel value={currentTab} index={1}>
-					<div>
+					<div className='profile-team-list'>
 						{teamReducer.joinedTeams.length > 0 ?
 							teamReducer.joinedTeams.map(team => {
 								return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} key={team.id}>
@@ -280,8 +284,10 @@ export default function Profile() {
 									</Link>
 									{team.hostId !== userReducer.user.id ?
 										<Button className="team-action-btn" variant="contained"
+											style={{ backgroundColor: 'var(--primary-color)' }}
 											onClick={handleOutTeam(team.id)}>Out Team</Button> :
 										<Button className="team-action-btn" variant="contained"
+											style={{ backgroundColor: 'var(--primary-color)' }}
 											onClick={handleDeleteTeam(team.id)}>Delete team</Button>}
 								</div>
 							})
@@ -289,7 +295,7 @@ export default function Profile() {
 					</div>
 				</TabPanel>
 				<TabPanel value={currentTab} index={2}>
-					<div>
+					<div className='profile-team-list'>
 						{teamReducer.invitedTeams.length > 0 ?
 							teamReducer.invitedTeams.map(team => {
 								return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} key={team.id}>
@@ -302,8 +308,11 @@ export default function Profile() {
 									</Link>
 									<div>
 										<Button className="team-action-btn" variant="contained"
+											style={{ backgroundColor: 'var(--primary-color)' }}
 											onClick={handleConfirmInvitation(team.id)}>Agree</Button>
-										<Button className="team-action-btn" style={{ marginLeft: '20px' }} variant="contained"
+										<Button className="team-action-btn"
+											style={{ marginLeft: '20px', backgroundColor: 'var(--primary-color)' }}
+											variant="contained"
 											onClick={(handleRemoveInvitation(team.id))}>Disagree</Button>
 									</div>
 								</div>
@@ -312,7 +321,7 @@ export default function Profile() {
 					</div>
 				</TabPanel>
 				<TabPanel value={currentTab} index={3}>
-					<div>
+					<div className='profile-team-list'>
 						{teamReducer.requestingTeams.length > 0 ?
 							teamReducer.requestingTeams.map(team => {
 								return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} key={team.id}>
@@ -323,7 +332,9 @@ export default function Profile() {
 											sx={{ width: 50, height: 50, }} />
 										<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
 									</span>
-									<Button className="team-action-btn" style={{ marginLeft: '20px' }} variant="contained"
+									<Button className="team-action-btn"
+										style={{ marginLeft: '20px', backgroundColor: 'var(--primary-color)' }}
+										variant="contained"
 										onClick={handleCancelRequest(team.id)}
 									>Cancel</Button>
 								</div>
@@ -339,12 +350,13 @@ export default function Profile() {
 				aria-labelledby="alert-dialog-title"
 				aria-describedby="alert-dialog-description"
 			>
-				<DialogTitle id="alert-dialog-title">
+				<DialogTitle id="alert-dialog-title"
+					style={{ backgroundColor: 'var(--primary-bg)' }}>
 					{"Do you really want to out this team ?"}
 				</DialogTitle>
-				<DialogActions>
-					<Button onClick={handleCloseOutModel}>Cancel</Button>
-					<Button onClick={confirmOutTeam} autoFocus>
+				<DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={handleCloseOutModel}>Cancel</Button>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={confirmOutTeam} autoFocus>
 						Confirm
 					</Button>
 				</DialogActions>
@@ -356,12 +368,13 @@ export default function Profile() {
 				aria-labelledby="alert-dialog-title"
 				aria-describedby="alert-dialog-description"
 			>
-				<DialogTitle id="alert-dialog-title">
+				<DialogTitle id="alert-dialog-title"
+					style={{ backgroundColor: 'var(--primary-bg)' }}>
 					{"Do you really want to delete this team ?"}
 				</DialogTitle>
-				<DialogActions>
-					<Button onClick={handleCloseDeleteModel}>Cancel</Button>
-					<Button onClick={confirmDeleteTeam} autoFocus>
+				<DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={handleCloseDeleteModel}>Cancel</Button>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={confirmDeleteTeam} autoFocus>
 						Confirm
 					</Button>
 				</DialogActions>
@@ -373,12 +386,13 @@ export default function Profile() {
 				aria-labelledby="alert-dialog-title"
 				aria-describedby="alert-dialog-description"
 			>
-				<DialogTitle id="alert-dialog-title">
+				<DialogTitle id="alert-dialog-title"
+					style={{ backgroundColor: 'var(--primary-bg)' }}>
 					{"Confirm to join this team ?"}
 				</DialogTitle>
-				<DialogActions>
-					<Button onClick={handleCloseConfirmInvitation}>Cancel</Button>
-					<Button onClick={agreeInvitaton} autoFocus>
+				<DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={handleCloseConfirmInvitation}>Cancel</Button>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={agreeInvitaton} autoFocus>
 						Agree
 					</Button>
 				</DialogActions>
@@ -390,12 +404,13 @@ export default function Profile() {
 				aria-labelledby="alert-dialog-title"
 				aria-describedby="alert-dialog-description"
 			>
-				<DialogTitle id="alert-dialog-title">
+				<DialogTitle id="alert-dialog-title"
+					style={{ backgroundColor: 'var(--primary-bg)' }}>
 					{"Confirm to refuse invitation to join this team ?"}
 				</DialogTitle>
-				<DialogActions>
-					<Button onClick={handleCloseRemoveInvitation}>Cancel</Button>
-					<Button onClick={disagreeInvitation} autoFocus>
+				<DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={handleCloseRemoveInvitation}>Cancel</Button>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={disagreeInvitation} autoFocus>
 						Disagree
 					</Button>
 				</DialogActions>
@@ -407,12 +422,13 @@ export default function Profile() {
 				aria-labelledby="alert-dialog-title"
 				aria-describedby="alert-dialog-description"
 			>
-				<DialogTitle id="alert-dialog-title">
+				<DialogTitle id="alert-dialog-title"
+					style={{ backgroundColor: 'var(--primary-bg)' }}>
 					{"Confirm to cancel request to join this team ?"}
 				</DialogTitle>
-				<DialogActions>
-					<Button onClick={handleCloseCancelRequest}>Cancel</Button>
-					<Button onClick={cancelJoin} autoFocus>
+				<DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={handleCloseCancelRequest}>Cancel</Button>
+					<Button style={{ color: 'var(--icon-color)' }} onClick={cancelJoin} autoFocus>
 						Agree
 					</Button>
 				</DialogActions>

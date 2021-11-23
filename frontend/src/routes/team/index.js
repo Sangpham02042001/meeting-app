@@ -385,7 +385,7 @@ export default function Team(props) {
           {currentNumOfMeetMess !== 0 && <div className='team-message-list' onScroll={handleMessageScroll}
             ref={scrollRef} style={{
               height: teamBody.current && teamBody.current.offsetHeight ?
-                teamBody.current.offsetHeight - (filesMessageUrl.length ? 170 : 50) - (rows - 1) * 24 : '560px'
+                teamBody.current.offsetHeight - (filesMessageUrl.length ? 170 : 50) - (rows - 1) * 24 : 'calc(100vh - 170px)'
             }}>
             {currentNumOfMeetMess && meetmess.slice(0, currentNumOfMeetMess - 1)
               .map((item, idx) => (item.isMessage ? <div key={'message' + item.id}>

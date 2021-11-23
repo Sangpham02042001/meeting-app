@@ -10,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
 import { axiosAuth, baseURL, socketClient } from '../../utils'
 import _ from 'lodash'
+import './invite-user-wrapper.css'
 
 export default function InviteUsersWrapper({ users }) {
   const dispatch = useDispatch()
@@ -125,13 +126,13 @@ export default function InviteUsersWrapper({ users }) {
         <Button variant="contained" onClick={e => {
           e.preventDefault()
           setShow(true)
-        }}>Invite</Button>
+        }} style={{ backgroundColor: 'var(--primary-color)' }}>Invite</Button>
       </div>
-      <Dialog open={isShow} onClose={handleInviteModalClose} minWidth={`sm`} fullWidth={true}>
-        <DialogTitle>
+      <Dialog className='invite-user-wrapper' open={isShow} onClose={handleInviteModalClose} minWidth={`sm`} fullWidth={true}>
+        <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>
           Invite users to join your team
         </DialogTitle>
-        <DialogContent>
+        <DialogContent style={{ backgroundColor: 'var(--primary-bg)' }}>
           <form onSubmit={handleSearchUser}>
             <FormControl variant="outlined" style={{ margin: '15px 0', width: '100%' }}>
               <InputLabel htmlFor="search-teams">
@@ -142,9 +143,10 @@ export default function InviteUsersWrapper({ users }) {
                 autoComplete='off'
                 value={searchUserName}
                 onChange={onSearch}
+                style={{ color: 'var(--text-color)' }}
                 startAdornment={
                   <InputAdornment position="start">
-                    <SearchIcon onClick={handleSearchUser} />
+                    <SearchIcon onClick={handleSearchUser} style={{ color: 'var(--text-color)' }} />
                   </InputAdornment>
                 }
               />
@@ -153,7 +155,7 @@ export default function InviteUsersWrapper({ users }) {
           <div style={{ minHeight: '300px' }}>
             {searchUserName && (
               (loading ? <div style={{ textAlign: 'center', padding: '10px' }}>
-                <CircularProgress />
+                <CircularProgress style={{ color: 'var(--icon-color)' }} />
               </div> : <div className="invited-user-list">
                 {searchUsers.filter(user => invitedUsers.map(u => u.id).indexOf(user.id) < 0)
                   .map(user => (
@@ -166,7 +168,8 @@ export default function InviteUsersWrapper({ users }) {
                         </span>
                       </span>
                       <Button variant="text" title="Add to the list of invited users"
-                        onClick={handleAddInvitedUser(user)}>
+                        onClick={handleAddInvitedUser(user)}
+                        style={{ color: 'var(--icon-color)' }} >
                         Add
                       </Button>
                     </div>
@@ -187,7 +190,8 @@ export default function InviteUsersWrapper({ users }) {
                     </span>
                   </span>
                   <Button variant="text" title="Remove"
-                    onClick={deleteUser(user)}>
+                    onClick={deleteUser(user)}
+                    style={{ color: 'var(--icon-color)' }} >
                     Remove
                   </Button>
                 </div>
@@ -195,11 +199,13 @@ export default function InviteUsersWrapper({ users }) {
             </div>}
           </div>
         </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={handleInviteModalClose}>
+        <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+          <Button variant="text" onClick={handleInviteModalClose}
+            style={{ color: 'var(--icon-color)' }}>
             Cancel
           </Button>
           <Button variant="text" disabled={!invitedUsers.length}
+            style={{ color: 'var(--icon-color)' }}
             onClick={handleInviteAll}>
             Invite
           </Button>

@@ -8,6 +8,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Message from '../Message'
+import './meeting-item.css'
 
 export default function MeetingItem({ meeting }) {
   const user = useSelector(state => state.userReducer.user)
@@ -39,26 +40,26 @@ export default function MeetingItem({ meeting }) {
     width: '96%',
     margin: '15px auto',
     fontSize: '14px'
-  }}>
+  }} className="meeting-item">
     <div className='time-text'>
       <span>
         {getTime(meeting.createdAt)}
       </span>
     </div>
-    <Accordion>
+    <Accordion style={{ backgroundColor: 'var(--primary-bg)' }}>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls="panel1a-content"
         id="panel1a-header">
         <div style={{ width: '100%' }}>
           <Typography style={{ fontSize: '14px' }}>Meeting created by <strong>{hostName}</strong></Typography>
-          <hr />
+          <hr style={{ color: 'var(--text-color)' }} />
           {meeting.members && <div style={{
             marginTop: '10px',
             display: 'flex',
             alignItems: 'center'
           }}>
-            Joined by <AvatarGroup max={5} style={{ marginLeft: '20px' }}>
+            <span>Joined by</span> <AvatarGroup max={5} style={{ marginLeft: '20px' }}>
               {meeting.members.map(member => (
                 <Tooltip key={member.id} title={member.userName} placement='top'>
                   <Avatar sx={{ width: '40px', height: '40px' }}

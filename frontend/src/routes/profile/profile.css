@@ -15,6 +15,13 @@
   padding-top: 10vh;
 }
 
+.profile-layout .profile-team-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 40px;
+  min-width: 800px;
+}
+
 .profile-right-tab {
   min-width: 500px;
   max-height: 550px;
@@ -79,3 +86,27 @@
 .team-action-btn {
   max-height: 40px;
 }
+
+.profile-tabs button {
+  color: var(--icon-color);
+}
+
+.profile-tabs button.Mui-selected {
+  color: var(--icon-color);
+}
+
+.profile-tabs > div > span {
+  background-color: var(--icon-color);
+}
+
+.profile-info label {
+  color: var(--text-color) !important;
+}
+
+.profile-info input {
+  color: var(--text-color) !important;
+}
+
+/* .profile-info label.Mui-disabled {
+  color: gray ;
+} */
