@@ -49,8 +49,7 @@
 }
 
 .team-header-menu-btn#basic-button {
-  color: #fff;
-  background-color: var(--primary-color);
+  color: var(--icon-color);
   min-width: 0;
   padding: 10px;
   border-radius: 50%;

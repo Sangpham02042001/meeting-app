@@ -10,7 +10,7 @@
 
 .team-info-expand-container {
   width: 100%;
-  background: var(--primary-bg);
+  background-color: var(--primary-bg) !important;
   box-shadow: none !important;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
@@ -29,7 +29,7 @@
 }
 
 .team-info-expand-container > div:first-child:hover {
-  background-color: rgb(231, 230, 230);
+  background-color: var(--hover-bg-color);
 }
 
 .team-info-expand-container .shared-media-list {
@@ -51,6 +51,10 @@
 
 .team-info-expand-container::before {
   display: none;
+}
+
+.team-info-expand-container svg {
+  color: var(--text-color);
 }
 
 .shared-file-list > div {

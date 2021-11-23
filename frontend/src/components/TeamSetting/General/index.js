@@ -64,7 +64,7 @@ export default function TeamGeneralSetting() {
   }
 
   return (
-    <div style={{ margin: 'auto', maxWidth: '450px' }}>
+    <div style={{ margin: 'auto', maxWidth: '450px' }} className='team-general-setting'>
       <div>
         <div className='profile-avatar-container'>
           <Avatar
@@ -79,11 +79,11 @@ export default function TeamGeneralSetting() {
       </div>
       <div style={{ margin: '10px 0', fontSize: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          Team code: <strong>{teamReducer.team.teamCode}</strong>
+          <span>Team code:</span> <strong>{teamReducer.team.teamCode}</strong>
         </div>
         <Tooltip title="Copy to clipboard">
           <IconButton onClick={copyTeamCode}>
-            <ContentCopyIcon />
+            <ContentCopyIcon style={{ color: 'var(--text-color)' }} />
           </IconButton>
         </Tooltip>
       </div>
@@ -96,13 +96,19 @@ export default function TeamGeneralSetting() {
       />
       <TextField variant="standard"
         select label="Change Team Visibility"
-        style={{ width: '100%', marginBottom: '20px' }}
+        style={{ width: '100%', marginBottom: '20px', color: 'var(--text-color)' }}
         value={teamType}
-        onChange={e => setTeamType(e.target.value)}>
-        <MenuItem value="public">Public - Anyone can request to join and find this team</MenuItem>
-        <MenuItem value="private">Private - Only team owners can add members</MenuItem>
+        onChange={e => setTeamType(e.target.value)}
+        className="team-type-select">
+        <MenuItem style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }} value="public">
+          Public - Anyone can request to join and find this team
+        </MenuItem>
+        <MenuItem style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }} value="private">
+          Private - Only team owners can add members
+        </MenuItem>
       </TextField>
-      <Button variant="text"
+      <Button variant="contained"
+        style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}
         onClick={handleUpdateTeamInfo}
         disabled={(teamName && teamName.trim() === teamReducer.team.name)
           && !imageUrl && (teamType === teamReducer.team.teamType)}>

@@ -39,6 +39,7 @@ import TeamInfo from '../../components/TeamInfo';
 export default function Team(props) {
   const { teamId } = useParams()
   const teamReducer = useSelector(state => state.teamReducer)
+  const settingReducer = useSelector(state => state.settingReducer)
   let meetmess = useSelector(state => state.teamReducer.team.meetmess)
   let currentNumOfMeetMess = (meetmess || {}).length || 0
   const user = useSelector(state => state.userReducer.user)
@@ -512,7 +513,7 @@ export default function Team(props) {
             {isOpenEmojiList &&
               <div style={{
                 position: 'absolute',
-                top: filesMessage.length ? '-330px' : '-440px',
+                top: filesMessage.length ? '-220px' : '-330px',
                 right: '100px',
               }}>
                 <Picker onSelect={onEmojiClick} set='facebook' />
@@ -532,6 +533,7 @@ export default function Team(props) {
                   ref={inputRef}
                   rows={rows}
                   value={input}
+                  style={{ backgroundColor: settingReducer.darkMode ? '#545557' : '#f0f2f5' }}
                   onKeyDown={handleEnterMessage}
                   onClick={e => { e.preventDefault(); setIsOpenEmojiList(false) }}
                   onChange={onWriteMessage} />
@@ -568,7 +570,7 @@ export default function Team(props) {
                         display: 'flex'
                       }}
                         htmlFor="files">
-                        <AttachFileIcon color="primary" />
+                        <AttachFileIcon style={{ color: 'var(--icon-color)' }} />
                       </label>
                       <input type="file"
                         onChange={onFileInputChange}
@@ -582,9 +584,9 @@ export default function Team(props) {
                   <Tooltip title="Speech to text">
                     <IconButton onClick={runSpeechRecognition}>
                       {voiceDetectRef.current ?
-                        <MicNoneIcon style={{ color: "#1A73E8" }} />
+                        <MicNoneIcon style={{ color: 'var(--icon-color)' }} />
                         :
-                        <MicIcon style={{ color: "#1A73E8" }} />
+                        <MicIcon style={{ color: 'var(--icon-color)' }} />
                       }
                     </IconButton>
                   </Tooltip>
@@ -593,7 +595,7 @@ export default function Team(props) {
                   <div>
                     <IconButton variant="text" onClick={handleSendMessage}
                       disabled={!input && !filesMessage.length}>
-                      <SendIcon style={{ color: "#1A73E8" }} />
+                      <SendIcon style={{ color: 'var(--icon-color)' }} />
                     </IconButton>
                   </div>
                 </Tooltip>

@@ -75,6 +75,18 @@ export default function TeamDiscover() {
     }
   }, [])
 
+  useEffect(() => {
+    if (teamReducer.requestingTeams.length && (team.name || searchTeams.length)) {
+      let team = teamReducer.requestingTeams[teamReducer.requestingTeams.length - 1]
+      setMessage({
+        type: 'success',
+        content: `Request join ${team.name} successfully`
+      })
+      setSearchTeams(searchTeams.filter(t => t.id != team.id))
+      setTeam({})
+    }
+  }, [teamReducer.requestingTeams.length])
+
   const handleCreateModalClose = () => {
     setCreateModalShow(false)
     setTeamName('')
@@ -196,8 +208,8 @@ export default function TeamDiscover() {
       userName: user.firstName + ' ' + user.lastName
     })
     // dispatch(requestJoinTeam({ team }))
-    setSearchTeams(searchTeams.filter(t => t.id != team.id))
-    setTeam({})
+    // setSearchTeams(searchTeams.filter(t => t.id != team.id))
+    // setTeam({})
   }
 
   const findTeamWithCode = async () => {
@@ -268,9 +280,9 @@ export default function TeamDiscover() {
                 <Avatar className='create-team-box-user' src="create-team-user2.svg" alt="Team Image" />
                 <Avatar className='create-team-box-user' src="create-team-user3.svg" alt="Team Image" />
               </div>}
-            <Button variant="text" onClick={handleCreateTeam}
-              style={{ color: 'var(--icon-color)' }}
-              startIcon={<GroupIcon style={{ color: 'var(--icon-color)' }} />}>
+            <Button variant="contained" onClick={handleCreateTeam}
+              style={{ backgroundColor: 'var(--primary-color)' }}
+              startIcon={<GroupIcon style={{ color: '#FFF' }} />}>
               Create team
             </Button>
           </span>
@@ -283,8 +295,8 @@ export default function TeamDiscover() {
                 onChange={e => setTeamCode(e.target.value)}
                 placeholder='Enter code' />
             </div>
-            <Button variant="text" onClick={findTeamWithCode}
-              disabled={!teamCode} style={{ color: 'var(--icon-color)' }}>
+            <Button variant="contained" onClick={findTeamWithCode}
+              disabled={!teamCode} style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}>
               Join team
             </Button>
           </span>
@@ -321,10 +333,10 @@ export default function TeamDiscover() {
               <Avatar src={`${baseURL}/api/team/coverphoto/${team.id}`} sx={{ width: '80px', height: '80px' }} />
               <h5>{team.name}</h5>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '80%' }}>
-                <Button variant='text' style={{ color: 'var(--icon-color)' }}
+                <Button variant='text' style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}
                   onClick={handleRequestJoin(team)}>Request</Button>
-                <Button variant='text'
-                  style={{ color: 'var(--icon-color)' }}
+                <Button variant='contained'
+                  style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}
                   onClick={e => {
                     e.preventDefault()
                     setSearchTeams(searchTeams.filter(t => t.id !== team.id))

@@ -47,18 +47,20 @@ export default function TeamInvitedUsers() {
               src={`${baseURL}/api/user/avatar/${member.id}`} />
             <span>{member.userName}</span>
           </div>
-          <Button onClick={e => {
-            e.preventDefault()
-            setShow(true)
-            setUser(member.id)
-          }} variant='contained'>Cancel</Button>
+          <Button variant='contained'
+            style={{ backgroundColor: 'var(--primary-color)' }}
+            onClick={e => {
+              e.preventDefault()
+              setShow(true)
+              setUser(member.id)
+            }} variant='contained'>Cancel</Button>
         </div>)}
       </div>
       <Dialog open={isShow} onClose={handleClose}>
-        <DialogTitle>Cancel invite this user ?</DialogTitle>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleCancel}>Confirm</Button>
+        <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>Cancel invite this user ?</DialogTitle>
+        <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+          <Button style={{ color: 'var(--icon-color)' }} onClick={handleClose}>Cancel</Button>
+          <Button style={{ color: 'var(--icon-color)' }} onClick={handleCancel}>Confirm</Button>
         </DialogActions>
       </Dialog>
 

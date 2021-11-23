@@ -206,7 +206,7 @@ export default function TeamHeader({ showTeamInfo }) {
         >
           {teamReducer.team.hostId === user.id &&
             <MenuItem className='teamheaer-menu-item'>
-              <Link to={`/teams/${teamId}/setting`}>
+              <Link to={`/teams/${teamId}/setting`} style={{ color: 'var(--text-color)' }}>
                 <i className="fas fa-cog"></i> Manage Team
               </Link></MenuItem>}
           {teamReducer.team.hostId === user.id &&
@@ -214,7 +214,7 @@ export default function TeamHeader({ showTeamInfo }) {
               e.preventDefault()
               setDeleteModalShow(true)
               setAnchorEl(null)
-            }}>
+            }} style={{ color: 'var(--text-color)' }}>
               <i className="fas fa-trash-alt"></i> &nbsp; Delete Team
             </MenuItem>}
           {teamReducer.team.hostId !== user.id &&
@@ -222,45 +222,52 @@ export default function TeamHeader({ showTeamInfo }) {
               e.preventDefault()
               setOutModalShow(true)
               setAnchorEl(null)
-            }}>
+            }} style={{ color: 'var(--text-color)' }}>
               <i className="fas fa-sign-out-alt"></i> Leave Team
             </MenuItem>}
         </Menu>
 
         <Dialog open={isDeleteModalShow} onClose={handleCloseDeleteModal}>
-          <DialogTitle>
+          <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>
             Confirm delete this team
           </DialogTitle>
-          <DialogActions>
-            <Button variant="text" onClick={handleCloseDeleteModal}>
+          <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="contained" onClick={handleCloseDeleteModal}
+              style={{ backgroundColor: 'var(--primary-bg)' }}>
               Cancel
             </Button>
-            <Button variant="text" onClick={handleDeleteTeam}>Delete</Button>
+            <Button variant="contained" onClick={handleDeleteTeam}
+              style={{ backgroundColor: 'var(--primary-bg)' }}>
+              Delete</Button>
           </DialogActions>
         </Dialog>
 
         <Dialog open={isOutModalShow} onClose={handleCloseOutModal}>
-          <DialogTitle>
+          <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>
             <h4>Confirm out this team</h4>
           </DialogTitle>
-          <DialogActions>
-            <Button variant="text" onClick={handleCloseOutModal}>
+          <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="contained" onClick={handleCloseOutModal}
+              style={{ backgroundColor: 'var(--primary-bg)' }}>
               Cancel
             </Button>
-            <Button variant="text" onClick={handleOutTeam}>Out</Button>
+            <Button variant="contained" onClick={handleOutTeam}
+              style={{ backgroundColor: 'var(--primary-bg)' }}>Out</Button>
           </DialogActions>
         </Dialog>
 
         {/* Meeting here */}
         <Dialog open={isCreateMeetingShow} onClose={handleCloseCreateMeeting}>
-          <DialogTitle>
+          <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>
             Create new meeting
           </DialogTitle>
-          <DialogActions>
-            <Button variant="text" onClick={handleCloseCreateMeeting}>
+          <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="contained" onClick={handleCloseCreateMeeting}
+              style={{ backgroundColor: 'var(--primary-bg)' }}>
               Cancel
             </Button>
-            <Button variant="text" onClick={handleCreateMeeting}>
+            <Button variant="contained" onClick={handleCreateMeeting}
+              style={{ backgroundColor: 'var(--primary-bg)' }}>
               Create
             </Button>
           </DialogActions>
@@ -352,6 +359,6 @@ export default function TeamHeader({ showTeamInfo }) {
           </DialogActions>
         </Dialog>
       </div>
-    </div>
+    </div >
   )
 }

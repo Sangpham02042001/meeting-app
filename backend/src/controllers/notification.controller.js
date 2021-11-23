@@ -120,9 +120,11 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
           await noti.save()
         }
       }
-      noti = {
-        ...noti.dataValues,
-        isNotiMess: true
+      if (noti) {
+        noti = {
+          ...noti.dataValues,
+          isNotiMess: true
+        }
       }
       console.log(noti)
       return {

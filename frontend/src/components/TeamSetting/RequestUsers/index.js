@@ -68,13 +68,14 @@ export default function TeamRequestUsers() {
           </div>
           <div>
             <Button variant='contained'
-              style={{ marginRight: '20px' }}
+              style={{ marginRight: '20px', backgroundColor: 'var(--primary-color)' }}
               onClick={e => {
                 e.preventDefault()
                 setConfirmShow(true)
                 setUser(member.id)
               }}>Agree</Button>
             <Button variant='contained'
+              style={{ backgroundColor: 'var(--primary-color)' }}
               onClick={e => {
                 e.preventDefault()
                 setRefuseShow(true)
@@ -84,17 +85,17 @@ export default function TeamRequestUsers() {
         </div>)}
       </div>
       <Dialog open={isConfirmShow} onClose={handleCloseConfirm}>
-        <DialogTitle>Confirm this user to join team?</DialogTitle>
-        <DialogActions>
-          <Button onClick={handleCloseConfirm}>Cancel</Button>
-          <Button onClick={handleConfirm}>Confirm</Button>
+        <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>Confirm this user to join team?</DialogTitle>
+        <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+          <Button style={{ color: 'var(--icon-color)' }} onClick={handleCloseConfirm}>Cancel</Button>
+          <Button style={{ color: 'var(--icon-color)' }} onClick={handleConfirm}>Confirm</Button>
         </DialogActions>
       </Dialog>
       <Dialog open={isRefuseShow} onClose={handleCloseRefuse}>
-        <DialogTitle>Confirm remove this request?</DialogTitle>
-        <DialogActions>
-          <Button onClick={handleCloseRefuse}>Cancel</Button>
-          <Button onClick={handleRefuse}>Confirm</Button>
+        <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>Confirm remove this request?</DialogTitle>
+        <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+          <Button style={{ color: 'var(--icon-color)' }} onClick={handleCloseRefuse}>Cancel</Button>
+          <Button style={{ color: 'var(--icon-color)' }} onClick={handleRefuse}>Confirm</Button>
         </DialogActions>
       </Dialog>
 

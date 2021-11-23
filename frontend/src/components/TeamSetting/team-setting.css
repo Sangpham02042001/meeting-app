@@ -19,3 +19,11 @@
 .setting-user-item > div > span {
   margin-left: 20px;
 }
+
+.team-general-setting label {
+  color: var(--text-color);
+}
+
+.team-general-setting input {
+  color: var(--text-color);
+}

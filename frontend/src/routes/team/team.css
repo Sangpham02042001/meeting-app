@@ -16,6 +16,22 @@
   overflow-x: hidden;
 }
 
+.team-body .emoji-mart {
+  background-color: var(--primary-bg);
+}
+
+.team-body .emoji-mart-category span {
+  background-color: var(--primary-bg);
+}
+
+.team-body .emoji-mart-search input {
+  background-color: var(--primary-bg);
+}
+
+.team-body .emoji-mart-bar {
+  display: none;
+}
+
 .team-info-container {
   box-sizing: border-box;
   box-shadow: -3px 0 10px var(--gray-shadow);
@@ -36,10 +52,11 @@
 
 .team-message-input input {
   padding: 5px;
+  color: var(--text-color);
 }
 
 .team-message-input:focus {
-  box-shadow: 0 0 0 1px var(--gray-shadow);
+  /* box-shadow: 0 0 0 1px var(--gray-shadow); */
   border-color: transparent;
 }
 
@@ -136,7 +153,7 @@
 }
 
 .arrow-expand-container:hover {
-  background-image: linear-gradient(90deg, transparent, #f0f0f0);
+  background-image: linear-gradient(90deg, transparent, var(--hover-bg-color));
 }
 
 .arrow-expand-container .arrow-rotate {

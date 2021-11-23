@@ -49,6 +49,7 @@ export default function TeamMembers() {
             <span>{member.userName}</span>
           </div>
           {member.id !== user.id && <Button variant='contained'
+            style={{ backgroundColor: 'var(--primary-color)' }}
             onClick={e => {
               e.preventDefault()
               setShow(true)
@@ -57,10 +58,10 @@ export default function TeamMembers() {
         </div>)}
       </div>
       <Dialog open={isShow} onClose={handleClose}>
-        <DialogTitle>Remove this user from team?</DialogTitle>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleRemove}>Confirm</Button>
+        <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>Remove this user from team?</DialogTitle>
+        <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+          <Button style={{ color: 'var(--icon-color)' }} onClick={handleClose}>Cancel</Button>
+          <Button style={{ color: 'var(--icon-color)' }} onClick={handleRemove}>Confirm</Button>
         </DialogActions>
       </Dialog>
 

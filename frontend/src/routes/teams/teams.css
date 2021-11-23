@@ -199,6 +199,7 @@
   border: none;
   resize: none;
   background-color: #f0f2f5;
+  color: var(--text-color);
   border-radius: 20px;
 }
 
