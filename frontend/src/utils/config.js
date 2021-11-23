@@ -1,7 +1,7 @@
 const baseURL = "http://localhost:3001";
-// const baseURL = "https://171.241.78.8"
-const janusServer = "https://171.241.78.8/janus-server/janus"
+// const baseURL = "https://3.134.88.175"
+const janusServer = "https://3.134.88.175/janus-server/janus"
 
-// "homepage": "https://171.241.78.8/public"
+// "homepage": "https://3.134.88.175/public"
 
 export { baseURL, janusServer };
