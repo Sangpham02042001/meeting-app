@@ -64,7 +64,7 @@
 .create-team-box {
   width: 250px;
   background-color: var(--primary-bg);
-  box-shadow: 0 0 1px 1px var(--gray-shadow);
+  box-shadow: 0 0 1px 1px var(--shadow-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -131,7 +131,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 1px 1px var(--gray-shadow);
+  box-shadow: 0 0 1px 1px var(--shadow-color);
   height: 200px;
   margin: 0 5px;
   border-radius: 10px;

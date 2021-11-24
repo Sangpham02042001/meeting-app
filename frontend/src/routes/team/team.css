@@ -47,7 +47,7 @@
 
 .team-info-container {
   box-sizing: border-box;
-  box-shadow: -3px 0 10px var(--gray-shadow);
+  box-shadow: var(--box-shadow);
   background-color: var(--primary-bg);
   transition: width 0.3s;
   display: flex;
@@ -69,7 +69,6 @@
 }
 
 .team-message-input:focus {
-  /* box-shadow: 0 0 0 1px var(--gray-shadow); */
   border-color: transparent;
 }
 
@@ -120,7 +119,7 @@
 
 .image-message-upload {
   padding: 10px;
-  border-top: 1px solid var(--gray-shadow);
+  border-top: 1px solid var(--shadow-color);
   position: relative;
   display: flex;
 }

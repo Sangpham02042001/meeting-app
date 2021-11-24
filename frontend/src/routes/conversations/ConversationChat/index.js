@@ -72,7 +72,7 @@ const AccordionSummary = styled((props) => (
 
 const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   padding: theme.spacing(0),
-  borderTop: '1px solid rgba(0, 0, 0, .125)',
+  // borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
 
@@ -99,6 +99,7 @@ export default function ConversationChat({ conversation, user }) {
   const messages = useSelector(state => state.conversationReducer.conversation.messages);
   const images = useSelector(state => state.conversationReducer.conversation.images);
   const files = useSelector(state => state.conversationReducer.conversation.files);
+  const settingReducer = useSelector(state => state.settingReducer)
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
   const speechReplyRef = useRef('');
@@ -367,10 +368,10 @@ export default function ConversationChat({ conversation, user }) {
           <div className="info-beginner-content">
             <Avatar width="80px" height="80px" userId={conversation.participantId} />
             <div >
-              {conversation.participantName}
+              <span>{conversation.participantName}</span>
             </div>
             <div style={{ fontSize: "18px", opacity: "0.7" }}>
-              Welcome to me!!!
+              <span>Welcome to me!!!</span>
             </div>
           </div>
           {messages.length > 0 && messages.slice(0, messages.length - 1)
@@ -474,7 +475,7 @@ export default function ConversationChat({ conversation, user }) {
                     cursor: 'pointer',
                   }}
                     htmlFor="files">
-                    < AddCircleIcon fontSize="large" />
+                    < AddCircleIcon fontSize="large" style={{ color: 'var(--icon-color)' }} />
                   </label>
                   <input type="file"
                     onChange={onFileInputChange}
@@ -488,7 +489,9 @@ export default function ConversationChat({ conversation, user }) {
               </div>
             }
 
-            <div style={{ display: 'flex', position: 'relative' }}>
+            <div style={{ display: 'flex', position: 'relative' }} style={{
+              backgroundColor: settingReducer.darkMode ? 'rgb(84, 85, 87)' : '#FFF'
+            }}>
               <textarea
                 onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}
                 placeholder="Send message"
@@ -496,10 +499,14 @@ export default function ConversationChat({ conversation, user }) {
                 onChange={onWriteMessage}
                 onKeyDown={handleEnterMessage}
                 value={content}
+                style={{
+                  color: 'var(--text-color)',
+                  backgroundColor: settingReducer.darkMode ? 'rgb(84, 85, 87)' : '#FFF'
+                }}
               />
               <Tooltip title="Choose an emoji" style={{ position: 'absolute', bottom: 3, right: 3 }}>
                 <IconButton onClick={chooseEmoji} >
-                  <InsertEmoticonIcon />
+                  <InsertEmoticonIcon style={{ color: 'var(--icon-color)' }} />
                 </IconButton>
               </Tooltip>
             </div>
@@ -580,7 +587,7 @@ export default function ConversationChat({ conversation, user }) {
           <Avatar width='80px' height='80px'
             userId={conversation.participantId} />
           <div style={{ fontSize: "36px" }}>
-            {conversation.participantName}
+            <span>{conversation.participantName}</span>
           </div>
         </div>
         <div className="conversation-info-detail">
@@ -590,8 +597,11 @@ export default function ConversationChat({ conversation, user }) {
             </AccordionSummary>
             <AccordionDetails>
               <div className="accordion-detail">
-                <Button startIcon={<DarkModeIcon style={{ color: 'var(--icon-color)' }} />}>Dark Mode</Button>
-                <Button startIcon={<ColorLensIcon style={{ color: 'var(--icon-color)' }} />}>Change Themes</Button>
+                {/* <Button startIcon={<DarkModeIcon style={{ color: 'var(--icon-color)' }} />}>Dark Mode</Button> */}
+                <Button style={{ color: 'var(--icon-color)' }}
+                  startIcon={<ColorLensIcon style={{ color: 'var(--icon-color)' }} />}>
+                  Change Themes
+                </Button>
               </div>
             </AccordionDetails>
           </Accordion>
@@ -652,19 +662,18 @@ export default function ConversationChat({ conversation, user }) {
       <Dialog
         open={conversationCall.isCalling}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id="alert-dialog-title" style={{ backgroundColor: 'var(--primary-bg)' }}>
           <Avatar width='40px' height='40px'
             userId={conversation.participantId} />
-
-          {conversation.participantName}
+          <span>{conversation.participantName}</span>
         </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+        <DialogContent style={{ backgroundColor: 'var(--primary-bg)' }}>
+          <DialogContentText id="alert-dialog-description" style={{ color: 'var(--text-color)' }}>
             Wait for the other party to pick up the phone ...
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelCall}>Cancel</Button>
+        <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+          <Button onClick={handleCancelCall} style={{ color: 'var(--icon-color)' }}>Cancel</Button>
         </DialogActions>
       </Dialog>
 

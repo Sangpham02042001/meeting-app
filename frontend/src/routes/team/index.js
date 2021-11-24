@@ -373,7 +373,7 @@ export default function Team(props) {
 
 
   return (teamReducer.teamLoaded ? <Grid container className='team-page-container'>
-    <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--gray-shadow)' }}>
+    <Grid item sm={2} style={{ padding: 0, zIndex: 3, boxShadow: '2px 2px 10px var(--shadow-color)' }}>
       <TeamList />
     </Grid>
     <Grid item sm={10} style={{ padding: 0 }}>
@@ -497,7 +497,7 @@ export default function Team(props) {
                     cursor: 'pointer',
                   }}
                     htmlFor="files">
-                    < AddCircleIcon fontSize="large" />
+                    < AddCircleIcon fontSize="large" style={{ color: 'var(--icon-color)' }} />
                   </label>
                   <input type="file"
                     onChange={onFileInputChange}
@@ -538,7 +538,7 @@ export default function Team(props) {
                   onChange={onWriteMessage} />
                 <Tooltip title="Choose an emoji">
                   <Button onClick={chooseEmoji} className='emoji-btn' >
-                    <InsertEmoticonIcon />
+                    <InsertEmoticonIcon style={{ color: 'var(--icon-color)' }} />
                   </Button>
                 </Tooltip>
               </div>

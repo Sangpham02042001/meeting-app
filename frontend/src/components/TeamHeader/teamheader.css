@@ -3,7 +3,7 @@
   display: flex;
   padding: 5px;
   background-color: var(--primary-bg);
-  border-bottom: 2px solid var(--gray-shadow);
+  border-bottom: 2px solid var(--shadow-color);
   flex-direction: row;
   justify-content: space-between;
 }

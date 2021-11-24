@@ -194,6 +194,7 @@ export default function ChatBox({ chatVisible }) {
                             background: '#3e4042 !important'
                         }}
                         onClick={e => {
+                            setFile(null)
                             setFileUrl('')
                         }}>
                         <CloseIcon />
@@ -202,6 +203,7 @@ export default function ChatBox({ chatVisible }) {
             </div>
             <div className="chatbox-sender">
                 <textarea
+                    style={{ fontSize: '16px' }}
                     variant="outlined"
                     type="text" placeholder="Chat" name='message'
                     autoComplete="off"
@@ -211,9 +213,7 @@ export default function ChatBox({ chatVisible }) {
                     onKeyDown={handleEnterSendMessage}
                     onChange={onWriteMessage} />
                 <div style={{ display: 'flex' }}>
-                    <IconButton style={{
-                        display: message.length ? 'none' : 'block'
-                    }}>
+                    <IconButton >
                         <label htmlFor="images" style={{ cursor: 'pointer' }}>
                             < AttachFileIcon color="primary" />
                         </label>

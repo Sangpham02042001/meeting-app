@@ -577,7 +577,7 @@ const Meeting = (props) => {
 					<MeetingVideo remoteStreams={remoteStreams} remoteVideos={remoteVideos} remoteAudios={remoteAudios} />
 				</div>
 				<div className="meeting-box" style={{
-					width: isOpenChat || isOpenInfo || isOpenUsers ? '20%' : '0%'
+					width: isOpenChat || isOpenInfo || isOpenUsers ? '24%' : '0%'
 				}}>
 					{isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
@@ -593,7 +593,7 @@ const Meeting = (props) => {
 					display: 'flex',
 					alignItems: 'center'
 				}}>
-					<strong>
+					<strong style={{ color: '#FFF' }}>
 						Time: {getTimeInfo()}
 					</strong>
 				</div>

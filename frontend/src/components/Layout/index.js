@@ -44,12 +44,16 @@ export default function Layout({ children }) {
       r.style.setProperty('--primary-color', '#0a0a0a')
       r.style.setProperty('--icon-color', '#FFF')
       r.style.setProperty('--hover-bg-color', 'rgb(112, 112, 112)')
+      r.style.setProperty('--box-shadow', '2px 2px 5px #111111')
+      r.style.setProperty('--shadow-color', '#111111')
     } else {
       r.style.setProperty('--text-color', '#000')
       r.style.setProperty('--primary-bg', '#fafafa')
       r.style.setProperty('--primary-color', '#1962a7')
       r.style.setProperty('--icon-color', '#1962a7')
       r.style.setProperty('--hover-bg-color', 'rgb(240, 240, 240)')
+      r.style.setProperty('--box-shadow', '2px 2px 5px #dadcdf')
+      r.style.setProperty('--shadow-color', '#dadcdf')
     }
   }, [settingReducer.darkMode])
 

@@ -156,8 +156,9 @@ export default function TeamHeader({ showTeamInfo }) {
         </LoadingButton>}
         {
           teamReducer.team.meetingActive
-          && <Button variant="contained"
+          && <Button variant="text"
             disabled={teamReducer.meetingJoined}
+            style={{ color: 'var(--icon-color)' }}
             className='join-meeting-btn' onClick={handleJoinMeeting}>
             Join Meeting
           </Button>
@@ -351,7 +352,7 @@ export default function TeamHeader({ showTeamInfo }) {
                       id: teamReducer.team.meetingActive.id
                     }))
                   }}
-                  style={{ textDecoration: 'none' }}
+                  style={{ textDecoration: 'none', color: ('var(--icon-color)') }}
                   to={`/teams/${teamId}/meeting/${teamReducer.team.meetingActive.id}?audio=${isAudioActive}`}>
                   Join
                 </Link>}
