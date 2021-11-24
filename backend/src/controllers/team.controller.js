@@ -10,6 +10,7 @@ const { getMeetingInfo } = require('./meeting.controller')
 const fs = require('fs')
 const { v4 } = require('uuid')
 const { Readable } = require('stream')
+const Meeting = require('../models/meeting')
 
 const getTeamInfo = async (req, res) => {
   let { teamId } = req.params
@@ -705,6 +706,34 @@ const getTeamSharedImages = async (req, res) => {
   }
 }
 
+
+//ADMIN SITE
+
+const getAllTeams = async (req, res) => {
+  try {
+    let teams = await Team.findAll({
+      include: [{
+        model: User,
+        as: 'host',
+        attributes: ['id', 'firstName', 'lastName']
+      }, {
+        model: User,
+        as: 'members',
+        attributes: ['id', 'firstName', 'lastName']
+      }, {
+        model: Meeting,
+        as: 'meetings',
+        attributes: ['id', 'createdAt', 'updatedAt']
+      }]
+    })
+
+    return res.status(200).json({ teams })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error: "Cann't get all teams" })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers,
@@ -714,5 +743,5 @@ module.exports = {
   sendMessage, getMemberTeam,
   getTeamMeetMess, getMeetings, searchTeamWithCode,
   socketInviteUsers, socketConfirmRequest, getTeamSharedFiles,
-  getTeamSharedImages, getMeetingActive
+  getTeamSharedImages, getMeetingActive, getAllTeams
 }

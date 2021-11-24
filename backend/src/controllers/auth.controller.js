@@ -61,7 +61,7 @@ const requireSignin = (req, res, next) => {
   }
 }
 
-const isAdmin = async (req, res, next) => {
+const isTeamAdmin = async (req, res, next) => {
   let { id } = req.auth
   let { teamId } = req.params
   try {
@@ -112,6 +112,6 @@ const isMember = async (req, res, next) => {
 }
 
 module.exports = {
-  signin, requireSignin, isAdmin,
+  signin, requireSignin, isTeamAdmin,
   isMember
 }
