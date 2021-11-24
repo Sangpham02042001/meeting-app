@@ -4,21 +4,33 @@ body {
   width: 100%;
 }
 
+.welcome-page {
+  height: 100%;
+  width: 100%;
+  padding: 60px 50px;
+  background-color: #3792e7;
+}
+
+.landing-page {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  padding: 10px 10px;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  background-color: #F2F3F5;
+  border-radius: 10px;
+}
+
 .top-nav {
-  /* overflow: hidden; */
-  position: fixed;
   display: flex;
   width: 100%;
   top: 0;
 }
 
 .top-nav h3 {
-  color: aliceblue;
+  /* color: aliceblue; */
   margin-left: 20px;
 }
-/* .brand {
-  margin: 10px 20px;
-} */
 
 .authLink {
   margin: 10px 20px 10px auto;
@@ -26,12 +38,63 @@ body {
 }
 
 .authLink > a {
-  color: #fff;
+  /* color: #fff; */
   text-decoration: none;
   text-transform: uppercase;
   font-size: 16px;
   margin: 0 15px;
   font-weight: 600;
+}
+
+.authLink button {
+  /* background-color: #3792e7; */
+}
+
+.welcome-content {
+  display: flex;
+  /* align-items: center; */
+  height: 90%;
+  padding: 30px 30px;
+}
+
+.description {
+  margin-top: 90px;
+  width: 30%;
+}
+
+.description div {
+  font-size: large;
+  font-weight: 500;
+}
+
+.description h1 {
+  font-size: 50px;
+  font-weight: bold;
+  border-radius: 10px;
+  color: #f2f3f5 !important;
+  text-align: center;
+  background-color: #3792e7;
+}
+
+
+
+.carousel-content {
+  width: 70%;
+  /* height: 100%; */
+  position: relative;
+}
+
+.carousel-content .carousel {
+  width: 100%;
+  height: 100%;
+}
+
+.carousel____left {
+  transform: translateX(-7vw) scale(0.9) rotateY(10deg) !important;
+}
+
+.carousel____right {
+  transform: translateX(7vw) scale(0.9) rotateY(10deg) !important;
 }
 
 #home-welcome {
@@ -56,6 +119,7 @@ body {
 .landing-text h1 {
   font-size: 500%;
   font-weight: 700;
+  color: #fff !important;
 }
 
 .landing-text a {

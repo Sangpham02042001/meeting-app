@@ -2,12 +2,16 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom'
 import Loading from "../Loading";
-import { Button, Avatar } from '@mui/material';
+import { Button, Avatar, Container } from '@mui/material';
 import { Redirect } from 'react-router-dom';
 import { isAuthenticated } from "../../store/reducers/user.reducer";
 import './welcome.css';
+import Carousel from 't-a-e-3d-carousel-reactjs';
 
 export default function Welcome() {
+  var state = {
+    goToSlide: 0
+  };
   const userReducer = useSelector(state => state.userReducer)
   const dispatch = useDispatch();
   useEffect(() => {
@@ -16,10 +20,25 @@ export default function Welcome() {
     }
   }, [])
 
+  const slides = [
+    {
+      url: "welcome/home.png"
+    },
+    {
+      url: "welcome/messages.png"
+    },
+    {
+      url: "welcome/team_messages.png"
+    },
+    {
+      url: "welcome/teams.png"
+    }
+  ];
+
   return (
     !userReducer.loaded ? <Loading />
       : (userReducer.authenticated ? <Redirect to="/home" />
-        : <div style={{ "height": "100%" }}>
+        : <div className="welcome-page" style={{ "height": "100%" }}><div className="landing-page">
           <nav className="top-nav">
             <div style={{ display: 'flex', padding: '10px', alignItems: 'center' }}>
               <Link to='/'>
@@ -28,30 +47,37 @@ export default function Welcome() {
                   height: '40px',
                 }} />
               </Link>
-              <h3 className="brand">MEETING APP</h3>
+              <h4 className="brand">MEETING APP</h4>
             </div>
 
             <div className="authLink">
               <Link to="/login">
+                <Button variant="outlined" size="medium">
                 Login
+                </Button>
               </Link>
               <Link to="/signup">
+              <Button variant="contained" size="medium">
                 Sign up
+                </Button>
               </Link>
             </div>
           </nav>
-          <div id="home-welcome" style={{
-            backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('./welcome-bg.webp')"
-          }}>
-            <div className="landing-text">
+          <div className="welcome-content">
+            <div className="description">
               <h1>MEETING APP</h1>
-              <Button variant="contained">
-                <Link to="/login">
-                  Get Started
-                </Link>
-              </Button>
+              <div>Feel free to connect and stay close to your favourite people!</div>
+            </div>
+            <div className="carousel-content">
+              <Carousel
+              className="carousel"
+              imageList={slides}
+              autoplay={true}
+              showArrows={false}
+              interval={"5000"} />
             </div>
           </div>
+        </div>
         </div>
       ))
 }
