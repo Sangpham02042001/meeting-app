@@ -32,6 +32,11 @@ body {
   margin-left: 20px;
 }
 
+.brand {
+  margin-left: 10px;
+  color: #3792e7;
+}
+
 .authLink {
   margin: 10px 20px 10px auto;
   /* margin-left: 100%; */
