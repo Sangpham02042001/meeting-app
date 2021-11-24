@@ -9,9 +9,19 @@
   align-items: center;
   overflow: hidden;
   z-index: 100;
+  animation: fadeout 0.75s;
   /* background-color: #fffffff0; */
 }
 
 .loading-container img {
   width: 200px;
+}
+
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }

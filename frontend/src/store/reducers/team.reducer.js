@@ -18,7 +18,6 @@ const initialState = {
     meetmess: [],
     files: [],
     images: [],
-    numOfMessages: 0,
     numOfMeetMess: 0,
     fakeMessageId: v4()
   },

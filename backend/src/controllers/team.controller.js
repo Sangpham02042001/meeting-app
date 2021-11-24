@@ -719,11 +719,11 @@ const getAllTeams = async (req, res) => {
       }, {
         model: User,
         as: 'members',
-        attributes: ['id', 'firstName', 'lastName']
+        attributes: ['id']
       }, {
         model: Meeting,
         as: 'meetings',
-        attributes: ['id', 'createdAt', 'updatedAt']
+        attributes: ['id'],
       }]
     })
 
@@ -731,6 +731,21 @@ const getAllTeams = async (req, res) => {
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error: "Cann't get all teams" })
+  }
+}
+
+const getTeamMeetings = async (req, res) => {
+  let { teamId } = req.params
+  try {
+    let meetings = await Meeting.findAll({
+      where: {
+        teamId
+      }
+    })
+    return res.status(200).json({ meetings })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error: "Cann't get all meetings" })
   }
 }
 
@@ -743,5 +758,5 @@ module.exports = {
   sendMessage, getMemberTeam,
   getTeamMeetMess, getMeetings, searchTeamWithCode,
   socketInviteUsers, socketConfirmRequest, getTeamSharedFiles,
-  getTeamSharedImages, getMeetingActive, getAllTeams
+  getTeamSharedImages, getMeetingActive, getAllTeams, getTeamMeetings
 }

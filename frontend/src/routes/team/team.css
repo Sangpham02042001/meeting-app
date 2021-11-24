@@ -1,5 +1,5 @@
 .team-page-container {
-  animation: fadein 0.75s;
+  /* animation: fadein 0.75s; */
 }
 
 @keyframes fadein {

@@ -68,4 +68,5 @@ router.route('/api/team/coverphoto/:teamId')
 
 router.route('/api/teams')
   .get(getAllTeams)
+
 module.exports = router

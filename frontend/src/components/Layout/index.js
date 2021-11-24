@@ -6,6 +6,7 @@ import { Avatar, Snackbar, Alert, Tooltip, Badge } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import MessageIcon from '@mui/icons-material/Message';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { socketClient, baseURL } from '../../utils';
 import { setMyStatus } from '../../store/reducers/user.reducer'
@@ -315,6 +316,13 @@ export default function Layout({ children }) {
               <button className="btn-default">
                 <Tooltip title='Teams' placement='right'>
                   <PeopleAltIcon />
+                </Tooltip>
+              </button>
+            </NavLink>
+            <NavLink to='/profile' activeClassName="btn-active">
+              <button className="btn-default">
+                <Tooltip title='Profile' placement='right'>
+                  <ManageAccountsIcon style={{ fontSize: '26px' }} />
                 </Tooltip>
               </button>
             </NavLink>

@@ -11,6 +11,10 @@
     z-index: 5px;
 } */
 
+.teams-page {
+  padding: 0 20px;
+}
+
 .group-chat {
   display: flex;
   flex-direction: row;
