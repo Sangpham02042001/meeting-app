@@ -39,6 +39,10 @@ User.init({
   status: {
     defaultValue: 'inactive',
     type: DataTypes.STRING(10)
+  },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: 'user'
   }
 }, {
   sequelize,

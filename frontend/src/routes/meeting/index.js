@@ -382,7 +382,7 @@ const Meeting = (props) => {
 									// alert("publishing...")
 								}
 								if (!videoTracks || videoTracks.length === 0) {
-									myVideo.current = null;
+									// myVideo.current = null;
 								}
 								// if (!isVideoActive) {
 								// 	sfuRef.current.muteVideo();

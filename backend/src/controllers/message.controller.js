@@ -1,6 +1,8 @@
 const Message = require('../models/message')
 const Media = require('../models/media')
 const fs = require('fs');
+const { QueryTypes } = require("sequelize");
+const sequelize = require('../models')
 
 const getImageMessage = async (req, res) => {
   let { messageId } = req.params
@@ -89,8 +91,51 @@ const downloadImageMessageMedia = async (req, res) => {
   }
 }
 
+const deleteMessage = async ({ messageId }) => {
+  try {
+    let media = await Media.findOne({
+      where: {
+        messageId
+      },
+      attributes: ['id', 'pathName', 'type']
+    })
+
+    await sequelize.query(
+      "DELETE FROM messages " +
+      "WHERE id = :messageId"
+      , {
+        replacements: {
+          messageId
+        },
+        type: QueryTypes.DELETE
+      })
+
+    if ((media || {}).type === 'image') {
+      fs.unlink(`./src/public/messages-photos/${media.pathName}`, (err) => {
+        if (err) {
+          console.log(err)
+          return null;
+        }
+      })
+    } else if ((media || {}).type === 'file') {
+      fs.unlink(`./src/public/messages-files/${media.pathName}`, (err) => {
+        if (err) {
+          console.log(err)
+          return null;
+        }
+      })
+    }
+
+    return 'success';
+
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
 
 module.exports = {
   getImageMessage, getImageMessageMedia, getFileMessageMedia,
-  downloadImageMessageMedia
+  downloadImageMessageMedia, deleteMessage
 }

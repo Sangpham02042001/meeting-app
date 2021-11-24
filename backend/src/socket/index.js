@@ -6,6 +6,7 @@ const { getActiveMemberMeeting, addMemberMeeting,
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification } = require('../controllers/notification.controller')
 const { socketRequestTeam, setUserStatus, getUserStatus } = require('../controllers/user.controller')
+const { deleteMessage } = require('../controllers/message.controller')
 
 const userSockets = {};
 const meetingsAudio = {};
@@ -108,6 +109,21 @@ const socketServer = (io, socket) => {
                     })
                 }
             }
+        }
+    })
+
+    socket.on('team-remove-message', async ({ teamId, messageId, senderId }) => {
+        let report = await deleteMessage({ messageId });
+        if (report) {
+            let members = await getMemberTeam({ teamId });
+            for (let m of members) {
+                if (userSockets[m.id] && userSockets[m.id].length) {
+                    for (const socketId of userSockets[m.id]) {
+                        socket.to(socketId).emit('team-removed-message', { teamId, messageId, senderId });
+                    }
+                }
+            }
+            socket.emit('team-removed-message', { teamId, messageId, senderId });
         }
     })
 
