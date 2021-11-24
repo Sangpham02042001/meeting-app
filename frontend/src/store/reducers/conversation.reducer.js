@@ -2,8 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { axiosAuth } from '../../utils';
 
 
-export const getConversations = createAsyncThunk('conversations/getUserConversations', async ({ userId }) => {
-  const response = await axiosAuth.get(`/api/conversations/users/${userId}`);
+export const getConversations = createAsyncThunk('conversations/getUserConversations', async () => {
+  const response = await axiosAuth.get(`/api/conversations`);
   return response.data;
 })
 
@@ -18,8 +18,8 @@ export const getParticipant = createAsyncThunk('conversations/getParticipant', a
   return response.data;
 })
 
-export const readConversation = createAsyncThunk('conversations/readConversation', async ({ conversationId, userId }) => {
-  const response = await axiosAuth.patch(`/api/conversations/${conversationId}`, { conversationId, userId });
+export const readConversation = createAsyncThunk('conversations/readConversation', async ({ conversationId }) => {
+  const response = await axiosAuth.patch(`/api/conversations/${conversationId}`, { conversationId });
   return response.data;
 })
 
@@ -30,6 +30,11 @@ export const getAllImages = createAsyncThunk('conversations/getAllImages', async
 
 export const getAllFiles = createAsyncThunk('conversations/getAllFiles', async ({ conversationId }) => {
   const response = await axiosAuth.get(`/api/conversations/${conversationId}/messages/files`);
+  return response.data;
+})
+
+export const getNumberMessageUnread = createAsyncThunk('conversations/getNumberMessageUnread', async () => {
+  const response = await axiosAuth.get(`/api/conversations/messages`);
   return response.data;
 })
 
@@ -52,7 +57,7 @@ export const conversationSlice = createSlice({
       senderName: null,
       receiverId: null,
     },
-
+    numberMessagesUnread: 0,
     lastMessageChange: false,
   },
   extraReducers: {
@@ -102,6 +107,14 @@ export const conversationSlice = createSlice({
     [getAllFiles.rejected]: (state, action) => {
       console.log('get files error')
     },
+    [getNumberMessageUnread.fulfilled]: (state, action) => {
+      const { numberMessages } = action.payload;
+      state.numberMessagesUnread = numberMessages;
+      console.log(numberMessages)
+    },
+    [getNumberMessageUnread.rejected]: (state, action) => {
+      console.log('get number of messages error')
+    },
   },
   reducers: {
     sendMessageCv: (state, action) => {
@@ -135,11 +148,6 @@ export const conversationSlice = createSlice({
       }
 
       const pIdx = state.conversations.findIndex(conv => conv.conversationId === conversationId);
-
-
-
-
-
 
       if (pIdx >= 0) {
         //check is read?

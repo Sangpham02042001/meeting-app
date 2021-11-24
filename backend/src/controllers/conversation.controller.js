@@ -10,7 +10,7 @@ const { Readable } = require('stream');
 
 const getConversations = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const { id } = req.auth
         const conversations = await sequelize.query(
             "SELECT uc.conversationId, uc.userId as participantId, concat(u.firstName, ' ', u.lastName) as participantName, u.status,tb1.isRead " +
             "FROM users_conversations uc " +
@@ -20,7 +20,7 @@ const getConversations = async (req, res) => {
             "ORDER BY uc.updatedAt DESC;",
             {
                 replacements: {
-                    userId
+                    userId: id
                 },
                 type: QueryTypes.SELECT
             }
@@ -49,7 +49,7 @@ const setConversation = async ({ senderId, receiverId, conversationId }) => {
                 },
                 type: QueryTypes.SELECT
             }
-        )  
+        )
         // const conversation = await Conversation.findByPk(conversationId);
         if (!conversation.length) {
             const newConversation = await Conversation.create({});
@@ -146,10 +146,34 @@ const getLastMessage = async (req, res) => {
     }
 }
 
+const getNumberMessageUnRead = async (req, res) => {
+    try {
+        const { id } = req.auth
+        const messages = await sequelize.query("SELECT COUNT(*) as total FROM users_conversations WHERE isRead = 1 AND userId = :userId",
+            {
+                replacements: {
+                    userId: id
+                },
+                type: QueryTypes.SELECT
+            }
+        )
+        console.log(messages);
+        return res.status(200).json({
+            numberMessages: messages[0].total
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(403).json({
+            message: "Could not get messages!"
+        })
+    }
+}
+
 const readConversation = async (req, res) => {
     try {
-        const { conversationId, userId } = req.body;
-        if (!conversationId || !userId) {
+        const { id } = req.auth
+        const { conversationId } = req.body;
+        if (!conversationId || !id) {
 
             return res.status(200).json({
                 conversationId: null
@@ -159,7 +183,7 @@ const readConversation = async (req, res) => {
             {
                 replacements: {
                     conversationId,
-                    userId
+                    userId: id
                 }
             }
         )
@@ -342,5 +366,5 @@ const removeMessageCv = async ({ messageId }) => {
 module.exports = {
     getConversations, getMessages, getLastMessage,
     setConversation, setMessage, readConversation, getImagesMessageCv,
-    getFilesMessageCv, removeMessageCv
+    getFilesMessageCv, removeMessageCv, getNumberMessageUnRead
 }

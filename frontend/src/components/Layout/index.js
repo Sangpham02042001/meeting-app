@@ -12,7 +12,7 @@ import { socketClient, baseURL } from '../../utils';
 import { setMyStatus } from '../../store/reducers/user.reducer'
 import {
   sendMessageCv, conversationCalling, cancelCall,
-  removeMessageCv, setConversationStatus
+  removeMessageCv, setConversationStatus, getNumberMessageUnread
 } from '../../store/reducers/conversation.reducer';
 import {
   sendMessage, setMeetingActive, endActiveMeeting,
@@ -32,9 +32,10 @@ export default function Layout({ children }) {
   const dispatch = useDispatch();
   const userReducer = useSelector(state => state.userReducer)
   const settingReducer = useSelector(state => state.settingReducer)
+  const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
+  const numberMessagesUnread = useSelector(state => state.conversationReducer.numberMessagesUnread);
   const params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const meetingId = params && Number(params.meetingId)
-  const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const [isSkConnected, setIsSkConnected] = useState(false);
   const [currentNoti, setNoti] = useState(null)
 
@@ -60,6 +61,11 @@ export default function Layout({ children }) {
   }, [settingReducer.darkMode])
 
   useEffect(() => {
+    dispatch(getNumberMessageUnread())
+  }, [numberMessagesUnread])
+
+  useEffect(() => {
+
     socketClient.auth = { userId: userReducer.user.id };
     socketClient.connect();
 
@@ -298,8 +304,8 @@ export default function Layout({ children }) {
             <NavLink to='/conversations' activeClassName="btn-active">
               <button className="btn-default" >
                 <Badge
-                  badgeContent={6}
-                  max={5}
+                  badgeContent={numberMessagesUnread}
+                  max={99}
                   color='error'
                   anchorOrigin={{
                     vertical: 'top',

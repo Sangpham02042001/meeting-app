@@ -1,11 +1,14 @@
 const { Router } = require('express');
 const { requireSignin } = require('../controllers/auth.controller')
 const { getConversations, getMessages, getLastMessage, readConversation,
-    getImagesMessageCv, getFilesMessageCv } = require('../controllers/conversation.controller')
+    getImagesMessageCv, getFilesMessageCv, getNumberMessageUnRead } = require('../controllers/conversation.controller')
 const router = Router()
 
-router.route('/api/conversations/users/:userId')
+router.route('/api/conversations')
     .get(requireSignin, getConversations)
+
+router.route('/api/conversations/messages')
+    .get(requireSignin, getNumberMessageUnRead)
 
 router.route('/api/conversations/:conversationId/messages')
     .get(requireSignin, getMessages)

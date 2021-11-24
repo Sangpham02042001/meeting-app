@@ -12,7 +12,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Check from '@mui/icons-material/Check';
 import {
-  Avatar, Menu, MenuItem, Badge, Button, IconButton,
+  Avatar, Menu, MenuItem, Badge, IconButton,
   ListItemIcon, ListItemText
 } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications';

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Tabs, Tab, Typography, Box, Avatar, TextField,
-	Button, Dialog, DialogContent, DialogActions, DialogContentText,
-	DialogTitle, Snackbar, Alert
+	Button, Dialog, DialogActions,
+	DialogTitle, Snackbar, Alert, Switch, FormControlLabel
 } from '@mui/material';
 import { baseURL } from '../../utils';
 import { Link } from 'react-router-dom';
@@ -15,6 +15,7 @@ import {
 } from '../../store/reducers/team.reducer'
 import Loading from '../../components/Loading'
 import './profile.css';
+import { toggleDarkMode } from '../../store/reducers/setting.reducer'
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -47,6 +48,7 @@ export default function Profile() {
 	const dispatch = useDispatch()
 	const teamReducer = useSelector(state => state.teamReducer)
 	const userReducer = useSelector(state => state.userReducer)
+	const settingReducer = useSelector(state => state.settingReducer)
 	const [currentTab, setCurrentTab] = useState(0);
 	const [firstName, setFirstName] = useState('')
 	const [lastName, setLastName] = useState('')
@@ -60,6 +62,8 @@ export default function Profile() {
 	const [isCancelRequestShow, setCancelRequestShow] = useState(false)
 	const [message, setMessage] = useState({})
 	const [editted, setEditted] = useState(false)
+
+
 
 	useEffect(() => {
 		setFirstName(userReducer.user.firstName)
@@ -235,12 +239,13 @@ export default function Profile() {
 					onChange={handleTabChange}
 					aria-label="Vertical tabs example"
 					className='profile-tabs'
-					sx={{ borderRight: 1, borderColor: 'divider', height: 195 }}
+					sx={{ borderRight: 1, borderColor: 'divider', height: 240 }}
 				>
 					<Tab label="Profile" {...a11yProps(0)} />
 					<Tab label="Joined Teams" {...a11yProps(1)} />
 					<Tab label="Invited Teams" {...a11yProps(2)} />
 					<Tab label="Requesting Teams" {...a11yProps(3)} />
+					<Tab label="Setting" {...a11yProps(4)} />
 				</Tabs>
 				<div className='profile-right-tab'>
 					<TabPanel value={currentTab} index={0}>
@@ -343,6 +348,19 @@ export default function Profile() {
 								})
 								: <h3>No request team for show</h3>}
 						</div>
+					</TabPanel>
+					<TabPanel value={currentTab} index={4}>
+						<div>
+							<h1>Setting</h1>
+							<FormControlLabel
+								control={
+									<Switch label="Dark Mode" checked={settingReducer.darkMode}
+										onChange={e => { dispatch(toggleDarkMode()) }}
+										color="default" />
+								}
+								label="Dark Mode"
+							/>
+						</div >
 					</TabPanel>
 				</div>
 

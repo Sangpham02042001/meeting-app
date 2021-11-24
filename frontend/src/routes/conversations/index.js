@@ -23,7 +23,7 @@ export default function Conversations(props) {
     const dispatch = useDispatch();
     const history = useHistory();
     useEffect(() => {
-        dispatch(getConversations({ userId: user.id }));
+        dispatch(getConversations());
         return () => {
             dispatch(clearConversation())
         }
