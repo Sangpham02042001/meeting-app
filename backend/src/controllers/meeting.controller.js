@@ -5,9 +5,12 @@ const Message = require('../models/message')
 const User = require('../models/user')
 const fs = require('fs')
 const { Readable } = require('stream');
-const { v4 } = require('uuid')
-const axios = require('axios')
-const Media = require('../models/media')
+const { v4 } = require('uuid');
+const axios = require('axios');
+const Media = require('../models/media');
+const https = require('https');
+const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+const axiosJanus = axios.create({ baseURL: process.env.JANUS_SERVER, httpsAgent });
 
 const getMeetingById = async (req, res) => {
   const { meetingId } = req.params
@@ -51,25 +54,22 @@ const createMeeting = async (req, res) => {
       hostId: id
     })
     meeting = await getMeetingInfo({ meetingId: meeting.id })
-    console.log(meeting)
 
-    const janusServer = process.env.JANUS_SERVER
-
-    let response = await axios.post(`${janusServer}`, {
+    let response = await axiosJanus.post('/', {
       janus: 'create',
       transaction: 'meeting_app',
       id: Number(meeting.id)
     })
     if (response.data && response.data.janus === 'success') {
       let sessionId = response.data.data.id
-      response = await axios.post(`${janusServer}/${sessionId}`, {
+      response = await axiosJanus.post(`/${sessionId}`, {
         janus: 'attach',
         transaction: 'meeting_app',
         plugin: 'janus.plugin.videoroom'
       })
       _id = response.data.data.id
       if (response.data && response.data.janus === 'success') {
-        response = await axios.post(`${janusServer}/${sessionId}/${_id}`, {
+        response = await axiosJanus.post(`/${sessionId}/${_id}`, {
           janus: 'message',
           transaction: 'meeting_app',
           body: {
