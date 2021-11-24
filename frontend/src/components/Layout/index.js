@@ -16,7 +16,8 @@ import {
 import {
   sendMessage, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, getCurrentMeeting, inviteUsers, receiveTeamInvitation,
-  confirmRequest, receiveTeamConfirm, joinRequest, receviceTeamRequest
+  confirmRequest, receiveTeamConfirm, joinRequest, receviceTeamRequest,
+  removeTeamMessge
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
@@ -133,6 +134,10 @@ export default function Layout({ children }) {
 
     socketClient.on('request-join-team-success', ({ team }) => {
       dispatch(joinRequest({ team }))
+    })
+
+    socketClient.on('team-removed-message', ({ teamId, senderId, messageId }) => {
+      dispatch(removeTeamMessge({ teamId, messageId, senderId }))
     })
 
     //meetings

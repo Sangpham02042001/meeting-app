@@ -441,6 +441,17 @@ export const teamSlice = createSlice({
           userName
         })
       }
+    },
+    removeTeamMessge: (state, action) => {
+      let { teamId, messageId } = action.payload
+      if (teamId, messageId) {
+        if (state.team.id == teamId) {
+          let idx = state.team.meetmess.findIndex(item => item.id == messageId && item.isMessage)
+          state.team.meetmess.splice(idx, 1)
+          state.team.files = state.team.files.filter(file => file.messageId != messageId)
+          state.team.images = state.team.images.filter(img => img.messageId != messageId)
+        }
+      }
     }
   },
   extraReducers: {
@@ -709,6 +720,6 @@ export const { cleanTeamState, sendMessage, updateMeetingState,
   setMeetingJoined, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, inviteUsers, receiveTeamInvitation,
   confirmRequest, receiveTeamConfirm, joinRequest,
-  receviceTeamRequest } = teamSlice.actions;
+  receviceTeamRequest, removeTeamMessge } = teamSlice.actions;
 
 export default teamSlice.reducer

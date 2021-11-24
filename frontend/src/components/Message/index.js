@@ -28,7 +28,11 @@ const Message = React.memo(({
 
   const handleRemoveMessage = () => {
     setAnchorEl(null);
-    socketClient.emit('conversation-remove-message', { conversationId, messageId: message.id, senderId: logInUserId, receiverId: participantId })
+    if (conversationId && participantId) {
+      socketClient.emit('conversation-remove-message', { conversationId, messageId: message.id, senderId: logInUserId, receiverId: participantId })
+    } else {
+      socketClient.emit('team-remove-message', { teamId: message.teamId, messageId: message.id, senderId: logInUserId })
+    }
   }
 
   const handleOpenMenu = (event) => {

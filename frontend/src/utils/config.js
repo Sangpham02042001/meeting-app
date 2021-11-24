@@ -1,4 +1,4 @@
-const awsServer = "https://3.15.44.215"
+const awsServer = "https://18.188.133.180"
 const baseURL = "http://localhost:3001";
 // const baseURL = awsServer
 const janusServer = awsServer + "/janus-server/janus"

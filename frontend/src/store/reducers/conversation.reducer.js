@@ -126,15 +126,21 @@ export const conversationSlice = createSlice({
 
       if (state.conversation.participant && (receiverId === state.conversation.participant.id || senderId === state.conversation.participant.id)) {
         state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, files, photos, createdAt });
+        if (files && files.length) {
+          state.conversation.files.unshift(...files)
+        }
+        if (photos && photos.length) {
+          state.conversation.images.unshift(...photos)
+        }
       }
 
       const pIdx = state.conversations.findIndex(conv => conv.conversationId === conversationId);
 
-      
 
 
-      
-      
+
+
+
       if (pIdx >= 0) {
         //check is read?
         conversation = state.conversations[pIdx];
@@ -161,6 +167,13 @@ export const conversationSlice = createSlice({
       }
       if (state.conversation.participant && senderId === state.conversation.participant.id) {
         state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, files, photos, createdAt });
+        //sang add
+        if (files && files.length) {
+          state.conversation.files.unshift(...files)
+        }
+        if (photos && photos.length) {
+          state.conversation.images.unshift(...photos)
+        }
       }
       state.lastMessageChange = !state.lastMessageChange;
     },
@@ -194,6 +207,9 @@ export const conversationSlice = createSlice({
       let idxMsg = state.conversation.messages.findIndex(m => m.id === messageId);
       if (idxMsg >= 0) {
         state.conversation.messages.splice(idxMsg, 1);
+        //sang add
+        state.conversation.files = state.conversation.files.filter(file => file.messageId != messageId)
+        state.conversation.images = state.conversation.images.filter(img => img.messageId != messageId)
       }
     },
     setConversationStatus: (state, action) => {
