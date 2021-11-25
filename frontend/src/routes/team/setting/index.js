@@ -44,7 +44,7 @@ export default function TeamSetting(props) {
         <div style={{ marginRight: '40px' }}>
           <SettingList />
         </div>
-        <div style={{ width: '500px' }}>
+        <div>
           <Switch>
             <Route path="/teams/:teamId/setting/members">
               <TeamMembers />

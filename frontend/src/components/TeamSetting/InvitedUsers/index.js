@@ -39,7 +39,7 @@ export default function TeamInvitedUsers() {
   return (
     <div>
       <InviteUsersWrapper />
-      <h1>Team Invited Users</h1>
+      <h3>Team Invited Users</h3>
       <div className='setting-user-list'>
         {team.invitedUsers.map(member => <div key={member.id} className='setting-user-item'>
           <div>

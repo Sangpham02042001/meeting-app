@@ -218,7 +218,6 @@ const Meeting = (props) => {
 
 	let debounceFunc = useCallback(
 		debounce((videoTracks, rfindex) => {
-			console.log(`remotestream debounce call ${Date.now()}`)
 			if (!videoTracks || videoTracks.length === 0) {
 				remoteVideos.current[rfindex] = false
 			} else {
@@ -260,165 +259,15 @@ const Meeting = (props) => {
 			if (audios.length) setIsEnableAudio(true);
 		})
 
-		Janus.init({
-			debug: 'all', callback: () => {
-				janus = new Janus({
-					server: janusServer,
-					iceServers: [{
-						url: 'turn:numb.viagenie.ca',
-						credential: 'muazkh',
-						username: 'webrtc@live.com'
-					},],
-					success: function () {
-						janus.attach({
-							plugin: "janus.plugin.videoroom",
-							opaqueId,
-							success: (pluginHandle) => {
-								sfuRef.current = pluginHandle;
-								const register = {
-									request: "join",
-									room: Number(meetingId),
-									ptype: "publisher",
-									display: JSON.stringify({
-										name: userReducer.user.firstName + ' ' + userReducer.user.lastName,
-										userId: userReducer.user.id
-									}),
-								};
-								sfuRef.current.send({ message: register });
-							},
-							iceState: function (state) {
-								Janus.log("ICE state changed to " + state);
-							},
-							mediaState: function (medium, on) {
-								Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
-							},
-							webrtcState: function (on) {
-								Janus.log("Janus says our WebRTC PeerConnection is " + (on ? "up" : "down") + " now");
-								if (!on) {
-									console.log('no on')
-									return;
-								}
-							},
-							onmessage: (msg, jsep) => {
-								console.log(msg);
-								const event = msg["videoroom"];
-								if (event) {
-									if (event === 'joined') {
-										console.log(`JOINED MESSAGE CALL`)
-										myId = msg["id"];
-										mypvtId = msg["private_id"];
-										publishOwnFeed(true);
-
-										if (msg["publishers"]) {
-											let list = msg["publishers"];
-											Janus.debug("Got a list of available publishers/feeds:", list);
-											for (let f in list) {
-												let id = list[f]["id"];
-												let display = list[f]["display"];
-												let audio = list[f]["audio_codec"];
-												let video = list[f]["video_codec"];
-												Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
-												newRemoteFeed(id, display, audio, video);
-											}
-										}
-									} else if (event === 'event') {
-										if (msg["publishers"]) {
-											let list = msg["publishers"];
-											Janus.debug("Got a list of available publishers/feeds:", list);
-											for (let f in list) {
-												let id = list[f]["id"];
-												let display = list[f]["display"];
-												let audio = list[f]["audio_codec"];
-												let video = list[f]["video_codec"];
-												Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
-												newRemoteFeed(id, display, audio, video);
-											}
-										} else if (msg["leaving"]) {
-											// One of the publishers has gone away?
-											let leaving = msg["leaving"];
-											console.log("Publisher left: " + leaving);
-											let remoteFeed = null;
-											for (let i = 0; i < 6; i++) {
-												if (feedRefs.current[i] && feedRefs.current[i].rfid == leaving) {
-													remoteFeed = feedRefs.current[i];
-													break;
-												}
-											}
-											if (remoteFeed != null) {
-												Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
-												console.log(`remote feed leaving ${remoteFeed.rfindex}`)
-												remoteFeed.detach();
-											}
-										}
-									}
-
-									if (jsep) {
-										Janus.debug("Handling SDP as well...", jsep);
-										sfuRef.current.handleRemoteJsep({ jsep: jsep });
-										// Check if any of the media we wanted to publish has
-										// been rejected (e.g., wrong or unsupported codec)
-										let audio = msg["audio_codec"];
-										if (myStream.current && myStream.current.getAudioTracks() && myStream.current.getAudioTracks().length > 0 && !audio) {
-											// Audio has been rejected
-											console.warning("Our audio stream has been rejected, viewers won't hear us");
-										}
-										let video = msg["video_codec"];
-										if (myStream.current && myStream.current.getVideoTracks() && myStream.current.getVideoTracks().length > 0 && !video) {
-											// Video has been rejected
-											console.warning("Our video stream has been rejected, viewers won't see us");
-											// Hide the webcam video
-											myVideo.current = null;
-										}
-									}
-								}
-							},
-							onlocalstream: (stream) => {
-								console.log(`ON LOCAL STREAM CALL`)
-								Janus.attachMediaStream(myVideo.current, stream);
-								myStream.current = stream;
-								let videoTracks = stream.getVideoTracks();
-								if (sfuRef.current.webrtcStuff.pc.iceConnectionState !== "completed" &&
-									sfuRef.current.webrtcStuff.pc.iceConnectionState !== "connected") {
-									// alert("publishing...")
-								}
-								if (!videoTracks || videoTracks.length === 0) {
-									// myVideo.current = null;
-								}
-								// if (!isVideoActive) {
-								// 	sfuRef.current.muteVideo();
-								// 	sfuRef.current.createOffer({
-								// 		media: { removeVideo: true },
-								// 		success: (jsep) => {
-								// 			sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
-								// 		},
-								// 		error: (error) => { console.log(error) }
-								// 	})
-								// } else {
-								// 	sfuRef.current.unmuteVideo();
-								// }
-								if (!isAudioActive) {
-									sfuRef.current.muteAudio()
-								}
-							},
-							oncleanup: function () {
-								Janus.log(" ::: Got a cleanup notification: we are unpublished now :::");
-								myStream.current = null;
-							},
-							error: (error) => {
-								console.log(error)
-							},
-							destroyed: function () {
-								window.location.reload();
-							}
-						})
-					}
-				})
-			}
-		})
-
 		window.addEventListener('beforeunload', function (e) {
 			e.preventDefault()
 		});
+
+		socketClient.on('receive-end-meeting', ({ currentMeetingId }) => {
+			if (currentMeetingId == meetingId) {
+				setIsMeetingEnd(true)
+			}
+		})
 
 	}, []);
 
@@ -443,6 +292,161 @@ const Meeting = (props) => {
 			if (!meeting || !meeting.active) {
 				setIsMeetingEnd(true)
 			} else {
+				Janus.init({
+					debug: 'all', callback: () => {
+						janus = new Janus({
+							server: janusServer,
+							iceServers: [{
+								url: 'turn:numb.viagenie.ca',
+								credential: 'muazkh',
+								username: 'webrtc@live.com'
+							},],
+							success: function () {
+								janus.attach({
+									plugin: "janus.plugin.videoroom",
+									opaqueId,
+									success: (pluginHandle) => {
+										sfuRef.current = pluginHandle;
+										const register = {
+											request: "join",
+											room: Number(meetingId),
+											ptype: "publisher",
+											display: JSON.stringify({
+												name: userReducer.user.firstName + ' ' + userReducer.user.lastName,
+												userId: userReducer.user.id
+											}),
+										};
+										sfuRef.current.send({ message: register });
+									},
+									iceState: function (state) {
+										Janus.log("ICE state changed to " + state);
+									},
+									mediaState: function (medium, on) {
+										Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
+									},
+									webrtcState: function (on) {
+										Janus.log("Janus says our WebRTC PeerConnection is " + (on ? "up" : "down") + " now");
+										if (!on) {
+											console.log('no on')
+											return;
+										}
+									},
+									onmessage: (msg, jsep) => {
+										console.log(msg);
+										const event = msg["videoroom"];
+										if (event) {
+											if (event === 'joined') {
+												console.log(`JOINED MESSAGE CALL`)
+												myId = msg["id"];
+												mypvtId = msg["private_id"];
+												publishOwnFeed(true);
+
+												if (msg["publishers"]) {
+													let list = msg["publishers"];
+													Janus.debug("Got a list of available publishers/feeds:", list);
+													for (let f in list) {
+														let id = list[f]["id"];
+														let display = list[f]["display"];
+														let audio = list[f]["audio_codec"];
+														let video = list[f]["video_codec"];
+														Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
+														newRemoteFeed(id, display, audio, video);
+													}
+												}
+											} else if (event === 'event') {
+												if (msg["publishers"]) {
+													let list = msg["publishers"];
+													Janus.debug("Got a list of available publishers/feeds:", list);
+													for (let f in list) {
+														let id = list[f]["id"];
+														let display = list[f]["display"];
+														let audio = list[f]["audio_codec"];
+														let video = list[f]["video_codec"];
+														Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
+														newRemoteFeed(id, display, audio, video);
+													}
+												} else if (msg["leaving"]) {
+													// One of the publishers has gone away?
+													let leaving = msg["leaving"];
+													console.log("Publisher left: " + leaving);
+													let remoteFeed = null;
+													for (let i = 0; i < 6; i++) {
+														if (feedRefs.current[i] && feedRefs.current[i].rfid == leaving) {
+															remoteFeed = feedRefs.current[i];
+															break;
+														}
+													}
+													if (remoteFeed != null) {
+														Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
+														console.log(`remote feed leaving ${remoteFeed.rfindex}`)
+														remoteFeed.detach();
+													}
+												}
+											}
+
+											if (jsep) {
+												Janus.debug("Handling SDP as well...", jsep);
+												sfuRef.current.handleRemoteJsep({ jsep: jsep });
+												// Check if any of the media we wanted to publish has
+												// been rejected (e.g., wrong or unsupported codec)
+												let audio = msg["audio_codec"];
+												if (myStream.current && myStream.current.getAudioTracks() && myStream.current.getAudioTracks().length > 0 && !audio) {
+													// Audio has been rejected
+													console.warning("Our audio stream has been rejected, viewers won't hear us");
+												}
+												let video = msg["video_codec"];
+												if (myStream.current && myStream.current.getVideoTracks() && myStream.current.getVideoTracks().length > 0 && !video) {
+													// Video has been rejected
+													console.warning("Our video stream has been rejected, viewers won't see us");
+													// Hide the webcam video
+													myVideo.current = null;
+												}
+											}
+										}
+									},
+									onlocalstream: (stream) => {
+										console.log(`ON LOCAL STREAM CALL`)
+										Janus.attachMediaStream(myVideo.current, stream);
+										myStream.current = stream;
+										let videoTracks = stream.getVideoTracks();
+										if (sfuRef.current.webrtcStuff.pc.iceConnectionState !== "completed" &&
+											sfuRef.current.webrtcStuff.pc.iceConnectionState !== "connected") {
+											// alert("publishing...")
+										}
+										if (!videoTracks || videoTracks.length === 0) {
+											// myVideo.current = null;
+										}
+										// if (!isVideoActive) {
+										// 	sfuRef.current.muteVideo();
+										// 	sfuRef.current.createOffer({
+										// 		media: { removeVideo: true },
+										// 		success: (jsep) => {
+										// 			sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
+										// 		},
+										// 		error: (error) => { console.log(error) }
+										// 	})
+										// } else {
+										// 	sfuRef.current.unmuteVideo();
+										// }
+										if (!isAudioActive) {
+											sfuRef.current.muteAudio()
+										}
+									},
+									oncleanup: function () {
+										Janus.log(" ::: Got a cleanup notification: we are unpublished now :::");
+										myStream.current = null;
+									},
+									error: (error) => {
+										console.log(error)
+									},
+									destroyed: function () {
+										window.location.reload();
+									}
+								})
+							}
+						})
+					}
+				})
 				dispatch(getMeetingMessages({
 					meetingId
 				}))

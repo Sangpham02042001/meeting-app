@@ -1,25 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { baseURL, axiosAuth } from '../../utils';
 
-export const createTeamMeeting = createAsyncThunk('/createTeamMeeting', async ({ teamId }, { rejectWithValue }) => {
-  try {
-    let response = await axiosAuth.post(`${baseURL}/api/meetings`, {
-      teamId
-    })
-    if (response.status) {
-      let { meeting } = response.data
-      return { meeting }
-    }
-  } catch (error) {
-    console.log(error)
-    let { data } = error.response
-    if (data && data.error) {
-      return rejectWithValue(data)
-    }
-    return error
-  }
-})
-
 export const getMeetingMessages = createAsyncThunk('meeting/getMessages', async ({ meetingId }, { rejectWithValue }) => {
   try {
     let response = await axiosAuth.get(`/api/meetings/${meetingId}/messages`)
@@ -50,22 +31,6 @@ export const meetingSlice = createSlice({
     error: null
   },
   extraReducers: {
-    [createTeamMeeting.pending]: (state, action) => {
-      console.log('create meeting pending')
-      state.loading = true;
-    },
-    [createTeamMeeting.fulfilled]: (state, action) => {
-      console.log(action.payload.meeting)
-      state.meeting = {
-        ...action.payload.meeting,
-        usersAudio: {}
-      }
-      state.loading = false;
-    },
-    [createTeamMeeting.rejected]: (state, action) => {
-      state.error = action.payload.error;
-      state.loading = false;
-    },
     [getMeetingMessages.pending]: (state) => {
       // state.loading = true;
       state.meeting.messagesLoaded = false

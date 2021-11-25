@@ -62,9 +62,12 @@ const requireSignin = (req, res, next) => {
 }
 
 const isTeamAdmin = async (req, res, next) => {
-  let { id } = req.auth
-  let { teamId } = req.params
   try {
+    let { id, role } = req.auth
+    let { teamId } = req.params
+    if (role === 'admin') {
+      next()
+    }
     let team = await Team.findOne({
       where: {
         id: teamId

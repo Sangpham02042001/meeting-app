@@ -4,6 +4,7 @@ import {
   TextField, MenuItem, Button, Avatar,
   Alert, Snackbar, Tooltip, IconButton
 } from '@mui/material'
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { baseURL } from '../../../utils'
 import { updateBasicTeamInfo } from '../../../store/reducers/team.reducer'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -72,7 +73,9 @@ export default function TeamGeneralSetting() {
             alt="Remy Sharp"
             src={imageUrl || `${baseURL}/api/team/coverphoto/${teamReducer.team.id}?id=${teamReducer.team.coverPhoto}`}
             sx={{ width: 200, height: 200, margin: 'auto', border: '5px solid #f7f7f7' }} />
-          <label className='new-avatar-btn' htmlFor='newAvatar'><i className="fas fa-camera"></i></label>
+          <label className='new-avatar-btn' htmlFor='newAvatar'>
+            <CameraAltIcon style={{ color: '#000' }} />
+          </label>
           <input id="newAvatar" type="file" accept='image/*' style={{ display: 'none' }}
             onChange={handleImageChange}></input>
         </div>

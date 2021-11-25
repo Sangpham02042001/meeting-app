@@ -383,7 +383,7 @@ export const teamSlice = createSlice({
     },
     endActiveMeeting: (state, action) => {
       let { meeting } = action.payload
-      if (state.team.meetingActive.id == meeting.id) {
+      if (state.team.meetingActive && state.team.meetingActive.id == meeting.id) {
         state.team.meetingActive = null
         let idx = state.team.meetings.findIndex(m => m.id == meeting.id)
         if (idx >= 0) {

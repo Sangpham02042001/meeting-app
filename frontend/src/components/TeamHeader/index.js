@@ -8,10 +8,14 @@ import {
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
+import CallEndIcon from '@mui/icons-material/CallEnd';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import InfoIcon from '@mui/icons-material/Info';
-import { baseURL } from '../../utils'
+import { baseURL, socketClient } from '../../utils'
 import './teamheader.css'
 import { deleteTeam, outTeam, createTeamMeeting, setMeetingJoined } from '../../store/reducers/team.reducer'
 import { width } from '@mui/system'
@@ -25,6 +29,7 @@ export default function TeamHeader({ showTeamInfo }) {
   const teamReducer = useSelector(state => state.teamReducer)
   const user = useSelector(state => state.userReducer.user)
   const [isDeleteModalShow, setDeleteModalShow] = useState(false)
+  const [isEndMeetingShow, setEndMeetingModalShow] = useState(false)
   const [isOutModalShow, setOutModalShow] = useState(false)
   const [isCreateMeetingShow, setShowCreateMeeting] = useState(false)
   const [isJoinMeetingShow, setShowJoinMeeting] = useState(false)
@@ -105,6 +110,10 @@ export default function TeamHeader({ showTeamInfo }) {
     setOutModalShow(false)
   }
 
+  const handleCloseEndMeetingModal = () => {
+    setEndMeetingModalShow(false)
+  }
+
   const handleCloseCreateMeeting = () => {
     setShowCreateMeeting(false)
   }
@@ -137,6 +146,13 @@ export default function TeamHeader({ showTeamInfo }) {
 
   const handleCloseJoinMeeting = () => {
     setShowJoinMeeting(false)
+  }
+
+  const handleEndMeeting = () => {
+    socketClient.emit('force-end-meeting', {
+      teamId
+    })
+    setEndMeetingModalShow(false)
   }
 
   return (
@@ -208,8 +224,9 @@ export default function TeamHeader({ showTeamInfo }) {
         >
           {teamReducer.team.hostId === user.id &&
             <MenuItem className='teamheaer-menu-item'>
-              <Link to={`/teams/${teamId}/setting`} style={{ color: 'var(--text-color)' }}>
-                <i className="fas fa-cog"></i> Manage Team
+              <Link to={`/teams/${teamId}/setting`} >
+                <SettingsApplicationsIcon style={{ color: 'var(--icon-color)' }} />
+                <span>Manage Team</span>
               </Link></MenuItem>}
           {teamReducer.team.hostId === user.id &&
             <MenuItem className='teamheaer-menu-item' onClick={e => {
@@ -217,7 +234,17 @@ export default function TeamHeader({ showTeamInfo }) {
               setDeleteModalShow(true)
               setAnchorEl(null)
             }} style={{ color: 'var(--text-color)' }}>
-              <i className="fas fa-trash-alt"></i> &nbsp; Delete Team
+              <DeleteIcon style={{ color: 'var(--icon-color)' }} />
+              <span>Delete Team</span>
+            </MenuItem>}
+          {teamReducer.team.meetingActive &&
+            (teamReducer.team.hostId === user.id || teamReducer.team.meetingActive.hostId == user.id) &&
+            <MenuItem className='teamheaer-menu-item' onClick={e => {
+              e.preventDefault()
+              setEndMeetingModalShow(true)
+              setAnchorEl(null)
+            }} style={{ color: 'var(--text-color)' }}>
+              <CallEndIcon style={{ color: 'var(--icon-color)' }} /> End Meeting
             </MenuItem>}
           {teamReducer.team.hostId !== user.id &&
             <MenuItem className='teamheaer-menu-item' onClick={e => {
@@ -225,7 +252,7 @@ export default function TeamHeader({ showTeamInfo }) {
               setOutModalShow(true)
               setAnchorEl(null)
             }} style={{ color: 'var(--text-color)' }}>
-              <i className="fas fa-sign-out-alt"></i> Leave Team
+              <ExitToAppIcon style={{ color: 'var(--icon-color)' }} /> Leave Team
             </MenuItem>}
         </Menu>
 
@@ -271,6 +298,22 @@ export default function TeamHeader({ showTeamInfo }) {
             <Button variant="text" onClick={handleCreateMeeting}
               style={{ color: 'var(--icon-color)' }}>
               Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={isEndMeetingShow} onClose={handleCloseEndMeetingModal}>
+          <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>
+            Force end meeting in this team ?
+          </DialogTitle>
+          <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="text" onClick={handleCloseEndMeetingModal}
+              style={{ color: 'var(--icon-color)' }}>
+              Cancel
+            </Button>
+            <Button variant="text" onClick={handleEndMeeting}
+              style={{ color: 'var(--icon-color)' }}>
+              End now
             </Button>
           </DialogActions>
         </Dialog>

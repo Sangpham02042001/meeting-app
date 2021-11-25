@@ -5,6 +5,7 @@ import {
 	Button, Dialog, DialogActions,
 	DialogTitle, Snackbar, Alert, Switch, FormControlLabel
 } from '@mui/material';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { baseURL } from '../../utils';
 import { Link } from 'react-router-dom';
 import { updateBasicUserInfo } from '../../store/reducers/user.reducer'
@@ -258,7 +259,7 @@ export default function Profile() {
 										src={imageUrl || `${baseURL}/api/user/avatar/${userReducer.user.id}?id=${userReducer.user.avatar}`}
 										sx={{ width: 200, height: 200, margin: 'auto', border: '5px solid #f7f7f7' }} />
 									<label className='new-avatar-btn' htmlFor='newAvatar'>
-										<i className="fas fa-camera" style={{ color: '#000' }}></i>
+										<CameraAltIcon style={{ color: '#000' }} />
 									</label>
 									<input id="newAvatar" type="file" accept='image/*' style={{ display: 'none' }}
 										onChange={handleImageChange}></input>

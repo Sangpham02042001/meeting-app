@@ -1,14 +1,20 @@
 .setting-user-list {
   overflow-y: auto;
   max-height: 450px;
+  min-width: 600px;
+  /* width: 60%; */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 20px;
+  row-gap: 20px;
 }
 
 .setting-user-item {
   display: flex;
-  width: 500px;
+  /* width: 500px; */
+  min-width: 300px;
   align-items: center;
   justify-content: space-between;
-  margin: 20px 0;
 }
 
 .setting-user-item > div {

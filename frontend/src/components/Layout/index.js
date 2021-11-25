@@ -35,7 +35,7 @@ export default function Layout({ children }) {
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const numberMessagesUnread = useSelector(state => state.conversationReducer.numberMessagesUnread);
   const params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
-  const meetingId = params && Number(params.meetingId)
+  const _meetingId = params && Number(params.meetingId)
   const [isSkConnected, setIsSkConnected] = useState(false);
   const [currentNoti, setNoti] = useState(null)
 
@@ -197,6 +197,11 @@ export default function Layout({ children }) {
       dispatch(endActiveMeeting({ meeting }))
     })
 
+    // socketClient.on('receive-end-meeting', ({ meetingId }) => {
+    //   if (_meetingId == meetingId) {
+    //     window.open("", "_self").close();
+    //   }
+    // })
 
     //notifications
     socketClient.on('receive-team-invitation', ({ noti, teamId, teamName, hostId }) => {
@@ -293,7 +298,7 @@ export default function Layout({ children }) {
 
   return (
     <>
-      {!meetingId ? <>
+      {!_meetingId ? <>
         <Navbar />
         <div className="layout">
           <div className="list-selection">

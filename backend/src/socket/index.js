@@ -6,7 +6,8 @@ const { getActiveMemberMeeting, addMemberMeeting,
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification, createMeetingNofication } = require('../controllers/notification.controller')
 const { socketRequestTeam, setUserStatus, getUserStatus } = require('../controllers/user.controller')
-const { deleteMessage } = require('../controllers/message.controller')
+const { deleteMessage } = require('../controllers/message.controller');
+const Meeting = require('../models/meeting');
 
 const userSockets = {};
 const meetingsAudio = {};
@@ -200,6 +201,39 @@ const socketServer = (io, socket) => {
         })
     })
 
+    socket.on('force-end-meeting', async ({ teamId }) => {
+        console.log(`receive force end meeting`, { teamId })
+        let meeting = await Meeting.findOne({
+            where: {
+                teamId: teamId,
+                active: true
+            }
+        })
+        if (meeting && meeting.id) {
+            console.log(`meeting active ${meeting.id}`)
+            meeting.active = false
+            await meeting.save()
+            let members = await getMemberTeam({ teamId });
+            // members = members.map(m => m.id != socket.userId)
+            for (const member of members) {
+                if (userSockets[member.id]) {
+                    for (const socketId of userSockets[member.id]) {
+                        socket.to(socketId).emit('end-meeting', { meeting })
+                    }
+                }
+            }
+            socket.emit('end-meeting', { meeting })
+            for (const socketId of userSockets[socket.userId]) {
+                socket.to(socketId).emit('receive-end-meeting', {
+                    currentMeetingId: meeting.id
+                })
+            }
+            socket.to(`meeting-${meeting.id}`).emit('receive-end-meeting', {
+                currentMeetingId: meeting.id
+            })
+        }
+    })
+
     //**********************************MEETING*************************************//
 
 
@@ -279,7 +313,7 @@ const socketServer = (io, socket) => {
                     console.log('all out meeting')
                     members = await updateMeetingState({ meetingId: socket.meetingId })
                     meeting = await getMeetingInfo({ meetingId: socket.meetingId })
-                    console.log(members)
+                    // console.log(members)
                     for (let m of members) {
                         if (userSockets[m.userId]) {
                             for (const socketId of userSockets[m.userId]) {

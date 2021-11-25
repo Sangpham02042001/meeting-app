@@ -69,11 +69,12 @@
 
 .new-avatar-btn {
   position: absolute;
-  padding: 5px 10px;
+  padding: 5px 10px 7px;
   border-radius: 50%;
   cursor: pointer;
   font-size: 20px;
   background-color: #e9e7e7;
+  color: #000;
   right: 0;
   bottom: 30px;
 }

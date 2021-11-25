@@ -140,7 +140,7 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
         }
       })
       let content = `${senderName} sent message to you.`
-      let relativeLink = `conversations/${senderId}`
+      let relativeLink = `/conversations/${senderId}`
       if (!noti || !noti.id) {
         noti = await Notification.create({
           content, relativeLink, userId: receiverId,
