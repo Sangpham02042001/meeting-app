@@ -93,7 +93,7 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
       let members = await team.getMembers({
         attributes: ['id']
       })
-      members = members = members.filter(m => m.id !== senderId);
+      members = members.filter(m => m.id !== senderId);
       let noti
       for (const member of members) {
         noti = await Notification.findOne({
@@ -172,4 +172,34 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
   }
 }
 
-module.exports = { updateRead, deleteNotification, createTeamNofication, createMessageNotification }
+const createMeetingNofication = async ({ content, relativeLink, teamId, createdBy }) => {
+  try {
+    console.log('create meeting nofication call')
+    let team = await Team.findByPk(teamId)
+    let members = await team.getMembers({
+      attributes: ['id']
+    })
+    members = members.filter(m => m.id !== createdBy);
+    console.log(members, createdBy)
+    let noti
+    for (const member of members) {
+      noti = await Notification.create({
+        relativeLink, userId: member.id,
+        content, teamId, createdBy
+      })
+    }
+    return {
+      message: 'success',
+      noti
+    }
+  } catch (error) {
+    console.log(error)
+    return { error }
+  }
+}
+
+module.exports = {
+  updateRead, deleteNotification,
+  createTeamNofication, createMessageNotification,
+  createMeetingNofication
+}

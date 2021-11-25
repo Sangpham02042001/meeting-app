@@ -4,7 +4,7 @@ const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
-const { createTeamNofication, createMessageNotification } = require('../controllers/notification.controller')
+const { createTeamNofication, createMessageNotification, createMeetingNofication } = require('../controllers/notification.controller')
 const { socketRequestTeam, setUserStatus, getUserStatus } = require('../controllers/user.controller')
 const { deleteMessage } = require('../controllers/message.controller')
 
@@ -131,13 +131,16 @@ const socketServer = (io, socket) => {
 
     //**********************************MEETING*************************************//
 
-    socket.on('new-meeting', async ({ meeting }) => {
+    socket.on('new-meeting', async ({ meeting, hostName, teamName }) => {
         let { teamId } = meeting
         let members = await getMemberTeam({ teamId });
+        let content = `${hostName} starts new meeting at ${teamName}`
+        let relativeLink = `/teams/${teamId}`
+        let { noti } = await createMeetingNofication({ content, relativeLink, teamId, createdBy: Number(socket.userId) })
         for (let m of members) {
             if (userSockets[m.id] && userSockets[m.id].length) {
                 for (const socketId of userSockets[m.id]) {
-                    socket.to(socketId).emit('new-meeting-created', { meeting });
+                    socket.to(socketId).emit('new-meeting-created', { meeting, noti });
                 }
             }
         }

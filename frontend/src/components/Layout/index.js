@@ -77,7 +77,7 @@ export default function Layout({ children }) {
     socketClient.emit('user-connect', { userId: userReducer.user.id })
 
     socketClient.on('user-changed-status', ({ userId, status, time }) => {
-      dispatch(setConversationStatus({ userId, status, time}))
+      dispatch(setConversationStatus({ userId, status, time }))
       dispatch(setMyStatus({ userId, status }))
     })
 
@@ -113,10 +113,16 @@ export default function Layout({ children }) {
     })
 
     //teams
-    socketClient.on('new-meeting-created', ({ meeting }) => {
+    socketClient.on('new-meeting-created', ({ meeting, noti }) => {
       dispatch(setMeetingActive({
         meeting
       }))
+      if (noti && noti.id) {
+        dispatch(receivceNotification({ noti }))
+        setTimeout(() => {
+          setNoti(noti)
+        }, 500)
+      }
     })
 
     socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, files, photos, createdAt, noti }) => {
@@ -385,6 +391,7 @@ export default function Layout({ children }) {
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             onClose={e => setNoti(null)}>
             <Alert variant="filled" severity="info"
+              style={{ backgroundColor: 'var(--primary-color)' }}
               onClick={(e) => {
                 e.preventDefault()
                 dispatch(readNotif(currentNoti.id))

@@ -152,13 +152,14 @@ export default function TeamHeader({ showTeamInfo }) {
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
-        {createMeetingPending && <LoadingButton loading={createMeetingPending} variant="text">
+        {createMeetingPending && <LoadingButton loading={createMeetingPending}
+          variant="text" style={{ color: 'var(--icon-color)' }}>
         </LoadingButton>}
         {
           teamReducer.team.meetingActive
-          && <Button variant="text"
+          && <Button variant="contained"
             disabled={teamReducer.meetingJoined}
-            style={{ color: 'var(--icon-color)' }}
+            style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}
             className='join-meeting-btn' onClick={handleJoinMeeting}>
             Join Meeting
           </Button>
@@ -275,10 +276,11 @@ export default function TeamHeader({ showTeamInfo }) {
         </Dialog>
 
         <Dialog open={isJoinMeetingShow} centered="true" onClose={handleCloseJoinMeeting} minWidth="sm" fullWidth={true}>
-          <DialogTitle>Join meeting
+          <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>
+            Join meeting
           </DialogTitle>
-          <DialogContent>
-            <div style={{ position: 'relative', width: '100%' }}>
+          <DialogContent style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <div style={{ position: 'relative', width: '100%', }}>
               {isEnableVideo && <video width="100%" height="320px" muted ref={userVideo} autoPlay />}
               {!isEnableVideo && <div style={{
                 width: '78%', height: '320px', display: 'flex',
@@ -318,7 +320,7 @@ export default function TeamHeader({ showTeamInfo }) {
                   <Tooltip placement="top" title="No micro found">
                     <div>
                       <IconButton disabled >
-                        <MicOffIcon />
+                        <MicOffIcon style={{ color: 'var(--text-color)' }} />
                       </IconButton>
                     </div>
                   </Tooltip>
@@ -326,11 +328,11 @@ export default function TeamHeader({ showTeamInfo }) {
                   <IconButton onClick={handleActiveAudio} >
                     {!isAudioActive ?
                       <Tooltip placement="top" title="Turn on mic">
-                        <MicOffIcon />
+                        <MicOffIcon style={{ color: 'var(--text-color)' }} />
                       </Tooltip>
                       :
                       <Tooltip placement="top" title="Turn off mic">
-                        <MicIcon />
+                        <MicIcon style={{ color: 'var(--text-color)' }} />
                       </Tooltip>}
                   </IconButton>
               }
@@ -338,8 +340,9 @@ export default function TeamHeader({ showTeamInfo }) {
               <span>Join with audio</span>
             </div>
           </DialogContent>
-          <DialogActions>
-            <Button variant="text" onClick={handleCloseJoinMeeting}>
+          <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
+            <Button variant="text" onClick={handleCloseJoinMeeting}
+              style={{ color: ('var(--icon-color)') }}>
               Cancel
             </Button>
             <Button variant="text">

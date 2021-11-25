@@ -385,10 +385,18 @@ export const teamSlice = createSlice({
       let { meeting } = action.payload
       if (state.team.meetingActive.id == meeting.id) {
         state.team.meetingActive = null
-        // let idx = state.team.meetings.findIndex(m => m.id == meeting.id)
-        // if (idx >= 0) {
-        //   state.team.meetings.splice(idx, 1, meeting)
-        // }
+        let idx = state.team.meetings.findIndex(m => m.id == meeting.id)
+        if (idx >= 0) {
+          state.team.meetmess.splice(idx, 1, {
+            ...meeting,
+            isMeeting: true
+          })
+        } else {
+          state.team.meetmess.push({
+            ...meeting,
+            isMeeting: true
+          })
+        }
       }
       if ((state.meetingJoined || {}).id === meeting.id) {
         state.meetingJoined = null
@@ -653,8 +661,11 @@ export const teamSlice = createSlice({
     [createTeamMeeting.fulfilled]: (state, action) => {
       let { meeting } = action.payload
       state.team.meetingActive = meeting
+      let hostName = state.team.members.find(m => m.id === meeting.hostId).userName
       socketClient.emit('new-meeting', {
-        meeting: meeting
+        meeting: meeting,
+        hostName,
+        teamName: state.team.name
       })
       // state.team.meetings.push(action.payload.meeting)
       state.loading = false
