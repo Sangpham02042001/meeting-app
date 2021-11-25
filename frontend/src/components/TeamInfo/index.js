@@ -31,7 +31,9 @@ export default function TeamInfo() {
     <div style={{ padding: '10px 5px', width: '100%', overflow: 'auto' }}>
       <strong style={{ padding: '0 5px' }}>About</strong>
       <p style={{ paddingLeft: '10px', margin: 0 }}>{teamReducer.team.name}</p>
-
+      <strong style={{ margin: '5px' }}>
+        {teamReducer.team.teamType === 'public' ? 'Public team' : 'Private team'}
+      </strong>
       <Accordion className='team-info-expand-container'>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}

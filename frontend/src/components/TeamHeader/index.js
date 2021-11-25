@@ -141,7 +141,7 @@ export default function TeamHeader({ showTeamInfo }) {
 
   return (
     <div className='team-header'>
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', marginLeft: '15px' }}>
         <div className='team-header-coverphoto'
           style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${teamId}")` }}>
         </div>

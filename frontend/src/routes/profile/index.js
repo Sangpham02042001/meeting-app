@@ -15,7 +15,7 @@ import {
 } from '../../store/reducers/team.reducer'
 import Loading from '../../components/Loading'
 import './profile.css';
-import { toggleDarkMode } from '../../store/reducers/setting.reducer'
+// import { toggleDarkMode } from '../../store/reducers/setting.reducer'
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -239,13 +239,13 @@ export default function Profile() {
 					onChange={handleTabChange}
 					aria-label="Vertical tabs example"
 					className='profile-tabs'
-					sx={{ borderRight: 1, borderColor: 'divider', height: 240 }}
+					sx={{ borderRight: 1, borderColor: 'divider', height: 190 }}
 				>
 					<Tab label="Profile" {...a11yProps(0)} />
 					<Tab label="Joined Teams" {...a11yProps(1)} />
 					<Tab label="Invited Teams" {...a11yProps(2)} />
 					<Tab label="Requesting Teams" {...a11yProps(3)} />
-					<Tab label="Setting" {...a11yProps(4)} />
+					{/* <Tab label="Setting" {...a11yProps(4)} /> */}
 				</Tabs>
 				<div className='profile-right-tab'>
 					<TabPanel value={currentTab} index={0}>
@@ -257,7 +257,9 @@ export default function Profile() {
 										alt="Remy Sharp"
 										src={imageUrl || `${baseURL}/api/user/avatar/${userReducer.user.id}?id=${userReducer.user.avatar}`}
 										sx={{ width: 200, height: 200, margin: 'auto', border: '5px solid #f7f7f7' }} />
-									<label className='new-avatar-btn' htmlFor='newAvatar'><i className="fas fa-camera"></i></label>
+									<label className='new-avatar-btn' htmlFor='newAvatar'>
+										<i className="fas fa-camera" style={{ color: '#000' }}></i>
+									</label>
 									<input id="newAvatar" type="file" accept='image/*' style={{ display: 'none' }}
 										onChange={handleImageChange}></input>
 								</div>
@@ -349,7 +351,7 @@ export default function Profile() {
 								: <h3>No request team for show</h3>}
 						</div>
 					</TabPanel>
-					<TabPanel value={currentTab} index={4}>
+					{/* <TabPanel value={currentTab} index={4}>
 						<div>
 							<h1>Setting</h1>
 							<FormControlLabel
@@ -361,7 +363,7 @@ export default function Profile() {
 								label="Dark Mode"
 							/>
 						</div >
-					</TabPanel>
+					</TabPanel> */}
 				</div>
 
 				<Dialog

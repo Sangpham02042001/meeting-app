@@ -28,7 +28,8 @@ const getTeamInfo = async (req, res) => {
     }
   )
   let team = teams[0]
-  if (team.hostId !== req.auth.id) {
+  //need backup
+  if (!req.auth || team.hostId !== req.auth.id) {
     delete team.teamCode
   }
   return res.status(200).json({
@@ -740,7 +741,16 @@ const getTeamMeetings = async (req, res) => {
     let meetings = await Meeting.findAll({
       where: {
         teamId
-      }
+      },
+      order: [
+        ['updatedAt', 'DESC'],
+        ['createdAt', 'DESC'],
+      ],
+      include: [{
+        model: User,
+        as: 'members',
+        attributes: ['id', 'firstName', 'lastName']
+      }]
     })
     return res.status(200).json({ meetings })
   } catch (error) {

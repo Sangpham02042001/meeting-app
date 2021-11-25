@@ -81,7 +81,11 @@ export const notificationSlice = createSlice({
             if (notiId) {
                 let idx = state.notifications.findIndex(noti => noti.id === notiId)
                 if (idx >= 0) {
+                    if (!state.notifications[idx].isRead) {
+                        state.numOf_UnReadNotifications--;
+                    }
                     state.notifications.splice(idx, 1)
+                    state.numOfNotifications--;
                 }
             }
         },

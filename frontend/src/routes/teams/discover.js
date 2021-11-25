@@ -477,7 +477,7 @@ export default function TeamDiscover() {
         {team.name && <>
           <DialogTitle style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>Team Info</DialogTitle>
           <DialogContent style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>
-            <h4>Team name: {team.name}</h4>
+            <h4>Team: {team.name}</h4>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
               <Avatar sx={{ width: '100px', height: '100px' }} src={`${baseURL}/api/team/coverphoto/${team.id}`} />
             </div>
@@ -494,10 +494,11 @@ export default function TeamDiscover() {
             </div>
           </DialogContent>
           <DialogActions style={{ color: 'var(--text-color)', backgroundColor: 'var(--primary-bg)' }}>
-            <Button variant='text' onClick={closeTeam}>
+            <Button variant='text' onClick={closeTeam} style={{ color: 'var(--icon-color)' }}>
               Close
             </Button>
             <Button variant='text' onClick={handleRequestJoin(team)}
+              style={{ color: 'var(--icon-color)' }}
               disabled={isMemberOfTeam(team.id).length > 0 || isInvitedOfTeam(team.id).length > 0 || isRequestOfTeam(team.id).length > 0}>
               Join
             </Button>

@@ -85,6 +85,13 @@ const isTeamAdmin = async (req, res, next) => {
   }
 }
 
+const isAdmin = async (req, res, next) => {
+  let { role } = req.auth
+  if (role === 'admin') {
+    next()
+  }
+}
+
 const isMember = async (req, res, next) => {
   let { id } = req.auth
   let { teamId } = req.params
@@ -113,5 +120,5 @@ const isMember = async (req, res, next) => {
 
 module.exports = {
   signin, requireSignin, isTeamAdmin,
-  isMember
+  isMember, isAdmin
 }
