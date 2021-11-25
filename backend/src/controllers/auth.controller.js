@@ -20,7 +20,7 @@ const signin = async (req, res) => {
       }
       const token = jwt.sign({
         id: user.id,
-        name: user.name,
+        name: user.firstName + ' ' + user.lastName,
         company: 'SPICY_CODE',
         role: user.role
       }, process.env.JWT_SECRET_KEY)
@@ -61,6 +61,17 @@ const requireSignin = (req, res, next) => {
   }
 }
 
+const isAdmin = async (req, res, next) => {
+  let { role } = req.auth
+  if (role === 'admin') {
+    next()
+  } else {
+    return res.status(401).json({
+      error: 'Unauthorized'
+    })
+  }
+}
+
 const isTeamAdmin = async (req, res, next) => {
   try {
     let { id, role } = req.auth
@@ -88,12 +99,7 @@ const isTeamAdmin = async (req, res, next) => {
   }
 }
 
-const isAdmin = async (req, res, next) => {
-  let { role } = req.auth
-  if (role === 'admin') {
-    next()
-  }
-}
+
 
 const isMember = async (req, res, next) => {
   let { id } = req.auth

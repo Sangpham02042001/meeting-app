@@ -18,6 +18,7 @@ const conversationRoutes = require('./routes/conversation.routes')
 const meetingRoutes = require('./routes/meeting.routes')
 const notificationRoutes = require('./routes/notification.routes')
 const messageRoutes = require('./routes/message.routes')
+const adminRoutes = require('./routes/admin.route')
 
 sequelize.sync()
 
@@ -33,7 +34,6 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
-
 //routes
 app.use('/', authRoutes)
 app.use('/', userRoutes)
@@ -42,6 +42,8 @@ app.use('/', conversationRoutes)
 app.use('/', meetingRoutes)
 app.use('/', notificationRoutes)
 app.use('/', messageRoutes)
+
+app.use('/admin', adminRoutes)
 
 io.use((socket, next) => {
     const userID = socket.handshake.auth.userId;

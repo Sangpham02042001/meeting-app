@@ -688,7 +688,7 @@ export const teamSlice = createSlice({
       }
     },
     [getCurrentMeeting.rejected]: (state, action) => {
-      state.error = action.payload.error;
+      state.error = (action.payload || {}).error;
     },
     [outJoinedMeeting.pending]: () => {
 

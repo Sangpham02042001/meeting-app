@@ -4,25 +4,27 @@ const { getConversations, getMessages, getLastMessage, readConversation,
     getImagesMessageCv, getFilesMessageCv, getNumberMessageUnRead } = require('../controllers/conversation.controller')
 const router = Router()
 
+router.use('/api/conversations', requireSignin)
+
 router.route('/api/conversations')
-    .get(requireSignin, getConversations)
+    .get(getConversations)
 
 router.route('/api/conversations/messages')
-    .get(requireSignin, getNumberMessageUnRead)
+    .get(getNumberMessageUnRead)
 
 router.route('/api/conversations/:conversationId/messages')
-    .get(requireSignin, getMessages)
+    .get(getMessages)
 
 router.route('/api/conversations/:conversationId')
-    .patch(requireSignin, readConversation)
+    .patch(readConversation)
 
 router.route('/api/conversations/:conversationId/messages/images')
-    .get(requireSignin, getImagesMessageCv)
+    .get(getImagesMessageCv)
 
 router.route('/api/conversations/:conversationId/messages/files')
-    .get(requireSignin, getFilesMessageCv)
+    .get(getFilesMessageCv)
 
 router.route('/api/conversations/:conversationId/messages/lastMessage')
-    .get(requireSignin, getLastMessage)
+    .get(getLastMessage)
 
 module.exports = router
