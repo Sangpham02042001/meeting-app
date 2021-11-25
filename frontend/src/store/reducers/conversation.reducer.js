@@ -88,6 +88,7 @@ export const conversationSlice = createSlice({
       let conversation = state.conversations.find(conv => conv.conversationId === conversationId);
       if (conversation) {
         conversation.isRead = true;
+        state.numberMessagesUnread--;
       }
     },
     [readConversation.rejected]: (state, action) => {
@@ -133,7 +134,7 @@ export const conversationSlice = createSlice({
       if (!conversation && !convParticipant) {
         state.conversations.unshift({
           conversationId, participantId: senderId,
-          participantName: senderName, isRead: false, status: false
+          participantName: senderName, isRead: false
         })
       }
 
@@ -153,9 +154,12 @@ export const conversationSlice = createSlice({
         //check is read?
         conversation = state.conversations[pIdx];
         conversation.isRead = true;
+        state.numberMessagesUnread--;
         if (!state.conversation.participant || state.conversation.participant.id !== receiverId) {
           conversation.isRead = false;
         }
+
+
         state.conversations.splice(pIdx, 1);
         state.conversations.unshift(conversation);
 
@@ -164,6 +168,7 @@ export const conversationSlice = createSlice({
           conversation.status = 'active';
         }
       }
+
 
       state.lastMessageChange = !state.lastMessageChange;
     },
