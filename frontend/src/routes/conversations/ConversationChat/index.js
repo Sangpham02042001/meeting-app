@@ -19,7 +19,6 @@ import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import InfoIcon from '@mui/icons-material/Info';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ColorLensIcon from '@mui/icons-material/ColorLens';
 import MicIcon from '@mui/icons-material/Mic';
 import MicNoneIcon from '@mui/icons-material/MicNone';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -27,7 +26,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import 'emoji-mart/css/emoji-mart.css'
 import { Picker, emojiIndex } from 'emoji-mart';
-import { socketClient, baseURL, emotionRegex } from '../../../utils';
+import { socketClient, baseURL, emotionRegex, timeDiff } from '../../../utils';
 import {
   getMessages, readConversation, startCall, cancelCall, getAllImages,
   getParticipant, getAllFiles
@@ -364,7 +363,7 @@ export default function ConversationChat({ conversation, user }) {
     } else if (status === 'busy') {
       return 'Do not disturb';
     } else if (status === 'inactive') {
-      return 'Offline';
+      return conversation.statusTime ? 'Last seen ' + timeDiff(conversation.statusTime).toLowerCase()  : 'Offline';
     }
   }
 

@@ -10,12 +10,12 @@ const timeDiff = (mysqlTime) => {
   let _time = new Date(mysqlTime).getTime()
   let second = Math.round((Date.now() - _time) / 1000)
   let time = 0;
-  if (second < 60) {
-    return "Just now";
-  }
+  // if (second < 60) {
+  //   return "Just now";
+  // }
   if (second < 3600) {
     time = Math.round(second / 60);
-    if (time == 1) {
+    if (time <= 1) {
       return "A minute ago";
     }
     return time + " minutes ago";

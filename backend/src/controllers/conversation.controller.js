@@ -12,7 +12,7 @@ const getConversations = async (req, res) => {
     try {
         const { id } = req.auth
         const conversations = await sequelize.query(
-            "SELECT uc.conversationId, uc.userId as participantId, concat(u.firstName, ' ', u.lastName) as participantName, u.status,tb1.isRead " +
+            "SELECT uc.conversationId, uc.userId as participantId, concat(u.firstName, ' ', u.lastName) as participantName, u.status, tb1.isRead, u.updatedAt as statusTime " +
             "FROM users_conversations uc " +
             "JOIN (SELECT conversationId, isRead FROM users_conversations WHERE userId = :userId) tb1 using(conversationId) " +
             "JOIN users u on uc.userId = u.id " +
@@ -149,7 +149,7 @@ const getLastMessage = async (req, res) => {
 const getNumberMessageUnRead = async (req, res) => {
     try {
         const { id } = req.auth
-        const messages = await sequelize.query("SELECT COUNT(*) as total FROM users_conversations WHERE isRead = 1 AND userId = :userId",
+        const messages = await sequelize.query("SELECT COUNT(*) as total FROM users_conversations WHERE isRead = 0 AND userId = :userId",
             {
                 replacements: {
                     userId: id
@@ -157,7 +157,7 @@ const getNumberMessageUnRead = async (req, res) => {
                 type: QueryTypes.SELECT
             }
         )
-        console.log(messages);
+
         return res.status(200).json({
             numberMessages: messages[0].total
         })

@@ -481,15 +481,27 @@ const getUserStatusList = async () => {
 const setUserStatus = async ({ userId, status }) => {
   try {
     await sequelize.query(
-      "UPDATE users SET status = :status " +
+      "UPDATE users SET status = :status, updatedAt = now() " +
       "WHERE id = :userId",
       {
         replacements: {
           status, userId
         }
       })
+
+    let updateTime = await sequelize.query(
+      "SELECT updatedAt FROM users " +
+      "WHERE id = :userId",
+      {
+        replacements: {
+          userId
+        },
+        type: QueryTypes.SELECT
+      })
+
+
     return {
-      message: 'update done'
+      time: updateTime[0].updatedAt
     }
   } catch (error) {
     console.log(error);

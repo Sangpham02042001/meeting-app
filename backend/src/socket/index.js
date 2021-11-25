@@ -26,17 +26,16 @@ const socketServer = (io, socket) => {
         if (status === 'inactive') {
             status = 'active';
         }
-        console.log(status)
         let report = await setUserStatus({ userId, status })
         if (report) {
-            io.emit('user-changed-status', { userId, status })
+            io.emit('user-changed-status', { userId, status, time: report.time })
         }
     })
 
     socket.on('user-change-status', async ({ userId, status }) => {
         let report = await setUserStatus({ userId, status })
         if (report) {
-            io.emit('user-changed-status', { userId, status })
+            io.emit('user-changed-status', { userId, status, time: report.time })
         }
     })
 
@@ -312,7 +311,7 @@ const socketServer = (io, socket) => {
         }
         let report = await setUserStatus({ userId: socket.userId, status });
         if (report) {
-            socket.broadcast.emit('user-disconnect', { userId: socket.userId, status })
+            socket.broadcast.emit('user-disconnect', { userId: socket.userId, status, time: report.time })
         }
 
         userSockets[socket.userId] = userSockets[socket.userId].filter(socketId => socketId != socket.id)

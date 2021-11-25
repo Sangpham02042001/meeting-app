@@ -221,10 +221,12 @@ export const conversationSlice = createSlice({
       }
     },
     setConversationStatus: (state, action) => {
-      let { userId, status } = action.payload;
+      let { userId, status, time } = action.payload;
       let conversation = state.conversations.find(conver => conver.participantId === userId);
       if (conversation) {
+        console.log(time)
         conversation.status = status;
+        conversation.statusTime = time;
       }
     }
   }

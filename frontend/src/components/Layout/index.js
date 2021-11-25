@@ -76,16 +76,17 @@ export default function Layout({ children }) {
     //user
     socketClient.emit('user-connect', { userId: userReducer.user.id })
 
-    socketClient.on('user-changed-status', ({ userId, status }) => {
-      dispatch(setConversationStatus({ userId, status }))
+    socketClient.on('user-changed-status', ({ userId, status, time }) => {
+      dispatch(setConversationStatus({ userId, status, time}))
       dispatch(setMyStatus({ userId, status }))
+      console.log(userId, status, time)
     })
 
 
 
-    socketClient.on('user-disconnect', ({ userId, status }) => {
-      console.log(userId, status)
-      dispatch(setConversationStatus({ userId, status }))
+    socketClient.on('user-disconnect', ({ userId, status, time }) => {
+      console.log(userId, status, time)
+      dispatch(setConversationStatus({ userId, status, time }))
     })
 
     //conversation
