@@ -75,24 +75,26 @@ const isAdmin = async (req, res, next) => {
 const isTeamAdmin = async (req, res, next) => {
   try {
     let { id, role } = req.auth
+    console.log(id, role)
     let { teamId } = req.params
     if (role === 'admin') {
       next()
+    } else {
+      let team = await Team.findOne({
+        where: {
+          id: teamId
+        },
+        attributes: ['hostId']
+      })
+      if (!team) {
+        throw `Team not found`
+      }
+      if (team.hostId != id) {
+        throw `You aren't the admin of this team`
+      }
+      req.hostId = team.hostId
+      next()
     }
-    let team = await Team.findOne({
-      where: {
-        id: teamId
-      },
-      attributes: ['hostId']
-    })
-    if (!team) {
-      throw `Team not found`
-    }
-    if (team.hostId != id) {
-      throw `You aren't the admin of this team`
-    }
-    req.hostId = team.hostId
-    next()
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })

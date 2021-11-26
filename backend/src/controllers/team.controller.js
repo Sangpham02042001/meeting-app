@@ -28,8 +28,7 @@ const getTeamInfo = async (req, res) => {
     }
   )
   let team = teams[0]
-  //need backup
-  if (!req.auth || team.hostId !== req.auth.id) {
+  if (team.hostId !== req.auth.id && req.auth.role !== 'admin') {
     delete team.teamCode
   }
   return res.status(200).json({
@@ -46,7 +45,10 @@ const createTeam = async (req, res) => {
       console.log(err);
       return res.status(400).json({ error: err })
     }
-    let { name } = fields
+    let { name, hostId } = fields
+    if (!hostId) {
+      hostId = id;
+    }
     let coverPhoto,
       teamType = fields.teamType || 'public'
     if (files.coverPhoto) {
@@ -60,7 +62,7 @@ const createTeam = async (req, res) => {
     try {
       let teams = await Team.findAll({
         where: {
-          hostId: id
+          hostId
         },
         attributes: ['name']
       })
@@ -76,7 +78,7 @@ const createTeam = async (req, res) => {
         name,
         coverPhoto,
         teamType,
-        hostId: id
+        hostId
       })
       team.coverPhoto = undefined
 
@@ -751,7 +753,11 @@ const getAllTeams = async (req, res) => {
         model: Meeting,
         as: 'meetings',
         attributes: ['id'],
-      }]
+      }],
+      order: [
+        ['updatedAt', 'DESC'],
+        ['createdAt', 'DESC']
+      ]
     })
 
     return res.status(200).json({ teams })
