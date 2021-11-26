@@ -306,9 +306,9 @@ export default function TeamDiscover() {
         <div style={{ marginTop: '20px', display: "flex", justifyContent: 'space-between' }}>
           <h3>Search teams you want to join</h3>
           <form onSubmit={handleSearchTeams} style={{ display: 'flex' }}>
-            {loading && <div style={{ textAlign: 'center', marginRight: '10px' }}>
+            {/* {loading && <div style={{ textAlign: 'center', marginRight: '10px' }}>
               <CircularProgress />
-            </div>}
+            </div>} */}
             <FormControl variant="outlined" className='search-teams-form'>
               <InputLabel htmlFor="search-teams">
                 <span>Find teams</span>

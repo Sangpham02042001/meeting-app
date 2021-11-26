@@ -581,7 +581,7 @@ const Meeting = (props) => {
 					<MeetingVideo remoteStreams={remoteStreams} remoteVideos={remoteVideos} remoteAudios={remoteAudios} />
 				</div>
 				<div className="meeting-box" style={{
-					width: isOpenChat || isOpenInfo || isOpenUsers ? '24%' : '0%'
+					width: isOpenChat || isOpenInfo || isOpenUsers ? '350px' : '0%'
 				}}>
 					{isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 

@@ -37,7 +37,6 @@ const getTeamInfo = async (req, res) => {
 }
 
 const createTeam = async (req, res) => {
-  let { id } = req.auth
   const form = formidable.IncomingForm()
   form.keepExtensions = true
   form.parse(req, async (err, fields, files) => {
@@ -46,8 +45,8 @@ const createTeam = async (req, res) => {
       return res.status(400).json({ error: err })
     }
     let { name, hostId } = fields
-    if (!hostId) {
-      hostId = id;
+    if (!hostId || hostId == null || hostId == 'null') {
+      hostId = req.auth.id;
     }
     let coverPhoto,
       teamType = fields.teamType || 'public'
@@ -244,20 +243,29 @@ const inviteUsers = async (req, res) => {
   let stringifyUsers = ''
   users.forEach(userId => stringifyUsers += `${userId},`)
   try {
-    const messages = await sequelize.query(
-      "CALL inviteUsers(:teamId, :users)",
-      {
-        replacements: {
-          users: stringifyUsers,
-          teamId
-        }
+    // const messages = await sequelize.query(
+    //   "CALL inviteUsers(:teamId, :users)",
+    //   {
+    //     replacements: {
+    //       users: stringifyUsers,
+    //       teamId
+    //     }
+    //   }
+    // )
+    // if (messages[0]) {
+    //   return res.status(200).json(messages[0])
+    // } else {
+    //   return res.status(400).json({ error: 'Some thing wrong' })
+    // }
+    let team = await Team.findOne({
+      where: {
+        id: teamId
       }
-    )
-    if (messages[0]) {
-      return res.status(200).json(messages[0])
-    } else {
-      return res.status(400).json({ error: 'Some thing wrong' })
+    })
+    for (const user of users) {
+      await team.addInivitedUser(user)
     }
+    return res.status(200).json({ message: 'success' })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })

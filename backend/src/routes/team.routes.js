@@ -16,7 +16,7 @@ const router = Router()
 router.route('/api/team/coverphoto/:teamId')
   .get(getTeamCoverPhoto)
 
-router.use(requireSignin)
+router.use('/api/teams', requireSignin)
 
 router.route('/api/teams/search')
   .post(searchTeams)
@@ -62,7 +62,7 @@ router.route('/api/teams/:teamId/remove-members')
 router.route('/api/teams/:teamId')
   .get(getTeamInfo)
   .put(isTeamAdmin, updateBasicTeamInfo)
-  .delete(isAdmin, isTeamAdmin, removeTeam)
+  .delete(isTeamAdmin, removeTeam)
 
 router.route('/api/teams')
   .post(createTeam)

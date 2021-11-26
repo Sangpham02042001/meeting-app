@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { FormControlLabel, Switch } from '@mui/material'
 import { toggleDarkMode } from '../../store/reducers/setting.reducer'
+import SwitchDarkMode from '../../components/SwitchDarkMode'
 import './setting.css'
 
 export default function Setting(props) {
@@ -16,12 +17,9 @@ export default function Setting(props) {
         <div className='setting-page'>
             <h1>Setting</h1>
             <FormControlLabel
-                control={
-                    <Switch label="Dark Mode" checked={settingReducer.darkMode}
-                        onChange={e => { dispatch(toggleDarkMode()) }}
-                        color="default" />
-                }
-                label="Dark Mode"
+                onChange={e => { dispatch(toggleDarkMode()) }}
+                control={<SwitchDarkMode sx={{ m: 1 }} checked={settingReducer.darkMode} />}
+                label={settingReducer.darkMode ? 'Dark Mode' : 'Light Mode'}
             />
         </div >
     )

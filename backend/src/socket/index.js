@@ -231,6 +231,7 @@ const socketServer = (io, socket) => {
             await meeting.save()
             let members = await getMemberTeam({ teamId });
             // members = members.map(m => m.id != socket.userId)
+            meeting = await getMeetingInfo({ meetingId: meeting.id })
             for (const member of members) {
                 if (userSockets[member.id] && userSockets[member.id].length) {
                     for (const socketId of userSockets[member.id]) {
