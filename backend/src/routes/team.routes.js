@@ -7,8 +7,7 @@ const { getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamInvitedUsers, searchTeams, updateBasicTeamInfo,
   getMeetings, getTeamMeetMess, searchTeamWithCode,
   getTeamSharedFiles, getTeamSharedImages, getMeetingActive,
-  getAllTeams,
-  getTeamMeetings } = require('../controllers/team.controller')
+  getAllTeams, getTeamMeetings, confirmRequest } = require('../controllers/team.controller')
 const { isTeamAdmin, isMember, isAdmin } = require('../controllers/auth.controller')
 
 const router = Router()
@@ -49,6 +48,8 @@ router.route('/api/teams/:teamId/users')
   .post(isTeamAdmin, inviteUsers)
   .put(isTeamAdmin, removeInvitations)
 
+router.route('/api/teams/:teamId/confirm-requests')
+  .put(isTeamAdmin, confirmRequest)
 
 router.route('/api/teams/:teamId/remove-requests')
   .put(isTeamAdmin, removeUserRequests)

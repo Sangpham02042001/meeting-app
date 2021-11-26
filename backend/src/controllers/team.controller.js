@@ -179,6 +179,24 @@ const removeUserRequests = async (req, res) => {
   }
 }
 
+const confirmRequest = async (req, res) => {
+  let { teamId } = req.params
+  let { users } = req.body
+  try {
+    let team = await Team.findByPk(Number(teamId))
+    if (team) {
+      for (const userId of users) {
+        await team.removeRequestUser(userId)
+        await team.addMember(userId)
+      }
+    }
+    return res.status(200).json({ message: 'Remove request successfully' })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 
 const removeMembers = async (req, res) => {
   let { teamId } = req.params
@@ -809,5 +827,5 @@ module.exports = {
   getTeamMeetMess, getMeetings, searchTeamWithCode,
   socketInviteUsers, socketConfirmRequest, getTeamSharedFiles,
   getTeamSharedImages, getMeetingActive, getAllTeams,
-  getTeamMeetings, socketRemoveMember
+  getTeamMeetings, socketRemoveMember, confirmRequest
 }
