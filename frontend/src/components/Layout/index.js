@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { NavLink, useRouteMatch, Link } from 'react-router-dom'
+import { NavLink, useRouteMatch, Link, useHistory } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { Avatar, Snackbar, Alert, Tooltip, Badge } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
@@ -18,7 +18,7 @@ import {
   sendMessage, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, getCurrentMeeting, inviteUsers, receiveTeamInvitation,
   confirmRequest, receiveTeamConfirm, joinRequest, receviceTeamRequest,
-  removeTeamMessge
+  removeTeamMessge, removeMember, forceOutTeam
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
@@ -30,12 +30,15 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/
 
 export default function Layout({ children }) {
   const dispatch = useDispatch();
+  const history = useHistory()
   const userReducer = useSelector(state => state.userReducer)
   const settingReducer = useSelector(state => state.settingReducer)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const numberMessagesUnread = useSelector(state => state.conversationReducer.numberMessagesUnread);
   const params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const _meetingId = params && Number(params.meetingId)
+  let teamParams = (useRouteMatch('/teams/:teamId') || {}).params
+  let _teamId = teamParams && Number(teamParams.teamId)
   const [isSkConnected, setIsSkConnected] = useState(false);
   const [currentNoti, setNoti] = useState(null)
 
@@ -148,6 +151,18 @@ export default function Layout({ children }) {
 
     socketClient.on('team-removed-message', ({ teamId, senderId, messageId }) => {
       dispatch(removeTeamMessge({ teamId, messageId, senderId }))
+    })
+
+    socketClient.on('team-removed-member', ({ teamId, userId, hostId }) => {
+      dispatch(removeMember({ teamId, userId }))
+    })
+
+    socketClient.on('receive-team-remove', ({ teamId }) => {
+      if (_teamId == teamId) {
+        console.log('history call')
+        history.push('/teams')
+      }
+      dispatch(forceOutTeam({ teamId }))
     })
 
     //meetings

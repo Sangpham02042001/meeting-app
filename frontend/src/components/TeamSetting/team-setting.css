@@ -1,7 +1,7 @@
 .setting-user-list {
   overflow-y: auto;
   max-height: 450px;
-  min-width: 600px;
+  min-width: 800px;
   /* width: 60%; */
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -23,7 +23,7 @@
 }
 
 .setting-user-item > div > span {
-  margin-left: 20px;
+  margin-left: 5px;
 }
 
 .team-general-setting label {

@@ -18,7 +18,7 @@ const conversationRoutes = require('./routes/conversation.routes')
 const meetingRoutes = require('./routes/meeting.routes')
 const notificationRoutes = require('./routes/notification.routes')
 const messageRoutes = require('./routes/message.routes')
-const adminRoutes = require('./routes/admin.route')
+const adminRoutes = require('./routes/admin.routes')
 
 sequelize.sync()
 

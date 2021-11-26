@@ -1,5 +1,5 @@
 const { getMemberTeam, sendMessage, socketInviteUsers,
-    socketConfirmRequest } = require('../controllers/team.controller');
+    socketConfirmRequest, socketRemoveMember } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
@@ -68,8 +68,10 @@ const socketServer = (io, socket) => {
             let noti
             for (const user of users) {
                 noti = await createTeamNofication({ userId: user.id, content, relativeLink, createdBy, teamId })
-                for (const socketId of userSockets[user.id]) {
-                    socket.to(socketId).emit('receive-team-invitation', { noti, teamId, teamName, hostId })
+                if (userSockets[user.id] && userSockets[user.id].length) {
+                    for (const socketId of userSockets[user.id]) {
+                        socket.to(socketId).emit('receive-team-invitation', { noti, teamId, teamName, hostId })
+                    }
                 }
             }
         }
@@ -84,8 +86,10 @@ const socketServer = (io, socket) => {
             let relativeLink = `/teams/${teamId}`
             let content = `${hostName} has confirmed your join request to ${teamName}`
             let noti = await createTeamNofication({ userId, content, relativeLink, createdBy, teamId })
-            for (const socketId of userSockets[userId]) {
-                socket.to(socketId).emit('receive-team-confirm', { noti, teamId, teamName, hostId: Number(socket.userId) })
+            if (userSockets[userId] && userSockets[userId].length) {
+                for (const socketId of userSockets[userId]) {
+                    socket.to(socketId).emit('receive-team-confirm', { noti, teamId, teamName, hostId: Number(socket.userId) })
+                }
             }
         }
     })
@@ -124,6 +128,18 @@ const socketServer = (io, socket) => {
                 }
             }
             socket.emit('team-removed-message', { teamId, messageId, senderId });
+        }
+    })
+
+    socket.on('team-remove-member', async ({ teamId, userId }) => {
+        let { error } = await socketRemoveMember({ teamId, userId, hostId: socket.userId })
+        if (!error) {
+            socket.emit('team-removed-member', { teamId, userId })
+            if (userSockets[userId] && userSockets[userId].length) {
+                for (const socketId of userSockets[userId]) {
+                    socket.to(socketId).emit('receive-team-remove', { teamId })
+                }
+            }
         }
     })
 
@@ -216,17 +232,19 @@ const socketServer = (io, socket) => {
             let members = await getMemberTeam({ teamId });
             // members = members.map(m => m.id != socket.userId)
             for (const member of members) {
-                if (userSockets[member.id]) {
+                if (userSockets[member.id] && userSockets[member.id].length) {
                     for (const socketId of userSockets[member.id]) {
                         socket.to(socketId).emit('end-meeting', { meeting })
                     }
                 }
             }
             socket.emit('end-meeting', { meeting })
-            for (const socketId of userSockets[socket.userId]) {
-                socket.to(socketId).emit('receive-end-meeting', {
-                    currentMeetingId: meeting.id
-                })
+            if (userSockets[socket.userId] && userSockets[socket.userId].length) {
+                for (const socketId of userSockets[socket.userId]) {
+                    socket.to(socketId).emit('receive-end-meeting', {
+                        currentMeetingId: meeting.id
+                    })
+                }
             }
             socket.to(`meeting-${meeting.id}`).emit('receive-end-meeting', {
                 currentMeetingId: meeting.id

@@ -59,20 +59,20 @@ export const getInvitedTeams = createAsyncThunk('teams/getInvitedTeams', async (
   }
 })
 
-export const removeMember = createAsyncThunk('teams/removeMember', async ({ userId, teamId }, { rejectWithValue }) => {
-  try {
-    await axiosAuth.put(`/api/teams/${teamId}/remove-members`, {
-      users: [userId]
-    })
-    return { userId }
-  } catch (error) {
-    let { data } = error.response
-    if (data && data.error) {
-      return rejectWithValue(data)
-    }
-    return error
-  }
-})
+// export const removeMember = createAsyncThunk('teams/removeMember', async ({ userId, teamId }, { rejectWithValue }) => {
+//   try {
+//     await axiosAuth.put(`/api/teams/${teamId}/remove-members`, {
+//       users: [userId]
+//     })
+//     return { userId }
+//   } catch (error) {
+//     let { data } = error.response
+//     if (data && data.error) {
+//       return rejectWithValue(data)
+//     }
+//     return error
+//   }
+// })
 
 export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId }, { rejectWithValue }) => {
   let response = await axiosAuth.get(`/api/teams/${teamId}`)
@@ -434,6 +434,10 @@ export const teamSlice = createSlice({
       let { id, name, hostId } = action.payload
       if (id && name && hostId) {
         state.joinedTeams.push({ id, name, hostId })
+        let idx = state.requestingTeams.findIndex(t => t.id == id)
+        if (idx >= 0) {
+          state.requestingTeams.splice(idx, 1)
+        }
       }
     },
     joinRequest: (state, action) => {
@@ -458,6 +462,22 @@ export const teamSlice = createSlice({
           state.team.files = state.team.files.filter(file => file.messageId != messageId)
           state.team.images = state.team.images.filter(img => img.messageId != messageId)
         }
+      }
+    },
+    removeMember: (state, action) => {
+      let { teamId, userId } = action.payload
+      if (state.team.id == teamId) {
+        let idx = state.team.members.findIndex(m => m.id == userId)
+        if (idx >= 0) {
+          state.team.members.splice(idx, 1)
+        }
+      }
+    },
+    forceOutTeam: (state, action) => {
+      let { teamId } = action.payload
+      let idx = state.joinedTeams.findIndex(t => t.id == teamId)
+      if (idx >= 0) {
+        state.joinedTeams.splice(idx, 1)
       }
     }
   },
@@ -715,14 +735,14 @@ export const teamSlice = createSlice({
       let { error } = action.payload
       console.log(error)
     },
-    [removeMember.fulfilled]: (state, action) => {
-      let { userId } = action.payload
-      state.team.members = state.team.members.filter(m => m.id != userId)
-    },
-    [removeMember.rejected]: (state, action) => {
-      let { error } = action.payload
-      state.error = error
-    }
+    // [removeMember.fulfilled]: (state, action) => {
+    //   let { userId } = action.payload
+    //   state.team.members = state.team.members.filter(m => m.id != userId)
+    // },
+    // [removeMember.rejected]: (state, action) => {
+    //   let { error } = action.payload
+    //   state.error = error
+    // }
   }
 })
 
@@ -730,6 +750,7 @@ export const { cleanTeamState, sendMessage, updateMeetingState,
   setMeetingJoined, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, inviteUsers, receiveTeamInvitation,
   confirmRequest, receiveTeamConfirm, joinRequest,
-  receviceTeamRequest, removeTeamMessge } = teamSlice.actions;
+  receviceTeamRequest, removeTeamMessge, removeMember,
+  forceOutTeam } = teamSlice.actions;
 
 export default teamSlice.reducer

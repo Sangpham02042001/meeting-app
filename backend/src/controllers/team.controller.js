@@ -333,6 +333,32 @@ const socketConfirmRequest = async ({ teamId, userId, hostId }) => {
   }
 }
 
+const socketRemoveMember = async ({ teamId, userId, hostId }) => {
+  try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      }
+    })
+    if (!team || !team.id) {
+      throw 'Team not found'
+    }
+    if (team.hostId != hostId) {
+      throw 'Not admin'
+    }
+    await team.removeMembers(userId)
+    return {
+      message: 'success'
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      message: "error",
+      error
+    }
+  }
+}
+
 const removeInvitations = async (req, res) => {
   let { teamId } = req.params
   let { users } = req.body
@@ -768,5 +794,6 @@ module.exports = {
   sendMessage, getMemberTeam,
   getTeamMeetMess, getMeetings, searchTeamWithCode,
   socketInviteUsers, socketConfirmRequest, getTeamSharedFiles,
-  getTeamSharedImages, getMeetingActive, getAllTeams, getTeamMeetings
+  getTeamSharedImages, getMeetingActive, getAllTeams,
+  getTeamMeetings, socketRemoveMember
 }

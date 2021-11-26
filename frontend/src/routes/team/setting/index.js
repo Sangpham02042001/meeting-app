@@ -32,14 +32,14 @@ export default function TeamSetting(props) {
     }
   }, [teamReducer.teamLoaded])
 
-  return (teamReducer.teamLoaded && <Grid container style={{ paddingTop: '15px' }}>
+  return (teamReducer.teamLoaded ? <Grid container style={{ paddingTop: '15px' }}>
     <Grid item sm={12} style={{ paddingLeft: '30px' }}>
       <div>
         <Link to={`/teams/${teamId}`} style={{ color: '#000', textDecoration: 'none' }}>
           <strong><ArrowBackIcon style={{ position: 'relative', bottom: '1px' }} /> Back</strong>
         </Link>
       </div>
-      <h3 style={{ margin: '15px 0 20px 0' }}>Setting</h3>
+      <h3 style={{ margin: '15px 0 20px 0' }}> Team Setting</h3>
       <div style={{ display: 'flex', alignItems: 'flex-start' }}>
         <div style={{ marginRight: '40px' }}>
           <SettingList />
@@ -64,6 +64,6 @@ export default function TeamSetting(props) {
         </div>
       </div>
     </Grid>
-  </Grid>
+  </Grid> : <Loading />
   )
 }

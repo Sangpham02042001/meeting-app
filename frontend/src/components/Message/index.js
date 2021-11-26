@@ -98,7 +98,6 @@ const Message = React.memo(({
         for (let emoji of emojiList) {
           emojiRenderList.push(joypixels.toImage(emoji[0]))
         }
-        console.log('render')
         return (
           <div className="emoji-message">
             {emojiRenderList.map((e, idx) => {

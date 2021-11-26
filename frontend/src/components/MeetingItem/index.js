@@ -13,7 +13,7 @@ import './meeting-item.css'
 export default function MeetingItem({ meeting }) {
   const user = useSelector(state => state.userReducer.user)
   const teamMembers = useSelector(state => state.teamReducer.team.members)
-  const hostName = ((meeting.members || teamMembers || []).find(m => m.id === meeting.hostId) || {}).userName || ''
+  const hostName = ((teamMembers || []).find(m => m.id === meeting.hostId) || {}).userName || ''
   const [messages, setMessages] = useState([])
   const [error, setError] = useState('')
 
@@ -54,7 +54,7 @@ export default function MeetingItem({ meeting }) {
         <div style={{ width: '100%' }}>
           <Typography style={{ fontSize: '14px' }}>Meeting created by <strong>{hostName}</strong></Typography>
           <hr style={{ color: 'var(--text-color)' }} />
-          {meeting.members && <div style={{
+          {meeting.members && meeting.members.length > 0 && <div style={{
             marginTop: '10px',
             display: 'flex',
             alignItems: 'center'

@@ -6,7 +6,7 @@ import {
   DialogTitle, Snackbar, Alert
 } from '@mui/material'
 import { removeMember } from '../../../store/reducers/team.reducer'
-import { baseURL } from '../../../utils'
+import { baseURL, socketClient } from '../../../utils'
 import '../team-setting.css'
 
 export default function TeamMembers() {
@@ -18,10 +18,14 @@ export default function TeamMembers() {
   const user = useSelector(state => state.userReducer.user)
 
   const handleRemove = () => {
-    dispatch(removeMember({
-      userId: selectedUser,
-      teamId: team.id
-    }))
+    // dispatch(removeMember({
+    //   userId: selectedUser,
+    //   teamId: team.id
+    // }))
+    socketClient.emit('team-remove-member', {
+      teamId: team.id,
+      userId: selectedUser
+    })
     setShow(false)
   }
 
