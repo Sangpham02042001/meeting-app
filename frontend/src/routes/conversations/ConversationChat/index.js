@@ -29,7 +29,7 @@ import { Picker, emojiIndex } from 'emoji-mart';
 import { socketClient, baseURL, emotionRegex, timeDiff } from '../../../utils';
 import {
   getMessages, readConversation, startCall, cancelCall, getAllImages,
-  getParticipant, getAllFiles
+  getParticipant, getAllFiles, getNumberMessageUnread
 } from '../../../store/reducers/conversation.reducer';
 import { toggleDarkMode } from '../../../store/reducers/setting.reducer'
 import { v4 } from 'uuid';
@@ -125,6 +125,7 @@ export default function ConversationChat({ conversation, user }) {
     dispatch(getParticipant({ participantId: conversation.participantId }))
     dispatch(getMessages({ conversationId: converId }))
     dispatch(readConversation({ conversationId: converId }))
+    dispatch(getNumberMessageUnread())
     setConversationId(converId)
   }, [conversation.conversationId])
 

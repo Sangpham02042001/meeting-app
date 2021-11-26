@@ -35,6 +35,7 @@ export default function Layout({ children }) {
   const settingReducer = useSelector(state => state.settingReducer)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const numberMessagesUnread = useSelector(state => state.conversationReducer.numberMessagesUnread);
+  const lastMessageChange = useSelector(state => state.conversationReducer.lastMessageChange);
   const params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const _meetingId = params && Number(params.meetingId)
   let teamParams = (useRouteMatch('/teams/:teamId') || {}).params
@@ -65,7 +66,7 @@ export default function Layout({ children }) {
 
   useEffect(() => {
     dispatch(getNumberMessageUnread())
-  }, [numberMessagesUnread])
+  }, [lastMessageChange])
 
   useEffect(() => {
 

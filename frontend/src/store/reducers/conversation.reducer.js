@@ -88,7 +88,6 @@ export const conversationSlice = createSlice({
       let conversation = state.conversations.find(conv => conv.conversationId === conversationId);
       if (conversation) {
         conversation.isRead = true;
-        state.numberMessagesUnread--;
       }
     },
     [readConversation.rejected]: (state, action) => {
@@ -154,7 +153,6 @@ export const conversationSlice = createSlice({
         //check is read?
         conversation = state.conversations[pIdx];
         conversation.isRead = true;
-        state.numberMessagesUnread--;
         if (!state.conversation.participant || state.conversation.participant.id !== receiverId) {
           conversation.isRead = false;
         }
