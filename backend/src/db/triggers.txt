@@ -35,6 +35,9 @@ BEGIN
 
     DELETE FROM request_users_teams rut
     WHERE rut.teamId = OLD.id;
+    
+    DELETE FROM invited_users_teams iut
+    WHERE iut.teamId = OLD.id;
 
     DELETE FROM notifications n
     WHERE n.teamId = OLD.id; 
@@ -59,5 +62,22 @@ FOR EACH ROW
 BEGIN
 	DELETE FROM users_meetings ut
     WHERE ut.meetingId = OLD.id;
+END $$
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS before_team_memmber_remove;
+DELIMITER $$
+CREATE TRIGGER before_team_memmber_remove
+BEFORE DELETE ON users_teams FOR EACH ROW
+BEGIN
+	DELETE FROM meetings m WHERE m.teamId = OLD.teamId AND m.hostId = OLD.userId;
+    DELETE FROM messages WHERE userId = OLD.userId and teamId = OLD.teamId;
+    DELETE FROM users_meetings um 
+    WHERE um.userId = OLD.userId AND um.meetingId IN(
+		SELECT id FROM meetings where teamId = OLD.teamId
+    );
+    DELETE FROM messages m WHERE m.meetingId IN(
+		SELECT id from meetings WHERE meetings.teamId = OLD.teamId 
+    ) AND m.userId = OLD.userId; 
 END $$
 DELIMITER ;

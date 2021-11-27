@@ -204,17 +204,17 @@ const removeMembers = async (req, res) => {
   let stringifyUsers = ''
   users.forEach(userId => stringifyUsers += `${userId},`)
   try {
-    await sequelize.query(
-      "DELETE FROM users_teams ut " +
-      "WHERE ut.teamId = :teamId AND FIND_IN_SET(ut.userId, :users);",
-      {
-        replacements: {
-          teamId,
-          users: stringifyUsers
-        },
-        type: QueryTypes.DELETE
+    let team = await Team.findOne({
+      where: {
+        id: teamId
       }
-    )
+    })
+    if (!team) {
+      throw "team not found"
+    }
+    for (const user of users) {
+      await team.removeMember(user)
+    }
     return res.status(200).json({
       message: 'Remove members successfully'
     })

@@ -519,7 +519,7 @@ export default function Team(props) {
                 <Picker onSelect={onEmojiClick} set='facebook' />
               </div>}
 
-            <div className="search-team-box">
+            <div className="team-input-container">
               <div style={{
                 marginLeft: isTeamInfoShow ? '3%' : '5%',
                 width: '100%',
