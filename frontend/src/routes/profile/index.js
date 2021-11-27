@@ -137,10 +137,11 @@ export default function Profile() {
 	}
 
 	const confirmOutTeam = () => {
-		dispatch(outTeam({
-			teamId: selectedTeam,
-			userId: userReducer.user.id
-		}))
+		// dispatch(outTeam({
+		// 	teamId: selectedTeam,
+		// 	userId: userReducer.user.id
+		// }))
+		socketClient.emit('out-team', { teamId: selectedTeam })
 		handleCloseOutModel()
 	}
 	//out team

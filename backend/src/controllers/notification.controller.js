@@ -51,7 +51,6 @@ const createTeamNofication = async ({ userId, content, relativeLink, createdBy, 
         createdBy
       }
     })
-    console.log(`noti, createdBy ${createdBy} ${userId} ${noti}`)
     if (!noti) {
       noti = await Notification.create({
         userId, createdBy, content, relativeLink, teamId

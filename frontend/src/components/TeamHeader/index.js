@@ -94,10 +94,11 @@ export default function TeamHeader({ showTeamInfo }) {
   }
 
   const handleOutTeam = async () => {
-    dispatch(outTeam({
-      userId: user.id,
-      teamId: Number(teamId)
-    }))
+    // dispatch(outTeam({
+    //   userId: user.id,
+    //   teamId: Number(teamId)
+    // }))
+    socketClient.emit('out-team', { teamId: Number(teamId) })
     setOutModalShow(false)
     history.push('/teams')
   }

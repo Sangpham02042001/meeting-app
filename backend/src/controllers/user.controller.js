@@ -544,6 +544,22 @@ const getUserStatus = async ({ userId }) => {
   }
 }
 
+const socketOutTeam = async ({ teamId, userId }) => {
+  try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      }
+    })
+    if (team) {
+      await team.removeMember(userId)
+    }
+    return 'Remove success'
+  } catch (error) {
+    console.log(error)
+    return null
+  }
+}
 
 module.exports = {
   signup, getUserInfo, updateUserInfo, getUserAvatar,
@@ -551,5 +567,6 @@ module.exports = {
   outTeam, cancelJoinRequest, confirmInvitations,
   removeInvitations, getInvitations, getNotifications,
   searchUsers, socketRequestTeam, getUserStatusList,
-  setUserStatus, getUserStatus, socketCancelJoin
+  setUserStatus, getUserStatus, socketCancelJoin,
+  socketOutTeam
 }

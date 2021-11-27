@@ -95,7 +95,6 @@ export default function Team(props) {
 
     return () => {
       // socketClient.leave(`team ${teamId}`)
-      socketClient.emit('out-team', { teamId })
       // dispatch(cleanTeamState())
       window.removeEventListener('paste', () => {
         console.log('remove events')

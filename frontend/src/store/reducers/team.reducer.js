@@ -249,22 +249,22 @@ export const createNewTeam = createAsyncThunk('teams/create', async ({ formData 
   }
 })
 
-export const outTeam = createAsyncThunk('teams/out', async ({ userId, teamId }, { rejectWithValue }) => {
-  try {
-    let response = await axiosAuth.delete(`/api/users/${userId}/teams/${teamId}`)
-    if (response.status == 200) {
-      return {
-        teamId
-      }
-    }
-  } catch (error) {
-    let { data } = error.response
-    if (data && data.error) {
-      return rejectWithValue(data)
-    }
-    return error
-  }
-})
+// export const outTeam = createAsyncThunk('teams/out', async ({ userId, teamId }, { rejectWithValue }) => {
+//   try {
+//     let response = await axiosAuth.delete(`/api/users/${userId}/teams/${teamId}`)
+//     if (response.status == 200) {
+//       return {
+//         teamId
+//       }
+//     }
+//   } catch (error) {
+//     let { data } = error.response
+//     if (data && data.error) {
+//       return rejectWithValue(data)
+//     }
+//     return error
+//   }
+// })
 
 export const createTeamMeeting = createAsyncThunk('/createTeamMeeting', async ({ teamId }, { rejectWithValue }) => {
   try {
@@ -400,8 +400,11 @@ export const teamSlice = createSlice({
     receiveTeamConfirm: (state, action) => {
       let { id, name, hostId } = action.payload
       if (id && name && hostId) {
-        state.joinedTeams.push({ id, name, hostId })
-        let idx = state.requestingTeams.findIndex(t => t.id == id)
+        let idx = state.joinedTeams.findIndex(t => t.id == id)
+        if (idx < 0) {
+          state.joinedTeams.push({ id, name, hostId })
+        }
+        idx = state.requestingTeams.findIndex(t => t.id == id)
         if (idx >= 0) {
           state.requestingTeams.splice(idx, 1)
         }
@@ -428,6 +431,13 @@ export const teamSlice = createSlice({
         if (idx >= 0) {
           state.team.requestUsers.splice(idx, 1)
         }
+      }
+    },
+    outTeam: (state, action) => {
+      let { teamId } = action.payload
+      let idx = state.joinedTeams.findIndex(t => t.id == teamId)
+      if (idx >= 0) {
+        state.joinedTeams.splice(idx, 1)
       }
     },
     receviceTeamRequest: (state, action) => {
@@ -637,19 +647,19 @@ export const teamSlice = createSlice({
     [getTeamMeetMess]: (state, action) => {
       state.team.meetmessLoaded = true
     },
-    [outTeam.pending]: (state) => {
-      state.loading = true
-    },
-    [outTeam.fulfilled]: (state, action) => {
-      let { teamId } = action.payload
-      let idx = state.joinedTeams.map(team => team.id).indexOf(teamId)
-      state.joinedTeams.splice(idx, 1)
-      state.loading = false
-    },
-    [outTeam.rejected]: (state, action) => {
-      state.loading = false
-      state.error = action.payload.error
-    },
+    // [outTeam.pending]: (state) => {
+    //   state.loading = true
+    // },
+    // [outTeam.fulfilled]: (state, action) => {
+    //   let { teamId } = action.payload
+    //   let idx = state.joinedTeams.map(team => team.id).indexOf(teamId)
+    //   state.joinedTeams.splice(idx, 1)
+    //   state.loading = false
+    // },
+    // [outTeam.rejected]: (state, action) => {
+    //   state.loading = false
+    //   state.error = action.payload.error
+    // },
     [createNewTeam.pending]: (state) => {
       console.log('create team pending');
       state.error = null;
@@ -721,6 +731,7 @@ export const { cleanTeamState, sendMessage, updateMeetingState,
   clearMeetingJoined, inviteUsers, receiveTeamInvitation,
   confirmRequest, receiveTeamConfirm, joinRequest,
   receviceTeamRequest, removeTeamMessge, removeMember,
-  forceOutTeam, cancelJoin, receiveCancelJoin } = teamSlice.actions;
+  forceOutTeam, cancelJoin, receiveCancelJoin,
+  outTeam } = teamSlice.actions;
 
 export default teamSlice.reducer
