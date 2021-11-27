@@ -68,7 +68,7 @@ export default function TeamInfo() {
         </AccordionSummary>
         <AccordionDetails>
           <div className='shared-media-list'>
-            {teamReducer.team.images.map((img, idx) => {
+            {teamReducer.team.images && teamReducer.team.images.map((img, idx) => {
               return (
                 <div key={idx}
                   style={{
@@ -93,7 +93,7 @@ export default function TeamInfo() {
         </AccordionSummary>
         <AccordionDetails>
           <div className='shared-file-list'>
-            {teamReducer.team.files.map((file, idx) => {
+            {teamReducer.team.files && teamReducer.team.files.map((file, idx) => {
               return <div key={file.id} >
                 <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
                 <span

@@ -592,6 +592,13 @@ export const teamSlice = createSlice({
     },
     [updateBasicTeamInfo.fulfilled]: (state, action) => {
       state.team = extend(state.team, action.payload.team)
+      let idx = state.joinedTeams.findIndex(t => t.id == state.team.id)
+      if (idx >= 0) {
+        state.joinedTeams.splice(idx, 1, {
+          ...state.joinedTeams[idx],
+          name: state.team.name
+        })
+      }
       state.loading = false
     },
     [updateBasicTeamInfo.rejected]: (state, action) => {
@@ -620,11 +627,19 @@ export const teamSlice = createSlice({
         members: [],
         invitedUsers: [],
         requestUsers: [],
-        meetings: []
+        meetmessLoaded: false,
+        meetings: [],
+        meetingActive: null,
+        meetmess: [],
+        files: [],
+        images: [],
+        numOfMeetMess: 0,
+        fakeMessageId: v4()
       }
       let { teamId } = action.payload
       state.joinedTeams = state.joinedTeams.filter(team => team.id != teamId)
       state.loading = false
+      state.teamLoaded = false
     },
     [deleteTeam.rejected]: (state, action) => {
       state.loading = false

@@ -64,3 +64,8 @@ strong,
 label {
   color: var(--text-color);
 }
+
+button:disabled {
+  /* background-image: linear-gradient(to right, #efeff0, #efeff0) !important; */
+  color: rgb(209, 209, 209) !important;
+}

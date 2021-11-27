@@ -234,6 +234,21 @@ export default function TeamDiscover() {
     }
   }
 
+  const handleImageChange = e => {
+    e.preventDefault()
+    if (e.target.files.length) {
+      let file = e.target.files[0]
+      if (Math.round(file.size / 1024) > 1024) {
+        setMessage({
+          type: 'error',
+          content: "Cann't upload coverphoto > 1MB size"
+        })
+        return;
+      }
+      setTeamCoverPhoto(file)
+    }
+  }
+
   const closeTeam = () => {
     setTeam({})
   }
@@ -377,7 +392,7 @@ export default function TeamDiscover() {
               id="team-coverphoto"
               type="file"
               accept='image/*'
-              onChange={e => setTeamCoverPhoto(e.target.files[0])}
+              onChange={handleImageChange}
             />
           </FormControl>
         </DialogContent>
@@ -467,7 +482,8 @@ export default function TeamDiscover() {
           <Button variant='text' onClick={handleInviteModalClose} style={{ color: 'var(--icon-color)' }}>
             Skip
           </Button>
-          <Button variant='text' onClick={handleInviteAll} style={{ color: 'var(--icon-color)' }}>
+          <Button variant='text' disabled={!invitedUsers.length}
+            onClick={handleInviteAll} style={{ color: 'var(--icon-color)' }}>
             Invite
           </Button>
         </DialogActions>

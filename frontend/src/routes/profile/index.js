@@ -97,11 +97,21 @@ export default function Profile() {
 	};
 
 	const handleImageChange = (e) => {
-		setImage(e.target.files[0])
-		let reader = new FileReader()
-		let url = reader.readAsDataURL(e.target.files[0])
-		reader.onloadend = e => {
-			setImageUrl(reader.result)
+		if (e.target.files.length) {
+			let file = e.target.files[0]
+			if (Math.round(file.size / 1024) > 1024) {
+				setMessage({
+					type: 'error',
+					content: "Cann't upload avatar > 1MB size"
+				})
+				return;
+			}
+			setImage(file)
+			let reader = new FileReader()
+			let url = reader.readAsDataURL(e.target.files[0])
+			reader.onloadend = e => {
+				setImageUrl(reader.result)
+			}
 		}
 	}
 
