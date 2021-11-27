@@ -61,12 +61,14 @@ const createTeamNofication = async ({ userId, content, relativeLink, createdBy, 
       noti.set('createdAt', new Date(), { raw: true })
       noti.set('isRead', false)
       noti.set('content', content)
+      noti.set('relativeLink', relativeLink)
       await noti.save()
     } else {
       noti.changed('createdAt', true)
       noti.set('createdAt', new Date(), { raw: true })
       noti.set('createdBy', createdBy)
       noti.set('isRead', false)
+      noti.set('relativeLink', relativeLink)
       await noti.save()
     }
     noti = noti.dataValues

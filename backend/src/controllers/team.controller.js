@@ -817,6 +817,44 @@ const getTeamMeetings = async (req, res) => {
   }
 }
 
+const getTeamMessages = async (req, res) => {
+  try {
+    let { teamId } = req.params
+    let messages = await Message.findAll({
+      where: {
+        teamId
+      },
+      include: [
+        { model: Media }
+      ],
+      order: [
+        ['updatedAt', 'DESC'],
+        ['createdAt', 'DESC'],
+      ]
+    })
+    if (messages && messages.length) {
+      for (let m of messages) {
+        let tmpFiles = [];
+        let tmpImages = []
+        for (let media of m.dataValues.Media) {
+          if (media.type === "image") {
+            tmpImages.push(media)
+          } else {
+            tmpFiles.push(media)
+          }
+        }
+        m.dataValues.files = tmpFiles;
+        m.dataValues.photos = tmpImages;
+        delete m.dataValues.Media;
+      }
+    }
+    return res.status(200).json({ messages })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error: "Cann't get all messages" })
+  }
+}
+
 module.exports = {
   getTeamInfo, createTeam, getTeamCoverPhoto,
   getTeamMembers, getTeamRequestUsers,
@@ -827,5 +865,6 @@ module.exports = {
   getTeamMeetMess, getMeetings, searchTeamWithCode,
   socketInviteUsers, socketConfirmRequest, getTeamSharedFiles,
   getTeamSharedImages, getMeetingActive, getAllTeams,
-  getTeamMeetings, socketRemoveMember, confirmRequest
+  getTeamMeetings, socketRemoveMember, confirmRequest,
+  getTeamMessages
 }

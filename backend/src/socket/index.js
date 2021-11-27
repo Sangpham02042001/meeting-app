@@ -5,7 +5,8 @@ const { getActiveMemberMeeting, addMemberMeeting,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification, createMeetingNofication } = require('../controllers/notification.controller')
-const { socketRequestTeam, setUserStatus, getUserStatus } = require('../controllers/user.controller')
+const { socketRequestTeam, setUserStatus, getUserStatus,
+    socketCancelJoin } = require('../controllers/user.controller')
 const { deleteMessage } = require('../controllers/message.controller');
 const Meeting = require('../models/meeting');
 
@@ -116,6 +117,23 @@ const socketServer = (io, socket) => {
         }
     })
 
+    socket.on('cancel-join-request', async ({ teamId }) => {
+        console.log(`cancel join ${teamId}`)
+        let result = await socketCancelJoin({ teamId, userId: socket.userId })
+        if (result && result.hostId) {
+            let hostId = result.hostId
+            console.log(`team host ${hostId}`)
+            socket.emit('cancel-join-success', { teamId })
+            if (userSockets[hostId] && userSockets[hostId].length) {
+                for (const socketId of userSockets[hostId]) {
+                    socket.to(socketId).emit('receive-cancel-join', {
+                        teamId, userId: socket.userId
+                    })
+                }
+            }
+        }
+    })
+
     socket.on('team-remove-message', async ({ teamId, messageId, senderId }) => {
         let report = await deleteMessage({ messageId });
         if (report) {
@@ -135,6 +153,14 @@ const socketServer = (io, socket) => {
         let { error } = await socketRemoveMember({ teamId, userId, hostId: socket.userId })
         if (!error) {
             socket.emit('team-removed-member', { teamId, userId })
+            let members = await getMemberTeam({ teamId });
+            for (let m of members) {
+                if (userSockets[m.id] && userSockets[m.id].length) {
+                    for (const socketId of userSockets[m.id]) {
+                        socket.to(socketId).emit('team-removed-member', { teamId, userId })
+                    }
+                }
+            }
             if (userSockets[userId] && userSockets[userId].length) {
                 for (const socketId of userSockets[userId]) {
                     socket.to(socketId).emit('receive-team-remove', { teamId })
@@ -329,10 +355,8 @@ const socketServer = (io, socket) => {
             if (message) {
                 let members = await getActiveMemberMeeting({ meetingId: socket.meetingId });
                 if (members.length === 0) {
-                    console.log('all out meeting')
                     members = await updateMeetingState({ meetingId: socket.meetingId })
                     meeting = await getMeetingInfo({ meetingId: socket.meetingId })
-                    // console.log(members)
                     for (let m of members) {
                         if (userSockets[m.userId]) {
                             for (const socketId of userSockets[m.userId]) {

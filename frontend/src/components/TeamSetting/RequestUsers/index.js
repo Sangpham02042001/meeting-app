@@ -58,7 +58,6 @@ export default function TeamRequestUsers() {
   return (
     <div>
       <InviteUsersWrapper />
-      <h3>Team Request Users</h3>
       <div className='setting-user-list'>
         {team.requestUsers.map(member => <div key={member.id} className='setting-user-item'>
           <div>

@@ -104,24 +104,28 @@ const isTeamAdmin = async (req, res, next) => {
 
 
 const isMember = async (req, res, next) => {
-  let { id } = req.auth
+  let { id, role } = req.auth
   let { teamId } = req.params
   try {
-    let user_team = await sequelize.query(
-      "SELECT * FROM users_teams " +
-      "WHERE userId = :id AND teamId = :teamId",
-      {
-        replacements: {
-          id,
-          teamId
-        },
-        type: QueryTypes.SELECT
-      }
-    )
-    if (user_team.length > 0) {
+    if (role === 'admin') {
       next()
     } else {
-      throw `You aren't a member of this team`
+      let user_team = await sequelize.query(
+        "SELECT * FROM users_teams " +
+        "WHERE userId = :id AND teamId = :teamId",
+        {
+          replacements: {
+            id,
+            teamId
+          },
+          type: QueryTypes.SELECT
+        }
+      )
+      if (user_team.length > 0) {
+        next()
+      } else {
+        throw `You aren't a member of this team`
+      }
     }
   } catch (error) {
     console.log(error)

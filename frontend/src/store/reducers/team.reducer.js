@@ -59,21 +59,6 @@ export const getInvitedTeams = createAsyncThunk('teams/getInvitedTeams', async (
   }
 })
 
-// export const removeMember = createAsyncThunk('teams/removeMember', async ({ userId, teamId }, { rejectWithValue }) => {
-//   try {
-//     await axiosAuth.put(`/api/teams/${teamId}/remove-members`, {
-//       users: [userId]
-//     })
-//     return { userId }
-//   } catch (error) {
-//     let { data } = error.response
-//     if (data && data.error) {
-//       return rejectWithValue(data)
-//     }
-//     return error
-//   }
-// })
-
 export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId }, { rejectWithValue }) => {
   let response = await axiosAuth.get(`/api/teams/${teamId}`)
   let { team } = response.data
@@ -166,24 +151,6 @@ export const confirmInvitations = createAsyncThunk('teams/confirmInvitations', a
     })
     if (response.status == 200) {
       return { teams: _teams }
-    }
-  } catch (error) {
-    let { data } = error.response
-    if (data && data.error) {
-      return rejectWithValue(data)
-    }
-    return error
-  }
-})
-
-export const cancelJoinRequest = createAsyncThunk('teams/cancelJoinRequest', async ({ teamId }, { rejectWithValue }) => {
-  try {
-    let { id } = JSON.parse(window.localStorage.getItem('user'))
-    let response = await axiosAuth.put(`/api/users/${id}/cancel-request`, {
-      teams: [teamId]
-    })
-    if (response.status == 200) {
-      return { teamId }
     }
   } catch (error) {
     let { data } = error.response
@@ -442,15 +409,37 @@ export const teamSlice = createSlice({
     },
     joinRequest: (state, action) => {
       let { team } = action.payload
-      state.requestingTeams.push(team)
+      let idx = state.requestingTeams.findIndex(t => t.id === team.id)
+      if (idx < 0) {
+        state.requestingTeams.push(team)
+      }
+    },
+    cancelJoin: (state, action) => {
+      let { teamId } = action.payload
+      let idx = state.requestingTeams.findIndex(t => t.id == teamId)
+      if (idx >= 0) {
+        state.requestingTeams.splice(idx, 1)
+      }
+    },
+    receiveCancelJoin: (state, action) => {
+      let { teamId, userId } = action.payload
+      if (state.team && state.team.id == teamId) {
+        let idx = state.team.requestUsers.findIndex(u => u.id == userId)
+        if (idx >= 0) {
+          state.team.requestUsers.splice(idx, 1)
+        }
+      }
     },
     receviceTeamRequest: (state, action) => {
       let { teamId, userName, userId } = action.payload
       if (state.team.id == teamId) {
-        state.team.requestUsers.push({
-          id: userId,
-          userName
-        })
+        let idx = state.team.requestUsers.findIndex(u => u.id === userId)
+        if (idx < 0) {
+          state.team.requestUsers.push({
+            id: userId,
+            userName
+          })
+        }
       }
     },
     removeTeamMessge: (state, action) => {
@@ -724,25 +713,6 @@ export const teamSlice = createSlice({
     [outJoinedMeeting.rejected]: (state, action) => {
       console.log(action.payload)
     },
-    [cancelJoinRequest.pending]: () => {
-      console.log('cancel join pending')
-    },
-    [cancelJoinRequest.fulfilled]: (state, action) => {
-      let { teamId } = action.payload
-      state.requestingTeams = state.requestingTeams.filter(team => team.id !== teamId)
-    },
-    [cancelJoinRequest.rejected]: (state, action) => {
-      let { error } = action.payload
-      console.log(error)
-    },
-    // [removeMember.fulfilled]: (state, action) => {
-    //   let { userId } = action.payload
-    //   state.team.members = state.team.members.filter(m => m.id != userId)
-    // },
-    // [removeMember.rejected]: (state, action) => {
-    //   let { error } = action.payload
-    //   state.error = error
-    // }
   }
 })
 
@@ -751,6 +721,6 @@ export const { cleanTeamState, sendMessage, updateMeetingState,
   clearMeetingJoined, inviteUsers, receiveTeamInvitation,
   confirmRequest, receiveTeamConfirm, joinRequest,
   receviceTeamRequest, removeTeamMessge, removeMember,
-  forceOutTeam } = teamSlice.actions;
+  forceOutTeam, cancelJoin, receiveCancelJoin } = teamSlice.actions;
 
 export default teamSlice.reducer

@@ -122,7 +122,7 @@ export default function InviteUsersWrapper({ users }) {
 
   return (
     <>
-      <div style={{ textAlign: 'right' }}>
+      <div style={{ textAlign: 'right', marginBottom: '20px' }}>
         <Button variant="contained" onClick={e => {
           e.preventDefault()
           setShow(true)

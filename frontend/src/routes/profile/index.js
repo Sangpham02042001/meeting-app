@@ -6,13 +6,13 @@ import {
 	DialogTitle, Snackbar, Alert, Switch, FormControlLabel
 } from '@mui/material';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import { baseURL } from '../../utils';
+import { baseURL, socketClient } from '../../utils';
 import { Link } from 'react-router-dom';
 import { updateBasicUserInfo } from '../../store/reducers/user.reducer'
 import {
 	getJoinedTeams, getInvitedTeams, getRequestTeams,
 	outTeam, deleteTeam, confirmInvitations,
-	refuseInvitations, cancelJoinRequest
+	refuseInvitations
 } from '../../store/reducers/team.reducer'
 import Loading from '../../components/Loading'
 import './profile.css';
@@ -219,9 +219,7 @@ export default function Profile() {
 
 	const cancelJoin = () => {
 		console.log(selectedTeam)
-		dispatch(cancelJoinRequest({
-			teamId: selectedTeam
-		}))
+		socketClient.emit('cancel-join-request', { teamId: selectedTeam })
 		handleCloseCancelRequest()
 	}
 	//cancel request

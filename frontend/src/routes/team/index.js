@@ -246,6 +246,7 @@ export default function Team(props) {
     dispatch(confirmInvitations({
       teams: [teamReducer.team.id]
     }))
+    // socketClient.emit('confirm-team-invitation')
   }
 
   const handleCancelRequest = () => {

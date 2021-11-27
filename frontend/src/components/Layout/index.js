@@ -18,7 +18,8 @@ import {
   sendMessage, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, getCurrentMeeting, inviteUsers, receiveTeamInvitation,
   confirmRequest, receiveTeamConfirm, joinRequest, receviceTeamRequest,
-  removeTeamMessge, removeMember, forceOutTeam
+  removeTeamMessge, removeMember, forceOutTeam,
+  cancelJoin, receiveCancelJoin
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
@@ -150,6 +151,14 @@ export default function Layout({ children }) {
       dispatch(joinRequest({ team }))
     })
 
+    socketClient.on('cancel-join-success', ({ teamId }) => {
+      dispatch(cancelJoin({ teamId }))
+    })
+
+    socketClient.on('receive-cancel-join', ({ teamId, userId }) => {
+      dispatch(receiveCancelJoin({ teamId, userId }))
+    })
+
     socketClient.on('team-removed-message', ({ teamId, senderId, messageId }) => {
       dispatch(removeTeamMessge({ teamId, messageId, senderId }))
     })
@@ -159,6 +168,7 @@ export default function Layout({ children }) {
     })
 
     socketClient.on('receive-team-remove', ({ teamId }) => {
+      console.log(`_teamId ${_teamId}`)
       if (_teamId == teamId) {
         console.log('history call')
         history.push('/teams')

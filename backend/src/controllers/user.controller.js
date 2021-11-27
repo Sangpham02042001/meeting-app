@@ -509,6 +509,22 @@ const setUserStatus = async ({ userId, status }) => {
   }
 }
 
+const socketCancelJoin = async ({ userId, teamId }) => {
+  try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      }
+    })
+    let hostId = team.hostId
+    await team.removeRequestUser(userId)
+    return { hostId }
+  } catch (error) {
+    console.log(error)
+    return null
+  }
+}
+
 const getUserStatus = async ({ userId }) => {
   try {
     let userStatus = await sequelize.query(
@@ -535,5 +551,5 @@ module.exports = {
   outTeam, cancelJoinRequest, confirmInvitations,
   removeInvitations, getInvitations, getNotifications,
   searchUsers, socketRequestTeam, getUserStatusList,
-  setUserStatus, getUserStatus
+  setUserStatus, getUserStatus, socketCancelJoin
 }

@@ -44,7 +44,6 @@ export default function TeamMembers() {
   return (
     <div>
       <InviteUsersWrapper />
-      <h3>Team Members</h3>
       <div className='setting-user-list'>
         {team.members.map(member => <div key={member.id} className='setting-user-item'>
           <div>

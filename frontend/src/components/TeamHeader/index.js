@@ -163,8 +163,8 @@ export default function TeamHeader({ showTeamInfo }) {
         </div>
         <span style={{ marginLeft: '15px', padding: 0 }}>
           <h5 style={{ marginBottom: '5px' }}>{teamReducer.team.name}</h5>
-          {teamReducer.team.numOfMembers && teamReducer.team.numOfMembers.length === 1
-            ? `${teamReducer.team.numOfMembers} member` : `${teamReducer.team.numOfMembers} members`}
+          {teamReducer.team.members && teamReducer.team.members.length === 1
+            ? `${teamReducer.team.members.length} member` : `${teamReducer.team.members.length} members`}
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
