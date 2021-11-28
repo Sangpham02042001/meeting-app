@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { NavLink, useRouteMatch, Link, useHistory } from 'react-router-dom'
+import { NavLink, useRouteMatch, Link, useHistory, useParams } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { Avatar, Snackbar, Alert, Tooltip, Badge } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
@@ -19,7 +19,8 @@ import {
   clearMeetingJoined, getCurrentMeeting, inviteUsers, receiveTeamInvitation,
   confirmRequest, receiveTeamConfirm, joinRequest, receviceTeamRequest,
   removeTeamMessge, removeMember, forceOutTeam,
-  cancelJoin, receiveCancelJoin, outTeam
+  cancelJoin, receiveCancelJoin, outTeam, confirmInvitation,
+  newMember
 } from '../../store/reducers/team.reducer';
 import {
   getMeetingMembers, userJoinMeeting, userOutMeeting,
@@ -41,6 +42,7 @@ export default function Layout({ children }) {
   const _meetingId = params && Number(params.meetingId)
   let teamParams = (useRouteMatch('/teams/:teamId') || {}).params
   let _teamId = teamParams && Number(teamParams.teamId)
+  let myParams = useParams()
   const [isSkConnected, setIsSkConnected] = useState(false);
   const [currentNoti, setNoti] = useState(null)
 
@@ -139,12 +141,20 @@ export default function Layout({ children }) {
       }
     })
 
+    socketClient.on('new-member', ({ teamId, userName, id }) => {
+      dispatch(newMember({ teamId, userName, id }))
+    })
+
     socketClient.on('team-invite-user-success', ({ users, teamId }) => {
       dispatch(inviteUsers({ users, teamId }))
     })
 
     socketClient.on('team-confirm-user-success', ({ teamId, userId }) => {
       dispatch(confirmRequest({ teamId, userId }))
+    })
+
+    socketClient.on('confirm-invitation-success', ({ id, name, hostId }) => {
+      dispatch(confirmInvitation({ id, name, hostId }))
     })
 
     socketClient.on('request-join-team-success', ({ team }) => {

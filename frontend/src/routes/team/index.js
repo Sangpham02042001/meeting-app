@@ -242,9 +242,14 @@ export default function Team(props) {
   }
 
   const handleConfirmInvitation = () => {
-    dispatch(confirmInvitations({
-      teams: [teamReducer.team.id]
-    }))
+    // dispatch(confirmInvitations({
+    //   teams: [teamReducer.team.id]
+    // }))
+    socketClient.emit('confirm-invitation', {
+      userName: user.firstName + ' ' + user.lastName,
+      id: user.id,
+      teamId: teamReducer.team.id
+    })
     // socketClient.emit('confirm-team-invitation')
   }
 
