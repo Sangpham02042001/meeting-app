@@ -22,16 +22,16 @@ export default function Welcome() {
 
   const slides = [
     {
-      url: "public/welcome/home.png"
+      url: "welcome/home.png"
     },
     {
-      url: "public/welcome/messages.png"
+      url: "welcome/messages.png"
     },
     {
-      url: "public/welcome/team_messages.png"
+      url: "welcome/team_messages.png"
     },
     {
-      url: "public/welcome/teams.png"
+      url: "welcome/teams.png"
     }
   ];
 
@@ -42,7 +42,7 @@ export default function Welcome() {
           <nav className="top-nav">
             <div style={{ display: 'flex', padding: '10px', alignItems: 'center' }}>
               <Link to='/'>
-                <Avatar src='public/meeting-logo.png' style={{
+                <Avatar src='meeting-logo.png' style={{
                   width: '40px',
                   height: '40px',
                 }} />
