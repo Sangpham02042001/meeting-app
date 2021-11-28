@@ -14,7 +14,7 @@ export default function Home() {
     return (
         <div className="home-component">
             <div className="home-items" id="start-item">
-                <img src="public/world-map.png" id="world-img"></img>
+                <img src="world-map.png" id="world-img"></img>
                 <div>
                     <a
                         id="help"
@@ -25,7 +25,7 @@ export default function Home() {
             </div>
             <div className="home-items" id="center-item">
                 <h1>Welcome to meeting app</h1>
-                <img src="public/Remote-team-bro.png" id="home-image"></img>
+                <img src="Remote-team-bro.png" id="home-image"></img>
                 <div id="profile">
                     <a
                         href="#"

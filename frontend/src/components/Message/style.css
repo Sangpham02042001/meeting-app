@@ -160,6 +160,7 @@
   flex-wrap: wrap;
   background-color: transparent;
   margin: 3px;
+  max-width: 400px;
 }
 .message-component .text-message .emoji-message {
   margin-left: 45px;

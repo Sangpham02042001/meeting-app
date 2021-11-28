@@ -521,7 +521,11 @@ export default function Team(props) {
                 top: filesMessage.length ? '-220px' : '-330px',
                 right: '100px',
               }}>
-                <Picker onSelect={onEmojiClick} set='facebook' />
+                <Picker
+                  onSelect={onEmojiClick}
+                  set='facebook'
+                  theme={settingReducer.darkMode ? 'dark' : 'light'}
+                />
               </div>}
 
             <div className="team-input-container">

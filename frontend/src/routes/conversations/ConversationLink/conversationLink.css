@@ -7,6 +7,8 @@
   width: 95%;
   border-radius: 5px;
   cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .conversation-link:hover {

@@ -51,7 +51,6 @@ export default function ConversationLink({ conversation, user }) {
     const changeConversation = (event) => {
         event.preventDefault();
         history.replace(`/conversations/${conversation.participantId}`)
-        console.log(history)
     }
 
 

@@ -34,11 +34,10 @@ export default function Conversations(props) {
             let response = await axiosAuth.post('/api/users/search', {
                 text: searchUserName
             })
-            console.log('Function debounced after 500ms!');
             setSearchUsers(response.data.users)
             setSearchLoading(false);
         }
-    }, 500), [])
+    }, 300), [])
 
     const onSearch = (event) => {
         let searchUserName = event.target.value.trim();

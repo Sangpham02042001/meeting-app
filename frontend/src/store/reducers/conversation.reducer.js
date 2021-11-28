@@ -18,8 +18,9 @@ export const getParticipant = createAsyncThunk('conversations/getParticipant', a
   return response.data;
 })
 
-export const readConversation = createAsyncThunk('conversations/readConversation', async ({ conversationId }) => {
+export const readConversation = createAsyncThunk('conversations/readConversation', async ({ conversationId }, { dispatch }) => {
   const response = await axiosAuth.patch(`/api/conversations/${conversationId}`, { conversationId });
+  dispatch(getNumberMessageUnread())
   return response.data;
 })
 
@@ -77,7 +78,6 @@ export const conversationSlice = createSlice({
       console.log('Get messages of user fail!')
     },
     [getParticipant.fulfilled]: (state, action) => {
-
       state.conversation.participant = action.payload;
     },
     [getParticipant.rejected]: (state, action) => {

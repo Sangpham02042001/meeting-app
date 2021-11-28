@@ -125,7 +125,6 @@ export default function ConversationChat({ conversation, user }) {
     dispatch(getParticipant({ participantId: conversation.participantId }))
     dispatch(getMessages({ conversationId: converId }))
     dispatch(readConversation({ conversationId: converId }))
-    dispatch(getNumberMessageUnread())
     setConversationId(converId)
   }, [conversation.conversationId])
 
@@ -341,7 +340,7 @@ export default function ConversationChat({ conversation, user }) {
               <Avatar width="40px" height="40px" userId={conversation.participantId} />
             </Badge>
             <div style={{ marginLeft: '15px' }}>
-              <div style={{ fontSize: '1.2em', fontWeight: '500' }}><span>{conversation.participantName}</span></div>
+              <div className="header-name"><span>{conversation.participantName}</span></div>
               <div><span>{getStatusString(conversation.status)}</span></div>
             </div>
 
@@ -368,7 +367,7 @@ export default function ConversationChat({ conversation, user }) {
         <div className="content-message" ref={scrollRef} onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}>
           <div className="info-beginner-content">
             <Avatar width="80px" height="80px" userId={conversation.participantId} />
-            <div >
+            <div style={{ textAlign: 'center' }} >
               <span>{conversation.participantName}</span>
             </div>
             <div style={{ fontSize: "18px", opacity: "0.7" }}>
@@ -398,7 +397,9 @@ export default function ConversationChat({ conversation, user }) {
         </div>
         <div className="bottom-message">
           {isOpenEmojiList &&
-            <Picker set='facebook'
+            <Picker
+              set='facebook'
+              theme={settingReducer.darkMode ? 'dark' : 'light'}
               style={{
                 position: 'absolute',
                 top: '-350px',
@@ -591,7 +592,10 @@ export default function ConversationChat({ conversation, user }) {
         <div className="custom-info">
           <Avatar width='80px' height='80px'
             userId={conversation.participantId} />
-          <div style={{ fontSize: "36px" }}>
+          <div style={{
+            fontSize: "36px",
+            textAlign: 'center', overflow: 'hidden',
+          }}>
             <span>{conversation.participantName}</span>
           </div>
         </div>

@@ -58,4 +58,25 @@ const getAllUsers = async (req, res) => {
 
 }
 
-module.exports = { adminSignin, getAllUsers }
+const deleteUser = async (req, res) => {
+    let { userId } = req.params;
+    try {
+        await User.destroy({
+            where: {
+                id: userId
+            }
+        })
+        return res.status(200).json({
+            ids: userId,
+            message: "Delete successfully!"
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({
+            message: 'Delete error'
+        })
+    }
+
+}
+
+module.exports = { adminSignin, getAllUsers, deleteUser }
