@@ -1,12 +1,11 @@
 const bcrpyt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
-const Team = require('../models/team')
 const sequelize = require('../models')
 const { QueryTypes } = require('sequelize')
+const bcrypt = require('bcrypt')
 
-
-
+let saltRounds = 10
 const adminSignin = async (req, res) => {
     let { email, password } = req.body
     try {
@@ -76,7 +75,53 @@ const deleteUser = async (req, res) => {
             message: 'Delete error'
         })
     }
-
 }
 
-module.exports = { adminSignin, getAllUsers, deleteUser }
+const updateUserInfo = async (req, res) => {
+    const { userId, firstName, lastName, email } = req.body;
+    try {
+        await User.update({
+            firstName, lastName, email
+        }, {
+            where: {
+                id: userId
+            }
+        })
+        return res.status(201).json({ message: "Update successfully" })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({
+            error: "Could not update user info!"
+        })
+    }
+}
+
+const changePassword = async (req, res) => {
+    const { password, userId } = req.body;
+    try {
+        bcrypt.hash(password, saltRounds, async (error, hash_password) => {
+            if (error) {
+                return res.status(400).json({ error })
+            }
+            await User.update({
+                hash_password
+            }, {
+                where: {
+                    id: userId
+                }
+            })
+            return res.status(201).json({ message: "Update password successfully" })
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({
+            error: "Could not update user info!"
+        })
+    }
+}
+
+
+
+
+module.exports = { adminSignin, getAllUsers, deleteUser, updateUserInfo, changePassword }

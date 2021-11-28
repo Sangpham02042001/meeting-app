@@ -1,8 +1,14 @@
+.message-component {
+  width: 100%;
+  position: relative;
+}
 .own-message {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   margin-right: 15px;
+  max-width: 60%;
+  float: right;
 }
 
 .own-message > div {
@@ -12,7 +18,6 @@
 }
 
 .own-message p {
-  max-width: 400px;
   border-radius: 10px;
   padding: 5px 7px;
   background-color: var(--primary-color);
@@ -30,6 +35,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: flex-end;
+  max-width: 60%;
 }
 
 .message > div {
@@ -37,7 +43,6 @@
 }
 
 .message > div > .text-message > p {
-  max-width: 400px;
   border-radius: 10px;
   padding: 5px 7px;
   background-color: #aaadb6;
@@ -160,7 +165,6 @@
   flex-wrap: wrap;
   background-color: transparent;
   margin: 3px;
-  max-width: 400px;
 }
 .message-component .text-message .emoji-message {
   margin-left: 45px;

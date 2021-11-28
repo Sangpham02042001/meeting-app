@@ -3,7 +3,7 @@ const { signup, getUserInfo, updateUserInfo, getUserAvatar,
   requestJoinTeam, getJoinedTeams, getRequestingTeams,
   outTeam, cancelJoinRequest, confirmInvitations,
   removeInvitations, getInvitations, getNotifications,
-  searchUsers, getConversationsOfUser } = require('../controllers/user.controller')
+  searchUsers } = require('../controllers/user.controller')
 const { requireSignin } = require('../controllers/auth.controller')
 
 const router = Router()

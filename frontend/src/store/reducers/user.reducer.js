@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { axiosAuth, axiosInstance } from '../../utils'
 import extend from 'lodash/extend';
-import { socketClient } from '../../utils';
 
 const initialState = {
   user: {},
