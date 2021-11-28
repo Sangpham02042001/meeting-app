@@ -47,7 +47,7 @@ export default function Login() {
             : (userReducer.authenticated ? <Redirect to="/home" />
                 : <div className="auth-page">
                     <Avatar sx={{ m: 1, width: 56, height: 56 }}
-                        src="public/meeting-logo.png" />
+                        src="meeting-logo.png" />
                     <Typography component="h1" variant="h4" sx={{ marginBottom: '50px' }}>
                         Meeting App
                     </Typography>

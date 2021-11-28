@@ -496,6 +496,22 @@ export const teamSlice = createSlice({
       if (idx >= 0) {
         state.joinedTeams.splice(idx, 1)
       }
+      // if (teamId == state.team.id) {
+      //   state.team = {
+      //     members: [],
+      //     invitedUsers: [],
+      //     requestUsers: [],
+      //     meetmessLoaded: false,
+      //     meetings: [],
+      //     meetingActive: null,
+      //     meetmess: [],
+      //     files: [],
+      //     images: [],
+      //     numOfMeetMess: 0,
+      //     fakeMessageId: v4()
+      //   }
+      // state.teamLoaded = false
+      // }
     }
   },
   extraReducers: {

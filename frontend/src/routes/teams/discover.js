@@ -283,17 +283,17 @@ export default function TeamDiscover() {
         <h3 style={{ margin: '15px 0' }}>Join or create a team</h3>
         <div style={{ display: 'flex', width: '100%' }}>
           <span className='create-team-box'>
-            <img className="create-team-empty-img" src="public/teamimage-empty.svg" alt="Team Image" />
+            <img className="create-team-empty-img" src="teamimage-empty.svg" alt="Team Image" />
             <h5 style={{ color: 'var(--text-color)' }}>Create Team</h5>
             {settingReducer.darkMode ?
               <div style={{ marginBottom: '15px', display: 'flex' }}>
-                <Avatar className='create-team-box-user' src="public/create-team-user1-dark.svg" alt="Team Image" />
-                <Avatar className='create-team-box-user' src="public/create-team-user2-dark.svg" alt="Team Image" />
-                <Avatar className='create-team-box-user' src="public/create-team-user3-dark.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user1-dark.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user2-dark.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user3-dark.svg" alt="Team Image" />
               </div> : <div style={{ marginBottom: '15px', display: 'flex' }}>
-                <Avatar className='create-team-box-user' src="public/create-team-user1.svg" alt="Team Image" />
-                <Avatar className='create-team-box-user' src="public/create-team-user2.svg" alt="Team Image" />
-                <Avatar className='create-team-box-user' src="public/create-team-user3.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user1.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user2.svg" alt="Team Image" />
+                <Avatar className='create-team-box-user' src="create-team-user3.svg" alt="Team Image" />
               </div>}
             <Button variant="contained" onClick={handleCreateTeam}
               style={{ backgroundColor: 'var(--primary-color)' }}
@@ -303,7 +303,7 @@ export default function TeamDiscover() {
           </span>
 
           <span className='create-team-box'>
-            <img className="create-team-empty-img" src="public/join-team-code.svg" alt="Team Image" />
+            <img className="create-team-empty-img" src="join-team-code.svg" alt="Team Image" />
             <h5>Join a team with code</h5>
             <div className='team-code-container'>
               <input value={teamCode} id="team-code"
