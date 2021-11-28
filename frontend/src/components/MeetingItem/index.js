@@ -29,7 +29,7 @@ export default function MeetingItem({ meeting }) {
         }
       })()
     }
-  }, [])
+  }, [meeting.active])
 
   const getUserName = userId => {
     let user = meeting.members.find(user => user.id == userId)
@@ -55,7 +55,6 @@ export default function MeetingItem({ meeting }) {
           <Typography style={{ fontSize: '14px' }}>
             Meeting created by <strong>{hostName}</strong>
           </Typography>
-          <hr style={{ color: 'var(--text-color)' }} />
           {meeting.members && meeting.members.length > 0 && <div style={{
             marginTop: '10px',
             display: 'flex',

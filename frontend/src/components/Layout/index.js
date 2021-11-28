@@ -197,12 +197,13 @@ export default function Layout({ children }) {
       dispatch(userJoinMeeting({ teamId, meetingId, user, isAudioActive }))
     })
 
-    socketClient.on('joined-meeting', ({ members, meetingId, teamId, usersAudio }) => {
+    socketClient.on('joined-meeting', ({ members, meetingId, teamId, usersAudio, hostId }) => {
       dispatch(getMeetingMembers({
         members,
         meetingId,
         teamId,
-        usersAudio
+        usersAudio,
+        hostId
       }))
     })
 

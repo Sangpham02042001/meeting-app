@@ -25,7 +25,8 @@ export const meetingSlice = createSlice({
       messages: [],
       teamId: null,
       messagesLoaded: false,
-      usersAudio: {}
+      usersAudio: {},
+      hostId: null
     },
     loading: false,
     error: null
@@ -80,11 +81,12 @@ export const meetingSlice = createSlice({
       }
     },
     getMeetingMembers: (state, action) => {
-      let { members, meetingId, teamId, usersAudio } = action.payload
+      let { members, meetingId, teamId, usersAudio, hostId } = action.payload
       state.meeting.members = members
       state.meeting.id = meetingId
       state.meeting.teamId = teamId
       state.meeting.usersAudio = usersAudio
+      state.meeting.hostId = hostId
     },
     meetingUserAudioChange: (state, action) => {
       let { meetingId, userId, isAudioActive } = action.payload

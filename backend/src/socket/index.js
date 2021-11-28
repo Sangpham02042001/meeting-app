@@ -2,7 +2,7 @@ const { getMemberTeam, sendMessage, socketInviteUsers,
     socketConfirmRequest, socketRemoveMember, socketDeleteTeam } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
-    updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
+    updateMeetingState, sendMessageMeeting, getMeetingHostId } = require('../controllers/meeting.controller')
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification, createMeetingNofication } = require('../controllers/notification.controller')
 const { socketRequestTeam, setUserStatus, getUserStatus,
@@ -262,8 +262,13 @@ const socketServer = (io, socket) => {
         let members = await getActiveMemberMeeting({ meetingId }); // luon lay in Meeting
         user = members.find(m => m.userId === user.userId)
         socket.meetingId = meetingId
+        let meeting = await getMeetingHostId({ meetingId })
+        let hostId
+        if (meeting) {
+            hostId = meeting.hostId
+        }
 
-        socket.emit('joined-meeting', { members, meetingId, teamId, usersAudio: meetingsAudio[meetingId] })
+        socket.emit('joined-meeting', { members, meetingId, teamId, usersAudio: meetingsAudio[meetingId], hostId })
 
         for (let m of members) {
             console.log(userSockets[m.userId])

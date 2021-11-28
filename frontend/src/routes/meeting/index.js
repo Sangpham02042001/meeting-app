@@ -5,6 +5,7 @@ import { socketClient } from "../../utils";
 import MeetingChatBox from "./MeetingChatBox";
 import MeetingUserList from "./MeetingUserList";
 import MeetingVideo from "./MeetingVideo";
+import MeetingInfo from "./MeetingInfo";
 import { isAuthenticated } from '../../store/reducers/user.reducer';
 import {
 	getTeamInfo,
@@ -583,6 +584,9 @@ const Meeting = (props) => {
 				<div className="meeting-box" style={{
 					width: isOpenChat || isOpenInfo || isOpenUsers ? '350px' : '0%'
 				}}>
+
+					{isOpenInfo && <MeetingInfo infoVisible={handleVisibleInfo} />}
+
 					{isOpenChat && <MeetingChatBox chatVisible={handleVisibleChat} />}
 
 					{isOpenUsers && <MeetingUserList usersVisible={handleVisibleUsers} members={meetingReducer.meeting.members} />}

@@ -350,10 +350,25 @@ const getAllMeetings = async (req, res) => {
   }
 }
 
+const getMeetingHostId = async ({ meetingId }) => {
+  try {
+    let meeting = await Meeting.findOne({
+      where: {
+        id: teamId
+      },
+      attributes: ['hostId']
+    })
+    return meeting
+  } catch (error) {
+    console.log(error)
+    return null
+  }
+}
+
 module.exports = {
   getMeetingInfo, createMeeting, getActiveMemberMeeting,
   addMemberMeeting, outMeeting, joinMeeting,
   getUserMeeting, updateMeetingState, sendMessageMeeting,
   getMeetingMessages, getCurrentMeeting, getMeetingById,
-  getAllMeetings
+  getAllMeetings, getMeetingHostId
 }
