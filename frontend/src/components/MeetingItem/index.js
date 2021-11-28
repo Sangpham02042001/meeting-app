@@ -52,7 +52,9 @@ export default function MeetingItem({ meeting }) {
         aria-controls="panel1a-content"
         id="panel1a-header">
         <div style={{ width: '100%' }}>
-          <Typography style={{ fontSize: '14px' }}>Meeting created by <strong>{hostName}</strong></Typography>
+          <Typography style={{ fontSize: '14px' }}>
+            Meeting created by <strong>{hostName}</strong>
+          </Typography>
           <hr style={{ color: 'var(--text-color)' }} />
           {meeting.members && meeting.members.length > 0 && <div style={{
             marginTop: '10px',
@@ -75,8 +77,8 @@ export default function MeetingItem({ meeting }) {
         overflowY: 'auto'
       }}>
         <Typography style={{ fontSize: '14px' }}>
-          {error ? { error } : messages.length ?
-            <>
+          {error ? <div>{error}</div> : messages.length ?
+            <div>
               {messages.slice(0, messages.length - 1).map((message, idx) => (
                 <div key={idx}>
                   <Message message={message}
@@ -84,19 +86,21 @@ export default function MeetingItem({ meeting }) {
                     userName={message.userId != messages[idx + 1].userId ? getUserName(message.userId) : ''}
                     hasAvatar={message.userId != messages[idx + 1].userId} />
                   {messages[idx + 1].userId != message.userId
-                    && <p style={{
-                      margin: 0,
-                      paddingLeft: '40px',
-                      color: 'gray'
-                    }}>{getUserName(messages[idx + 1].userId)}</p>}
+                    && <div>
+                      <span style={{
+                        margin: 0,
+                        paddingLeft: '40px',
+                        color: 'gray'
+                      }}>{getUserName(messages[idx + 1].userId)}</span>
+                    </div>}
                 </div>
               ))}
               <Message message={messages[messages.length - 1]}
                 logInUserId={null}
                 userName={getUserName(messages[messages.length - 1].userId)}
                 hasAvatar={true} lastMessage={true} />
-            </> :
-            <p>No messages in this meeting</p>
+            </div> :
+            <div>No messages in this meeting</div>
           }
         </Typography>
       </AccordionDetails>

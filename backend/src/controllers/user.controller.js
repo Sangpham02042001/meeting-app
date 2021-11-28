@@ -407,11 +407,11 @@ const getNotifications = async (req, res) => {
         }
       )
       numOfNotifications = numOfNotifications[0]['numOfNotifications']
-      let fragFlag = false
-      if (numOfNotifications > 10) {
-        notifications = notifications.slice(0, 10),
-          fragFlag = true
-      }
+      // let fragFlag = false
+      // if (numOfNotifications > 10) {
+      //   notifications = notifications.slice(0, 10),
+      //     fragFlag = true
+      // }
       return res.status(200).json({ notifications, numOfNotifications, numOf_UnReadNotifications })
     } else {
       let notifications = await sequelize.query(

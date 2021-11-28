@@ -1,5 +1,5 @@
 const { getMemberTeam, sendMessage, socketInviteUsers,
-    socketConfirmRequest, socketRemoveMember } = require('../controllers/team.controller');
+    socketConfirmRequest, socketRemoveMember, socketDeleteTeam } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting } = require('../controllers/meeting.controller')
@@ -205,6 +205,22 @@ const socketServer = (io, socket) => {
             if (userSockets[userId] && userSockets[userId].length) {
                 for (const socketId of userSockets[userId]) {
                     socket.to(socketId).emit('receive-team-remove', { teamId })
+                }
+            }
+        }
+    })
+
+    socket.on('delete-team', async ({ teamId }) => {
+        let members = await getMemberTeam({ teamId })
+        members = members.filter(m => m.id != socket.userId)
+        let result = await socketDeleteTeam({ teamId })
+        if (result) {
+            socket.emit('receive-team-remove', { teamId })
+            for (const m of members) {
+                if (userSockets[m.id] && userSockets[m.id].length) {
+                    for (const socketId of userSockets[m.id]) {
+                        socket.to(socketId).emit('receive-team-remove', { teamId })
+                    }
                 }
             }
         }

@@ -761,6 +761,21 @@ const getTeamSharedImages = async (req, res) => {
   }
 }
 
+const socketDeleteTeam = async ({ teamId }) => {
+  try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      }
+    })
+    await team.destroy()
+    return 'Success'
+  } catch (error) {
+    console.log(error)
+    return null
+  }
+}
+
 
 //ADMIN SITE
 
@@ -866,5 +881,5 @@ module.exports = {
   socketInviteUsers, socketConfirmRequest, getTeamSharedFiles,
   getTeamSharedImages, getMeetingActive, getAllTeams,
   getTeamMeetings, socketRemoveMember, confirmRequest,
-  getTeamMessages
+  getTeamMessages, socketDeleteTeam
 }

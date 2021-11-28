@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { NavLink, useRouteMatch, Link, useHistory, useParams } from 'react-router-dom'
+import { NavLink, useRouteMatch, Link, useHistory } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { Avatar, Snackbar, Alert, Tooltip, Badge } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
@@ -14,7 +14,7 @@ import {
   sendMessageCv, conversationCalling, cancelCall,
   removeMessageCv, setConversationStatus, getNumberMessageUnread
 } from '../../store/reducers/conversation.reducer';
-import {
+import teamReducer, {
   sendMessage, setMeetingActive, endActiveMeeting,
   clearMeetingJoined, getCurrentMeeting, inviteUsers, receiveTeamInvitation,
   confirmRequest, receiveTeamConfirm, joinRequest, receviceTeamRequest,
@@ -40,10 +40,10 @@ export default function Layout({ children }) {
   const lastMessageChange = useSelector(state => state.conversationReducer.lastMessageChange);
   const params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const _meetingId = params && Number(params.meetingId)
+  let teamRef = useRef()
   let teamParams = (useRouteMatch('/teams/:teamId') || {}).params
   let _teamId = teamParams && Number(teamParams.teamId)
-  console.log(`_teamId ${_teamId}`)
-  let myParams = useParams()
+  teamRef.current = _teamId
   const [isSkConnected, setIsSkConnected] = useState(false);
   const [currentNoti, setNoti] = useState(null)
 
@@ -184,7 +184,7 @@ export default function Layout({ children }) {
 
     socketClient.on('receive-team-remove', ({ teamId }) => {
       console.log(`_teamId ${_teamId}`)
-      if (_teamId == teamId) {
+      if (teamRef.current == teamId) {
         console.log('history call')
         history.push('/teams')
       }

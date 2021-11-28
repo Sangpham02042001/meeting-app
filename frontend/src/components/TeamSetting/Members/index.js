@@ -47,9 +47,12 @@ export default function TeamMembers() {
       <div className='setting-user-list'>
         {team.members.map(member => <div key={member.id} className='setting-user-item'>
           <div>
-            <Avatar sx={{ width: '40px', height: '40px' }}
+            <Avatar sx={{ width: '45px', height: '45px' }}
               src={`${baseURL}/api/user/avatar/${member.id}`} />
-            <span>{member.userName}</span>
+            <span style={{
+              fontSize: '16px',
+              fontWeight: 500
+            }}>{member.userName}</span>
           </div>
           {member.id !== user.id && <Button variant='contained'
             style={{ backgroundColor: 'var(--primary-color)' }}

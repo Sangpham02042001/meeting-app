@@ -29,7 +29,7 @@ export default function TeamList() {
             <div className='team-list-coverphoto'
               style={{ backgroundImage: `url("${baseURL}/api/team/coverphoto/${team.id}")` }}>
             </div>
-            {team.name}
+            <p>{team.name}</p>
           </Link>
         ))}
       </div>

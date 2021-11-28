@@ -160,6 +160,7 @@
 .team-item-image {
   width: 150px;
   height: 100px;
+  margin: auto;
   margin-bottom: 10px;
   border-radius: 10px;
   background-position: center;

@@ -42,7 +42,7 @@ export default function TeamInvitedUsers() {
       <div className='setting-user-list'>
         {team.invitedUsers.map(member => <div key={member.id} className='setting-user-item'>
           <div>
-            <Avatar sx={{ width: '40px', height: '40px' }}
+            <Avatar sx={{ width: '45px', height: '45px' }}
               src={`${baseURL}/api/user/avatar/${member.id}`} />
             <span>{member.userName}</span>
           </div>

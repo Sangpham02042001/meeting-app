@@ -86,11 +86,12 @@ export default function TeamHeader({ showTeamInfo }) {
 
   const handleDeleteTeam = async () => {
     console.log('delete team')
-    dispatch(deleteTeam({
-      teamId
-    }))
+    socketClient.emit('delete-team', { teamId })
+    // dispatch(deleteTeam({
+    //   teamId
+    // }))
     setDeleteModalShow(false)
-    history.push('/teams')
+    // history.push('/teams')
   }
 
   const handleOutTeam = async () => {

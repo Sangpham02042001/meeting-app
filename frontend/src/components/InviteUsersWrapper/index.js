@@ -107,6 +107,8 @@ export default function InviteUsersWrapper({ users }) {
       users: invitedUsers
     })
     setLoading(false)
+    setSearchUsers([])
+    setInvitedUsers([])
     setShow(false)
   }
 

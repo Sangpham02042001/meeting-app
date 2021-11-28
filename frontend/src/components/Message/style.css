@@ -1,14 +1,8 @@
-.message-component {
-  width: 100%;
-  position: relative;
-}
 .own-message {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   margin-right: 15px;
-  max-width: 60%;
-  float: right;
 }
 
 .own-message > div {
@@ -18,11 +12,12 @@
 }
 
 .own-message p {
+  max-width: 600px;
   border-radius: 10px;
   padding: 5px 7px;
   background-color: var(--primary-color);
   color: white;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
   word-break: break-all;
 }
 
@@ -43,11 +38,12 @@
 }
 
 .message > div > .text-message > p {
+  max-width: 400px;
   border-radius: 10px;
   padding: 5px 7px;
   background-color: #aaadb6;
   color: white;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
   margin-left: 45px;
   word-break: break-all;
 }
