@@ -561,6 +561,27 @@ const socketOutTeam = async ({ teamId, userId }) => {
   }
 }
 
+const socketConfirmInvitation = async ({ teamId, userId }) => {
+  try {
+    let team = await Team.findOne({
+      where: {
+        id: teamId
+      }
+    })
+    if (team) {
+      await team.removeInvitedUser(userId)
+      await team.addMember(userId)
+    }
+    return {
+      name: team.name,
+      hostId: team.hostId
+    }
+  } catch (error) {
+    console.log(error)
+    return null
+  }
+}
+
 module.exports = {
   signup, getUserInfo, updateUserInfo, getUserAvatar,
   requestJoinTeam, getJoinedTeams, getRequestingTeams,
@@ -568,5 +589,5 @@ module.exports = {
   removeInvitations, getInvitations, getNotifications,
   searchUsers, socketRequestTeam, getUserStatusList,
   setUserStatus, getUserStatus, socketCancelJoin,
-  socketOutTeam
+  socketOutTeam, socketConfirmInvitation
 }

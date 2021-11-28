@@ -189,9 +189,14 @@ export default function Profile() {
 
 	const agreeInvitaton = () => {
 		console.log(selectedTeam)
-		dispatch(confirmInvitations({
-			teams: [selectedTeam]
-		}))
+		// dispatch(confirmInvitations({
+		// 	teams: [selectedTeam]
+		// }))
+		socketClient.emit('confirm-invitation', {
+			userName: userReducer.user.firstName + ' ' + userReducer.user.lastName,
+			id: userReducer.user.id,
+			teamId: selectedTeam
+		})
 		handleCloseConfirmInvitation()
 	}
 	//confirm invitations

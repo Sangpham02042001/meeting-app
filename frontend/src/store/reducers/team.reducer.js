@@ -440,6 +440,24 @@ export const teamSlice = createSlice({
         state.joinedTeams.splice(idx, 1)
       }
     },
+    confirmInvitation: (state, action) => {
+      let { id, name, hostId } = action.payload
+      state.joinedTeams.push({ id, name, hostId })
+      let idx = state.invitedTeams.findIndex(t => t.id == id)
+      if (idx >= 0) {
+        state.invitedTeams.splice(idx, 1)
+      }
+    },
+    newMember: (state, action) => {
+      let { teamId, userName, id } = action.payload
+      if (state.team.id == teamId) {
+        state.team.members.push({ id, userName })
+        let idx = state.team.invitedUsers.findIndex(u => u.id == id)
+        if (idx >= 0) {
+          state.team.invitedUsers.splice(idx, 1)
+        }
+      }
+    },
     receviceTeamRequest: (state, action) => {
       let { teamId, userName, userId } = action.payload
       if (state.team.id == teamId) {
@@ -579,7 +597,8 @@ export const teamSlice = createSlice({
     [confirmInvitations.fulfilled]: (state, action) => {
       let { teams } = action.payload
       console.log(teams)
-      state.invitedTeams = state.invitedTeams.filter(team => teams.indexOf(team.id) < 0)
+      // state.invitedTeams = state.invitedTeams.filter(team => teams.map(t => t.td).indexOf(team.id) < 0)
+      state.invitedTeams = state.invitedTeams.filter(team => !teams.find(t => t.id == team.id))
       state.loading = false
       state.joinedTeams.push(...teams)
     },
@@ -747,6 +766,6 @@ export const { cleanTeamState, sendMessage, updateMeetingState,
   confirmRequest, receiveTeamConfirm, joinRequest,
   receviceTeamRequest, removeTeamMessge, removeMember,
   forceOutTeam, cancelJoin, receiveCancelJoin,
-  outTeam } = teamSlice.actions;
+  outTeam, confirmInvitation, newMember } = teamSlice.actions;
 
 export default teamSlice.reducer

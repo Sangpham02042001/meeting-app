@@ -6,7 +6,7 @@ const { getActiveMemberMeeting, addMemberMeeting,
 const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification, createMeetingNofication } = require('../controllers/notification.controller')
 const { socketRequestTeam, setUserStatus, getUserStatus,
-    socketCancelJoin, socketOutTeam } = require('../controllers/user.controller')
+    socketCancelJoin, socketOutTeam, socketConfirmInvitation } = require('../controllers/user.controller')
 const { deleteMessage } = require('../controllers/message.controller');
 const Meeting = require('../models/meeting');
 
@@ -130,6 +130,31 @@ const socketServer = (io, socket) => {
                     socket.to(socketId).emit('receive-cancel-join', {
                         teamId, userId: socket.userId
                     })
+                }
+            }
+        }
+    })
+
+    socket.on('confirm-invitation', async ({ userName, id, teamId }) => {
+        let result = await socketConfirmInvitation({ teamId, userId: id })
+        if (result) {
+            let { name, hostId } = result
+            let members = await getMemberTeam({ teamId })
+            members = members.filter(m => m.id != id)
+            socket.emit('confirm-invitation-success', {
+                id: teamId,
+                name,
+                hostId
+            })
+            for (const m of members) {
+                if (userSockets[m.id] && userSockets[m.id].length) {
+                    for (const socketId of userSockets[m.id]) {
+                        socket.to(socketId).emit('new-member', {
+                            teamId,
+                            userName,
+                            id
+                        })
+                    }
                 }
             }
         }
