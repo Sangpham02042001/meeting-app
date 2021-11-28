@@ -38,6 +38,11 @@ Team.hasMany(Meeting, {
   foreignKey: 'teamId'
 })
 
+Meeting.belongsTo(Team, {
+  as: 'team',
+  foreignKey: 'id'
+})
+
 Team.hasMany(Message, {
   as: 'messages',
   foreignKey: 'teamId'

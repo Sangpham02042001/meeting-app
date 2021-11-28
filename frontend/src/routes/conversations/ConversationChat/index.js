@@ -271,12 +271,13 @@ export default function ConversationChat({ conversation, user }) {
       let transcript = event.results[0][0].transcript;
       let confidence = event.results[0][0].confidence;
       console.log(transcript, confidence * 100 + '%')
-      if (confidence < 0.6 && transcript.length) {
+      if (confidence > 0.6 && transcript.length) {
         socketClient.emit('conversation-sendMessage', {
           content: transcript, senderId: user.id, receiverId: conversation.participantId,
           conversationId, files: null, senderName: user.firstName + ' ' + user.lastName
         });
       } else {
+        setMessageAlert("Coundn't understand")
         speechReplyRef.current = "Could not understand!";
         setForceRender(v4());
       }

@@ -86,7 +86,9 @@ export const userSlice = createSlice({
       state.user = extend(state.user, user)
     },
     [signin.rejected]: (state, action) => {
-      // state.error = action.payload.error
+      if (action.payload.error) {
+        state.error = action.payload.error
+      }
       state.loading = false
     },
     [updateBasicUserInfo.pending]: () => {

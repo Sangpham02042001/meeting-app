@@ -9,6 +9,7 @@ const { v4 } = require('uuid');
 const axios = require('axios');
 const Media = require('../models/media');
 const https = require('https');
+const Team = require('../models/team')
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const axiosJanus = axios.create({ baseURL: process.env.JANUS_SERVER, httpsAgent });
 
@@ -325,9 +326,34 @@ const getCurrentMeeting = async (req, res) => {
   }
 }
 
+const getAllMeetings = async (req, res) => {
+  try {
+    let meetings = await Meeting.findAll({
+      include: [
+        { model: User, as: 'host', attributes: ['firstName', 'lastName', 'id'] },
+        {
+          model: User,
+          as: 'members',
+          attributes: ['firstName', 'lastName', 'id']
+        },
+        { model: Team, attributes: ['id', 'name'], as: 'team' }
+      ],
+      order: [
+        ['updatedAt', 'DESC'],
+        ['createdAt', 'DESC']
+      ]
+    })
+    return res.status(200).json({ meetings })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getMeetingInfo, createMeeting, getActiveMemberMeeting,
   addMemberMeeting, outMeeting, joinMeeting,
   getUserMeeting, updateMeetingState, sendMessageMeeting,
-  getMeetingMessages, getCurrentMeeting, getMeetingById
+  getMeetingMessages, getCurrentMeeting, getMeetingById,
+  getAllMeetings
 }

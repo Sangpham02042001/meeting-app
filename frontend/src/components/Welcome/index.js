@@ -22,16 +22,19 @@ export default function Welcome() {
 
   const slides = [
     {
-      url: "public/welcome/home.png"
+      url: "welcome/teams.png"
     },
     {
-      url: "public/welcome/messages.png"
+      url: "welcome/meetings.png"
     },
     {
-      url: "public/welcome/team_messages.png"
+      url: "welcome/messages.png"
     },
     {
-      url: "public/welcome/teams.png"
+      url: "welcome/team_messages.png"
+    },
+    {
+      url: "welcome/home.png"
     }
   ];
 
@@ -42,7 +45,7 @@ export default function Welcome() {
           <nav className="top-nav">
             <div style={{ display: 'flex', padding: '10px', alignItems: 'center' }}>
               <Link to='/'>
-                <Avatar src='public/meeting-logo.png' style={{
+                <Avatar src='meeting-logo.png' style={{
                   width: '40px',
                   height: '40px',
                 }} />
@@ -52,13 +55,13 @@ export default function Welcome() {
 
             <div className="authLink">
               <Link to="/login">
-                <Button variant="outlined" size="medium">
-                Login
+                <Button variant="contained" size="medium">
+                  Login
                 </Button>
               </Link>
               <Link to="/signup">
                 <Button variant="contained" size="medium">
-                Sign up
+                  Sign up
                 </Button>
               </Link>
             </div>
@@ -70,11 +73,11 @@ export default function Welcome() {
             </div>
             <div className="carousel-content">
               <Carousel
-              className="carousel"
-              imageList={slides}
-              autoplay={true}
-              showArrows={false}
-              interval={"5000"} />
+                className="carousel"
+                imageList={slides}
+                autoplay={true}
+                showArrows={false}
+                interval={"2500"} />
             </div>
           </div>
         </div>

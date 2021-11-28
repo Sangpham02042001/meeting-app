@@ -43,7 +43,7 @@ export default function TeamInfo() {
           <strong>Members ({teamReducer.team.members.length})</strong>
         </AccordionSummary>
         <AccordionDetails>
-          {teamReducer.team.members.slice(0, 5).map(member => (
+          {teamReducer.team.members.slice(0, 10).map(member => (
             <span key={`member ${member.id}`}
               style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', paddingLeft: '10px' }}>
               <div className='team-info-user-avatar'
@@ -52,7 +52,7 @@ export default function TeamInfo() {
               <p style={{ marginBottom: 0 }}>{member.userName}</p>
             </span>
           ))}
-          {teamReducer.team.members.length > 5 && <Link to="#">
+          {teamReducer.team.members.length > 10 && <Link to="#">
             See all members
           </Link>}
         </AccordionDetails>
