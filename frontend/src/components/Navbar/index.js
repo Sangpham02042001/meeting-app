@@ -135,7 +135,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div style={{ display: 'flex' }}>
         <Link to='/home'>
-          <Avatar src='meeting-logo.png' style={{
+          <Avatar src='public/meeting-logo.png' style={{
             width: '40px',
             height: '40px',
           }} />

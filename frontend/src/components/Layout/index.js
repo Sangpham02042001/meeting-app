@@ -57,8 +57,8 @@ export default function Layout({ children }) {
     } else {
       r.style.setProperty('--text-color', '#000')
       r.style.setProperty('--primary-bg', '#fafafa')
-      r.style.setProperty('--primary-color', '#1962a7')
-      r.style.setProperty('--icon-color', '#1962a7')
+      r.style.setProperty('--primary-color', '#3792e7')
+      r.style.setProperty('--icon-color', '#3792e7')
       r.style.setProperty('--hover-bg-color', 'rgb(240, 240, 240)')
       r.style.setProperty('--box-shadow', '2px 2px 5px #dadcdf')
       r.style.setProperty('--shadow-color', '#dadcdf')
