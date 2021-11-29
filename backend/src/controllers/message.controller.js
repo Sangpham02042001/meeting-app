@@ -134,8 +134,18 @@ const deleteMessage = async ({ messageId }) => {
   }
 }
 
+const delMessage = async (req, res) => {
+  let { messageId } = req.params
+  let result = await deleteMessage({ messageId })
+  if (result) {
+    return res.status(200).json({ message: 'Delete success' })
+  }
+  else {
+    return res.status(400).json({ error: 'Something wrong' })
+  }
+}
 
 module.exports = {
   getImageMessage, getImageMessageMedia, getFileMessageMedia,
-  downloadImageMessageMedia, deleteMessage
+  downloadImageMessageMedia, deleteMessage, delMessage
 }

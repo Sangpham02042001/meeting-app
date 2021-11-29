@@ -14,13 +14,27 @@ const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const axiosJanus = axios.create({ baseURL: process.env.JANUS_SERVER, httpsAgent });
 
 const getMeetingById = async (req, res) => {
-  const { meetingId } = req.params
-  const meeting = await Meeting.findOne({
-    where: {
-      id: meetingId
-    }
-  })
-  return res.status(200).json({ meeting })
+  let { meetingId } = req.params
+  try {
+    let meeting = await Meeting.findAll({
+      where: {
+        id: meetingId
+      },
+      include: [
+        { model: User, as: 'host', attributes: ['firstName', 'lastName', 'id'] },
+        {
+          model: User,
+          as: 'members',
+          attributes: ['firstName', 'lastName', 'id']
+        },
+        { model: Team, attributes: ['id', 'name'], as: 'team' }
+      ],
+    })
+    return res.status(200).json({ meeting })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
 }
 
 const getMeetingInfo = async ({ meetingId }) => {
@@ -354,7 +368,7 @@ const getMeetingHostId = async ({ meetingId }) => {
   try {
     let meeting = await Meeting.findOne({
       where: {
-        id: teamId
+        id: meetingId
       },
       attributes: ['hostId']
     })
@@ -365,10 +379,26 @@ const getMeetingHostId = async ({ meetingId }) => {
   }
 }
 
+const deleteMeeting = async (req, res) => {
+  try {
+    let { meetingId } = req.params
+    let meeting = await Meeting.findOne({
+      where: {
+        id: meetingId
+      }
+    })
+    await meeting.destroy()
+    return res.status(200).json({ message: 'success' })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   getMeetingInfo, createMeeting, getActiveMemberMeeting,
   addMemberMeeting, outMeeting, joinMeeting,
   getUserMeeting, updateMeetingState, sendMessageMeeting,
   getMeetingMessages, getCurrentMeeting, getMeetingById,
-  getAllMeetings, getMeetingHostId
+  getAllMeetings, getMeetingHostId, deleteMeeting
 }
