@@ -17,7 +17,6 @@
     "emoji-mart": "^3.0.1",
     "emoji-regex": "^10.0.0",
     "emojione": "^4.5.0",
-    "fs": "0.0.1-security",
     "html-react-parser": "^1.4.0",
     "lodash": "^4.17.21",
     "react": "^17.0.2",

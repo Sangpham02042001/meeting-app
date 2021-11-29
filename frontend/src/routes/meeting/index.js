@@ -12,7 +12,7 @@ import {
 } from '../../store/reducers/team.reducer'
 import { getMeetingMessages } from '../../store/reducers/meeting.reducer'
 import Janus from '../../janus'
-import { janusServer, baseURL } from '../../utils'
+import { janusServer, baseURL, getAmTime } from '../../utils'
 import { debounce } from 'lodash'
 import { v4 } from 'uuid'
 
@@ -602,7 +602,7 @@ const Meeting = (props) => {
 					alignItems: 'center'
 				}}>
 					<strong style={{ color: '#FFF' }}>
-						Time: {getTimeInfo()}
+						Time: {getAmTime(Date.now())}
 					</strong>
 				</div>
 				<div className="btn-mid" style={{

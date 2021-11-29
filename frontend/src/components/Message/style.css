@@ -1,7 +1,33 @@
+.message-component {
+  position: relative;
+}
+
+.message-component .time-text {
+  width: 100%;
+  margin: 15px 0;
+  text-align: center;
+  height: 20px;
+  opacity: 0.6;
+}
+
+.own-time {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.8rem;
+  margin-right: 20px;
+  opacity: 0.6;
+}
+
+.message-time {
+  display: flex;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-left: 50px;
+}
+
 .own-message {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
   margin-right: 15px;
 }
 
@@ -13,12 +39,14 @@
 
 .own-message p {
   max-width: 600px;
+  min-width: 40px;
   border-radius: 10px;
-  padding: 5px 7px;
+  padding: 7px 12px;
   background-color: var(--primary-color);
   color: white;
   margin-bottom: 2px;
   word-break: break-all;
+  height: 100%;
 }
 
 .own-message p img {
@@ -29,8 +57,6 @@
 .message {
   display: flex;
   justify-content: flex-start;
-  align-items: flex-end;
-  max-width: 60%;
 }
 
 .message > div {
@@ -38,9 +64,10 @@
 }
 
 .message > div > .text-message > p {
-  max-width: 400px;
+  max-width: 600px;
+  min-width: 40px;
   border-radius: 10px;
-  padding: 5px 7px;
+  padding: 7px 12px;
   background-color: #aaadb6;
   color: white;
   margin-bottom: 2px;
@@ -97,7 +124,6 @@
   display: flex;
   max-width: 470px;
   flex-wrap: wrap;
-  margin-bottom: 8px;
 }
 
 .own-message .message-photo-list {
@@ -111,8 +137,7 @@
 .message-photo-list > img,
 .message-photo-list > div {
   border-radius: 15px;
-  margin-right: 5px;
-  margin-bottom: 5px;
+  margin: 3px;
   cursor: pointer;
 }
 
@@ -161,6 +186,7 @@
   flex-wrap: wrap;
   background-color: transparent;
   margin: 3px;
+  max-width: 600px;
 }
 .message-component .text-message .emoji-message {
   margin-left: 45px;

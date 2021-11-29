@@ -26,7 +26,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import 'emoji-mart/css/emoji-mart.css'
 import { Picker, emojiIndex } from 'emoji-mart';
-import { socketClient, baseURL, emotionRegex, timeDiff } from '../../../utils';
+import { socketClient, baseURL, emotionRegex, timeDiff, messageTimeDiff } from '../../../utils';
 import {
   getMessages, readConversation, startCall, cancelCall, getAllImages,
   getParticipant, getAllFiles, getNumberMessageUnread
@@ -375,7 +375,7 @@ export default function ConversationChat({ conversation, user }) {
               <span>Welcome to me!!!</span>
             </div>
           </div>
-          {messages.length > 0 && messages.slice(0, messages.length - 1)
+          {messages.length > 0 && messages
             .map((message, idx) => {
               return (
                 <Message message={message}
@@ -383,17 +383,14 @@ export default function ConversationChat({ conversation, user }) {
                   logInUserId={user.id}
                   conversationId={conversationId}
                   participantId={conversation.participantId}
-                  hasAvatar={message.userId != messages[idx + 1].userId}
+                  changeMessage={idx >= 1 ? message.userId != messages[idx - 1].userId : true}
+                  hasAvatar={idx + 1 === messages.length ? true : message.userId != messages[idx + 1].userId}
+                  lastMessage={idx + 1 === messages.length ? true : false}
                   userName={user.firstName.concat(' ', user.lastName)}
+                  messageDif={idx >= 1 ? messageTimeDiff(messages[idx].createdAt, messages[idx - 1].createdAt) : ''}
                 />
               )
             })}
-          {messages.length > 0 &&
-            <Message message={messages[messages.length - 1]}
-              logInUserId={user.id}
-              conversationId={conversationId}
-              participantId={conversation.participantId}
-              hasAvatar={true} lastMessage={true} />}
 
         </div>
         <div className="bottom-message">

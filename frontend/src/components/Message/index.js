@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState } from 'react'
 import {
   Avatar, Tooltip, Dialog, DialogContent, IconButton,
   Menu, MenuItem
 } from '@mui/material';
-import { baseURL, getTime, socketClient, emotionRegex } from '../../utils';
+import { baseURL, getTime, socketClient, getAmTime } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -16,15 +16,15 @@ import './style.css'
 
 const Message = React.memo(({
   message, logInUserId, hasAvatar, lastMessage,
-  userName, conversationId, participantId
+  userName, conversationId, participantId, messageDif,
+  changeMessage
 }) => {
   const [isPreviewImg, setIsPreviewImg] = useState(false);
   const [imgPreviewUrl, setImgPreviewUrl] = useState(null);
   const [selectedPhotoId, setPhotoId] = useState(null)
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const regex = emojiRegex();
-  const [isContentOptionShow, setContentOptionShow] = useState('none')
+  const [regex, setRegex] = useState(emojiRegex());
 
   const handleRemoveMessage = () => {
     setAnchorEl(null);
@@ -126,79 +126,97 @@ const Message = React.memo(({
 
   return (
     <div className="message-component">
+      {messageDif &&
+        <div className='time-text'>
+          <span>
+            {messageDif}
+          </span>
+        </div>
+      }
       {
         message.userId === logInUserId ?
-          <div className={`own-message ${lastMessage ? 'last-message' : ''}`}
-            style={{ marginBottom: '0px' }}>
-            <div>
-              <IconButton onClick={handleOpenMenu}>
-                <MoreHorizIcon className="icon-hover-menu" />
-              </IconButton>
-              <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleCloseMenu}
-                MenuListProps={{
-                  'aria-labelledby': 'basic-button',
-                }}
-              >
-                <MenuItem onClick={handleRemoveMessage} style={{ color: 'var(--text-color)' }}>Remove</MenuItem>
-              </Menu>
-            </div>
-            <Tooltip title={getTime(message.createdAt)} placement="left">
+          <div>
+            <span className="own-time">
+              {changeMessage && getAmTime(message.createdAt)}
+            </span>
+            <div className={`own-message ${lastMessage ? 'last-message' : ''}`}>
               <div>
-                {message.content &&
-                  parseMessage(message.content)
-                }
-                {message.photos && message.photos.length > 0 &&
-
-                  <div className='message-photo-list'>
-                    {message.photos.map((photo, idx) => {
-                      return (message.photos.length > 1 ?
-                        <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                          src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
-                          className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                          style={{
-                            width: getImageSize(message.photos.length).itemWidth,
-                            height: getImageSize(message.photos.length).height,
-                          }} />
-                        :
-                        <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                          src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
-                          className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                          style={{
-                            maxWidth: getImageSize(message.photos.length).itemWidth,
-                            maxHeight: getImageSize(message.photos.length).height,
-                          }} />
-                      )
-                    })}
-                  </div>
-                }
-                {message.files && message.files.length > 0 &&
-
-                  <div className="message-file-list">
-                    {message.files.map((file) => {
-                      return (
-                        <div className="message-file" key={file.id} >
-                          <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
-                          <span
-                            onClick={e => handleFileDownload(e, message.id, file.id)}
-                          >
-                            {file.name}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-
-                }
+                <IconButton onClick={handleOpenMenu}>
+                  <MoreHorizIcon className="icon-hover-menu" />
+                </IconButton>
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleCloseMenu}
+                  MenuListProps={{
+                    'aria-labelledby': 'basic-button',
+                  }}
+                >
+                  <MenuItem onClick={handleRemoveMessage} style={{ color: 'var(--text-color)' }}>Remove</MenuItem>
+                </Menu>
               </div>
-            </Tooltip>
+              <Tooltip title={getTime(message.createdAt)} placement="left">
+                <div>
+                  {message.content &&
+                    parseMessage(message.content)
+                  }
+                  {message.photos && message.photos.length > 0 &&
 
-          </div >
+                    <div className='message-photo-list'>
+                      {message.photos.map((photo, idx) => {
+                        return (message.photos.length > 1 ?
+                          <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                            src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                            style={{
+                              width: getImageSize(message.photos.length).itemWidth,
+                              height: getImageSize(message.photos.length).height,
+                            }} />
+                          :
+                          <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                            src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                            style={{
+                              maxWidth: getImageSize(message.photos.length).itemWidth,
+                              maxHeight: getImageSize(message.photos.length).height,
+                            }} />
+                        )
+                      })}
+                    </div>
+                  }
+                  {message.files && message.files.length > 0 &&
+
+                    <div className="message-file-list">
+                      {message.files.map((file) => {
+                        return (
+                          <div className="message-file" key={file.id} >
+                            <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                            <span
+                              onClick={e => handleFileDownload(e, message.id, file.id)}
+                            >
+                              {file.name}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                  }
+                </div>
+              </Tooltip>
+            </div >
+          </div>
           :
           <div >
+            <span className="message-time">
+              {changeMessage &&
+                <>
+                  <span style={{ maxWidth: '50px', overflow: 'hidden', textOverflow: 'ellipsis' }} >
+                    {userName.split(' ')[0]}
+                  </span>, {getAmTime(message.createdAt)}
+                </>}
+            </span>
             <div className={`message  ${lastMessage ? 'last-message' : ''}`}
               style={{ marginBottom: hasAvatar ? '10px' : 0 }}>
               {hasAvatar && (userName ?

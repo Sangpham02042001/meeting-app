@@ -73,6 +73,23 @@ const messageTimeDiff = (mysqlTime1, mysqlTime2) => {
   return res
 }
 
+const getAmTime = mysqlTime => {
+  let time = new Date(mysqlTime)
+  let minute = time.getMinutes().toString().length === 1 ? `0${time.getMinutes()}` : time.getMinutes()
+  let hour = time.getHours()
+  if (hour === 0 ) {
+    hour = 12;
+    minute += ' AM'
+  } else if (hour >= 12) {
+    if (hour > 12) hour -= 12;
+    minute += ' PM'
+  } else {
+    minute += ' AM'
+  }
+  return `${hour}:${minute}`
+}
+
+
 const getTime = mysqlTime => {
   let time = new Date(mysqlTime)
   let minute = time.getMinutes().toString().length === 1 ? `0${time.getMinutes()}` : time.getMinutes()
@@ -82,4 +99,4 @@ const getTime = mysqlTime => {
 
 const emotionRegex = /[:;=]+["^'-]*[()pPdD*oO]+/g;
 
-export { convertDate, timeDiff, messageTimeDiff, getTime, emotionRegex }
+export { convertDate, timeDiff, messageTimeDiff, getTime, emotionRegex, getAmTime }
