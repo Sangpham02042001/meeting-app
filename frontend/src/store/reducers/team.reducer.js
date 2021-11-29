@@ -13,7 +13,6 @@ const initialState = {
     invitedUsers: [],
     requestUsers: [],
     meetmessLoaded: false,
-    meetings: [],
     meetingActive: null,
     meetmess: [],
     files: [],
@@ -74,11 +73,6 @@ export const getTeamInfo = createAsyncThunk('teams/getTeamInfo', async ({ teamId
   response = await axiosAuth.get(`/api/teams/${teamId}/requestusers`)
   let { requestUsers } = response.data
   team.requestUsers = requestUsers
-  //get meetings
-  // response = await axiosAuth.get(`/api/teams/${teamId}/meetings`)
-  // let { meetings } = response.data
-  // team.meetings = meetings
-  // team.meetingActive = meetings.filter(meeting => meeting.active)[0] || null
   //get meetingActive 
   response = await axiosAuth.get(`/api/teams/${teamId}/meetingactive`)
   let { meetingActive } = response.data
@@ -308,12 +302,10 @@ export const teamSlice = createSlice({
         requestUsers: [],
         meetmess: [],
         meetmessLoaded: false,
-        meetings: []
       }
     },
     sendMessage: (state, action) => {
       let { messageId, content, senderId, teamId, photos, isMessage, createdAt, files } = action.payload;
-      console.log(photos)
       if (state.team.id && state.team.id == teamId) {
         state.team.meetmess.push({ id: messageId, content, userId: senderId, teamId, photos, isMessage, files, createdAt })
         if (files && files.length) {
@@ -343,7 +335,6 @@ export const teamSlice = createSlice({
       if (meeting) {
         let { teamId } = meeting
         if (teamId == state.team.id) {
-          // state.team.meetings.push(meeting)
           state.team.meetingActive = meeting
         }
       }
@@ -352,7 +343,7 @@ export const teamSlice = createSlice({
       let { meeting } = action.payload
       if (state.team.meetingActive && state.team.meetingActive.id == meeting.id) {
         state.team.meetingActive = null
-        let idx = state.team.meetings.findIndex(m => m.id == meeting.id)
+        let idx = state.team.meetmess.filter(m => m.isMeeting).findIndex(m => m.id == meeting.id)
         if (idx >= 0) {
           state.team.meetmess.splice(idx, 1, {
             ...meeting,
@@ -481,7 +472,7 @@ export const teamSlice = createSlice({
     },
     receiveCancelInvite: (state, action) => {
       let { teamId } = action.payload
-      let idx = state.invitedTeams.findIndex(t => t.td === teamId)
+      let idx = state.invitedTeams.findIndex(t => t.id == teamId)
       if (idx >= 0) {
         state.invitedTeams.splice(idx, 1)
       }
@@ -512,22 +503,21 @@ export const teamSlice = createSlice({
       if (idx >= 0) {
         state.joinedTeams.splice(idx, 1)
       }
-      // if (teamId == state.team.id) {
-      //   state.team = {
-      //     members: [],
-      //     invitedUsers: [],
-      //     requestUsers: [],
-      //     meetmessLoaded: false,
-      //     meetings: [],
-      //     meetingActive: null,
-      //     meetmess: [],
-      //     files: [],
-      //     images: [],
-      //     numOfMeetMess: 0,
-      //     fakeMessageId: v4()
-      //   }
-      // state.teamLoaded = false
-      // }
+      if (teamId == state.team.id) {
+        state.team = {
+          members: [],
+          invitedUsers: [],
+          requestUsers: [],
+          meetmessLoaded: false,
+          meetingActive: null,
+          meetmess: [],
+          files: [],
+          images: [],
+          numOfMeetMess: 0,
+          fakeMessageId: v4()
+        }
+        state.teamLoaded = false
+      }
     }
   },
   extraReducers: {
@@ -679,7 +669,6 @@ export const teamSlice = createSlice({
         invitedUsers: [],
         requestUsers: [],
         meetmessLoaded: false,
-        meetings: [],
         meetingActive: null,
         meetmess: [],
         files: [],
@@ -752,7 +741,6 @@ export const teamSlice = createSlice({
         hostName,
         teamName: state.team.name
       })
-      // state.team.meetings.push(action.payload.meeting)
       state.loading = false
     },
     [createTeamMeeting.rejected]: (state, action) => {

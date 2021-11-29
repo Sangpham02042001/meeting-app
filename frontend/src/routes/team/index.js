@@ -147,14 +147,14 @@ export default function Team(props) {
     }
   }, [teamReducer.joinedTeams.length])
 
-  useEffect(() => {
-    if (filesMessage.length) {
-      setMessage({
-        type: 'success',
-        content: 'Upload file successfully'
-      })
-    }
-  }, [filesMessage.length])
+  // useEffect(() => {
+  //   if (filesMessage.length) {
+  //     setMessage({
+  //       type: 'success',
+  //       content: 'Upload file successfully'
+  //     })
+  //   }
+  // }, [filesMessage.length])
 
   const runSpeechRecognition = () => {
     let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -178,6 +178,10 @@ export default function Team(props) {
       speechReplyRef.current = 'Error occurred in recognition: ' + event.error;
       voiceDetectRef.current = false;
       setForceRender(v4());
+      setMessage({
+        type: 'warning',
+        content: 'Could not understand!'
+      })
       recognition.stop();
     }
 
@@ -343,7 +347,6 @@ export default function Team(props) {
       let filesUpload = []
       for (const file of e.target.files) {
         size += Math.round(file.size / 1024)
-        console.log(file)
         filesUpload.push({
           type: file.type,
           name: file.name,

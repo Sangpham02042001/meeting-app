@@ -136,9 +136,9 @@ const Message = React.memo(({
       {
         message.userId === logInUserId ?
           <div>
-            <span className="own-time">
+            {changeMessage && getAmTime(message.createdAt) && <span className="own-time">
               {changeMessage && getAmTime(message.createdAt)}
-            </span>
+            </span>}
             <div className={`own-message ${lastMessage ? 'last-message' : ''}`}>
               <div>
                 <IconButton onClick={handleOpenMenu}>
@@ -210,7 +210,7 @@ const Message = React.memo(({
           :
           <div >
             <span className="message-time">
-              {changeMessage &&
+              {changeMessage && getAmTime(message.createdAt) &&
                 <>
                   <span style={{ maxWidth: '50px', overflow: 'hidden', textOverflow: 'ellipsis' }} >
                     {userName.split(' ')[0]}
