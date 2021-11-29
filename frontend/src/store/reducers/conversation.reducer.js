@@ -110,7 +110,6 @@ export const conversationSlice = createSlice({
     [getNumberMessageUnread.fulfilled]: (state, action) => {
       const { numberMessages } = action.payload;
       state.numberMessagesUnread = numberMessages;
-      console.log(numberMessages)
     },
     [getNumberMessageUnread.rejected]: (state, action) => {
       console.log('get number of messages error')
@@ -139,7 +138,8 @@ export const conversationSlice = createSlice({
 
       if (state.conversation.participant && (receiverId === state.conversation.participant.id || senderId === state.conversation.participant.id)) {
         state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, files, photos, createdAt });
-        if (files && files.length) {
+
+        if (files && files.length && files[0].type === 'file') {
           state.conversation.files.unshift(...files)
         }
         if (photos && photos.length) {

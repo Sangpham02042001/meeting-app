@@ -1,12 +1,11 @@
 .conversation-info {
   height: 100%;
-  width: 25%;
   background-color: var(--primary-bg);
   border-left: 2px solid rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: display 0.3s;
+  transition: width 0.3s;
   overflow-y: auto;
 }
 
@@ -111,7 +110,31 @@
   overflow-x: hidden;
   overflow-y: hidden;
   margin: 0 auto;
-  background-color: #f0f2f5;
+  width: 100%;
+}
+
+.conversation-message .record-message {
+  position: relative;
+  display: flex;
+  border-radius: 24px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.record-message .audio-message {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+
+.record-message .is-recording {
+  display: flex;
+  width: 100%;
+}
+
+.record-message .audio-message audio {
   width: 100%;
 }
 
@@ -122,15 +145,14 @@
 }
 
 .input-message textarea {
-  width: 95%;
+  width: 100%;
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 10px 10px 10px 24px;
+  padding: 10px;
   outline: none;
   border: none;
   resize: none;
-  background-color: #f0f2f5;
   display: flex;
 }
 
@@ -140,9 +162,8 @@
 }
 
 .conversation-message .input-btn button {
-  margin: 0 10px;
-  width: 36px;
-  height: 36px;
+  width: 50px;
+  height: 50px;
 }
 
 .conversation-message .emoji-mart-preview {
@@ -178,4 +199,9 @@
 
 .cv-info-expand-container svg {
   color: var(--text-color);
+}
+
+.conversation-message .btn-in-div {
+  display: flex;
+  align-items: center;
 }

@@ -5,7 +5,8 @@ import Avatar from '../../../components/Avatar';
 import {
   Button, IconButton, Tooltip, Dialog, DialogActions,
   DialogContent, DialogContentText, DialogTitle, Typography,
-  Snackbar, Alert, ImageList, ImageListItem, Badge, FormControlLabel
+  Snackbar, Alert, ImageList, ImageListItem, Badge, FormControlLabel,
+  LinearProgress
 } from '@mui/material';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
@@ -24,6 +25,10 @@ import MicNoneIcon from '@mui/icons-material/MicNone';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ColorLensIcon from '@mui/icons-material/ColorLens';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
 import 'emoji-mart/css/emoji-mart.css'
 import { Picker, emojiIndex } from 'emoji-mart';
 import { socketClient, baseURL, emotionRegex, timeDiff, messageTimeDiff } from '../../../utils';
@@ -36,7 +41,6 @@ import { v4 } from 'uuid';
 import './conversationChat.css';
 import PreviewImage from '../../../components/PreviewImage';
 import SwitchDarkMode from '../../../components/SwitchDarkMode';
-import useRecorder from '../../../hooks/useRecorder';
 
 
 const Accordion = styled((props) => (
@@ -75,6 +79,11 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   // borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
+const requestRecorder = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  return new MediaRecorder(stream);
+}
+const MAX_TIME_RECORD = 90;
 
 export default function ConversationChat({ conversation, user }) {
 
@@ -104,7 +113,40 @@ export default function ConversationChat({ conversation, user }) {
   const scrollRef = useRef(null);
   const speechReplyRef = useRef('');
   const voiceDetectRef = useRef(false);
-  const [audioURL, isRecording, startRecording, stopRecording] = useRecorder();
+  const [audioData, setAudioData] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recorder, setRecorder] = useState(null);
+  const [recordTime, setRecordTime] = useState(0);
+  const [intervalTime, setIntervalTime] = useState(null);
+
+  useEffect(() => {
+    // Lazily obtain recorder first time we're recording.
+    if (recorder === null) {
+      if (isRecording) {
+        requestRecorder().then(setRecorder, (error) => {
+          console.log(error);
+        });
+      }
+      return;
+    }
+
+    // Manage recorder state.
+    if (isRecording) {
+      recorder.start();
+    } else {
+      recorder.stop();
+      // setRecorder(null);
+    }
+
+    // Obtain the audio when ready.
+    const handleData = e => {
+      console.log(e.data)
+      setAudioData(e.data);
+    };
+
+    recorder.addEventListener("dataavailable", handleData);
+    return () => recorder.removeEventListener("dataavailable", handleData);
+  }, [recorder, isRecording]);
 
   useEffect(() => {
     if (showInfo) {
@@ -118,7 +160,11 @@ export default function ConversationChat({ conversation, user }) {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages.length])
 
-  useEffect
+  useEffect(() => {
+    if (recordTime >= MAX_TIME_RECORD) {
+      handleRecord()
+    }
+  }, [recordTime])
 
   useEffect(() => {
     let converId = conversation.conversationId;
@@ -160,7 +206,7 @@ export default function ConversationChat({ conversation, user }) {
 
   const handleSendMessage = (event) => {
     event.preventDefault();
-    if (content !== '' || filesMessage) {
+    if (content !== '' || filesMessage.length) {
       let tContent = content;
       let emotions = [...tContent.matchAll(emotionRegex)];
       for (let emotion of emotions) {
@@ -182,6 +228,14 @@ export default function ConversationChat({ conversation, user }) {
       setFilesMessage([]);
       setFilesMessageUrl([]);
       setRows(minRows);
+    } else if (audioData) {
+      setAudioData(null)
+      console.log(audioData)
+      socketClient.emit('conversation-sendMessage', {
+        content: '', senderId: user.id, receiverId: conversation.participantId,
+        conversationId, files: [], senderName: user.firstName + ' ' + user.lastName,
+        audio: audioData
+      });
     }
   }
 
@@ -205,6 +259,18 @@ export default function ConversationChat({ conversation, user }) {
     dispatch(cancelCall({ conversationId }))
   }
 
+  const getFileSize = (size) => {
+    if (size < 1000) {
+      return size + ' B';
+    } else if (size < 1000 * 1024) {
+      size /= 1024;
+      return Math.round(size) + ' KB';
+    } else if (size < 1000 * Math.pow(1024, 2)) {
+      size /= Math.pow(1024, 2);
+      return Math.round(size) + ' MB';
+    }
+  }
+
   const onFileInputChange = e => {
     e.preventDefault()
     if (e.target.files.length) {
@@ -212,7 +278,6 @@ export default function ConversationChat({ conversation, user }) {
       let filesUpload = []
       for (const file of e.target.files) {
         size += Math.round(file.size / 1024)
-        console.log(file)
         filesUpload.push({
           type: file.type,
           name: file.name,
@@ -224,6 +289,7 @@ export default function ConversationChat({ conversation, user }) {
         size += Math.round(file.size / 1024)
       }
 
+      console.log(size);
       if (size > 5120) {
         setMessageAlert('Could not upload file > 5MB !')
         return
@@ -235,7 +301,8 @@ export default function ConversationChat({ conversation, user }) {
         urls.push({
           type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file',
           url,
-          name: file.name
+          name: file.name,
+          size: getFileSize(file.size)
         })
       }
       setFilesMessageUrl([...filesMessageUrl, ...urls])
@@ -274,7 +341,7 @@ export default function ConversationChat({ conversation, user }) {
       if (confidence > 0.6 && transcript.length) {
         socketClient.emit('conversation-sendMessage', {
           content: transcript, senderId: user.id, receiverId: conversation.participantId,
-          conversationId, files: null, senderName: user.firstName + ' ' + user.lastName
+          conversationId, files: [], senderName: user.firstName + ' ' + user.lastName
         });
       } else {
         setMessageAlert("Coundn't understand")
@@ -295,9 +362,29 @@ export default function ConversationChat({ conversation, user }) {
   }
 
   const handleRecord = () => {
-    !isRecording ? startRecording() : stopRecording();
-    console.log(audioURL);
+    if (!isRecording) {
+      let interval = setInterval(() => {
+        setRecordTime(recordTime => {
+          return recordTime += 1
+        });
+
+      }, 1000);
+      setIntervalTime(interval);
+    } else {
+      setIntervalTime(clearInterval(intervalTime))
+    }
+    setIsRecording(!isRecording)
   }
+
+  const handleCancelRecord = (e) => {
+    e.preventDefault();
+    setIsRecording(false);
+    setRecorder(null);
+    setAudioData(null);
+    setIntervalTime(clearInterval(intervalTime))
+    setRecordTime(0);
+  }
+
 
   const getColorStatus = (status) => {
     if (status === 'active') {
@@ -322,6 +409,17 @@ export default function ConversationChat({ conversation, user }) {
       return conversation.statusTime ? 'Last seen ' + timeDiff(conversation.statusTime).toLowerCase() : 'Offline';
     }
   }
+
+  const getTimeRecord = (time) => {
+    if (time < 10) {
+      return `0:0${time}`
+    } else if (time < 60) {
+      return `0:${time}`
+    } else {
+      return `${Math.round(time / 60)}:${time - 60}`
+    }
+  }
+
 
   return (
     <>
@@ -401,192 +499,239 @@ export default function ConversationChat({ conversation, user }) {
               style={{
                 position: 'absolute',
                 top: '-350px',
-                right: '200px',
+                left: '150px',
               }}
               onSelect={onEmojiClick} />
           }
+          {!audioData && !isRecording ?
+            <div className="input-message" style={{ backgroundColor: settingReducer.darkMode ? 'rgb(84, 85, 87)' : '#f0f2f5' }}>
+              {filesMessageUrl.length > 0 &&
+                <div className="input-file" style={{
+                  backgroundColor: settingReducer.darkMode ? 'rgb(84, 85, 87)' : '#f0f2f5'
+                }}>
+                  {filesMessageUrl.map((fileUrl, idx) => {
+                    return (
+                      <div key={idx}
+                        style={{
+                          position: 'relative',
+                          margin: '5px',
+                        }}>
+                        <IconButton
+                          sx={{
+                            position: 'absolute',
+                            right: '-8px',
+                            top: '-8px',
+                            zIndex: '10',
+                            width: '24px',
+                            height: '24px',
+                            color: '#fff',
+                            background: '#3e4042 !important'
+                          }}
+                          onClick={e => {
+                            e.preventDefault()
+                            setFilesMessage(files => {
+                              let tmpArr = [...files];
+                              tmpArr.splice(idx, 1);
+                              return tmpArr;
+                            })
+                            setFilesMessageUrl(filesUrl => {
+                              let tmpArr = [...filesUrl];
+                              tmpArr.splice(idx, 1);
+                              return tmpArr;
+                            })
+                          }}>
+                          <CloseIcon fontSize='small' />
+                        </IconButton>
+                        {fileUrl.type === 'image' ?
+                          <img width='120' height='120' src={`${fileUrl.url}`} />
+                          :
+                          <div
+                            style={{
+                              background: '#fff',
+                              borderRadius: '5px',
+                              padding: '16px',
+                              width: '120px',
+                              height: '120px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between'
+                            }}>
+                            <DescriptionIcon style={{}} />
+                            <span style={{
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap',
+                              textOverflow: 'ellipsis',
+                              fontWeight: '600',
+                              color: '#000'
+                            }}>
+                              {fileUrl.name}
+                            </span>
+                            <span style={{
+                              fontSize: '0.8em',
+                              opacity: '0.7',
+                              color: '#000'
+                            }}>
+                              {fileUrl.size}
+                            </span>
+                          </div>
+                        }
+                      </div>
+                    )
+                  })
+                  }
+                  <Button style={{ margin: '5px' }}>
+                    <label style={{
+                      cursor: 'pointer',
+                    }}
+                      htmlFor="files">
+                      < AddCircleIcon fontSize="large" style={{ color: 'var(--icon-color)' }} />
+                    </label>
+                    <input type="file"
+                      onChange={onFileInputChange}
+                      multiple="multiple"
+                      id="files"
+                      style={{
+                        display: 'none'
+                      }} />
+                  </Button>
 
-          <div className="input-message" >
-            {filesMessageUrl.length > 0 &&
-              <div className="input-file" style={{
+                </div>
+              }
+
+              <div style={{
+                display: 'flex', position: 'relative',
                 backgroundColor: settingReducer.darkMode ? 'rgb(84, 85, 87)' : '#f0f2f5'
               }}>
-                {filesMessageUrl.map((fileUrl, idx) => {
-                  return (
-                    <div key={idx}
-                      style={{
-                        position: 'relative',
-                        margin: '5px',
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <Tooltip title="Choose an emoji"  >
+                    <IconButton onClick={chooseEmoji} >
+                      <InsertEmoticonIcon style={{ color: 'var(--icon-color)' }} />
+                    </IconButton>
+                  </Tooltip>
 
-                      }}>
-                      <IconButton
-                        sx={{
-                          position: 'absolute',
-                          right: '-8px',
-                          top: '-8px',
-                          zIndex: '10',
-                          width: '24px',
-                          height: '24px',
-                          color: '#fff',
-                          background: '#3e4042 !important'
-                        }}
-                        onClick={e => {
-                          e.preventDefault()
-                          setFilesMessage(files => {
-                            let tmpArr = [...files];
-                            tmpArr.splice(idx, 1);
-                            return tmpArr;
-                          })
-                          setFilesMessageUrl(filesUrl => {
-                            let tmpArr = [...filesUrl];
-                            tmpArr.splice(idx, 1);
-                            return tmpArr;
-                          })
-                        }}>
-                        <CloseIcon fontSize='small' />
-                      </IconButton>
-                      {fileUrl.type === 'image' ?
-                        <img width='60' height='60' src={`${fileUrl.url}`} />
-                        :
-                        <div
-                          style={{
-                            background: '#fff',
-                            borderRadius: '10px',
-                            padding: '16px',
-                            width: '160px',
-                            height: '60px',
-                            display: 'flex'
-                          }}>
-                          <DescriptionIcon />
-                          <span style={{
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap',
-                            textOverflow: 'ellipsis',
-                            fontWeight: '600',
-                            color: '#000'
-                          }}>
-                            {fileUrl.name}
-                          </span>
-                        </div>
-                      }
-                    </div>
-                  )
-                })
-                }
-
-                <Button>
-                  <label style={{
-                    cursor: 'pointer',
+                </div>
+                <textarea
+                  onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}
+                  placeholder="Send message"
+                  rows={rows}
+                  onChange={onWriteMessage}
+                  onKeyDown={handleEnterMessage}
+                  value={content}
+                  style={{
+                    color: 'var(--text-color)',
+                    backgroundColor: settingReducer.darkMode ? 'rgb(84, 85, 87)' : '#f0f2f5'
                   }}
-                    htmlFor="files">
-                    < AddCircleIcon fontSize="large" style={{ color: 'var(--icon-color)' }} />
-                  </label>
-                  <input type="file"
-                    onChange={onFileInputChange}
-                    multiple="multiple"
-                    id="files"
-                    style={{
-                      display: 'none'
-                    }} />
-                </Button>
+                />
 
               </div>
-            }
-
-            <div style={{ display: 'flex', position: 'relative' }} style={{
-              backgroundColor: settingReducer.darkMode ? 'rgb(84, 85, 87)' : '#f0f2f5'
-            }}>
-              <textarea
-                onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}
-                placeholder="Send message"
-                rows={rows}
-                onChange={onWriteMessage}
-                onKeyDown={handleEnterMessage}
-                value={content}
-                style={{
-                  color: 'var(--text-color)',
-                  backgroundColor: settingReducer.darkMode ? 'rgb(84, 85, 87)' : '#f0f2f5'
-                }}
-              />
-              <Tooltip title="Choose an emoji" style={{ position: 'absolute', bottom: 3, right: 3 }}>
-                <IconButton onClick={chooseEmoji} >
-                  <InsertEmoticonIcon style={{ color: 'var(--icon-color)' }} />
-                </IconButton>
-              </Tooltip>
             </div>
-          </div>
+            :
+            <div className="record-message" style={{
+              backgroundColor: '#f0f2f5'
+            }}>
+              {!audioData ?
+                <div className="is-recording">
+                  <div className="btn-in-div">
+                    <IconButton onClick={handleRecord}>
+                      <StopCircleIcon />
+                    </IconButton>
+                  </div>
+                  <span style={{ color: '#000', width: '100%' }}>
+                    Recording...
+                    <LinearProgress variant="determinate" value={Math.round(recordTime / MAX_TIME_RECORD * 100)} />
+                    {getTimeRecord(recordTime)}
+                  </span>
+                </div>
+                :
+                <div className="audio-message">
+                  <audio src={URL.createObjectURL(audioData)} controls />
+                </div>
+              }
+              <div className="btn-in-div">
+                <IconButton onClick={handleCancelRecord}>
+                  <CancelIcon />
+                </IconButton>
+              </div>
+            </div>
+          }
+
 
           <div className="input-btn">
-            <div style={{
-              display: 'flex'
-            }}>
-              <Tooltip title="Attach photos">
-                <IconButton >
-                  <label style={{
-                    cursor: 'pointer',
-                    display: 'flex'
-                  }}
-                    htmlFor="photos">
-                    <ImageIcon color='success' />
-                  </label>
-                  <input type="file" accept='image/*'
-                    onChange={onFileInputChange}
-                    multiple="multiple"
-                    id="photos"
-                    style={{
-                      display: 'none'
-                    }} />
-                </IconButton>
+            {!audioData && !isRecording &&
+              <div style={{
+                display: 'flex'
+              }}>
+                <Tooltip title="Attach photos">
+                  <IconButton >
+                    <label style={{
+                      cursor: 'pointer',
+                      display: 'flex'
+                    }}
+                      htmlFor="photos">
+                      <ImageIcon color='success' />
+                    </label>
+                    <input type="file" accept='image/*'
+                      onChange={onFileInputChange}
+                      multiple="multiple"
+                      id="photos"
+                      style={{
+                        display: 'none'
+                      }} />
+                  </IconButton>
 
-              </Tooltip>
+                </Tooltip>
 
-              <Tooltip title="Attach a file">
-                <IconButton >
-                  <label style={{
-                    cursor: 'pointer',
-                    display: 'flex'
-                  }}
-                    htmlFor="files">
-                    <AttachFileIcon style={{ color: 'var(--icon-color)' }} />
-                  </label>
-                  <input type="file"
-                    onChange={onFileInputChange}
-                    multiple="multiple"
-                    id="files"
-                    style={{
-                      display: 'none'
-                    }} />
-                </IconButton>
-              </Tooltip>
+                <Tooltip title="Attach a file">
+                  <IconButton >
+                    <label style={{
+                      cursor: 'pointer',
+                      display: 'flex'
+                    }}
+                      htmlFor="files">
+                      <AttachFileIcon style={{ color: '#1962a7' }} />
+                    </label>
+                    <input type="file"
+                      onChange={onFileInputChange}
+                      multiple="multiple"
+                      id="files"
+                      style={{
+                        display: 'none'
+                      }} />
+                  </IconButton>
+                </Tooltip>
+                {!content &&
+                  <>
+                    <Tooltip title="Record">
+                      <IconButton onClick={handleRecord}>
+                        <RadioButtonCheckedIcon style={{ color: 'red' }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Speech to text">
+                      <IconButton onClick={runSpeechRecognition}>
+                        {voiceDetectRef.current ?
+                          <MicNoneIcon style={{ color: 'var(--icon-color)' }} />
+                          :
+                          <MicIcon style={{ color: 'var(--icon-color)' }} />
+                        }
+                      </IconButton>
+                    </Tooltip>
 
-              <Tooltip title="Speech to text">
-                <IconButton onClick={runSpeechRecognition}>
-                  {voiceDetectRef.current ?
-                    <MicNoneIcon style={{ color: 'var(--icon-color)' }} />
-                    :
-                    <MicIcon style={{ color: 'var(--icon-color)' }} />
-                  }
-                </IconButton>
-              </Tooltip>
-              {/* <Tooltip title="Record">
-              <IconButton onClick={handleRecord}>
-                {isRecording ?
-                  <MicNoneIcon style={{ color: "#1A73E8" }} />
-                  :
-                  <MicIcon style={{ color: "#1A73E8" }} />
+                  </>
                 }
-              </IconButton>
-            </Tooltip> */}
-            </div>
-            <Tooltip title="Send message" style={{ display: !content.length ? 'none' : 'flex' }}>
-              <IconButton onClick={handleSendMessage} >
-                <SendIcon style={{ color: 'var(--icon-color)' }} />
-              </IconButton>
-            </Tooltip>
+              </div>
+            }
+            {(content || filesMessage.length || audioData) &&
+              <Tooltip title="Send message" >
+                <IconButton onClick={handleSendMessage} >
+                  <SendIcon style={{ color: 'var(--icon-color)' }} />
+                </IconButton>
+              </Tooltip>
+            }
           </div>
+
         </div>
       </div>
-      <div className="conversation-info" style={{ display: !showInfo ? 'none' : 'flex' }}>
+      <div className="conversation-info" style={{ width: !showInfo ? '0%' : '25%' }}>
         <div className="custom-info">
           <Avatar width='80px' height='80px'
             userId={conversation.participantId} />
@@ -604,10 +749,10 @@ export default function ConversationChat({ conversation, user }) {
             </AccordionSummary>
             <AccordionDetails>
               <div className="accordion-detail">
-                {/* <Button style={{ color: 'var(--icon-color)' }}
+                <Button style={{ color: 'var(--icon-color)' }}
                   startIcon={<ColorLensIcon style={{ color: 'var(--icon-color)' }} />}>
                   Change Themes
-                </Button> */}
+                </Button>
                 <FormControlLabel
                   onChange={e => { dispatch(toggleDarkMode()) }}
                   control={<SwitchDarkMode sx={{ m: 1 }} checked={settingReducer.darkMode} />}

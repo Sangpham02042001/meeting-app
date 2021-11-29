@@ -79,7 +79,6 @@ const createTeamNofication = async ({ userId, content, relativeLink, createdBy, 
 
 const createMessageNotification = async ({ teamId, senderId, conversationId, receiverId, senderName }) => {
   try {
-    console.log(`senderId ${senderId}`)
     if (teamId) {
       let team = await Team.findOne({
         where: {
@@ -130,14 +129,12 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
           isNotiMess: true
         }
       }
-      console.log(noti)
       return {
         message: 'success',
         noti
       }
     }
     if (conversationId && receiverId) {
-      console.log(conversationId, receiverId)
       let noti = await Notification.findOne({
         where: {
           conversationId, userId: receiverId
@@ -160,7 +157,7 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
         ...noti.dataValues,
         isNotiMess: true
       }
-      console.log(noti)
+
       return {
         message: 'success',
         noti

@@ -198,26 +198,40 @@ const readConversation = async (req, res) => {
     }
 }
 
-const setMessage = async ({ content, files, conversationId, senderId }) => {
+const setMessage = async ({ content, files, conversationId, senderId, audio }) => {
     try {
         let multiMedia = [];
-        if (files) {
-            for (let file of files) {
-                if (file) {
-                    let fileName = v4().concat('-', file.name)
-                    const fileStream = new Readable();
-                    let writeStream = fs.createWriteStream(`./src/public/messages-${/image\/(?!svg)/.test(file.type) ? 'photos' : 'files'}/${fileName}`)
-                    fileStream._read = () => { }
-                    fileStream.push(file.data)
-                    fileStream.pipe(writeStream)
-                    multiMedia.push({
-                        pathName: fileName,
-                        name: file.name,
-                        type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
-                    });
-                }
+        for (let file of files) {
+            if (file) {
+                let fileName = v4().concat('-', file.name)
+                const fileStream = new Readable();
+                const writeStream = fs.createWriteStream(`./src/public/messages-${/image\/(?!svg)/.test(file.type) ? 'photos' : 'files'}/${fileName}`)
+                fileStream._read = () => { }
+                fileStream.push(file.data)
+                fileStream.pipe(writeStream)
+
+                multiMedia.push({
+                    pathName: fileName,
+                    name: file.name,
+                    type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
+                });
             }
         }
+
+        if (audio) {
+            let fileName = v4().concat('.wav');
+            const fileStream = new Readable();
+            const writeStream = fs.createWriteStream(`./src/public/messages-files/${fileName}`)
+            fileStream._read = () => { }
+            fileStream.push(audio)
+            fileStream.pipe(writeStream)
+            multiMedia.push({
+                pathName: fileName,
+                name: fileName,
+                type: 'audio'
+            });
+        }
+
 
         const message = await Message.create({ content, conversationId, userId: senderId });
         await Promise.all(multiMedia.map(async (m, idx) => {

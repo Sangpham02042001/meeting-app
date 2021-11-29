@@ -130,7 +130,7 @@ export default function Conversations(props) {
             <div className="conversation-content">
                 {props.params === '/conversations' ?
                     <div className="conversation-welcome">
-                        <h4>Start chat with other users</h4>
+                        <h3>Start chat with other users</h3>
                     </div>
                     :
                     <Switch>

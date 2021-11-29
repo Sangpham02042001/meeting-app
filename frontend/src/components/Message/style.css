@@ -143,9 +143,8 @@
 
 .message-file-list {
   display: flex;
-  max-width: 470px;
   flex-direction: column;
-  margin-bottom: 8px;
+  max-width: 470px;
 }
 
 .message-file-list .message-file {

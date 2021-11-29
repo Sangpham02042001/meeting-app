@@ -360,11 +360,11 @@ const socketServer = (io, socket) => {
 
     //**********************************CONVERSATION*************************************//
 
-    socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, files, senderName }) => {
+    socket.on('conversation-sendMessage', async ({ content, senderId, receiverId, conversationId, files, senderName, audio }) => {
         let converId = await setConversation({ senderId, receiverId, conversationId });
         let message;
         if (converId) {
-            message = await setMessage({ content, conversationId: converId, senderId, files });
+            message = await setMessage({ content, conversationId: converId, senderId, files, audio });
         }
         if (message) {
             socket.emit('conversation-receiveMessage', {

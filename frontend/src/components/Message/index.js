@@ -24,7 +24,7 @@ const Message = React.memo(({
   const [selectedPhotoId, setPhotoId] = useState(null)
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const [regex, setRegex] = useState(emojiRegex());
+  const [regex] = useState(emojiRegex());
 
   const handleRemoveMessage = () => {
     setAnchorEl(null);
@@ -123,7 +123,6 @@ const Message = React.memo(({
 
   }
 
-
   return (
     <div className="message-component">
       {messageDif &&
@@ -190,18 +189,22 @@ const Message = React.memo(({
                     <div className="message-file-list">
                       {message.files.map((file) => {
                         return (
-                          <div className="message-file" key={file.id} >
-                            <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
-                            <span
-                              onClick={e => handleFileDownload(e, message.id, file.id)}
-                            >
-                              {file.name}
-                            </span>
-                          </div>
+                          file.type === "audio" ?
+                            <div key={file.id}>
+                              <audio key={file.id} src={`${baseURL}/api/messages/files/${message.id}/${file.id}`} controls />
+                            </div>
+                            :
+                            <div className="message-file" key={file.id} >
+                              <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                              <span
+                                onClick={e => handleFileDownload(e, message.id, file.id)}
+                              >
+                                {file.name}
+                              </span>
+                            </div>
                         )
                       })}
                     </div>
-
                   }
                 </div>
               </Tooltip>
@@ -219,12 +222,15 @@ const Message = React.memo(({
             </span>
             <div className={`message  ${lastMessage ? 'last-message' : ''}`}
               style={{ marginBottom: hasAvatar ? '10px' : 0 }}>
-              {hasAvatar && (userName ?
-                <Tooltip title={userName}>
-                  <Avatar sx={{ width: '40px', height: '40px' }}
-                    src={`${baseURL}/api/user/avatar/${message.userId}`} />
-                </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
-                  src={`${baseURL}/api/user/avatar/${message.userId}`} />)}
+              {hasAvatar &&
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>{userName ?
+                  <Tooltip title={userName}>
+                    <Avatar sx={{ width: '40px', height: '40px' }}
+                      src={`${baseURL}/api/user/avatar/${message.userId}`} />
+                  </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
+                    src={`${baseURL}/api/user/avatar/${message.userId}`} />}
+                </div>
+              }
               <Tooltip title={getTime(message.createdAt)} placement='right'>
                 <div className={message.photos && message.photos.length > 0 ? 'message-with-photo' : ''}>
                   {message.content &&
@@ -262,14 +268,19 @@ const Message = React.memo(({
                       style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
                       {message.files.map((file) => {
                         return (
-                          <div className="message-file" key={file.id}>
-                            <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
-                            <span
-                              onClick={e => handleFileDownload(e, message.id, file.id)}
-                            >
-                              {file.name}
-                            </span>
-                          </div>
+                          file.type === 'audio' ?
+                            <div key={file.id}>
+                              <audio key={file.id} src={`${baseURL}/api/messages/files/${message.id}/${file.id}`} controls />
+                            </div>
+                            :
+                            <div className="message-file" key={file.id}>
+                              <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                              <span
+                                onClick={e => handleFileDownload(e, message.id, file.id)}
+                              >
+                                {file.name}
+                              </span>
+                            </div>
                         )
                       })}
                     </div>
