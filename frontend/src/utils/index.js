@@ -48,8 +48,8 @@ const timeDiff = (mysqlTime) => {
   return time + " years ago";
 }
 
-const WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
-  'Friday', 'Saturday', 'Sunday']
+const WEEK_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+  'Friday', 'Saturday']
 
 const MONTHS = ['Jan', 'Feb', 'Marh', 'Apr', 'May', "June",
   'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']

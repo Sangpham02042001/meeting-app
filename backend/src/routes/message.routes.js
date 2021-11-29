@@ -1,7 +1,10 @@
 const { Router } = require('express')
 const { getImageMessage, getImageMessageMedia, getFileMessageMedia,
-  downloadImageMessageMedia } = require('../controllers/message.controller')
+  downloadImageMessageMedia, delMessage } = require('../controllers/message.controller')
 const router = Router()
+
+router.route('/api/messages/:messageId')
+  .delete(delMessage)
 
 router.route('/api/messages/:messageId/image')
   .get(getImageMessage)

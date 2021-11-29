@@ -1,5 +1,6 @@
-const { getMeetingInfo, createMeeting, getMeetingMessages,
-  getCurrentMeeting, getMeetingById, getAllMeetings } = require('../controllers/meeting.controller')
+const { createMeeting, getMeetingMessages,
+  getCurrentMeeting, getMeetingById, getAllMeetings,
+  deleteMeeting } = require('../controllers/meeting.controller')
 const { requireSignin, isAdmin } = require('../controllers/auth.controller')
 const { Router } = require('express')
 
@@ -18,6 +19,7 @@ router.route('/api/meetings/:meetingId/messages')
 
 router.route('/api/meetings/:meetingId')
   .get(getMeetingById)
+  .delete(isAdmin, deleteMeeting)
 
 router.route('/api/meetings')
   .get(isAdmin, getAllMeetings)
