@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import extend from 'lodash/extend'
 import { v4 } from 'uuid'
-import { axiosAuth, baseURL, socketClient } from '../../utils'
+import { axiosAuth, baseURL, socketClient, timeDiff } from '../../utils'
 
 const initialState = {
   joinedTeams: [],
@@ -470,6 +470,22 @@ export const teamSlice = createSlice({
         }
       }
     },
+    cancelInviteUser: (state, action) => {
+      let { teamId, userId } = action.payload
+      if (state.team.id == teamId) {
+        let idx = state.team.invitedUsers.findIndex(u => u.id == userId)
+        if (idx >= 0) {
+          state.team.invitedUsers.splice(idx, 1)
+        }
+      }
+    },
+    receiveCancelInvite: (state, action) => {
+      let { teamId } = action.payload
+      let idx = state.invitedTeams.findIndex(t => t.td === teamId)
+      if (idx >= 0) {
+        state.invitedTeams.splice(idx, 1)
+      }
+    },
     removeTeamMessge: (state, action) => {
       let { teamId, messageId } = action.payload
       if (teamId, messageId) {
@@ -782,6 +798,7 @@ export const { cleanTeamState, sendMessage, updateMeetingState,
   confirmRequest, receiveTeamConfirm, joinRequest,
   receviceTeamRequest, removeTeamMessge, removeMember,
   forceOutTeam, cancelJoin, receiveCancelJoin,
-  outTeam, confirmInvitation, newMember } = teamSlice.actions;
+  outTeam, confirmInvitation, newMember,
+  cancelInviteUser, receiveCancelInvite } = teamSlice.actions;
 
 export default teamSlice.reducer

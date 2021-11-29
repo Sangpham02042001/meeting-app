@@ -145,7 +145,8 @@ export const notificationSlice = createSlice({
                 state.numOf_UnReadNotifications += 1
                 state.numOfNotifications += 1
             } else {
-                state.notifications.splice(idx, 1, noti)
+                state.notifications.splice(idx, 1)
+                state.notifications.unshift(noti)
                 state.numOf_UnReadNotifications += 1
             }
         }

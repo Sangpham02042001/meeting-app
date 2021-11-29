@@ -1,5 +1,6 @@
 const { getMemberTeam, sendMessage, socketInviteUsers,
-    socketConfirmRequest, socketRemoveMember, socketDeleteTeam } = require('../controllers/team.controller');
+    socketConfirmRequest, socketRemoveMember, socketDeleteTeam,
+    socketCancelInvitation } = require('../controllers/team.controller');
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting, getMeetingHostId } = require('../controllers/meeting.controller')
@@ -73,6 +74,18 @@ const socketServer = (io, socket) => {
                     for (const socketId of userSockets[user.id]) {
                         socket.to(socketId).emit('receive-team-invitation', { noti, teamId, teamName, hostId })
                     }
+                }
+            }
+        }
+    })
+
+    socket.on('cancel-invitation', async ({ teamId, userId }) => {
+        let result = await socketCancelInvitation({ teamId, userId })
+        if (result) {
+            socket.emit('cancel-invitation-success', { teamId, userId })
+            if (userSockets[userId] && userSockets[userId].length) {
+                for (const socketId of userSockets[userId]) {
+                    socket.to(socketId).emit('receive-cancel-invitation', { teamId })
                 }
             }
         }

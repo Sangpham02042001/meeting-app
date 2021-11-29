@@ -5,7 +5,7 @@ import {
   DialogTitle, Snackbar, Alert
 } from '@mui/material'
 import InviteUsersWrapper from '../../InviteUsersWrapper'
-import { baseURL } from '../../../utils'
+import { baseURL, socketClient } from '../../../utils'
 import { cancelInviteUsers } from '../../../store/reducers/team.reducer'
 import '../team-setting.css'
 
@@ -27,10 +27,14 @@ export default function TeamInvitedUsers() {
   }, [team.invitedUsers.length])
 
   const handleCancel = () => {
-    dispatch(cancelInviteUsers({
+    // dispatch(cancelInviteUsers({
+    //   userId: selectedUser,
+    //   teamId: team.id
+    // }))
+    socketClient.emit('cancel-invitation', {
       userId: selectedUser,
       teamId: team.id
-    }))
+    })
     setShow(false)
   }
 

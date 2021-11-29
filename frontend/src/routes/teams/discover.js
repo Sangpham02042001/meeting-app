@@ -457,7 +457,7 @@ export default function TeamDiscover() {
               </div>)
             )}
             {invitedUsers.length > 0 && <>
-              <h4>User list</h4>
+              <h4>Invite list</h4>
             </>}
             {<div className="invited-user-list">
               {invitedUsers.map(user => (

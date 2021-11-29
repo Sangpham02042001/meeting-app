@@ -180,7 +180,7 @@ export default function InviteUsersWrapper({ users }) {
             )}
             {!loading && !searchUsers.length && searchUserName &&
               <h4 style={{ textAlign: 'center' }}>No user founded</h4>}
-            {invitedUsers.length > 0 && <h4>User list</h4>}
+            {invitedUsers.length > 0 && <h4>Invite list</h4>}
             {<div className="invited-user-list">
               {invitedUsers.map(user => (
                 <div key={user.id} className="invited-user-item">

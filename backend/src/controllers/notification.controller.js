@@ -110,6 +110,8 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
         } else if (noti.createdBy == senderId) {
           noti.changed('createdAt', true)
           noti.set('createdAt', new Date(), { raw: true })
+          noti.set('content', content)
+          noti.set('relativeLink', relativeLink)
           noti.set('isRead', false)
           await noti.save()
         } else if (noti.createdBy) {
@@ -117,6 +119,7 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
           noti.set('createdAt', new Date(), { raw: true })
           noti.set('isRead', false)
           noti.set('content', content)
+          noti.set('relativeLink', relativeLink)
           noti.set('createdBy', senderId)
           await noti.save()
         }
