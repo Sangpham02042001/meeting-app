@@ -749,7 +749,7 @@ const getTeamSharedFiles = async (req, res) => {
       "SELECT m.id, m.messageId, m.name, m.type, m.createdAt FROM media m " +
       "INNER JOIN messages msg ON msg.id = m.messageId " +
       "INNER JOIN teams t ON t.id = msg.teamId " +
-      "WHERE msg.teamId = :teamId AND (m.type = 'file' OR m.type = 'audio') " +
+      "WHERE msg.teamId = :teamId AND m.type = 'file' " +
       "ORDER BY m.updatedAt DESC",
       {
         replacements: {

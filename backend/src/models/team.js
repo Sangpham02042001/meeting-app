@@ -27,13 +27,13 @@ Team.init({
   teamCode: {
     type: DataTypes.STRING,
     defaultValue: `${v4().toString().slice(0, 8)}`,
-    indexes: [
-      { fields: ['name'] },
-    ]
   }
 }, {
   sequelize,
-  modelName: 'Team'
+  modelName: 'Team',
+  indexes: [
+    { fields: ['name'] },
+  ]
 })
 
 Team.hasMany(Meeting, {
