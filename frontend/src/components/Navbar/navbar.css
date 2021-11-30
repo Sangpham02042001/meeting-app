@@ -162,3 +162,10 @@
 .notification-item:hover {
   background-color: gray;
 }
+
+.notification-content {
+  max-width: 320px;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  white-space: nowrap;
+}

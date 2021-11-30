@@ -304,7 +304,7 @@ export default function Profile() {
 											<Avatar alt="team coverphoto"
 												src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 												sx={{ width: 50, height: 50, }} />
-											<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
+											<p className='team-name'>{team.name}</p>
 										</Link>
 										{team.hostId !== userReducer.user.id ?
 											<Button className="team-action-btn" variant="contained"
@@ -328,7 +328,7 @@ export default function Profile() {
 											<Avatar alt="team coverphoto"
 												src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 												sx={{ width: 50, height: 50, }} />
-											<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
+											<p className='team-name'>{team.name}</p>
 										</Link>
 										<div>
 											<Button className="team-action-btn" variant="contained"
@@ -354,7 +354,7 @@ export default function Profile() {
 											<Avatar alt="team coverphoto"
 												src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 												sx={{ width: 50, height: 50, }} />
-											<p style={{ margin: 0, marginLeft: '10px' }}>{team.name}</p>
+											<p className='team-name'>{team.name}</p>
 										</span>
 										<Button className="team-action-btn"
 											style={{ marginLeft: '20px', backgroundColor: 'var(--primary-color)' }}

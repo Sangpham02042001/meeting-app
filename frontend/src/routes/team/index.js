@@ -136,11 +136,17 @@ export default function Team(props) {
     // })
 
     return () => {
-      // socketClient.leave(`team ${teamId}`)
-      // dispatch(cleanTeamState())
       window.removeEventListener('paste', () => {
         console.log('remove events')
       })
+      setInput('')
+      setFilesMessage([])
+      setFilesMessageUrl([])
+      setAudioData(null)
+      setIsRecording(false)
+      setRecorder(null)
+      setRecordTime(0)
+      setIntervalTime(null)
     }
   }, [teamId])
 
