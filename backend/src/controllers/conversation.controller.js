@@ -312,7 +312,7 @@ const getFilesMessageCv = async (req, res) => {
             "SELECT m.id, m.messageId, m.name, m.type, m.createdAt FROM media m " +
             "JOIN messages msg on msg.id = m.messageId " +
             "JOIN conversations cv on cv.id = msg.conversationId " +
-            "WHERE msg.conversationId = :conversationId AND m.type = 'file'" +
+            "WHERE msg.conversationId = :conversationId AND (m.type = 'file' OR m.type = 'audio') " +
             "ORDER BY m.updatedAt DESC"
             , {
                 replacements: {

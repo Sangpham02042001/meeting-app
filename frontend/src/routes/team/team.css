@@ -120,8 +120,12 @@
 .image-message-upload {
   padding: 10px;
   border-top: 1px solid var(--shadow-color);
-  position: relative;
+  position: absolute;
   display: flex;
+  overflow-x: auto;
+  width: 100%;
+  left: 0;
+  bottom: 50px;
 }
 
 .image-message-upload > div {
@@ -160,8 +164,10 @@
 
 .team-input-container {
   display: flex;
-  align-items: flex-end;
-  position: relative;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
 }
 
 .team-input-container > div {
@@ -213,4 +219,40 @@
   font-size: 35px;
   z-index: 10;
   color: var(--text-color);
+}
+
+.team-record-message {
+  width: 80%;
+  position: absolute;
+  left: 10%;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  border-radius: 20px;
+}
+
+.team-record-message > div:first-child {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.team-record-message .audio-message {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+
+.team-record-message .is-recording {
+  display: flex;
+  width: 100%;
+}
+
+.team-record-message .is-recording .btn-in-div {
+  display: flex;
+  align-items: center;
+}
+
+.team-record-message .audio-message audio {
+  width: 100%;
 }

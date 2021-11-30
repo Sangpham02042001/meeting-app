@@ -44,10 +44,10 @@ const socketServer = (io, socket) => {
 
     //**********************************TEAM*************************************//
 
-    socket.on('send-message-team', async ({ teamId, senderId, content, files, senderName }) => {
+    socket.on('send-message-team', async ({ teamId, senderId, content, files, senderName, audio }) => {
         let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
-        const message = await sendMessage({ teamId, senderId, content, files })
+        const message = await sendMessage({ teamId, senderId, content, files, audio })
         socket.emit('receive-message-team', { messageId: message.id, content, teamId, senderId, files: message.files, photos: message.photos, createdAt: message.createdAt })
         const { noti } = await createMessageNotification({ teamId, senderId, senderName })
         for (let m of members) {

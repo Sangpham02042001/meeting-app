@@ -28,6 +28,9 @@ const getTeamInfo = async (req, res) => {
     }
   )
   let team = teams[0]
+  if (!team) {
+    return res.status(400).json({ error: 'Team not found' })
+  }
   if (team.hostId !== req.auth.id && req.auth.role !== 'admin') {
     delete team.teamCode
   }
@@ -549,7 +552,7 @@ const updateBasicTeamInfo = async (req, res) => {
   })
 }
 
-const sendMessage = async ({ teamId, senderId, content, files }) => {
+const sendMessage = async ({ teamId, senderId, content, files, audio }) => {
   try {
     let multiMedia = [];
     if (files) {
@@ -568,6 +571,20 @@ const sendMessage = async ({ teamId, senderId, content, files }) => {
           });
         }
       }
+    }
+
+    if (audio) {
+      let fileName = v4().concat('.wav');
+      const fileStream = new Readable();
+      const writeStream = fs.createWriteStream(`./src/public/messages-files/${fileName}`)
+      fileStream._read = () => { }
+      fileStream.push(audio)
+      fileStream.pipe(writeStream)
+      multiMedia.push({
+        pathName: fileName,
+        name: fileName,
+        type: 'audio'
+      });
     }
 
     const message = await Message.create({ content, teamId, userId: senderId });
@@ -732,7 +749,7 @@ const getTeamSharedFiles = async (req, res) => {
       "SELECT m.id, m.messageId, m.name, m.type, m.createdAt FROM media m " +
       "INNER JOIN messages msg ON msg.id = m.messageId " +
       "INNER JOIN teams t ON t.id = msg.teamId " +
-      "WHERE msg.teamId = :teamId AND m.type = 'file' " +
+      "WHERE msg.teamId = :teamId AND (m.type = 'file' OR m.type = 'audio') " +
       "ORDER BY m.updatedAt DESC",
       {
         replacements: {

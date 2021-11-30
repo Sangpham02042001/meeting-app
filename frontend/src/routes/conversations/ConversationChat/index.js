@@ -230,6 +230,7 @@ export default function ConversationChat({ conversation, user }) {
       setRows(minRows);
     } else if (audioData) {
       setAudioData(null)
+      setRecordTime(0);
       console.log(audioData)
       socketClient.emit('conversation-sendMessage', {
         content: '', senderId: user.id, receiverId: conversation.participantId,
@@ -331,6 +332,7 @@ export default function ConversationChat({ conversation, user }) {
       speechReplyRef.current = 'Error occurred in recognition: ' + event.error;
       voiceDetectRef.current = false;
       setForceRender(v4());
+      setMessageAlert("Coundn't understand")
       recognition.stop();
     }
 
@@ -774,7 +776,8 @@ export default function ConversationChat({ conversation, user }) {
                   <ImageListItem key={img.id}>
                     <img
                       style={{
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        borderRadius: '10px'
                       }}
                       onClick={event => handlePreview(event, img.messageId, img.id)}
                       src={filePath.concat(`/${img.messageId}/${img.id}`)}
