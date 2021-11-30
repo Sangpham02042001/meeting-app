@@ -169,7 +169,7 @@ export default function Navbar() {
           }}
           PaperProps={{
             style: {
-              minWidth: 400,
+              width: 400,
               backgroundColor: 'var(--primary-bg)'
             }
           }}>

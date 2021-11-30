@@ -192,7 +192,7 @@ export default function TeamHeader({ showTeamInfo }) {
         </Tooltip>
         <Button variant="outlined" className="meeting-btn"
           style={{ backgroundColor: 'var(--primary-bg)', color: 'var(--icon-color)' }}
-          disabled={teamReducer.team.meetingActive || teamReducer.meetingJoined}
+          disabled={teamReducer.team.meetingActive}
           startIcon={<VideoCameraFrontIcon style={{ color: 'var(--icon-color)' }} />}
           onClick={e => {
             e.preventDefault()

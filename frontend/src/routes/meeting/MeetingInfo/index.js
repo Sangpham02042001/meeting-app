@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux';
+import { IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 export default function MeetingInfo({ infoVisible }) {
   const userReducer = useSelector(state => state.userReducer)
@@ -23,10 +25,10 @@ export default function MeetingInfo({ infoVisible }) {
           </IconButton>
         </div>
       </div>
-      <div>
+      <div style={{ padding: '20px', fontSize: '16px' }}>
         {getUserName(meetingReducer.meeting.hostId) &&
-          <h5>Meeting created by {getUserName(meetingReducer.meeting.hostId)}</h5>}
-        {teamReducer.team.name && <h5>Meeting created at team {teamReducer.team.name}</h5>}
+          <div>Meeting created by <strong>{getUserName(meetingReducer.meeting.hostId)}</strong></div>}
+        {teamReducer.team.name && <div>Meeting created at team <strong>{teamReducer.team.name}</strong></div>}
       </div>
     </>
   )

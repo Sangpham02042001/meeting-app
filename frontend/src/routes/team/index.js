@@ -389,7 +389,7 @@ export default function Team(props) {
 
   const getUserName = userId => {
     let user = teamReducer.team.members.find(user => user.id == userId)
-    return (user || {}).userName || '';
+    return (user || {}).userName || 'Anonymous';
   }
 
   const handleEnterMessage = (event) => {

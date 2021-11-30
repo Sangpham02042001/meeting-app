@@ -69,7 +69,6 @@ const createMeeting = async (req, res) => {
       hostId: id
     })
     meeting = await getMeetingInfo({ meetingId: meeting.id })
-
     let response = await axiosJanus.post('/', {
       janus: 'create',
       transaction: 'meeting_app',
@@ -90,7 +89,7 @@ const createMeeting = async (req, res) => {
           body: {
             request: 'create',
             room: Number(meeting.id),
-            publishers: 6
+            publishers: 100
           }
         })
       }

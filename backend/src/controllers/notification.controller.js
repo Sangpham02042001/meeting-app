@@ -185,13 +185,11 @@ const createMessageNotification = async ({ teamId, senderId, conversationId, rec
 
 const createMeetingNofication = async ({ content, relativeLink, teamId, createdBy }) => {
   try {
-    console.log('create meeting nofication call')
     let team = await Team.findByPk(teamId)
     let members = await team.getMembers({
       attributes: ['id']
     })
     members = members.filter(m => m.id !== createdBy);
-    console.log(members, createdBy)
     let noti
     for (const member of members) {
       noti = await Notification.create({
