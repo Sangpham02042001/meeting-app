@@ -1,8 +1,10 @@
 const Notification = require('../models/notification')
 const Team = require('../models/team')
+const User = require('../models/user')
 
 const updateRead = async (req, res) => {
   let { notiId } = req.params
+  let { content } = req.body
   let { id } = req.auth
   try {
     let notification = await Notification.findOne({
@@ -14,7 +16,10 @@ const updateRead = async (req, res) => {
     //   throw `Not authorized`
     // }
     if (notification) {
-      notification.isRead = true
+      if (content) {
+        notification.content = content
+      }
+      notification.isRead = !notification.isRead
       await notification.save()
     }
     return res.status(200).json({ notification })
@@ -204,8 +209,28 @@ const createMeetingNofication = async ({ content, relativeLink, teamId, createdB
   }
 }
 
+const getAllNotifications = async (req, res) => {
+  try {
+    let notifications = await Notification.findAll({
+      include: [
+        { model: User, as: 'created', attributes: ['id', 'firstName', 'lastName'] },
+        { model: User, as: 'user', attributes: ['id', 'firstName', 'lastName'] },
+        // { model: Team, as: 'team', attributes: ['id', 'name'] },
+      ],
+      order: [
+        ['updatedAt', 'DESC'],
+        ['createdAt', 'DESC']
+      ]
+    })
+    return res.status(200).json({ notifications })
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ error })
+  }
+}
+
 module.exports = {
   updateRead, deleteNotification,
   createTeamNofication, createMessageNotification,
-  createMeetingNofication
+  createMeetingNofication, getAllNotifications
 }

@@ -27,6 +27,9 @@ Team.init({
   teamCode: {
     type: DataTypes.STRING,
     defaultValue: `${v4().toString().slice(0, 8)}`,
+    indexes: [
+      { fields: ['name'] },
+    ]
   }
 }, {
   sequelize,
@@ -40,7 +43,7 @@ Team.hasMany(Meeting, {
 
 Meeting.belongsTo(Team, {
   as: 'team',
-  foreignKey: 'id'
+  foreignKey: 'teamId'
 })
 
 Team.hasMany(Message, {

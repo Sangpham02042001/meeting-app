@@ -65,7 +65,7 @@
 
 .message > div > .text-message > p {
   max-width: 600px;
-  min-width: 40px;
+  /* min-width: 40px; */
   border-radius: 10px;
   padding: 7px;
   background-color: #aaadb6;

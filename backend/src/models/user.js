@@ -3,7 +3,8 @@ const sequelize = require('./index')
 const Conversation = require('./conversation');
 const Team = require('./team');
 const Meeting = require('./meeting');
-const Message = require('./message')
+const Message = require('./message');
+const Notification = require('./notification');
 
 class User extends Model {
   getFullName() {
@@ -46,7 +47,10 @@ User.init({
   }
 }, {
   sequelize,
-  modelName: 'User'
+  modelName: 'User',
+  indexes: [
+    { fields: ['firstName', 'lastName'] },
+  ]
 })
 
 const Users_Conversations = sequelize.define('Users_Conversations', {
@@ -132,8 +136,41 @@ User.hasMany(Message, {
 })
 
 Message.belongsTo(User, {
+  as: 'user',
   foreignKey: {
     name: 'userId',
+    allowNull: false
+  }
+})
+
+User.hasMany(Notification, {
+  as: 'notifications',
+  foreignKey: {
+    name: 'userId',
+    allowNull: false
+  }
+})
+
+Notification.belongsTo(User, {
+  as: 'user',
+  foreignKey: {
+    name: 'userId',
+    allowNull: false
+  }
+})
+
+User.hasMany(Notification, {
+  as: 'createdNotifications',
+  foreignKey: {
+    name: 'createdBy',
+    allowNull: false
+  }
+})
+
+Notification.belongsTo(User, {
+  as: 'created',
+  foreignKey: {
+    name: 'createdBy',
     allowNull: false
   }
 })
