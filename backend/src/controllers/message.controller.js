@@ -2,7 +2,8 @@ const Message = require('../models/message')
 const Media = require('../models/media')
 const fs = require('fs');
 const { QueryTypes } = require("sequelize");
-const sequelize = require('../models')
+const sequelize = require('../models');
+const User = require('../models/user');
 
 const getImageMessage = async (req, res) => {
   let { messageId } = req.params
@@ -145,7 +146,50 @@ const delMessage = async (req, res) => {
   }
 }
 
+const getMessages = async (req, res) => {
+  try {
+    let { offset, num } = req.query
+    let numOfMessages
+    let messages = await Message.findAll({
+      include: [
+        { model: User, as: 'user', attributes: ['id', 'firstName', 'lastName'] },
+        { model: Media, as: 'medias', attributes: ['id', 'type'] }
+      ],
+      order: [
+        ['updatedAt', 'DESC'],
+        ['createdAt', 'DESC']
+      ]
+    })
+    numOfMessages = messages.length
+    messages = messages.slice(offset, offset + num)
+    return res.status(200).json({ messages, numOfMessages })
+  } catch (error) {
+    return res.status(400).json({ error: 'Something wrong' })
+  }
+}
+
+const editMessage = async (req, res) => {
+  try {
+    let { messageId } = req.params
+    let { content } = req.body
+    let message = await Message.findOne({
+      where: {
+        id: messageId
+      }
+    })
+    if (!message) {
+      throw 'Message not found'
+    }
+    message.content = content
+    await message.save()
+    return res.status(200).json({ 'message': 'Edit successfully' })
+  } catch (error) {
+    return res.status(400).json({ error: 'Something wrong' })
+  }
+}
+
 module.exports = {
   getImageMessage, getImageMessageMedia, getFileMessageMedia,
-  downloadImageMessageMedia, deleteMessage, delMessage
+  downloadImageMessageMedia, deleteMessage, delMessage,
+  getMessages, editMessage
 }
