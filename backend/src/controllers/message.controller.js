@@ -4,23 +4,9 @@ const fs = require('fs');
 const { QueryTypes } = require("sequelize");
 const sequelize = require('../models')
 
-const getImageMessage = async (req, res) => {
-  let { messageId } = req.params
-  let message = await Message.findOne({
-    where: {
-      id: messageId
-    },
-    attributes: ['photo']
-  })
-  if (!message) {
-    return res.status(400).json({ error: 'Image not found' })
-  }
-  if (message.photo) {
-    fs.createReadStream(`./src/public/messages-photos/${message.photo}`).pipe(res)
-  }
-}
 
-const getImageMessageMedia = async (req, res) => {
+
+const getImageMessage = async (req, res) => {
   let { messageId, mediaId } = req.params
   try {
     let media = await Media.findOne({
@@ -41,7 +27,7 @@ const getImageMessageMedia = async (req, res) => {
   }
 }
 
-const getFileMessageMedia = async (req, res) => {
+const downloadFileMessage = async (req, res) => {
   let { messageId, mediaId } = req.params
   try {
     let media = await Media.findOne({
@@ -50,8 +36,8 @@ const getFileMessageMedia = async (req, res) => {
         messageId
       },
     })
+    
     if (!media) {
-
       return res.status(400).json({ error: 'File not found' })
     }
 
@@ -62,11 +48,12 @@ const getFileMessageMedia = async (req, res) => {
       fileStream.pipe(res);
     }
   } catch (error) {
+    console.log(error)
     return res.status(400).json({ error: 'File not found' })
   }
 }
 
-const downloadImageMessageMedia = async (req, res) => {
+const downloadImageMessage = async (req, res) => {
   let { messageId, mediaId } = req.params
   try {
     let media = await Media.findOne({
@@ -117,7 +104,7 @@ const deleteMessage = async ({ messageId }) => {
           return null;
         }
       })
-    } else if ((media || {}).type === 'file') {
+    } else if ((media || {}).type === 'file' || (media || {}).type === 'audio') {
       fs.unlink(`./src/public/messages-files/${media.pathName}`, (err) => {
         if (err) {
           console.log(err)
@@ -146,6 +133,6 @@ const delMessage = async (req, res) => {
 }
 
 module.exports = {
-  getImageMessage, getImageMessageMedia, getFileMessageMedia,
-  downloadImageMessageMedia, deleteMessage, delMessage
+  getImageMessage, downloadFileMessage,
+  downloadImageMessage, deleteMessage, delMessage
 }

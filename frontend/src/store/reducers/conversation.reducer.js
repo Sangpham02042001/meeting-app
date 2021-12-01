@@ -78,7 +78,7 @@ export const conversationSlice = createSlice({
       console.log('Get messages of user fail!')
     },
     [getParticipant.fulfilled]: (state, action) => {
-      state.conversation.participant = action.payload;
+      state.conversation.participant = action.payload.user;
     },
     [getParticipant.rejected]: (state, action) => {
       console.log('Get participant info error!!');

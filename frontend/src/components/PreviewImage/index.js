@@ -12,7 +12,7 @@ export default function PreviewImage({ isPreview, onClose, messageId, photoId })
     const imgPath = `${baseURL}/api/messages`
     const handleImageDownload = (event) => {
         event.preventDefault()
-        window.open(`${baseURL}/api/messages/photos/${messageId}/${photoId}`)
+        window.open(`${baseURL}/api/messages/${messageId}/photos/${photoId}`)
     }
 
     return (
@@ -50,7 +50,7 @@ export default function PreviewImage({ isPreview, onClose, messageId, photoId })
                         <DownloadIcon />
                     </IconButton>
                 </Tooltip>
-                <img width="100%" height="100%" src={imgPath.concat(`/${messageId}/${photoId}`)} />
+                <img width="100%" height="100%" src={imgPath.concat(`/${messageId}/image/${photoId}`)} />
             </DialogContent>
         </Dialog >
 

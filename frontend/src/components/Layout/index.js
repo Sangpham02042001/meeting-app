@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { NavLink, useRouteMatch, Link, useHistory } from 'react-router-dom'
+import { NavLink, useRouteMatch, Link, useHistory, useParams } from 'react-router-dom'
 import Navbar from '../Navbar';
 import { Avatar, Snackbar, Alert, Tooltip, Badge } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
@@ -33,6 +33,8 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/
 export default function Layout({ children }) {
   const dispatch = useDispatch();
   const history = useHistory()
+  const [isSkConnected, setIsSkConnected] = useState(false);
+  const [currentNoti, setNoti] = useState(null)
   const userReducer = useSelector(state => state.userReducer)
   const settingReducer = useSelector(state => state.settingReducer)
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
@@ -40,12 +42,11 @@ export default function Layout({ children }) {
   const lastMessageChange = useSelector(state => state.conversationReducer.lastMessageChange);
   const params = (useRouteMatch('/teams/:teamId/meeting/:meetingId') || {}).params
   const _meetingId = params && Number(params.meetingId)
-  let teamRef = useRef()
   let teamParams = (useRouteMatch('/teams/:teamId') || {}).params
   let _teamId = teamParams && Number(teamParams.teamId)
+  let teamRef = useRef()
   teamRef.current = _teamId
-  const [isSkConnected, setIsSkConnected] = useState(false);
-  const [currentNoti, setNoti] = useState(null)
+  const _participantId = useParams().participantId;
 
   useEffect(() => {
     let r = document.querySelector(':root');
@@ -112,7 +113,6 @@ export default function Layout({ children }) {
 
     socketClient.on('conversation-calling', ({ conversationId, senderId, senderName, receiverId }) => {
       //todo
-      console.log('converstation calling')
       dispatch(conversationCalling({ conversationId, senderId, senderName, receiverId }))
     })
 
@@ -309,7 +309,6 @@ export default function Layout({ children }) {
       setIsSkConnected(false)
     });
 
-    console.log(socketClient);
 
     return () => {
       socketClient.disconnect();
@@ -345,14 +344,15 @@ export default function Layout({ children }) {
   };
 
   const handleAcceptCall = () => {
-    dispatch(cancelCall({
-      conversationId: conversationCall.conversationId
-    }))
+    socketClient.emit('conversation-accept-call', {
+      conversationId: conversationCall.conversationId,
+      senderId: userReducer.user.id, receiverId: conversationCall.senderId
+    })
   };
 
   return (
     <>
-      {!_meetingId ? <>
+      {!_meetingId && !_participantId ? <>
         <Navbar />
         <div className="layout">
           <div className="list-selection">

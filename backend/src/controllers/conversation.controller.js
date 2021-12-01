@@ -209,10 +209,10 @@ const setMessage = async ({ content, files, conversationId, senderId, audio }) =
                 fileStream._read = () => { }
                 fileStream.push(file.data)
                 fileStream.pipe(writeStream)
-
                 multiMedia.push({
                     pathName: fileName,
                     name: file.name,
+                    size: file.size,
                     type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
                 });
             }
@@ -228,6 +228,7 @@ const setMessage = async ({ content, files, conversationId, senderId, audio }) =
             multiMedia.push({
                 pathName: fileName,
                 name: fileName,
+                size: 0,
                 type: 'audio'
             });
         }
@@ -235,7 +236,10 @@ const setMessage = async ({ content, files, conversationId, senderId, audio }) =
 
         const message = await Message.create({ content, conversationId, userId: senderId });
         await Promise.all(multiMedia.map(async (m, idx) => {
-            let media = await Media.create({ pathName: m.pathName, name: m.name, messageId: message.id, type: m.type })
+            let media = await Media.create({
+                pathName: m.pathName, name: m.name,
+                messageId: message.id, type: m.type, size: m.size
+            })
             multiMedia[idx] = media;
         }))
         let tmpImages = []
@@ -309,7 +313,7 @@ const getFilesMessageCv = async (req, res) => {
         const { conversationId } = req.params;
 
         const files = await sequelize.query(
-            "SELECT m.id, m.messageId, m.name, m.type, m.createdAt FROM media m " +
+            "SELECT m.id, m.messageId, m.name, m.size, m.type, m.createdAt FROM media m " +
             "JOIN messages msg on msg.id = m.messageId " +
             "JOIN conversations cv on cv.id = msg.conversationId " +
             "WHERE msg.conversationId = :conversationId AND m.type = 'file' " +
@@ -331,54 +335,11 @@ const getFilesMessageCv = async (req, res) => {
     }
 }
 
-const removeMessageCv = async ({ messageId }) => {
-
-    try {
-        let media = await Media.findOne({
-            where: {
-                messageId
-            },
-            attributes: ['id', 'pathName', 'type']
-        })
-
-        await sequelize.query(
-            "DELETE FROM messages " +
-            "WHERE id = :messageId"
-            , {
-                replacements: {
-                    messageId
-                },
-                type: QueryTypes.DELETE
-            })
-
-        if ((media || {}).type === 'image') {
-            fs.unlink(`./src/public/messages-photos/${media.pathName}`, (err) => {
-                if (err) {
-                    console.log(err)
-                    return null;
-                }
-            })
-        } else if ((media || {}).type === 'file') {
-            fs.unlink(`./src/public/messages-files/${media.pathName}`, (err) => {
-                if (err) {
-                    console.log(err)
-                    return null;
-                }
-            })
-        }
-
-        return 'success';
-
-    } catch (error) {
-        console.log(error);
-        return null;
-    }
-}
 
 
 
 module.exports = {
     getConversations, getMessages, getLastMessage,
     setConversation, setMessage, readConversation, getImagesMessageCv,
-    getFilesMessageCv, removeMessageCv, getNumberMessageUnRead
+    getFilesMessageCv, getNumberMessageUnRead
 }

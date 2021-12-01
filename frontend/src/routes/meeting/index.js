@@ -313,7 +313,7 @@ const Meeting = (props) => {
 											room: Number(meetingId),
 											ptype: "publisher",
 											display: JSON.stringify({
-												name: userReducer.user.firstName + ' ' + userReducer.user.lastName,
+												name: userReducer.user.userName,
 												userId: userReducer.user.id
 											}),
 										};

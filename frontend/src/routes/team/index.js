@@ -292,7 +292,7 @@ export default function Team(props) {
     //   teams: [teamReducer.team.id]
     // }))
     socketClient.emit('confirm-invitation', {
-      userName: user.firstName + ' ' + user.lastName,
+      userName: user.userName,
       id: user.id,
       teamId: teamReducer.team.id
     })
@@ -336,7 +336,7 @@ export default function Team(props) {
       setRecordTime(0)
       socketClient.emit("send-message-team", {
         teamId, senderId: user.id, content: '',
-        files: [], senderName: user.firstName + ' ' + user.lastName,
+        files: [], senderName: user.userName,
         audio: audioData
       })
     }

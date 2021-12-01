@@ -42,7 +42,7 @@ router.route('/api/users/:userId/cancel-request')
   .put(requireSignin, cancelJoinRequest)
 
 router.route('/api/users/:userId')
-  .get(getUserInfo)
+  .get(requireSignin, getUserInfo)
   .put(requireSignin, updateUserInfo)
 
 router.route('/api/user/avatar/:userId')

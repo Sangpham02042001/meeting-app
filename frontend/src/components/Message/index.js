@@ -3,15 +3,17 @@ import {
   Avatar, Tooltip, Dialog, DialogContent, IconButton,
   Menu, MenuItem
 } from '@mui/material';
-import { baseURL, getTime, socketClient, getAmTime } from '../../utils';
+import { baseURL, getTime, socketClient, getAmTime, getFileSize } from '../../utils';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import emojiRegex from 'emoji-regex';
 import joypixels from 'emojione';
 import parse from 'html-react-parser';
 import './style.css'
+
+
 
 
 const Message = React.memo(({
@@ -25,6 +27,13 @@ const Message = React.memo(({
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [regex] = useState(emojiRegex());
+
+  const urlify = (text) => {
+    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, function (url) {
+      return '<a style="color: #fff;" href="' + url + '" target="_blank">' + url + '</a>';
+    })
+  }
 
   const handleRemoveMessage = () => {
     setAnchorEl(null);
@@ -46,7 +55,7 @@ const Message = React.memo(({
   const handlePreviewImg = (e, messageId, photoId) => {
     e.preventDefault();
     setIsPreviewImg(true);
-    setImgPreviewUrl(`${baseURL}/api/messages/${messageId}/${photoId}`)
+    setImgPreviewUrl(`${baseURL}/api/messages/${messageId}/image/${photoId}`)
     setPhotoId(photoId)
   }
 
@@ -82,12 +91,12 @@ const Message = React.memo(({
 
   const handleFileDownload = (event, messageId, fileId) => {
     event.preventDefault();
-    window.open(`${baseURL}/api/messages/files/${messageId}/${fileId}`)
+    window.open(`${baseURL}/api/messages/${messageId}/files/${fileId}`)
   }
 
   const handleImageDownload = (event) => {
     event.preventDefault()
-    window.open(`${baseURL}/api/messages/photos/${message.id}/${selectedPhotoId}`)
+    window.open(`${baseURL}/api/messages/${message.id}/photos/${selectedPhotoId}`)
   }
 
   const parseMessage = (content) => {
@@ -108,8 +117,9 @@ const Message = React.memo(({
           </div>
         )
       } else {
-        let newContent = content;
+        let newContent = urlify(content);
         if (emojiList[0]) {
+          console.log(newContent)
           newContent = content.replaceAll(regex, `<span className="img-emoji">${joypixels.toImage(emojiList[0][0])}</span>`)
         }
 
@@ -120,7 +130,6 @@ const Message = React.memo(({
         )
       }
     }
-
   }
 
   return (
@@ -141,7 +150,7 @@ const Message = React.memo(({
             <div className={`own-message ${lastMessage ? 'last-message' : ''}`}>
               <div>
                 <IconButton onClick={handleOpenMenu}>
-                  <MoreHorizIcon className="icon-hover-menu" />
+                  <MoreVertIcon className="icon-hover-menu" />
                 </IconButton>
                 <Menu
                   id="basic-menu"
@@ -166,7 +175,7 @@ const Message = React.memo(({
                       {message.photos.map((photo, idx) => {
                         return (message.photos.length > 1 ?
                           <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                            src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                            src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
                             className={`${hasAvatar ? 'photo-last-message' : ''}`}
                             style={{
                               width: getImageSize(message.photos.length).itemWidth,
@@ -174,7 +183,7 @@ const Message = React.memo(({
                             }} />
                           :
                           <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                            src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                            src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
                             className={`${hasAvatar ? 'photo-last-message' : ''}`}
                             style={{
                               maxWidth: getImageSize(message.photos.length).itemWidth,
@@ -191,16 +200,19 @@ const Message = React.memo(({
                         return (
                           file.type === "audio" ?
                             <div key={file.id}>
-                              <audio key={file.id} src={`${baseURL}/api/messages/files/${message.id}/${file.id}`} controls />
+                              <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
                             </div>
                             :
-                            <div className="message-file" key={file.id} >
-                              <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
-                              <span
-                                onClick={e => handleFileDownload(e, message.id, file.id)}
-                              >
-                                {file.name}
-                              </span>
+                            <div className="message-file" key={file.id} onClick={e => handleFileDownload(e, message.id, file.id)}>
+                              <div className="file-name" >
+                                <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                                <span>
+                                  {file.name}
+                                </span>
+                              </div>
+                              <div className="file-size">
+                                {getFileSize(file.size)}
+                              </div>
                             </div>
                         )
                       })}
@@ -244,7 +256,7 @@ const Message = React.memo(({
                       {message.photos.map((photo, idx) => {
                         return (message.photos.length > 1 ?
                           <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                            src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                            src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
                             className={`${hasAvatar ? 'photo-last-message' : ''}`}
                             style={{
                               width: getImageSize(message.photos.length).itemWidth,
@@ -252,7 +264,7 @@ const Message = React.memo(({
                             }} />
                           :
                           <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                            src={`${baseURL}/api/messages/${message.id}/${photo.id}`}
+                            src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
                             className={`${hasAvatar ? 'photo-last-message' : ''}`}
                             style={{
                               maxWidth: getImageSize(message.photos.length).itemWidth,
@@ -270,16 +282,19 @@ const Message = React.memo(({
                         return (
                           file.type === 'audio' ?
                             <div key={file.id}>
-                              <audio key={file.id} src={`${baseURL}/api/messages/files/${message.id}/${file.id}`} controls />
+                              <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
                             </div>
                             :
-                            <div className="message-file" key={file.id}>
-                              <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
-                              <span
-                                onClick={e => handleFileDownload(e, message.id, file.id)}
-                              >
-                                {file.name}
-                              </span>
+                            <div className="message-file" key={file.id} onClick={e => handleFileDownload(e, message.id, file.id)}>
+                              <div className="file-name">
+                                <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                                <span>
+                                  {file.name}
+                                </span>
+                              </div>
+                              <div className="file-size">
+                                {getFileSize(file.size)}
+                              </div>
                             </div>
                         )
                       })}

@@ -77,7 +77,7 @@ const getAmTime = mysqlTime => {
   let time = new Date(mysqlTime)
   let minute = time.getMinutes().toString().length === 1 ? `0${time.getMinutes()}` : time.getMinutes()
   let hour = time.getHours()
-  if (hour === 0 ) {
+  if (hour === 0) {
     hour = 12;
     minute += ' AM'
   } else if (hour >= 12) {
@@ -97,6 +97,21 @@ const getTime = mysqlTime => {
   return `${WEEK_DAYS[time.getDay()]}, ${MONTHS[time.getMonth()]} ${time.getDate()} ${time.getFullYear()} ${hour}:${minute}`
 }
 
+const getFileSize = (size) => {
+  if (size < 1000) {
+    return size + ' B';
+  } else if (size < Math.pow(1000, 2)) {
+    size /= 1000;
+    return Math.round(size) + ' KB';
+  } else if (size < Math.pow(1000, 3)) {
+    size /= Math.pow(1000, 2);
+    return Math.round(size) + ' MB';
+  }
+}
+
 const emotionRegex = /[:;=]+["^'-]*[()pPdD*oO]+/g;
 
-export { convertDate, timeDiff, messageTimeDiff, getTime, emotionRegex, getAmTime }
+export {
+  convertDate, timeDiff, messageTimeDiff, getTime,
+  emotionRegex, getAmTime, getFileSize
+}

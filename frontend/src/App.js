@@ -15,6 +15,7 @@ import PrivateRoute from './routes/private';
 import NotFound from './components/NotFound';
 import Team from './routes/team';
 import TeamSetting from './routes/team/setting';
+import RoomCall from './routes/room-call';
 
 function App() {
   return (
@@ -31,6 +32,9 @@ function App() {
         </PrivateRoute>
         <PrivateRoute path="/conversations" >
           <Conversations />
+        </PrivateRoute>
+        <PrivateRoute path="/room-call/conversation/:participantId" >
+          <RoomCall />
         </PrivateRoute>
         <PrivateRoute path="/teams" >
           <Switch>
@@ -55,6 +59,7 @@ function App() {
         <PrivateRoute path="/setting" >
           <Setting />
         </PrivateRoute>
+
         <Route component={() => <NotFound />} />
       </Switch>
     </HashRouter>

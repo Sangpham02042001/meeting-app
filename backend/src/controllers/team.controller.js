@@ -567,6 +567,7 @@ const sendMessage = async ({ teamId, senderId, content, files, audio }) => {
           multiMedia.push({
             pathName: fileName,
             name: file.name,
+            size: file.size,
             type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
           });
         }
@@ -583,13 +584,14 @@ const sendMessage = async ({ teamId, senderId, content, files, audio }) => {
       multiMedia.push({
         pathName: fileName,
         name: fileName,
+        size: 0,
         type: 'audio'
       });
     }
 
     const message = await Message.create({ content, teamId, userId: senderId });
     await Promise.all(multiMedia.map(async (m, idx) => {
-      let media = await Media.create({ pathName: m.pathName, name: m.name, messageId: message.id, type: m.type })
+      let media = await Media.create({ pathName: m.pathName, name: m.name, messageId: message.id, type: m.type, size: m.size })
       multiMedia[idx] = media;
     }))
     let tmpImages = []
@@ -746,7 +748,7 @@ const getTeamSharedFiles = async (req, res) => {
     let { teamId } = req.params
 
     const files = await sequelize.query(
-      "SELECT m.id, m.messageId, m.name, m.type, m.createdAt FROM media m " +
+      "SELECT m.id, m.messageId, m.name, m.size, m.type, m.createdAt FROM media m " +
       "INNER JOIN messages msg ON msg.id = m.messageId " +
       "INNER JOIN teams t ON t.id = msg.teamId " +
       "WHERE msg.teamId = :teamId AND m.type = 'file' " +

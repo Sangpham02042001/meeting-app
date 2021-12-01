@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import './conversations.css';
 import { axiosAuth } from '../../utils';
 import { getConversations, createConversation, clearConversation } from '../../store/reducers/conversation.reducer';
-import { Switch, Route } from "react-router-dom";
-import { useHistory } from 'react-router';
+import { Switch, Route, useParams, useHistory } from "react-router-dom";
 import Avatar from '../../components/Avatar';
 import ConversationChat from './ConversationChat';
 import ConversationLink from './ConversationLink';
@@ -72,7 +71,7 @@ export default function Conversations(props) {
         >
             <div className="conversation-list">
                 <div className="search-user" style={{
-                    border: settingReducer ? '1px solid var(--gray-shadow)' : 'none'
+                    border: '1px solid var(--gray-shadow)'
                 }}>
                     <SearchIcon style={{ color: 'var(--icon-color)' }} />
                     <input
@@ -110,10 +109,7 @@ export default function Conversations(props) {
 
                         </div>
                     }
-
                 </div>
-
-
 
                 <div className="conversation-user">
                     {
@@ -130,7 +126,8 @@ export default function Conversations(props) {
             <div className="conversation-content">
                 {props.params === '/conversations' ?
                     <div className="conversation-welcome">
-                        <h3>Start chat with other users</h3>
+                        <h3>{settingReducer.darkMode ? 'Wake up and start conversation now' : 'Start conversation with friends'}</h3>
+                        <img width="600" height="600" src={settingReducer.darkMode ? 'conversation.svg' : 'conversation1.svg'} />
                     </div>
                     :
                     <Switch>

@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux';
+import { IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 export default function MeetingInfo({ infoVisible }) {
   const userReducer = useSelector(state => state.userReducer)

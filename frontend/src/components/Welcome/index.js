@@ -16,6 +16,7 @@ export default function Welcome() {
   const dispatch = useDispatch();
   useEffect(() => {
     if (!userReducer.loaded) {
+      console.log('hello')
       dispatch(isAuthenticated())
     }
   }, [])

@@ -4,7 +4,7 @@ const { getMemberTeam, sendMessage, socketInviteUsers,
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting, getMeetingHostId } = require('../controllers/meeting.controller')
-const { setConversation, setMessage, removeMessageCv } = require('../controllers/conversation.controller');
+const { setConversation, setMessage } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification, createMeetingNofication } = require('../controllers/notification.controller')
 const { socketRequestTeam, setUserStatus, getUserStatus,
     socketCancelJoin, socketOutTeam, socketConfirmInvitation } = require('../controllers/user.controller')
@@ -388,7 +388,7 @@ const socketServer = (io, socket) => {
     })
 
     socket.on('conversation-remove-message', async ({ conversationId, messageId, senderId, receiverId }) => {
-        let report = await removeMessageCv({ conversationId, messageId, senderId });
+        let report = await deleteMessage({ messageId });
         if (report) {
             if (userSockets[receiverId] && userSockets[receiverId].length) {
                 for (const socketId of userSockets[receiverId]) {
@@ -406,6 +406,18 @@ const socketServer = (io, socket) => {
                 socket.to(socketId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
             }
         }
+    })
+
+    socket.on('conversation-accept-call', ({ conversationId, senderId, senderName, receiverId }) => {
+        if (userSockets[receiverId] && userSockets[receiverId].length) {
+            for (const socketId of userSockets[receiverId]) {
+                socket.to(socketId).emit('conversation-accepted-call', { conversationId, senderId, senderName, receiverId })
+            }
+        }
+    })
+
+    socket.on('conversation-send-signal', ({ }) => {
+        console.log('receive-signal')
     })
 
     socket.on('conversation-cancel-call', ({ conversationId, senderId, receiverId }) => {

@@ -35,7 +35,6 @@
   outline: none;
   border: none;
   resize: none;
-  /* background-color: #f0f2f5; */
   background-color: var(--primary-bg);
   display: flex;
 }
@@ -69,7 +68,7 @@
 
 
 .search-list .user-find:hover {
-  background-color: rgba(185, 207, 216, 0.205);
+  background-color: var(--hover-bg-color);
 }
 
 .conversation-list .conversation-user {

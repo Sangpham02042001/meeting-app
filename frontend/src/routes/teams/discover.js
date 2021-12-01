@@ -205,7 +205,7 @@ export default function TeamDiscover() {
     e.preventDefault()
     socketClient.emit("request-join-team", {
       team,
-      userName: user.firstName + ' ' + user.lastName
+      userName: user.userName
     })
     // dispatch(requestJoinTeam({ team }))
     // setSearchTeams(searchTeams.filter(t => t.id != team.id))

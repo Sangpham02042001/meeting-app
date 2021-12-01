@@ -5,7 +5,6 @@ import extend from 'lodash/extend';
 const initialState = {
   user: {},
   error: null,
-  loading: false,
   authenticated: false,
   loaded: false,
   status: 'active',
@@ -57,38 +56,34 @@ export const userSlice = createSlice({
 
   },
   reducers: {
-    isAuthenticated: state => {
-      const user = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user'))
-      if (user) {
-        state.user = user
-        state.user.userName = user.firstName.concat(user.lastName);
-        state.loading = false
-        state.authenticated = true
+    isAuthenticated: (state, action) => {
+      const user = window.localStorage.getItem('user') && JSON.parse(localStorage.getItem('user'))
+      if (user && user.token) {
+        state.user = user;
+        state.user.userName = user.firstName.concat(' ', user.lastName);
+        state.authenticated = true;
       }
-      state.loaded = true
+      state.loaded = true;
     },
+
     setMyStatus: (state, action) => {
       const { userId, status } = action.payload;
       if (userId === state.user.id) state.status = status;
     }
   },
   extraReducers: {
-    [signin.pending]: (state, action) => {
-      state.loading = true
-    },
     [signin.fulfilled]: (state, action) => {
       let user = action.payload.user
-      state.loading = false
+
       state.authenticated = true
       window.localStorage.setItem('user', JSON.stringify(user))
       user.token = undefined
-      state.user = extend(state.user, user)
+      state.user = user;
     },
     [signin.rejected]: (state, action) => {
       if (action.payload.error) {
         state.error = action.payload.error
       }
-      state.loading = false
     },
     [updateBasicUserInfo.pending]: () => {
       console.log('update user info pending')
@@ -112,6 +107,6 @@ export const userSlice = createSlice({
   }
 })
 
-export const { isAuthenticated, setMyStatus } = userSlice.actions;
+export const { setMyStatus, isAuthenticated } = userSlice.actions;
 
 export default userSlice.reducer

@@ -1,5 +1,4 @@
 DELIMITER $$
-DROP TRIGGER IF EXISTS after_team_insert;
 CREATE TRIGGER after_team_insert
 	AFTER INSERT ON teams
     FOR EACH ROW
@@ -13,7 +12,6 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-DROP TRIGGER IF EXISTS before_meeting_delete;
 CREATE TRIGGER before_meeting_delete
 BEFORE DELETE ON meetings FOR EACH ROW
 BEGIN 
@@ -23,7 +21,6 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-DROP TRIGGER IF EXISTS before_team_delete;
 CREATE TRIGGER before_team_delete
 BEFORE DELETE ON teams FOR EACH ROW
 BEGIN 
@@ -45,7 +42,6 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-DROP TRIGGER IF EXISTS before_delete_invitation;
 CREATE TRIGGER before_delete_invitation
 BEFORE DELETE ON invited_users_teams FOR EACH ROW
 BEGIN 
@@ -65,7 +61,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-DROP TRIGGER IF EXISTS before_team_memmber_remove;
+
 DELIMITER $$
 CREATE TRIGGER before_team_memmber_remove
 BEFORE DELETE ON users_teams FOR EACH ROW

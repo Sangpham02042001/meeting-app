@@ -1,5 +1,4 @@
 DELIMITER $$
-DROP PROCEDURE IF EXISTS getTeamMembers;
 CREATE PROCEDURE getTeamMembers(IN teamId INT)
 BEGIN
 	SELECT CONCAT(u.firstName, ' ', u.lastName) as userName,
@@ -11,7 +10,6 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS getTeamRequestMembers;
 CREATE PROCEDURE getTeamRequestMembers(IN teamId INT)
 BEGIN 
 SELECT CONCAT(u.firstName, ' ', u.lastName) as userName,
@@ -37,7 +35,6 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS updateBasicUserInfo;
 CREATE PROCEDURE updateBasicUserInfo(
 	IN userId INT,
     IN firstName VARCHAR(255),
@@ -70,7 +67,6 @@ DELIMITER ;
 
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS removeInvitations;
 CREATE PROCEDURE removeInvitations(
 	teams VARCHAR(255),
     userId INT,
@@ -110,7 +106,6 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS updateBasicTeamInfo;
 CREATE PROCEDURE updateBasicTeamInfo(
 	IN teamId INT,
     IN teamName VARCHAR(255),

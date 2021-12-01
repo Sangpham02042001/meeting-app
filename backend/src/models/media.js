@@ -17,6 +17,9 @@ Media.init({
     name: {
         type: DataTypes.STRING,
     },
+    size: {
+        type: DataTypes.INTEGER
+    },
     type: {
         type: DataTypes.STRING(10),
     }
@@ -26,7 +29,8 @@ Media.init({
 })
 
 Media.belongsTo(Message, {
-    foreignKey: 'messageId'
+    foreignKey: 'messageId',
+    onDelete: 'cascade',
 })
 
 Message.hasMany(Media, {

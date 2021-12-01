@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, } from 'react-redux';
+import { useHistory, useParams } from 'react-router';
 import Message from '../../../components/Message';
 import Avatar from '../../../components/Avatar';
 import {
@@ -31,7 +32,10 @@ import ColorLensIcon from '@mui/icons-material/ColorLens';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import 'emoji-mart/css/emoji-mart.css'
 import { Picker, emojiIndex } from 'emoji-mart';
-import { socketClient, baseURL, emotionRegex, timeDiff, messageTimeDiff } from '../../../utils';
+import {
+  socketClient, baseURL, emotionRegex,
+  timeDiff, messageTimeDiff, getFileSize
+} from '../../../utils';
 import {
   getMessages, readConversation, startCall, cancelCall, getAllImages,
   getParticipant, getAllFiles, getNumberMessageUnread
@@ -41,7 +45,7 @@ import { v4 } from 'uuid';
 import './conversationChat.css';
 import PreviewImage from '../../../components/PreviewImage';
 import SwitchDarkMode from '../../../components/SwitchDarkMode';
-
+import Peer from 'simple-peer';
 
 const Accordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -76,23 +80,28 @@ const AccordionSummary = styled((props) => (
 
 const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   padding: theme.spacing(0),
-  // borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
 const requestRecorder = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
   return new MediaRecorder(stream);
 }
-const MAX_TIME_RECORD = 90;
+
+const getConnectedDevices = (type, callback) => {
+  navigator.mediaDevices.enumerateDevices()
+    .then(devices => {
+      const filtered = devices.filter(device => device.kind === type);
+      callback(filtered);
+    });
+}
 
 export default function ConversationChat({ conversation, user }) {
+  const MAX_TIME_RECORD = 90;
+  const minRows = 1;
+  const maxRows = 8;
 
   const [content, setContent] = useState('');
   const [rows, setRows] = useState(1);
-  const minRows = 1;
-  const maxRows = 5;
-
-  const [conversationId, setConversationId] = useState(null);
   const filePath = `${baseURL}/api/messages`;
   const [filesMessage, setFilesMessage] = useState([]);
   const [filesMessageUrl, setFilesMessageUrl] = useState([]);
@@ -100,24 +109,27 @@ export default function ConversationChat({ conversation, user }) {
   const [isOpenEmojiList, setIsOpenEmojiList] = useState(false);
   const [forceRender, setForceRender] = useState(v4());
   const [isPreview, setIsPreview] = useState(false);
+  const [conversationId, setConversationId] = useState(null);
   const [selectedMessageId, setMessageId] = useState(null)
   const [selectedPhotoId, setPhotoId] = useState(null)
   const [messageAlert, setMessageAlert] = useState('')
+  const [audioData, setAudioData] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recorder, setRecorder] = useState(null);
+  const [recordTime, setRecordTime] = useState(0);
+  const [intervalTime, setIntervalTime] = useState(null);
 
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const messages = useSelector(state => state.conversationReducer.conversation.messages);
   const images = useSelector(state => state.conversationReducer.conversation.images);
   const files = useSelector(state => state.conversationReducer.conversation.files);
   const settingReducer = useSelector(state => state.settingReducer)
-  const dispatch = useDispatch();
   const scrollRef = useRef(null);
-  const speechReplyRef = useRef('');
   const voiceDetectRef = useRef(false);
-  const [audioData, setAudioData] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recorder, setRecorder] = useState(null);
-  const [recordTime, setRecordTime] = useState(0);
-  const [intervalTime, setIntervalTime] = useState(null);
+
+  const dispatch = useDispatch();
+  const history = useHistory();
+
 
   useEffect(() => {
     // Lazily obtain recorder first time we're recording.
@@ -189,10 +201,6 @@ export default function ConversationChat({ conversation, user }) {
       event.target.scrollTop = event.target.scrollHeight;
     }
     setRows(currentRows < maxRows ? currentRows : maxRows)
-
-    // let emotions = [...event.target.value.matchAll(emotionRegex)];
-    // console.log(emotions)
-
     setContent(event.target.value);
   }
 
@@ -210,7 +218,6 @@ export default function ConversationChat({ conversation, user }) {
       let tContent = content;
       let emotions = [...tContent.matchAll(emotionRegex)];
       for (let emotion of emotions) {
-
         if (emotion) {
           let emojiList = emojiIndex.search(emotion[0]);
           if (emojiList.length) {
@@ -222,7 +229,7 @@ export default function ConversationChat({ conversation, user }) {
 
       socketClient.emit('conversation-sendMessage', {
         content: tContent, senderId: user.id, receiverId: conversation.participantId, conversationId,
-        files: filesMessage, senderName: user.firstName.concat(' ', user.lastName)
+        files: filesMessage, senderName: user.userName
       });
       setContent('');
       setFilesMessage([]);
@@ -232,17 +239,13 @@ export default function ConversationChat({ conversation, user }) {
       setAudioData(null)
       setRecordTime(0);
       console.log(audioData)
+      setRecordTime(0);
       socketClient.emit('conversation-sendMessage', {
         content: '', senderId: user.id, receiverId: conversation.participantId,
-        conversationId, files: [], senderName: user.firstName + ' ' + user.lastName,
+        conversationId, files: [], senderName: user.userName,
         audio: audioData
       });
     }
-  }
-
-  const chooseEmoji = () => {
-    setIsOpenEmojiList(!isOpenEmojiList);
-
   }
 
   const onEmojiClick = (emojiObject) => {
@@ -250,7 +253,9 @@ export default function ConversationChat({ conversation, user }) {
     setContent(content.concat(emojiObject.native));
   };
 
+
   const handleVoiceCall = () => {
+    window.open(`/#/room-call/conversation/${conversationId}`, '_blank', 'width=900,height=700')
     socketClient.emit('conversation-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId });
     dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId }))
   }
@@ -260,17 +265,7 @@ export default function ConversationChat({ conversation, user }) {
     dispatch(cancelCall({ conversationId }))
   }
 
-  const getFileSize = (size) => {
-    if (size < 1000) {
-      return size + ' B';
-    } else if (size < 1000 * 1024) {
-      size /= 1024;
-      return Math.round(size) + ' KB';
-    } else if (size < 1000 * Math.pow(1024, 2)) {
-      size /= Math.pow(1024, 2);
-      return Math.round(size) + ' MB';
-    }
-  }
+
 
   const onFileInputChange = e => {
     e.preventDefault()
@@ -329,7 +324,6 @@ export default function ConversationChat({ conversation, user }) {
     }
 
     recognition.onerror = function (event) {
-      speechReplyRef.current = 'Error occurred in recognition: ' + event.error;
       voiceDetectRef.current = false;
       setForceRender(v4());
       setMessageAlert("Coundn't understand")
@@ -343,11 +337,10 @@ export default function ConversationChat({ conversation, user }) {
       if (confidence > 0.6 && transcript.length) {
         socketClient.emit('conversation-sendMessage', {
           content: transcript, senderId: user.id, receiverId: conversation.participantId,
-          conversationId, files: [], senderName: user.firstName + ' ' + user.lastName
+          conversationId, files: [], senderName: user.userName
         });
       } else {
-        setMessageAlert("Coundn't understand")
-        speechReplyRef.current = "Could not understand!";
+        setMessageAlert("Couldn't understand")
         setForceRender(v4());
       }
 
@@ -486,7 +479,7 @@ export default function ConversationChat({ conversation, user }) {
                   changeMessage={idx >= 1 ? message.userId != messages[idx - 1].userId : true}
                   hasAvatar={idx + 1 === messages.length ? true : message.userId != messages[idx + 1].userId}
                   lastMessage={idx + 1 === messages.length ? true : false}
-                  userName={user.firstName.concat(' ', user.lastName)}
+                  userName={conversation.participantName}
                   messageDif={idx >= 1 ? messageTimeDiff(messages[idx].createdAt, messages[idx - 1].createdAt) : ''}
                 />
               )
@@ -501,7 +494,7 @@ export default function ConversationChat({ conversation, user }) {
               style={{
                 position: 'absolute',
                 top: '-350px',
-                left: '150px',
+                left: '100px',
               }}
               onSelect={onEmojiClick} />
           }
@@ -558,7 +551,7 @@ export default function ConversationChat({ conversation, user }) {
                               flexDirection: 'column',
                               justifyContent: 'space-between'
                             }}>
-                            <DescriptionIcon style={{}} />
+                            <DescriptionIcon />
                             <span style={{
                               overflow: 'hidden',
                               whiteSpace: 'nowrap',
@@ -606,7 +599,7 @@ export default function ConversationChat({ conversation, user }) {
               }}>
                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                   <Tooltip title="Choose an emoji"  >
-                    <IconButton onClick={chooseEmoji} >
+                    <IconButton onClick={e => { setIsOpenEmojiList(!isOpenEmojiList); }} >
                       <InsertEmoticonIcon style={{ color: 'var(--icon-color)' }} />
                     </IconButton>
                   </Tooltip>
@@ -664,7 +657,7 @@ export default function ConversationChat({ conversation, user }) {
                 display: 'flex'
               }}>
                 <Tooltip title="Attach photos">
-                  <IconButton >
+                  <IconButton>
                     <label style={{
                       cursor: 'pointer',
                       display: 'flex'
@@ -768,19 +761,19 @@ export default function ConversationChat({ conversation, user }) {
               <Typography>Shared Media</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <ImageList sx={{ width: '100%', maxHeight: 450, margin: '5px' }}
-                cols={3}
-                rowHeight={130}
+              <ImageList sx={{ width: '100%', maxHeight: 450, margin: '7px' }}
+                cols={2}
+                rowHeight={120}
               >
                 {images.map((img) => (
                   <ImageListItem key={img.id}>
                     <img
                       style={{
                         cursor: 'pointer',
-                        borderRadius: '10px'
+                        borderRadius: '5px',
                       }}
                       onClick={event => handlePreview(event, img.messageId, img.id)}
-                      src={filePath.concat(`/${img.messageId}/${img.id}`)}
+                      src={filePath.concat(`/${img.messageId}/image/${img.id}`)}
                       alt={'image'}
                       loading="lazy"
                     />
@@ -801,7 +794,7 @@ export default function ConversationChat({ conversation, user }) {
                       fontWeight: '600',
                       margin: '8px'
                     }}>
-                      <a href={filePath.concat(`/files/${file.messageId}/${file.id}`)}>{file.name}</a>
+                      <a href={filePath.concat(`/${file.messageId}/files/${file.id}`)}>{file.name}</a>
                     </div>
                   )
                 })}

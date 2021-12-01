@@ -264,6 +264,7 @@ const sendMessageMeeting = async ({ senderId, content, file, meetingId }) => {
       let media = await Media.create({
         pathName: fileName,
         name: file.name,
+        size: file.size,
         messageId: message.id,
         type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
       })

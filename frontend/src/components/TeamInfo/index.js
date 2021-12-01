@@ -24,7 +24,7 @@ export default function TeamInfo() {
 
   const handleDownload = (event, messageId, fileId) => {
     event.preventDefault();
-    window.open(`${baseURL}/api/messages/files/${messageId}/${fileId}`)
+    window.open(`${baseURL}/api/messages/${messageId}/files/${fileId}`)
   }
 
   return (
@@ -73,7 +73,7 @@ export default function TeamInfo() {
                 <div key={idx}
                   style={{
                     cursor: 'pointer',
-                    backgroundImage: `url(${imgPath}/${img.messageId}/${img.id})`
+                    backgroundImage: `url(${imgPath}/${img.messageId}/image/${img.id})`
                   }}
                   onClick={event => handlePreviewImage(event, img.messageId, img.id)}
                 />

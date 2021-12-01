@@ -50,8 +50,8 @@ const getUserInfo = async (req, res) => {
       })
     }
     user.hash_password = undefined
-    user.avatar = undefined
-    return res.status(200).json({ id: user.id, userName: user.getFullName(), email: user.email })
+
+    return res.status(200).json({ user })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error })
@@ -133,6 +133,13 @@ const getUserAvatar = async (req, res) => {
     },
     attributes: ['avatar']
   })
+
+  if (!user) {
+    return res.status(400).json({
+      error: "Could not get avatar!"
+    })
+  }
+
   if (user.avatar) {
     fs.createReadStream(`./src/public/users-avatars/${user.avatar}`).pipe(res)
   } else {
@@ -501,7 +508,7 @@ const setUserStatus = async ({ userId, status }) => {
 
 
     return {
-      time: updateTime[0].updatedAt
+      time: (updateTime[0] || {}).updatedAt
     }
   } catch (error) {
     console.log(error);
