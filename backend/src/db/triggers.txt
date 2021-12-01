@@ -60,20 +60,3 @@ BEGIN
     WHERE ut.meetingId = OLD.id;
 END $$
 DELIMITER ;
-
-
-DELIMITER $$
-CREATE TRIGGER before_team_memmber_remove
-BEFORE DELETE ON users_teams FOR EACH ROW
-BEGIN
-	DELETE FROM meetings m WHERE m.teamId = OLD.teamId AND m.hostId = OLD.userId;
-    DELETE FROM messages WHERE userId = OLD.userId and teamId = OLD.teamId;
-    DELETE FROM users_meetings um 
-    WHERE um.userId = OLD.userId AND um.meetingId IN(
-		SELECT id FROM meetings where teamId = OLD.teamId
-    );
-    DELETE FROM messages m WHERE m.meetingId IN(
-		SELECT id from meetings WHERE meetings.teamId = OLD.teamId 
-    ) AND m.userId = OLD.userId; 
-END $$
-DELIMITER ;

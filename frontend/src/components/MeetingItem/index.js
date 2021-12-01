@@ -33,7 +33,7 @@ export default function MeetingItem({ meeting }) {
 
   const getUserName = userId => {
     let user = meeting.members.find(user => user.id == userId)
-    return (user || {}).userName || '';
+    return (user || {}).userName || 'Anonymous';
   }
 
   return (!meeting.active && <div style={{

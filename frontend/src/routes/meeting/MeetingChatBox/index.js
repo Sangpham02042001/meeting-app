@@ -29,6 +29,11 @@ export default function ChatBox({ chatVisible }) {
     const scrollRef = useRef(null);
     const inputRef = useRef(null);
 
+    const getMemberName = userId => {
+        let user = meetingReducer.meeting.members.find(user => user.id == userId)
+        return (user || {}).userName || '';
+    }
+
     const onWriteMessage = (event) => {
         event.preventDefault()
         const textareaLineHeight = 36;
@@ -149,11 +154,11 @@ export default function ChatBox({ chatVisible }) {
                     {currentNumOfMessages && meetingReducer.meeting.messages.slice(0, currentNumOfMessages - 1)
                         .map((message, idx) => (
                             <Message message={message} key={'message' + message.id}
-                                logInUserId={null}
+                                logInUserId={null} userName={getMemberName(message.userId)}
                                 hasAvatar={message.userId != meetingReducer.meeting.messages[idx + 1].userId} />
                         ))}
                     {currentNumOfMessages && <Message message={meetingReducer.meeting.messages[currentNumOfMessages - 1]}
-                        logInUserId={null}
+                        logInUserId={null} userName={getMemberName(message.userId)}
                         hasAvatar={true} lastMessage={true} />}
                 </div>}
                 {fileUrl && <div className='image-message-upload'>

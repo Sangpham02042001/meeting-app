@@ -27,6 +27,7 @@
   position: relative;
   transition: width 0.3s;
   overflow-x: hidden;
+  box-shadow: var(--box-shadow);
 }
 
 .team-body .emoji-mart {

@@ -34,7 +34,7 @@ Media.belongsTo(Message, {
 })
 
 Message.hasMany(Media, {
-    foreignKey: 'messageId',
+    foreignKey: 'messageId'
 })
 
 module.exports = Media;

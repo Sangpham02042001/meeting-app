@@ -142,6 +142,11 @@
   display: flex;
   flex-direction: column;
   max-width: 470px;
+  align-items: flex-start;
+}
+
+.own-message .message-file-list {
+  align-items: flex-end;
 }
 
 .message-file-list .message-file {

@@ -169,7 +169,7 @@ export default function Navbar() {
           }}
           PaperProps={{
             style: {
-              minWidth: 400,
+              width: 450,
               backgroundColor: 'var(--primary-bg)'
             }
           }}>
@@ -210,7 +210,7 @@ export default function Navbar() {
 
                                 <Avatar className="notificationImg" src={imgSrc} style={{ marginRight: '10px' }} />
                               </Badge>}
-                            <span>{notification.content}</span>
+                            <span className='notification-content'>{notification.content}</span>
                           </div>
                           <IconButton
                             id="basic-button"

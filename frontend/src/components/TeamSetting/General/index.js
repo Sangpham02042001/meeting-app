@@ -21,6 +21,13 @@ export default function TeamGeneralSetting() {
 
   const handleUpdateTeamInfo = (e) => {
     e.preventDefault()
+    if (teamName.trim().length > 30) {
+      setMessage({
+        type: 'warning',
+        'content': 'Team name too long!'
+      })
+      return;
+    }
     let formData = new FormData()
     formData.append('name', teamName === teamReducer.team.name ? '' : teamName)
     formData.append('teamType', teamType === teamReducer.team.teamType ? '' : teamType)

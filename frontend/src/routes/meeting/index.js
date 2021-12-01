@@ -67,6 +67,7 @@ const Meeting = (props) => {
 	const remoteStreams = useRef([])
 	const remoteVideos = useRef([])
 	const remoteAudios = useRef([])
+	const membersRef = useRef(6)
 
 	function getConnectedDevices(type, callback) {
 		navigator.mediaDevices.enumerateDevices()
@@ -139,7 +140,7 @@ const Meeting = (props) => {
 				} else if (event) {
 					if (event === "attached") {
 						console.log('new remote attach', msg)
-						for (let i = 0; i < 6; i++) {
+						for (let i = 0; i < membersRef.current; i++) {
 							if (!feedRefs.current[i]) {
 								feedRefs.current[i] = remoteFeed;
 								remoteFeed.rfindex = i;
@@ -275,6 +276,7 @@ const Meeting = (props) => {
 	useEffect(() => {
 		if (teamReducer.teamLoaded) {
 			let members = teamReducer.team.members;
+			membersRef.current = members.length
 			let meetingId = teamReducer.team.meetingActive && teamReducer.team.meetingActive.id;
 			if (localStorage.getItem('user')) {
 				let userId = JSON.parse(localStorage.getItem('user')).id
@@ -371,7 +373,7 @@ const Meeting = (props) => {
 													let leaving = msg["leaving"];
 													console.log("Publisher left: " + leaving);
 													let remoteFeed = null;
-													for (let i = 0; i < 6; i++) {
+													for (let i = 0; i < membersRef.current; i++) {
 														if (feedRefs.current[i] && feedRefs.current[i].rfid == leaving) {
 															remoteFeed = feedRefs.current[i];
 															break;
@@ -602,7 +604,7 @@ const Meeting = (props) => {
 					alignItems: 'center'
 				}}>
 					<strong style={{ color: '#FFF' }}>
-						Time: {getAmTime(Date.now())}
+						Start time: {getAmTime(Date.now())}
 					</strong>
 				</div>
 				<div className="btn-mid" style={{
