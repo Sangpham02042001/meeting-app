@@ -153,7 +153,7 @@ const getMessages = async (req, res) => {
     let messages = await Message.findAll({
       include: [
         { model: User, as: 'user', attributes: ['id', 'firstName', 'lastName'] },
-        { model: Media, as: 'medias', attributes: ['id', 'type'] }
+        { model: Media, attributes: ['id', 'type'] }
       ],
       order: [
         ['updatedAt', 'DESC'],
