@@ -320,7 +320,7 @@ export default function TeamHeader({ showTeamInfo }) {
           </DialogActions>
         </Dialog>
 
-        <Dialog open={isJoinMeetingShow} centered="true" onClose={handleCloseJoinMeeting} minWidth="sm" fullWidth={true}>
+        <Dialog open={isJoinMeetingShow} centered="true" onClose={handleCloseJoinMeeting} maxWidth={"sm"} fullWidth={true}>
           <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>
             Join meeting
           </DialogTitle>

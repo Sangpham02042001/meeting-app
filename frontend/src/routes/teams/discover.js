@@ -169,6 +169,13 @@ export default function TeamDiscover() {
   }
 
   const createTeamAndInviteUsers = async () => {
+    if (teamName.trim().length > 24) {
+      setMessage({
+        type: 'warning',
+        'content': 'Team name must be less than 24 characters!'
+      })
+      return;
+    }
     let formData = new FormData()
     formData.append('name', teamName)
     formData.append('coverPhoto', teamCoverPhoto)

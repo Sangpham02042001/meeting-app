@@ -159,7 +159,7 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  margin: auto;
+  /* margin: auto; */
 }
 
 .team-item-image {

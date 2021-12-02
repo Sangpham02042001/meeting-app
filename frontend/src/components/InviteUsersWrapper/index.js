@@ -130,7 +130,7 @@ export default function InviteUsersWrapper({ users }) {
           setShow(true)
         }} style={{ backgroundColor: 'var(--primary-color)' }}>Invite</Button>
       </div>
-      <Dialog className='invite-user-wrapper' open={isShow} onClose={handleInviteModalClose} minWidth={`sm`} fullWidth={true}>
+      <Dialog className='invite-user-wrapper' open={isShow} onClose={handleInviteModalClose} maxWidth={`sm`} fullWidth={true}>
         <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>
           Invite users to join your team
         </DialogTitle>

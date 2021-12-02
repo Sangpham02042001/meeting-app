@@ -21,10 +21,10 @@ export default function TeamGeneralSetting() {
 
   const handleUpdateTeamInfo = (e) => {
     e.preventDefault()
-    if (teamName.trim().length > 30) {
+    if (teamName.trim().length > 24) {
       setMessage({
         type: 'warning',
-        'content': 'Team name too long!'
+        'content': 'Team name must be less than 24 characters!'
       })
       return;
     }
