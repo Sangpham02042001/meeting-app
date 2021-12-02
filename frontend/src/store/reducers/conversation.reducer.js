@@ -202,6 +202,13 @@ export const conversationSlice = createSlice({
     startCall: (state, action) => {
       state.conversationCall = { ...state.conversationCall, ...action.payload, isCalling: true }
     },
+    acceptCall: (state, action) => {
+      let { conversationId } = action.payload;
+      if (conversationId === state.conversationCall.conversationId) {
+        state.conversationCall.isRinging = false;
+        state.conversationCall.isCalling = true;
+      }
+    },
     cancelCall: (state, action) => {
       let { conversationId } = action.payload;
       if (conversationId === state.conversationCall.conversationId) {
@@ -214,7 +221,7 @@ export const conversationSlice = createSlice({
       state.conversation.participant = null;
     },
     removeMessageCv: (state, action) => {
-      let { conversationId, messageId } = action.payload;
+      let { messageId } = action.payload;
       let idxMsg = state.conversation.messages.findIndex(m => m.id === messageId);
       if (idxMsg >= 0) {
         state.conversation.messages.splice(idxMsg, 1);
@@ -231,12 +238,13 @@ export const conversationSlice = createSlice({
         conversation.status = status;
         conversation.statusTime = time;
       }
-    }
+    },
+
   }
 })
 
 export const { createConversation, sendMessageCv, receiveMessageCv,
   conversationCalling, clearConversation, cancelCall, startCall, removeMessageCv,
-  setConversationStatus } = conversationSlice.actions;
+  setConversationStatus, acceptCall } = conversationSlice.actions;
 
 export default conversationSlice.reducer

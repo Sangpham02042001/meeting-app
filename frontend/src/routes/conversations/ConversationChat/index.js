@@ -34,7 +34,7 @@ import 'emoji-mart/css/emoji-mart.css'
 import { Picker, emojiIndex } from 'emoji-mart';
 import {
   socketClient, baseURL, emotionRegex,
-  timeDiff, messageTimeDiff, getFileSize
+  timeDiff, messageTimeDiff, getFileSize, getConnectedDevices
 } from '../../../utils';
 import {
   getMessages, readConversation, startCall, cancelCall, getAllImages,
@@ -87,13 +87,6 @@ const requestRecorder = async () => {
   return new MediaRecorder(stream);
 }
 
-const getConnectedDevices = (type, callback) => {
-  navigator.mediaDevices.enumerateDevices()
-    .then(devices => {
-      const filtered = devices.filter(device => device.kind === type);
-      callback(filtered);
-    });
-}
 
 export default function ConversationChat({ conversation, user }) {
   const MAX_TIME_RECORD = 90;
@@ -118,6 +111,8 @@ export default function ConversationChat({ conversation, user }) {
   const [recorder, setRecorder] = useState(null);
   const [recordTime, setRecordTime] = useState(0);
   const [intervalTime, setIntervalTime] = useState(null);
+  const [isEnableVideo, setIsEnableVideo] = useState(false);
+  const [isEnableAudio, setIsEnableAudio] = useState(false);
 
   const conversationCall = useSelector(state => state.conversationReducer.conversationCall);
   const messages = useSelector(state => state.conversationReducer.conversation.messages);
@@ -184,6 +179,17 @@ export default function ConversationChat({ conversation, user }) {
     dispatch(getMessages({ conversationId: converId }))
     dispatch(readConversation({ conversationId: converId }))
     setConversationId(converId)
+
+    getConnectedDevices('videoinput', (cameras) => {
+      if (cameras.length) setIsEnableVideo(true);
+    })
+
+    getConnectedDevices('audioinput', (audios) => {
+      if (audios.length) setIsEnableAudio(true);
+      console.log(audios)
+    })
+
+
   }, [conversation.conversationId])
 
   const onWriteMessage = (event) => {
@@ -255,17 +261,28 @@ export default function ConversationChat({ conversation, user }) {
 
 
   const handleVoiceCall = () => {
-    window.open(`/#/room-call/conversation/${conversationId}`, '_blank', 'width=900,height=700')
-    socketClient.emit('conversation-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId });
+    let wWidth = document.body.clientWidth;
+    let wHeight = document.body.clientHeight;
+    let width = 900;
+    let height = 700;
+
+    window.open(`/#/room-call/conversation/${conversation.participantId}`,
+      '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
+    socketClient.emit('conversation-start-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId });
     dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId }))
   }
 
-  const handleCancelCall = () => {
-    socketClient.emit('conversation-cancel-call', { conversationId, senderId: user.id, receiverId: conversation.participantId })
-    dispatch(cancelCall({ conversationId }))
+  const handleVideoCall = () => {
+    let wWidth = document.body.clientWidth;
+    let wHeight = document.body.clientHeight;
+    let width = 900;
+    let height = 700;
+
+    window.open(`/#/room-call/conversation/${conversation.participantId}?video=true`,
+      '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
+    socketClient.emit('conversation-start-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId });
+    dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId }))
   }
-
-
 
   const onFileInputChange = e => {
     e.preventDefault()
@@ -439,17 +456,43 @@ export default function ConversationChat({ conversation, user }) {
             </div>
 
           </div>
+
           <div className="header-btn-list">
-            <Tooltip title="Start a voice call">
-              <IconButton onClick={handleVoiceCall}>
-                <PhoneIcon style={{ color: 'var(--icon-color)' }} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Start a video call">
-              <IconButton >
-                <VideocamIcon style={{ color: 'var(--icon-color)' }} />
-              </IconButton>
-            </Tooltip>
+            {conversation.conversationId && <>
+              <Tooltip title="Start a voice call">
+                <IconButton onClick={handleVoiceCall}>
+                  <Badge
+                    badgeContent=" "
+                    variant="dot"
+                    color={getColorStatus(conversation.status)}
+                    anchorOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    overlap='circular'
+                    invisible={conversation.status !== 'active'}
+                  >
+                    <PhoneIcon style={{ color: 'var(--icon-color)' }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+              {isEnableVideo ?
+                <Tooltip title="Start a video call">
+                  <IconButton >
+                    <VideocamIcon style={{ color: 'var(--icon-color)' }} />
+                  </IconButton>
+                </Tooltip>
+                :
+                <Tooltip title="You dont have camera">
+                  <div>
+                    <IconButton disabled>
+                      <VideocamIcon />
+                    </IconButton>
+                  </div>
+                </Tooltip>
+              }
+            </>
+            }
             <Tooltip title="Conversation info">
               <IconButton onClick={e => setShowInfo(!showInfo)}>
                 <InfoIcon style={{ color: 'var(--icon-color)' }} />
@@ -457,8 +500,13 @@ export default function ConversationChat({ conversation, user }) {
             </Tooltip>
 
           </div>
+
         </div>
-        <div className="content-message" ref={scrollRef} onClick={e => { e.preventDefault(); setIsOpenEmojiList(false); }}>
+        <div className="content-message" ref={scrollRef}
+          onClick={e => {
+            // e.preventDefault();
+            setIsOpenEmojiList(false);
+          }}>
           <div className="info-beginner-content">
             <Avatar width="80px" height="80px" userId={conversation.participantId} />
             <div style={{ textAlign: 'center' }} >
@@ -627,9 +675,11 @@ export default function ConversationChat({ conversation, user }) {
               {!audioData ?
                 <div className="is-recording">
                   <div className="btn-in-div">
+
                     <IconButton onClick={handleRecord}>
                       <StopCircleIcon />
                     </IconButton>
+
                   </div>
                   <span style={{ color: '#000', width: '100%' }}>
                     Recording...
@@ -696,21 +746,41 @@ export default function ConversationChat({ conversation, user }) {
                 </Tooltip>
                 {!content &&
                   <>
-                    <Tooltip title="Record">
-                      <IconButton onClick={handleRecord}>
-                        <RadioButtonCheckedIcon style={{ color: 'red' }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Speech to text">
-                      <IconButton onClick={runSpeechRecognition}>
-                        {voiceDetectRef.current ?
-                          <MicNoneIcon style={{ color: 'var(--icon-color)' }} />
-                          :
-                          <MicIcon style={{ color: 'var(--icon-color)' }} />
-                        }
-                      </IconButton>
-                    </Tooltip>
-
+                    {isEnableAudio ?
+                      <>
+                        <Tooltip title="Record">
+                          <IconButton onClick={handleRecord}>
+                            <RadioButtonCheckedIcon style={{ color: 'red' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Speech to text">
+                          <IconButton onClick={runSpeechRecognition}>
+                            {voiceDetectRef.current ?
+                              <MicNoneIcon style={{ color: 'var(--icon-color)' }} />
+                              :
+                              <MicIcon style={{ color: 'var(--icon-color)' }} />
+                            }
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                      :
+                      <>
+                        <Tooltip title="You dont have mic">
+                          <div>
+                            <IconButton disabled >
+                              <RadioButtonCheckedIcon />
+                            </IconButton>
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="You dont have mic">
+                          <div>
+                            <IconButton disabled>
+                              <MicIcon />
+                            </IconButton>
+                          </div>
+                        </Tooltip>
+                      </>
+                    }
                   </>
                 }
               </div>
@@ -810,7 +880,7 @@ export default function ConversationChat({ conversation, user }) {
         messageId={selectedMessageId} photoId={selectedPhotoId}
       />
 
-      <Dialog
+      {/* <Dialog
         open={conversationCall.isCalling}
       >
         <DialogTitle id="alert-dialog-title" style={{ backgroundColor: 'var(--primary-bg)' }}>
@@ -826,7 +896,7 @@ export default function ConversationChat({ conversation, user }) {
         <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
           <Button onClick={handleCancelCall} style={{ color: 'var(--icon-color)' }}>Cancel</Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
 
       <Snackbar open={messageAlert.length > 0}
         autoHideDuration={3000}

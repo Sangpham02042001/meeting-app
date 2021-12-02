@@ -387,23 +387,23 @@ const socketServer = (io, socket) => {
         }
     })
 
-    socket.on('conversation-remove-message', async ({ conversationId, messageId, senderId, receiverId }) => {
+    socket.on('conversation-remove-message', async ({ messageId, receiverId }) => {
         let report = await deleteMessage({ messageId });
         if (report) {
             if (userSockets[receiverId] && userSockets[receiverId].length) {
                 for (const socketId of userSockets[receiverId]) {
-                    socket.to(socketId).emit('conversation-removed-message', { conversationId, messageId, senderId })
+                    socket.to(socketId).emit('conversation-removed-message', { messageId })
                 }
             }
-            socket.emit('conversation-removed-message', { conversationId, messageId, senderId })
+            socket.emit('conversation-removed-message', { messageId })
         }
     })
 
-    socket.on('conversation-call', ({ conversationId, senderId, senderName, receiverId }) => {
+    socket.on('conversation-start-call', ({ conversationId, senderId, senderName, receiverId }) => {
         console.log(senderName);
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (const socketId of userSockets[receiverId]) {
-                socket.to(socketId).emit('conversation-calling', { conversationId, senderId, senderName, receiverId })
+                socket.to(socketId).emit('conversation-start-calling', { conversationId, senderId, senderName, receiverId })
             }
         }
     })
@@ -416,14 +416,45 @@ const socketServer = (io, socket) => {
         }
     })
 
-    socket.on('conversation-send-signal', ({ }) => {
-        console.log('receive-signal')
+    socket.on('conversation-send-signal', async ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
+        socket.roomCallId = conversationId;
+        socket.join(`room-call-${conversationId}`)
+        if (userSockets[receiverId] && userSockets[receiverId].length) {
+            for (const socketId of userSockets[receiverId]) {
+                socket.to(socketId).emit('conversation-sent-signal', { conversationId, senderId, receiverId, signal, isVideo, isAudio })
+            }
+        }
+
+        let report = await setUserStatus({ userId: senderId, status: 'busy' })
+        if (report) {
+            io.emit('user-changed-status', { userId: senderId, status: 'busy', time: report.time })
+        }
+    })
+
+    socket.on('conversation-return-signal', async ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
+        socket.roomCallId = conversationId;
+        socket.join(`room-call-${conversationId}`)
+        socket.to(`room-call-${conversationId}`).emit('conversation-returning-signal', { senderId, receiverId, signal, isVideo, isAudio })
+
+        let report = await setUserStatus({ userId: receiverId, status: 'busy' })
+        if (report) {
+            io.emit('user-changed-status', { userId: receiverId, status: 'busy', time: report.time })
+        }
+    })
+
+    socket.on('mute-device', ({ type, isActive }) => {
+        // if (userSockets[receiverId] && userSockets[receiverId].length) {
+        //     for (const socketId of userSockets[receiverId]) {
+        //         socket.to(socketId).emit('muted-device', { type, isActive })
+        //     }
+        // }
+        socket.to(`room-call-${socket.roomCallId}`).emit('muted-device', { type, isActive })
     })
 
     socket.on('conversation-cancel-call', ({ conversationId, senderId, receiverId }) => {
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (const socketId of userSockets[receiverId]) {
-                socket.to(socketId).emit('cancel-call', { conversationId, senderId, receiverId })
+                socket.to(socketId).emit('cancel-call', { conversationId })
             }
         }
     })
@@ -479,6 +510,18 @@ const socketServer = (io, socket) => {
         let report = await setUserStatus({ userId: socket.userId, status });
         if (report) {
             socket.broadcast.emit('user-disconnect', { userId: socket.userId, status, time: report.time })
+        }
+
+        //conversation
+        if (socket.roomCallId) {
+            let conversationId = socket.roomCallId;
+            socket.to(`room-call-${conversationId}`).emit('cancel-call', { conversationId })
+            delete socket.roomCallId;
+            socket.leave(`room-call-${conversationId}`)
+            let report = await setUserStatus({ userId: socket.userId, status: 'active' })
+            if (report) {
+                io.emit('user-changed-status', { userId: socket.userId, status: 'active', time: report.time })
+            }
         }
 
         userSockets[socket.userId] = userSockets[socket.userId].filter(socketId => socketId != socket.id)

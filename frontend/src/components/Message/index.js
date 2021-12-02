@@ -31,14 +31,14 @@ const Message = React.memo(({
   const urlify = (text) => {
     var urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.replace(urlRegex, function (url) {
-      return '<a style="color: #fff;" href="' + url + '" target="_blank">' + url + '</a>';
+      return `<a style="color: #fff;" href="${url}" target="_blank" > ${url} </a>`;
     })
   }
 
   const handleRemoveMessage = () => {
     setAnchorEl(null);
     if (conversationId && participantId) {
-      socketClient.emit('conversation-remove-message', { conversationId, messageId: message.id, senderId: logInUserId, receiverId: participantId })
+      socketClient.emit('conversation-remove-message', { messageId: message.id, receiverId: participantId })
     } else {
       socketClient.emit('team-remove-message', { teamId: message.teamId, messageId: message.id, senderId: logInUserId })
     }
@@ -160,6 +160,11 @@ const Message = React.memo(({
                   MenuListProps={{
                     'aria-labelledby': 'basic-button',
                   }}
+                  PaperProps={{
+                    sx: {
+                      background: 'var(--primary-bg)'
+                    }
+                  }}
                 >
                   <MenuItem onClick={handleRemoveMessage} style={{ color: 'var(--text-color)' }}>Remove</MenuItem>
                 </Menu>
@@ -199,9 +204,9 @@ const Message = React.memo(({
                       {message.files.map((file) => {
                         return (
                           file.type === "audio" ?
-                            <div key={file.id}>
-                              <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
-                            </div>
+
+                            <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
+
                             :
                             <div className="message-file" key={file.id} onClick={e => handleFileDownload(e, message.id, file.id)}>
                               <div className="file-name" >
@@ -281,9 +286,9 @@ const Message = React.memo(({
                       {message.files.map((file) => {
                         return (
                           file.type === 'audio' ?
-                            <div key={file.id}>
-                              <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
-                            </div>
+
+                            <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
+
                             :
                             <div className="message-file" key={file.id} onClick={e => handleFileDownload(e, message.id, file.id)}>
                               <div className="file-name">

@@ -167,7 +167,7 @@
 .message-file .file-size {
   opacity: 0.6;
   font-size: 0.8rem;
-  margin: 3px 8px;
+  margin: 3px;
 }
 
 .message-option-icon {
@@ -198,9 +198,6 @@
 .message-component .text-message .emoji-message {
   margin-left: 45px;
 }
-/* .message-component .message .emoji-message {
-  margin-left: 45px;
-} */
 
 .message-component .emoji-message img {
   width: 40px;

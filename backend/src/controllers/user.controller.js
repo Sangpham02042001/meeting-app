@@ -49,7 +49,8 @@ const getUserInfo = async (req, res) => {
         message: 'User info not found'
       })
     }
-    user.hash_password = undefined
+    user.hash_password = undefined;
+    user.dataValues.userName = user.firstName.concat(' ', user.lastName);
 
     return res.status(200).json({ user })
   } catch (error) {

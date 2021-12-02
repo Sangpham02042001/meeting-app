@@ -12,7 +12,8 @@ import { socketClient, baseURL } from '../../utils';
 import { setMyStatus } from '../../store/reducers/user.reducer'
 import {
   sendMessageCv, conversationCalling, cancelCall,
-  removeMessageCv, setConversationStatus, getNumberMessageUnread
+  removeMessageCv, setConversationStatus, getNumberMessageUnread,
+  acceptCall
 } from '../../store/reducers/conversation.reducer';
 import teamReducer, {
   sendMessage, setMeetingActive, endActiveMeeting,
@@ -111,13 +112,13 @@ export default function Layout({ children }) {
       dispatch(removeMessageCv({ conversationId, messageId, receiverId, senderId }))
     })
 
-    socketClient.on('conversation-calling', ({ conversationId, senderId, senderName, receiverId }) => {
+    socketClient.on('conversation-start-calling', ({ conversationId, senderId, senderName, receiverId }) => {
       //todo
       dispatch(conversationCalling({ conversationId, senderId, senderName, receiverId }))
     })
 
-    socketClient.on('cancel-call', ({ conversationId, senderId, receiverId }) => {
-      dispatch(cancelCall({ conversationId, senderId, receiverId }))
+    socketClient.on('cancel-call', ({ conversationId }) => {
+      dispatch(cancelCall({ conversationId}))
     })
 
     //teams
@@ -344,6 +345,17 @@ export default function Layout({ children }) {
   };
 
   const handleAcceptCall = () => {
+    let wWidth = document.body.clientWidth;
+    let wHeight = document.body.clientHeight;
+    let width = 900;
+    let height = 700;
+
+    window.open(`/#/room-call/conversation/${conversationCall.senderId}`,
+      '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
+
+    dispatch(acceptCall({
+      conversationId: conversationCall.conversationId
+    }))
     socketClient.emit('conversation-accept-call', {
       conversationId: conversationCall.conversationId,
       senderId: userReducer.user.id, receiverId: conversationCall.senderId
@@ -435,7 +447,7 @@ export default function Layout({ children }) {
                     width: '40px',
                     height: '40px',
                   }} />
-                <span style={{ fontSize: '18px', fontWeight: 500 }}>{conversationCall.senderName}</span> is calling you...
+                <span style={{ fontSize: '18px', fontWeight: 500, color: '#000' }}>{conversationCall.senderName}</span> is calling you...
               </div>
 
             </DialogContent>

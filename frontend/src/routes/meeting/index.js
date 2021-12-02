@@ -299,11 +299,13 @@ const Meeting = (props) => {
 					debug: 'all', callback: () => {
 						janus = new Janus({
 							server: janusServer,
-							iceServers: [{
-								url: 'turn:numb.viagenie.ca',
-								credential: 'muazkh',
-								username: 'webrtc@live.com'
-							},],
+							iceServers: [
+								{ urls: 'stun:stun.l.google.com:19302' },
+								{
+									url: 'turn:numb.viagenie.ca',
+									credential: 'muazkh',
+									username: 'webrtc@live.com'
+								},],
 							success: function () {
 								janus.attach({
 									plugin: "janus.plugin.videoroom",

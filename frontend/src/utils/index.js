@@ -109,9 +109,17 @@ const getFileSize = (size) => {
   }
 }
 
-const emotionRegex = /[:;=]+["^'-]*[()pPdD*oO]+/g;
+const getConnectedDevices = (type, callback) => {
+  navigator.mediaDevices.enumerateDevices()
+      .then(devices => {
+          const filtered = devices.filter(device => device.kind === type);
+          callback(filtered);
+      });
+}
+
+const emotionRegex = /[:;=<]+["^'-]*[3()pPdD*oO]+/g;
 
 export {
   convertDate, timeDiff, messageTimeDiff, getTime,
-  emotionRegex, getAmTime, getFileSize
+  emotionRegex, getAmTime, getFileSize, getConnectedDevices
 }
