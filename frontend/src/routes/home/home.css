@@ -5,16 +5,16 @@
   display: flex;
   flex-direction: row;
 }
-.home-items {
+.home-component .home-items {
   width: 33.33%;
   height: 100%;
 }
-#world-img {
+.home-component #world-img {
   width: 110%;
   position: relative;
   top: 15%;
 }
-#center-item {
+.home-component #center-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -23,45 +23,59 @@
   margin-top: 30px;
   font-weight: 600;
 }
-#home-image {
+.home-component #home-image {
   width: 500px;
 }
-#profile {
+.home-component #profile {
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
   width: 80%;
 }
-.contact-links {
+.home-component .contact-links {
   font-size: 40px;
   color: var(--icon-color);
 }
-.contact-links:hover {
-  color: var(--icon-color);
+.home-component .contact-links:hover {
+  color: var(--primary-color);
 }
 
-#end-item {
+.home-component #end-item {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-#calendar {
+.home-component #calendar {
   /* background-color: rgba(85, 112, 85, 0.719); */
-  height: 300px;
-  margin-top: 30%;
+  margin-top: 20%;
 }
-.footer-button {
+.home-component .footer-button {
   font-size: 20px;
   position: fixed;
   bottom: 20px;
 }
-#help {
-  left: 110px;
-  color: var(--icon-color);
+.home-component #help {
+  left: 80px;
+  color: var(--primary-color);
   text-decoration: none;
+  bottom: 0px;
 }
-#customize {
-  right: 40px;
-  color: var(--icon-color);
+.home-component #customize {
+  right: 30px;
+  color: var(--primary-color);
   text-decoration: none;
+  bottom: 10px;
+}
+
+.home-component .add-event {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-component .event-input {
+  margin-top: 2%;
+  padding: 0;
+}
+.send-icon {
+  color: #fff;
 }

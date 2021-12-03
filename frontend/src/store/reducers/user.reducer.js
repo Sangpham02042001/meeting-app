@@ -10,6 +10,10 @@ const initialState = {
   status: 'active',
 }
 
+export const sendFeedback = createAsyncThunk('user/sendFeedback', async ({ feedback, userId }, { rejectWithValue }) => {
+  
+})
+
 export const signin = createAsyncThunk('user/signin', async ({ email, password }, { rejectWithValue }) => {
   try {
     const response = await axiosInstance.post('/api/signin', {

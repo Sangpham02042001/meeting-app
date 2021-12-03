@@ -5,8 +5,9 @@
   "dependencies": {
     "@emotion/react": "^11.5.0",
     "@emotion/styled": "^11.3.0",
+    "@material-ui/lab": "^4.0.0-alpha.60",
     "@mui/icons-material": "^5.0.5",
-    "@mui/lab": "^5.0.0-alpha.54",
+    "@mui/lab": "^5.0.0-alpha.55",
     "@mui/material": "^5.0.6",
     "@reduxjs/toolkit": "^1.6.1",
     "@testing-library/jest-dom": "^5.11.4",
@@ -14,6 +15,7 @@
     "@testing-library/user-event": "^12.1.10",
     "axios": "^0.21.4",
     "bootstrap": "^5.1.0",
+    "date-fns": "^2.26.0",
     "emoji-mart": "^3.0.1",
     "emoji-regex": "^10.0.0",
     "emojione": "^4.5.0",
