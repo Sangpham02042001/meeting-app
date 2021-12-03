@@ -1,5 +1,5 @@
 .room-call {
-  background: #202124;
+  background: var(--bg-meeting-color);
   font-family: "Roboto", arial, sans-serif;
   font-size: 12px;
   height: 100vh;
@@ -14,7 +14,7 @@
 .room-call .video-content {
   display: flex;
   position: relative;
-  height: 90vh;
+  height: 95vh;
 }
 
 .video-content .video-content-user {
@@ -47,7 +47,7 @@
   height: 200px;
   border-radius: 10px;
   position: absolute;
-  border: 1px solid #fff;
+  background-color: var(--video-color);
   border-radius: 15px;
   bottom: 0px;
 }
@@ -75,12 +75,12 @@
 }
 
 .room-call .part-video {
-  width: 80%;
+  width: 85%;
   height: 100%;
   min-width: 500px;
   min-height: 500px;
   position: relative;
-  border: 1px solid #fff;
+  background-color: var(--video-color);
   border-radius: 15px;
 }
 

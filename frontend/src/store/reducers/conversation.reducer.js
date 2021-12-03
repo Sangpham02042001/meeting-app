@@ -211,7 +211,7 @@ export const conversationSlice = createSlice({
     },
     cancelCall: (state, action) => {
       let { conversationId } = action.payload;
-      if (conversationId === state.conversationCall.conversationId) {
+      if (conversationId == state.conversationCall.conversationId) {
         state.conversationCall.isRinging = false;
         state.conversationCall.isCalling = false;
       }

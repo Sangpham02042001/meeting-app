@@ -66,13 +66,14 @@ const createMeeting = async (req, res) => {
   try {
     let meeting = await Meeting.create({
       teamId,
-      hostId: id
+      hostId: id,
+      active: false
     })
-    meeting = await getMeetingInfo({ meetingId: meeting.id })
+    let _meeting = await getMeetingInfo({ meetingId: meeting.id })
     let response = await axiosJanus.post('/', {
       janus: 'create',
       transaction: 'meeting_app',
-      id: Number(meeting.id)
+      id: Number(_meeting.id)
     })
     if (response.data && response.data.janus === 'success') {
       let sessionId = response.data.data.id
@@ -88,12 +89,19 @@ const createMeeting = async (req, res) => {
           transaction: 'meeting_app',
           body: {
             request: 'create',
-            room: Number(meeting.id),
+            room: Number(_meeting.id),
             publishers: 100
           }
         })
+
+        meeting.active = true;
+        await meeting.save();
       }
+
     }
+
+
+
     return res.status(200).json({ meeting })
   } catch (error) {
     console.log(error)

@@ -4,7 +4,7 @@ const { getMemberTeam, sendMessage, socketInviteUsers,
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting, getMeetingHostId } = require('../controllers/meeting.controller')
-const { setConversation, setMessage } = require('../controllers/conversation.controller');
+const { setConversation, setMessage, getParticipantId } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification, createMeetingNofication } = require('../controllers/notification.controller')
 const { socketRequestTeam, setUserStatus, getUserStatus,
     socketCancelJoin, socketOutTeam, socketConfirmInvitation } = require('../controllers/user.controller')
@@ -291,6 +291,11 @@ const socketServer = (io, socket) => {
                 }
             }
         }
+
+        let report = await setUserStatus({ userId, status: 'busy' })
+        if (report) {
+            io.emit('user-changed-status', { userId, status: 'busy', time: report.time })
+        }
     });
 
     socket.on('send-message-meeting', async ({ teamId, senderId, content, file, meetingId }) => {
@@ -400,7 +405,6 @@ const socketServer = (io, socket) => {
     })
 
     socket.on('conversation-start-call', ({ conversationId, senderId, senderName, receiverId }) => {
-        console.log(senderName);
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (const socketId of userSockets[receiverId]) {
                 socket.to(socketId).emit('conversation-start-calling', { conversationId, senderId, senderName, receiverId })
@@ -416,11 +420,16 @@ const socketServer = (io, socket) => {
         }
     })
 
-    socket.on('conversation-send-signal', async ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
+    socket.on('set-room-id', ({ conversationId }) => {
         socket.roomCallId = conversationId;
         socket.join(`room-call-${conversationId}`)
+    })
+
+    socket.on('conversation-send-signal', async ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
+        // socket.roomCallId = conversationId;
+        // socket.join(`room-call-${conversationId}`)
         if (userSockets[receiverId] && userSockets[receiverId].length) {
-            for (const socketId of userSockets[receiverId]) {
+            for (let socketId of userSockets[receiverId]) {
                 socket.to(socketId).emit('conversation-sent-signal', { conversationId, senderId, receiverId, signal, isVideo, isAudio })
             }
         }
@@ -432,22 +441,17 @@ const socketServer = (io, socket) => {
     })
 
     socket.on('conversation-return-signal', async ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
-        socket.roomCallId = conversationId;
-        socket.join(`room-call-${conversationId}`)
+        // socket.roomCallId = conversationId;
+        // socket.join(`room-call-${conversationId}`)
         socket.to(`room-call-${conversationId}`).emit('conversation-returning-signal', { senderId, receiverId, signal, isVideo, isAudio })
 
-        let report = await setUserStatus({ userId: receiverId, status: 'busy' })
+        let report = await setUserStatus({ userId: senderId, status: 'busy' })
         if (report) {
-            io.emit('user-changed-status', { userId: receiverId, status: 'busy', time: report.time })
+            io.emit('user-changed-status', { userId: senderId, status: 'busy', time: report.time })
         }
     })
 
     socket.on('mute-device', ({ type, isActive }) => {
-        // if (userSockets[receiverId] && userSockets[receiverId].length) {
-        //     for (const socketId of userSockets[receiverId]) {
-        //         socket.to(socketId).emit('muted-device', { type, isActive })
-        //     }
-        // }
         socket.to(`room-call-${socket.roomCallId}`).emit('muted-device', { type, isActive })
     })
 
@@ -500,6 +504,11 @@ const socketServer = (io, socket) => {
             }
             delete socket.meetingId;
             socket.leave(`meeting-${socket.meetingId}`)
+
+            let report = await setUserStatus({ userId: socket.userId, status: 'active' })
+            if (report) {
+                io.emit('user-changed-status', { userId: socket.userId, status: 'active', time: report.time })
+            }
         }
 
         //user
@@ -512,12 +521,23 @@ const socketServer = (io, socket) => {
             socket.broadcast.emit('user-disconnect', { userId: socket.userId, status, time: report.time })
         }
 
+
+
         //conversation
         if (socket.roomCallId) {
             let conversationId = socket.roomCallId;
+            let participantId = await getParticipantId({ userId: socket.userId, conversationId });
+            console.log('xxx', participantId, conversationId);
+            if (participantId) {
+                if (userSockets[participantId]) {
+                    for (const socketId of userSockets[participantId]) {
+                        socket.to(socketId).emit('cancel-call', { conversationId })
+                    }
+                }
+            }
             socket.to(`room-call-${conversationId}`).emit('cancel-call', { conversationId })
             delete socket.roomCallId;
-            socket.leave(`room-call-${conversationId}`)
+            socket.leave(`room-call-${conversationId}`);
             let report = await setUserStatus({ userId: socket.userId, status: 'active' })
             if (report) {
                 io.emit('user-changed-status', { userId: socket.userId, status: 'active', time: report.time })

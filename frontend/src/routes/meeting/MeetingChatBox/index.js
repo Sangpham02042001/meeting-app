@@ -208,7 +208,7 @@ export default function ChatBox({ chatVisible }) {
             </div>
             <div className="chatbox-sender">
                 <textarea
-                    style={{ fontSize: '16px' }}
+                    style={{ fontSize: '16px', }}
                     variant="outlined"
                     type="text" placeholder="Chat" name='message'
                     autoComplete="off"

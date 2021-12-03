@@ -1,5 +1,5 @@
 .room-meeting {
-  background: #202124;
+  background: var(--bg-meeting-color);
   font-family: "Roboto", arial, sans-serif;
   font-size: 12px;
   height: 100vh;

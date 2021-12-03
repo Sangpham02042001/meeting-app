@@ -233,6 +233,8 @@ export default function ConversationChat({ conversation, user }) {
         }
       }
 
+      console.log(user.userName)
+
       socketClient.emit('conversation-sendMessage', {
         content: tContent, senderId: user.id, receiverId: conversation.participantId, conversationId,
         files: filesMessage, senderName: user.userName
@@ -266,9 +268,11 @@ export default function ConversationChat({ conversation, user }) {
     let width = 900;
     let height = 700;
 
-    window.open(`/#/room-call/conversation/${conversation.participantId}`,
-      '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
+    window.open(`/public/#/room-call/conversation/${conversation.participantId}?cvId=${conversationId}`,
+      '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`);
+
     socketClient.emit('conversation-start-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId });
+
     dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId }))
   }
 
@@ -278,7 +282,7 @@ export default function ConversationChat({ conversation, user }) {
     let width = 900;
     let height = 700;
 
-    window.open(`/#/room-call/conversation/${conversation.participantId}?video=true`,
+    window.open(`/public/#/room-call/conversation/${conversation.participantId}?video=true,cvId=${conversationId}`,
       '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
     socketClient.emit('conversation-start-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId });
     dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId }))

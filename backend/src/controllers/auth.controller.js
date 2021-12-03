@@ -29,6 +29,7 @@ const signin = async (req, res) => {
         token,
         lastName: user.lastName,
         firstName: user.firstName,
+        userName: user.firstName + ' ' + user.lastName,
         id: user.id,
         avatar: user.avatar
       })

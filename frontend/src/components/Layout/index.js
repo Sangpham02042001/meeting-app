@@ -118,6 +118,7 @@ export default function Layout({ children }) {
     })
 
     socketClient.on('cancel-call', ({ conversationId }) => {
+      console.log(conversationId)
       dispatch(cancelCall({ conversationId }))
     })
 
@@ -350,7 +351,7 @@ export default function Layout({ children }) {
     let width = 900;
     let height = 700;
 
-    window.open(`/#/room-call/conversation/${conversationCall.senderId}`,
+    window.open(`/public/#/room-call/conversation/${conversationCall.senderId}?cvId=${conversationCall.conversationId}`,
       '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
 
     dispatch(acceptCall({

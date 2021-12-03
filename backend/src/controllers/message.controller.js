@@ -136,6 +136,8 @@ const delMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   try {
     let { offset, num } = req.query
+    offset = Number(offset);
+    num = Number(num);
     let numOfMessages
     let messages = await Message.findAll({
       include: [

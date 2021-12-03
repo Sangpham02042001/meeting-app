@@ -326,10 +326,10 @@ export default function TeamHeader({ showTeamInfo }) {
           </DialogTitle>
           <DialogContent style={{ backgroundColor: 'var(--primary-bg)' }}>
             <div style={{ position: 'relative', width: '100%', }}>
-              {isEnableVideo && <video width="100%" height="320px" muted ref={userVideo} autoPlay />}
+              <video width="100%" height="320px" muted ref={userVideo} autoPlay />
               {!isEnableVideo && <div style={{
                 width: '78%', height: '320px', display: 'flex',
-                position: 'absolute', top: 0, left: '11%', background: '#FFF',
+                position: 'absolute', top: 0, left: '11%', background: 'var(--primary-bg)',
                 justifyContent: 'center', alignItems: 'center'
               }}>
                 <Avatar sx={{ width: '120px', height: '120px' }} src={`${baseURL}/api/user/avatar/${user.id}`} />

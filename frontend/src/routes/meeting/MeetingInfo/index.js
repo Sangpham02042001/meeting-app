@@ -27,8 +27,8 @@ export default function MeetingInfo({ infoVisible }) {
       </div>
       <div style={{ padding: '20px', fontSize: '16px' }}>
         {getUserName(meetingReducer.meeting.hostId) &&
-          <div>Meeting created by <strong>{getUserName(meetingReducer.meeting.hostId)}</strong></div>}
-        {teamReducer.team.name && <div>Meeting created at team <strong>{teamReducer.team.name}</strong></div>}
+          <div>Meeting created by <strong style={{color: '#000'}}>{getUserName(meetingReducer.meeting.hostId)}</strong></div>}
+        {teamReducer.team.name && <div>Meeting created at team <strong style={{color: '#000'}}>{teamReducer.team.name}</strong></div>}
       </div>
     </>
   )

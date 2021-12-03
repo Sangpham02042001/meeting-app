@@ -11,26 +11,6 @@ import { LoadingButton } from '@mui/lab';
 import Peer from 'simple-peer';
 import './style.css';
 
-const Video = ({ peer }) => {
-    const ref = useRef();
-
-    useEffect(() => {
-        console.log(peer)
-        peer.on("stream", stream => {
-            ref.current.srcObject = stream;
-            console.log(stream)
-        })
-    }, []);
-
-    return (
-        <>
-            <video width="100%" height="100%" ref={ref} autoPlay />
-        </>
-    );
-}
-
-
-
 
 export default function RoomCall() {
     const dispatch = useDispatch();
@@ -50,13 +30,13 @@ export default function RoomCall() {
     const [isAudioActive, setIsAudioActive] = useState(true);
     const [isPartAudio, setIsPartAudio] = useState(true);
     const [isPartVideo, setIsPartVideo] = useState(false);
-    const [conversationId, setConversationId] = useState(null);
+    const [conversationId, setConversationId] = useState(query.get('cvId'))
 
     const peerRef = useRef(null);
     const myStreamRef = useRef(null);
     const partStreamRef = useRef(null);
 
-    const createPeer = ({ conversationId, userId, participantId, stream }) => {
+    const createPeer = ({ conversationId, userId, partId, stream }) => {
         const peer = new Peer({
             initiator: true,
             trickle: false,
@@ -73,14 +53,14 @@ export default function RoomCall() {
         });
         peer.on("signal", signal => {
             socketClient.emit("conversation-send-signal", {
-                conversationId, senderId: userId, receiverId: participantId, signal,
+                conversationId, senderId: userId, receiverId: partId, signal,
                 isAudio: isAudioActive, isVideo: isVideoActive
             })
         })
         return peer;
     }
 
-    const addPeer = ({ conversationId, incomingSignal, senderId, receiverId, stream }) => {
+    const addPeer = ({ conversationId, incomingSignal, userId, partId, stream }) => {
         const peer = new Peer({
             initiator: false,
             trickle: false,
@@ -97,7 +77,7 @@ export default function RoomCall() {
         })
         peer.on("signal", signal => {
             socketClient.emit("conversation-return-signal", {
-                conversationId, senderId, receiverId, signal,
+                conversationId, senderId: userId, receiverId: partId, signal,
                 isAudio: isAudioActive, isVideo: isVideoActive
             })
         })
@@ -116,6 +96,7 @@ export default function RoomCall() {
             setSetupDevice(true);
         })
 
+        socketClient.emit('set-room-id', { conversationId });
     }, [])
 
     useEffect(() => {
@@ -124,15 +105,14 @@ export default function RoomCall() {
             if (!isEnableVideo && !isEnableAudio) {
 
                 socketClient.on('conversation-accepted-call', ({ conversationId, senderId, receiverId }) => {
-                    console.log('create peer')
-                    let peer = createPeer({ conversationId, userId: receiverId, participantId: senderId, stream: false })
+                    
+                    let peer = createPeer({ conversationId, userId: receiverId, partId: senderId, stream: false })
                     peerRef.current = peer;
                     setPeer(peer);
-                    setConversationId(conversationId);
                 })
 
                 socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, isAudio, isVideo }) => {
-                    let peer = addPeer({ conversationId, incomingSignal: signal, senderId, receiverId, stream: false })
+                    let peer = addPeer({ conversationId, incomingSignal: signal, userId: senderId, partId: receiverId, stream: false })
                     peerRef.current = peer;
                     setPeer(peer);
                     setIsAccepted(true);
@@ -151,14 +131,14 @@ export default function RoomCall() {
 
                         socketClient.on('conversation-accepted-call', ({ conversationId, senderId, receiverId }) => {
                             console.log('create peer')
-                            let peer = createPeer({ conversationId, userId: receiverId, participantId: senderId, stream })
+                            let peer = createPeer({ conversationId, userId: receiverId, partId: senderId, stream })
                             peerRef.current = peer;
                             setPeer(peer);
                         })
 
 
                         socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, isAudio, isVideo }) => {
-                            let peer = addPeer({ conversationId, incomingSignal: signal, senderId, receiverId, stream })
+                            let peer = addPeer({ conversationId, incomingSignal: signal, userId: receiverId, partId: senderId, stream })
                             peerRef.current = peer;
                             setPeer(peer);
                             setIsAccepted(true);
