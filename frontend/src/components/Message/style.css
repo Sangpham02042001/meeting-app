@@ -1,5 +1,6 @@
 .message-component {
   position: relative;
+  margin-bottom: 2px;
 }
 
 .message-component .time-text {

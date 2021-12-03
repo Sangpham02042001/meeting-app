@@ -173,6 +173,7 @@
 
 .team-input-container > div {
   position: relative;
+  transition: margin-left 0.3s linear;
 }
 
 .team-input-container .emoji-btn {

@@ -336,6 +336,7 @@ export default function RoomCall() {
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     color: '#fff',
                     fontSize: '36px',

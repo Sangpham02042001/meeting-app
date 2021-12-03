@@ -118,7 +118,7 @@ export default function Layout({ children }) {
     })
 
     socketClient.on('cancel-call', ({ conversationId }) => {
-      dispatch(cancelCall({ conversationId}))
+      dispatch(cancelCall({ conversationId }))
     })
 
     //teams
@@ -435,23 +435,29 @@ export default function Layout({ children }) {
             open={conversationCall.isRinging}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
+            className='receive-call-dialog'
           >
-            <DialogTitle id="alert-dialog-title">
+            <DialogTitle id="alert-dialog-title" style={{ backgroundColor: 'var(--primary-bg)' }}>
               Calling...
             </DialogTitle>
-            <DialogContent>
-              <div>
+            <DialogContent style={{ backgroundColor: 'var(--primary-bg)' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center'
+              }}>
                 <Avatar src={`${baseURL}/api/user/avatar/${conversationCall.senderId}`}
                   alt="user avatar"
                   style={{
                     width: '40px',
                     height: '40px',
                   }} />
-                <span style={{ fontSize: '18px', fontWeight: 500, color: '#000' }}>{conversationCall.senderName}</span> is calling you...
+                <span style={{ fontSize: '18px', fontWeight: 500, color: 'var(--text-color)', marginLeft: '15px' }}>
+                  {conversationCall.senderName}</span>
+                &nbsp; <span>is calling you...</span>
               </div>
 
             </DialogContent>
-            <DialogActions>
+            <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
               <Button onClick={handleCancelCall} variant="contained" color="error">Reject</Button>
               <Button onClick={handleAcceptCall} variant="contained">
                 Accept

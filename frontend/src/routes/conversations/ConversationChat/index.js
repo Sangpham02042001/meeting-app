@@ -478,7 +478,7 @@ export default function ConversationChat({ conversation, user }) {
               </Tooltip>
               {isEnableVideo ?
                 <Tooltip title="Start a video call">
-                  <IconButton >
+                  <IconButton onClick={handleVideoCall}>
                     <VideocamIcon style={{ color: 'var(--icon-color)' }} />
                   </IconButton>
                 </Tooltip>
