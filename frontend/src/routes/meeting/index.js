@@ -18,7 +18,10 @@ import { v4 } from 'uuid'
 
 // ***React Material***
 import './meeting.css';
-import { Button, IconButton, Tooltip, Snackbar, Alert, Badge, Avatar } from '@mui/material';
+import {
+	Button, IconButton, Tooltip, Snackbar,
+	Alert, Badge, Avatar, CircularProgress
+} from '@mui/material';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
@@ -28,6 +31,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+
 
 
 
@@ -52,8 +56,10 @@ const Meeting = (props) => {
 	const [isEnableVideo, setIsEnableVideo] = useState(false);
 	const [isEnableAudio, setIsEnableAudio] = useState(false);
 	const [isMeetingEnd, setIsMeetingEnd] = useState(false);
-	const [message, setMessage] = useState('')
-	const [trigger, setTrigger] = useState(v4())
+	const [message, setMessage] = useState('');
+	const [timeLine, setTimeLine] = useState(Date.now());
+	const [trigger, setTrigger] = useState(v4());
+
 
 	//******************janus************
 	let janus = null;
@@ -193,6 +199,13 @@ const Meeting = (props) => {
 					userId: JSON.parse(remoteFeed.rfdisplay).userId
 				};
 				let videoTracks = stream.getVideoTracks();
+				
+				if (!videoTracks || videoTracks.length === 0) {
+					remoteVideos.current[remoteFeed.rfindex] = false
+				} else {
+					remoteVideos.current[remoteFeed.rfindex] = true
+				}
+				setTrigger(v4())
 				// let debounceFunc = debounce((videoTracks) => {
 				// 	console.log(`remotestream debounce call ${Date.now()}`)
 				// 	if (!videoTracks || videoTracks.length === 0) {
@@ -203,7 +216,7 @@ const Meeting = (props) => {
 				// 	setTrigger(v4())
 				// }, 1000)
 
-				debounceFunc(videoTracks, remoteFeed.rfindex)
+				// debounceFunc(videoTracks, remoteFeed.rfindex)
 			},
 			oncleanup: function () {
 				console.log(" ::: Got a cleanup notification (remote feed " + id + ") :::");
@@ -229,6 +242,16 @@ const Meeting = (props) => {
 		}, 1000), [])
 
 	useEffect(() => {
+		let interval = setInterval(() => {
+			setTimeLine(Date.now())
+		}, 60000)
+
+		return () => {
+			clearInterval(interval)
+		}
+	}, [])
+
+	useEffect(() => {
 		if (meetingReducer.meeting.members.length && members.length) {
 			let length = meetingReducer.meeting.members.length
 			let users
@@ -250,28 +273,26 @@ const Meeting = (props) => {
 	useEffect(() => {
 		if (!userReducer.loaded) {
 			dispatch(isAuthenticated())
+		} else {
+			dispatch(getTeamInfo({ teamId }))
+
+			getConnectedDevices('videoinput', (cameras) => {
+				if (cameras.length) setIsEnableVideo(true);
+			})
+
+			getConnectedDevices('audioinput', (audios) => {
+				if (audios.length) setIsEnableAudio(true);
+			})
+
+			socketClient.on('receive-end-meeting', ({ currentMeetingId }) => {
+				if (currentMeetingId == meetingId) {
+					setIsMeetingEnd(true)
+				}
+			})
 		}
-		dispatch(getTeamInfo({ teamId }))
 
-		getConnectedDevices('videoinput', (cameras) => {
-			if (cameras.length) setIsEnableVideo(true);
-		})
 
-		getConnectedDevices('audioinput', (audios) => {
-			if (audios.length) setIsEnableAudio(true);
-		})
-
-		window.addEventListener('beforeunload', function (e) {
-			e.preventDefault()
-		});
-
-		socketClient.on('receive-end-meeting', ({ currentMeetingId }) => {
-			if (currentMeetingId == meetingId) {
-				setIsMeetingEnd(true)
-			}
-		})
-
-	}, []);
+	}, [userReducer.loaded]);
 
 	useEffect(() => {
 		if (teamReducer.teamLoaded) {
@@ -289,9 +310,7 @@ const Meeting = (props) => {
 			}
 
 			let meeting = teamReducer.team.meetingActive
-			// if (!meeting) {
-			//     history.push(`/notfound`)
-			// }
+
 			if (!meeting || !meeting.active) {
 				setIsMeetingEnd(true)
 			} else {
@@ -414,25 +433,17 @@ const Meeting = (props) => {
 										Janus.attachMediaStream(myVideo.current, stream);
 										myStream.current = stream;
 										let videoTracks = stream.getVideoTracks();
+
+
 										if (sfuRef.current.webrtcStuff.pc.iceConnectionState !== "completed" &&
 											sfuRef.current.webrtcStuff.pc.iceConnectionState !== "connected") {
 											// alert("publishing...")
+
 										}
 										if (!videoTracks || videoTracks.length === 0) {
 											// myVideo.current = null;
 										}
-										// if (!isVideoActive) {
-										// 	sfuRef.current.muteVideo();
-										// 	sfuRef.current.createOffer({
-										// 		media: { removeVideo: true },
-										// 		success: (jsep) => {
-										// 			sfuRef.current.send({ message: { request: "configure" }, jsep: jsep })
-										// 		},
-										// 		error: (error) => { console.log(error) }
-										// 	})
-										// } else {
-										// 	sfuRef.current.unmuteVideo();
-										// }
+
 										if (!isAudioActive) {
 											sfuRef.current.muteAudio()
 										}
@@ -546,18 +557,8 @@ const Meeting = (props) => {
 	}
 
 	const handleEndMeeting = () => {
-		// console.log(myVideo.current.srcObject)
-		// myVideo.current.srcObject.getTracks().forEach((track) => {
-		//     console.log(track)
-		//     track.stop();
-		// });
-		// socketClient.emit('disconnect-meeting');
+
 		window.open("", "_self").close();
-	}
-
-	const getTimeInfo = () => {
-
-		return new Date().getHours() + ':' + new Date().getMinutes().toPrecision(2);
 	}
 
 	return (
@@ -580,6 +581,7 @@ const Meeting = (props) => {
 								alt={userReducer.user.firstName} />
 						</div>}
 					<h4>You {!isAudioActive && <MicOffIcon />}</h4>
+
 				</div>
 				<div className="meeting-remote-videos"
 					style={{ width: isOpenChat || isOpenUsers || isOpenInfo ? '60%' : '80%' }}>
@@ -606,7 +608,7 @@ const Meeting = (props) => {
 					alignItems: 'center'
 				}}>
 					<strong style={{ color: '#FFF' }}>
-						Start time: {getAmTime(Date.now())}
+						Time: {getAmTime(timeLine)}
 					</strong>
 				</div>
 				<div className="btn-mid" style={{

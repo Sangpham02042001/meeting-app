@@ -9,8 +9,8 @@ import Box from '@mui/material/Box';
 import { IconButton, Modal } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import {useDispatch, useSelector} from 'react-redux';
-import {sendFeedback} from '../../store/reducers/user.reducer';
+import { useDispatch, useSelector } from 'react-redux';
+import { sendFeedback } from '../../store/reducers/user.reducer';
 
 export default function Home() {
 
@@ -32,14 +32,13 @@ export default function Home() {
         transform: 'translate(-50%, -50%)',
         width: 400,
         bgcolor: 'background.paper',
-        border: '2px solid #000',
         borderRadius: '10px',
         boxShadow: 24,
         pt: 2,
         px: 4,
         pb: 3,
-      };
-    
+    };
+
     const handleOpen = () => {
         setOpen(true);
     }
@@ -62,7 +61,7 @@ export default function Home() {
     function handleSendFeedback(e) {
         if (feedback) {
             console.log(feedback);
-            dispatch(sendFeedback({feedback, userId : user.id}))
+            dispatch(sendFeedback({ feedback, userId: user.id }))
         }
     }
 
@@ -70,7 +69,7 @@ export default function Home() {
         <div className="home-component">
             <div className="home-items" id="start-item">
                 <img src="world-map.png" id="world-img"></img>
-    
+
 
             </div>
             <div className="home-items" id="center-item">
@@ -80,20 +79,20 @@ export default function Home() {
                     <a
                         href="#"
                         className="contact-links"
-                    ><i className="fab fa-facebook-square" style={{color:'#1877f2'}}></i></a>
+                    ><i className="fab fa-facebook-square" style={{ color: 'var(--icon-color)' }}></i></a>
                     <a
                         id="profile-link"
                         href="#"
                         className="contact-links"
-                    ><i className="fab fa-github" style={{color:'#041029'}}></i></a>
+                    ><i className="fab fa-github" style={{ color: 'var(--icon-color)' }}></i></a>
                     <a
                         href="#"
                         className="contact-links"
-                    ><i className="fab fa-twitter" style={{color:'#1d9bf0'}}></i></a>
+                    ><i className="fab fa-twitter" style={{ color: 'var(--icon-color)' }}></i></a>
                     <a
                         href="#"
                         className="contact-links"
-                    ><i className="fas fa-at"></i></a>
+                    ><i className="fas fa-at" style={{ color: 'var(--icon-color)' }}></i></a>
                 </div>
             </div>
             <div className="home-items" id="end-item">
@@ -111,11 +110,13 @@ export default function Home() {
                     </LocalizationProvider>
 
                     <div>
-                        {/* <p>You have no event on {value.toLocaleDateString()}</p> */}
+                        <p>You have no event on {value.toLocaleDateString()}</p>
                         <Button
                             variant="outlined"
                             style={{
-                                marginTop: "20px"
+                                marginTop: "20px",
+                                color: 'var(--icon-color)',
+                                borderColor: 'var(--icon-color)'
                             }}
                             onClick={() => {
                                 setSchedule(true);
@@ -130,7 +131,7 @@ export default function Home() {
                             aria-labelledby="parent-modal-title"
                             aria-describedby="parent-modal-description"
                         >
-                            <Box sx={{...style}} className='add-event'>
+                            <Box sx={{ ...style }} className='add-event'>
                                 <h2>Schedule</h2>
                                 <p>Create your schedule</p>
                                 <TextField
@@ -139,7 +140,7 @@ export default function Home() {
                                     fullWidth
                                     className="event-input title"
                                     margin="normal"
-                                    // variant="standard"
+                                    variant="outlined"
                                     onChange={(e) => {
                                         setTitle(e.target.value);
                                     }}
@@ -178,11 +179,11 @@ export default function Home() {
                     </div>
                 </div>
                 <div>
-                <IconButton
+                    <IconButton
                         id="customize"
                         className="footer-button"
                         onClick={handleOpen}
-                    ><BugReportIcon /></IconButton>
+                    ><BugReportIcon style={{ color: 'var(--icon-color)' }} /></IconButton>
 
                     <Modal
                         open={open}
@@ -207,9 +208,9 @@ export default function Home() {
                                 style={{
                                     marginTop: '20px'
                                 }}
-                                endIcon={<SendIcon className='send-icon' />} 
+                                endIcon={<SendIcon className='send-icon' />}
                                 onClick={handleSendFeedback}
-                                >
+                            >
                                 Send
                             </Button>
                         </Box>

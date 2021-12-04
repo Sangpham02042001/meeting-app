@@ -12,9 +12,14 @@ const MeetingVideo = ({ remoteStreams, remoteVideos, remoteAudios }) => {
     <div className="remote-videos">
       {
         remoteStreams.current.length && remoteStreams.current.map((remote, idx) => {
-          return remote && remote.stream && <Video
-            key={remote.userId + ' ' + remoteVideos.current[idx] + ' ' + remoteAudios.current[idx]} userId={remote.userId}
-            stream={remote.stream} name={remote.name} isVideo={remoteVideos.current[idx]} isAudio={usersAudio[remote.userId]} />
+          return (
+            (remote && remote.stream) ?
+              <Video
+                key={remote.userId + ' ' + remoteVideos.current[idx] + ' ' + remoteAudios.current[idx]} userId={remote.userId}
+                stream={remote.stream} name={remote.name} isVideo={remoteVideos.current[idx]} isAudio={usersAudio[remote.userId]} />
+              :
+              <div style={{color: '#fff', fontSize: '36px'}}>loading...</div>
+          )
         })
       }
     </div>

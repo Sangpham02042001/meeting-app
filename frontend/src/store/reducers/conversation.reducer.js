@@ -57,6 +57,7 @@ export const conversationSlice = createSlice({
       senderId: null,
       senderName: null,
       receiverId: null,
+      type: null,
     },
     numberMessagesUnread: 0,
     lastMessageChange: false,

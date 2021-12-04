@@ -404,10 +404,10 @@ const socketServer = (io, socket) => {
         }
     })
 
-    socket.on('conversation-start-call', ({ conversationId, senderId, senderName, receiverId }) => {
+    socket.on('conversation-start-call', ({ conversationId, senderId, senderName, receiverId, type }) => {
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (const socketId of userSockets[receiverId]) {
-                socket.to(socketId).emit('conversation-start-calling', { conversationId, senderId, senderName, receiverId })
+                socket.to(socketId).emit('conversation-start-calling', { conversationId, senderId, senderName, receiverId, type })
             }
         }
     })
@@ -425,12 +425,12 @@ const socketServer = (io, socket) => {
         socket.join(`room-call-${conversationId}`)
     })
 
-    socket.on('conversation-send-signal', async ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
+    socket.on('conversation-send-signal', async ({ conversationId, senderId, receiverId, signal,  }) => {
         // socket.roomCallId = conversationId;
         // socket.join(`room-call-${conversationId}`)
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (let socketId of userSockets[receiverId]) {
-                socket.to(socketId).emit('conversation-sent-signal', { conversationId, senderId, receiverId, signal, isVideo, isAudio })
+                socket.to(socketId).emit('conversation-sent-signal', { conversationId, senderId, receiverId, signal, })
             }
         }
 
@@ -440,10 +440,10 @@ const socketServer = (io, socket) => {
         }
     })
 
-    socket.on('conversation-return-signal', async ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
+    socket.on('conversation-return-signal', async ({ conversationId, senderId, receiverId, signal, }) => {
         // socket.roomCallId = conversationId;
         // socket.join(`room-call-${conversationId}`)
-        socket.to(`room-call-${conversationId}`).emit('conversation-returning-signal', { senderId, receiverId, signal, isVideo, isAudio })
+        socket.to(`room-call-${conversationId}`).emit('conversation-returning-signal', { senderId, receiverId, signal })
 
         let report = await setUserStatus({ userId: senderId, status: 'busy' })
         if (report) {
@@ -527,7 +527,6 @@ const socketServer = (io, socket) => {
         if (socket.roomCallId) {
             let conversationId = socket.roomCallId;
             let participantId = await getParticipantId({ userId: socket.userId, conversationId });
-            console.log('xxx', participantId, conversationId);
             if (participantId) {
                 if (userSockets[participantId]) {
                     for (const socketId of userSockets[participantId]) {

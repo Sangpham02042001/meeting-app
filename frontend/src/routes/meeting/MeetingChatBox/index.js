@@ -30,7 +30,7 @@ export default function ChatBox({ chatVisible }) {
     const inputRef = useRef(null);
 
     const getMemberName = userId => {
-        let user = meetingReducer.meeting.members.find(user => user.id == userId)
+        let user = meetingReducer.meeting.members.find(m => m.userId == userId)
         return (user || {}).userName || '';
     }
 
@@ -151,15 +151,25 @@ export default function ChatBox({ chatVisible }) {
                     ref={scrollRef} style={{
                         height: `calc(60vh - ${(fileUrl ? 120 : 0) + (rows - 1) * 24}px)`
                     }}>
-                    {currentNumOfMessages && meetingReducer.meeting.messages.slice(0, currentNumOfMessages - 1)
+                    {/* {currentNumOfMessages && meetingReducer.meeting.messages.slice(0, currentNumOfMessages - 1)
                         .map((message, idx) => (
                             <Message message={message} key={'message' + message.id}
                                 logInUserId={null} userName={getMemberName(message.userId)}
                                 hasAvatar={message.userId != meetingReducer.meeting.messages[idx + 1].userId} />
                         ))}
                     {currentNumOfMessages && <Message message={meetingReducer.meeting.messages[currentNumOfMessages - 1]}
-                        logInUserId={null} userName={getMemberName(message.userId)}
-                        hasAvatar={true} lastMessage={true} />}
+                        logInUserId={null} userName={getMemberName(meetingReducer.meeting.messages[currentNumOfMessages - 1].userId)}
+                        hasAvatar={true} lastMessage={true} />} */}
+                    {currentNumOfMessages &&
+                        meetingReducer.meeting.messages.map((message, idx) => (
+                            <Message message={message} key={'message' + message.id}
+                                logInUserId={null} userName={getMemberName(message.userId)}
+                                hasAvatar={idx + 1 === meetingReducer.meeting.messages.length ?
+                                    true : message.userId != meetingReducer.meeting.messages[idx + 1].userId}
+                                lastMessage={idx + 1 === meetingReducer.meeting.messages.length ? true : false}
+                            />
+                        ))}
+
                 </div>}
                 {fileUrl && <div className='image-message-upload'>
                     {fileUrl.type === 'image' ?
@@ -182,7 +192,8 @@ export default function ChatBox({ chatVisible }) {
                                 overflow: 'hidden',
                                 whiteSpace: 'nowrap',
                                 textOverflow: 'ellipsis',
-                                fontWeight: '600'
+                                fontWeight: '600',
+                                color: '#000',
                             }}>
                                 {fileUrl.name}
                             </span>
@@ -208,7 +219,6 @@ export default function ChatBox({ chatVisible }) {
             </div>
             <div className="chatbox-sender">
                 <textarea
-                    style={{ fontSize: '16px', }}
                     variant="outlined"
                     type="text" placeholder="Chat" name='message'
                     autoComplete="off"
@@ -217,7 +227,7 @@ export default function ChatBox({ chatVisible }) {
                     value={message}
                     onKeyDown={handleEnterSendMessage}
                     onChange={onWriteMessage} />
-                <div style={{ display: 'flex' }}>
+                <div style={{ display: 'flex' }} className="chatbox-btn">
                     <IconButton >
                         <label htmlFor="images" style={{ cursor: 'pointer' }}>
                             < AttachFileIcon color="primary" />

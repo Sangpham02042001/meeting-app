@@ -52,6 +52,7 @@
 .chatbox-sender textarea {
   resize: none;
   border-radius: 25px;
+  font-size: 14px;
   width: 100%;
   padding: 10px 10px 10px 15px;
   border: none;
@@ -59,8 +60,10 @@
   background: #f1f3f4;
 }
 
-.chatbox-sender fieldset {
-  border: none;
+.chatbox-sender .chatbox-btn button {
+  width: 36px;
+  height: 36px;
+  margin: 2px;
 }
 
 .meeting-box .message-list {

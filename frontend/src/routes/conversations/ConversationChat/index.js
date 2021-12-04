@@ -186,7 +186,6 @@ export default function ConversationChat({ conversation, user }) {
 
     getConnectedDevices('audioinput', (audios) => {
       if (audios.length) setIsEnableAudio(true);
-      console.log(audios)
     })
 
 
@@ -268,10 +267,13 @@ export default function ConversationChat({ conversation, user }) {
     let width = 900;
     let height = 700;
 
-    window.open(`/public/#/room-call/conversation/${conversation.participantId}?cvId=${conversationId}`,
+    window.open(`/public/#/room-call/conversation/${conversation.participantId}?type=audio&cvId=${conversationId}`,
       '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`);
 
-    socketClient.emit('conversation-start-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId });
+    socketClient.emit('conversation-start-call', {
+      conversationId, senderId: user.id, senderName: user.userName,
+      receiverId: conversation.participantId, type: 'audio'
+    });
 
     dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId }))
   }
@@ -282,9 +284,12 @@ export default function ConversationChat({ conversation, user }) {
     let width = 900;
     let height = 700;
 
-    window.open(`/public/#/room-call/conversation/${conversation.participantId}?video=true,cvId=${conversationId}`,
+    window.open(`/public/#/room-call/conversation/${conversation.participantId}?type=video&cvId=${conversationId}`,
       '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
-    socketClient.emit('conversation-start-call', { conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId });
+    socketClient.emit('conversation-start-call', {
+      conversationId, senderId: user.id, senderName: user.userName,
+      receiverId: conversation.participantId, type: 'video'
+    });
     dispatch(startCall({ conversationId, senderId: user.id, senderName: user.userName, receiverId: conversation.participantId }))
   }
 

@@ -1,13 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useLocation } from 'react-router-dom'
 import { getParticipant } from '../../store/reducers/conversation.reducer';
 import { socketClient, baseURL, getConnectedDevices } from '../../utils';
-import { Tooltip, IconButton, Avatar, Button } from '@mui/material';
+import { Tooltip, IconButton, Avatar, Button, CircularProgress } from '@mui/material';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
-import { LoadingButton } from '@mui/lab';
 import Peer from 'simple-peer';
 import './style.css';
 
@@ -26,15 +25,19 @@ export default function RoomCall() {
     const [setupDevice, setSetupDevice] = useState(false);
     const [isEnableVideo, setIsEnableVideo] = useState(false);
     const [isEnableAudio, setIsEnableAudio] = useState(false);
-    const [isVideoActive, setIsVideoActive] = useState(query.get('video') == 'true' || false);
+    const [isVideoActive, setIsVideoActive] = useState(query.get('type') == 'video' || false);
     const [isAudioActive, setIsAudioActive] = useState(true);
     const [isPartAudio, setIsPartAudio] = useState(true);
     const [isPartVideo, setIsPartVideo] = useState(false);
-    const [conversationId, setConversationId] = useState(query.get('cvId'))
+    const [conversationId] = useState(query.get('cvId'))
 
+
+    const isAcceptedRef = useRef(false);
     const peerRef = useRef(null);
     const myStreamRef = useRef(null);
     const partStreamRef = useRef(null);
+    // ~15s
+    const TIME_END = 30000;
 
     const createPeer = ({ conversationId, userId, partId, stream }) => {
         const peer = new Peer({
@@ -52,13 +55,14 @@ export default function RoomCall() {
             stream,
         });
         peer.on("signal", signal => {
+
             socketClient.emit("conversation-send-signal", {
-                conversationId, senderId: userId, receiverId: partId, signal,
-                isAudio: isAudioActive, isVideo: isVideoActive
+                conversationId, senderId: userId, receiverId: partId, signal
             })
         })
         return peer;
     }
+
 
     const addPeer = ({ conversationId, incomingSignal, userId, partId, stream }) => {
         const peer = new Peer({
@@ -75,10 +79,10 @@ export default function RoomCall() {
             },
             stream,
         })
+
         peer.on("signal", signal => {
             socketClient.emit("conversation-return-signal", {
                 conversationId, senderId: userId, receiverId: partId, signal,
-                isAudio: isAudioActive, isVideo: isVideoActive
             })
         })
         peer.signal(incomingSignal);
@@ -97,7 +101,21 @@ export default function RoomCall() {
         })
 
         socketClient.emit('set-room-id', { conversationId });
+
+        let timeout = setTimeout(() => {
+            console.log(isAcceptedRef.current)
+            if (!isAcceptedRef.current) {
+                handleEndCall();
+            }
+        }, TIME_END)
+
+        return () => {
+            clearTimeout(timeout)
+        }
+
     }, [])
+
+
 
     useEffect(() => {
         if (setupDevice && roomCallActive) {
@@ -105,19 +123,17 @@ export default function RoomCall() {
             if (!isEnableVideo && !isEnableAudio) {
 
                 socketClient.on('conversation-accepted-call', ({ conversationId, senderId, receiverId }) => {
-                    
                     let peer = createPeer({ conversationId, userId: receiverId, partId: senderId, stream: false })
                     peerRef.current = peer;
                     setPeer(peer);
                 })
 
-                socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, isAudio, isVideo }) => {
+                socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, }) => {
                     let peer = addPeer({ conversationId, incomingSignal: signal, userId: senderId, partId: receiverId, stream: false })
                     peerRef.current = peer;
                     setPeer(peer);
                     setIsAccepted(true);
-                    setIsPartAudio(isAudio);
-                    setIsPartVideo(isVideo);
+                    isAcceptedRef.current = true;
                 })
 
             } else {
@@ -130,20 +146,18 @@ export default function RoomCall() {
                         })
 
                         socketClient.on('conversation-accepted-call', ({ conversationId, senderId, receiverId }) => {
-                            console.log('create peer')
                             let peer = createPeer({ conversationId, userId: receiverId, partId: senderId, stream })
                             peerRef.current = peer;
                             setPeer(peer);
                         })
 
 
-                        socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, isAudio, isVideo }) => {
+                        socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, }) => {
                             let peer = addPeer({ conversationId, incomingSignal: signal, userId: receiverId, partId: senderId, stream })
                             peerRef.current = peer;
                             setPeer(peer);
                             setIsAccepted(true);
-                            setIsPartAudio(isAudio);
-                            setIsPartVideo(isVideo);
+                            isAcceptedRef.current = true;
                         })
                     })
                     .catch(error => {
@@ -151,11 +165,10 @@ export default function RoomCall() {
                     })
             }
 
-            socketClient.on('conversation-returning-signal', ({ signal, isAudio, isVideo }) => {
+            socketClient.on('conversation-returning-signal', ({ signal }) => {
                 peerRef.current.signal(signal);
                 setIsAccepted(true);
-                setIsPartAudio(isAudio);
-                setIsPartVideo(isVideo);
+                isAcceptedRef.current = true;
             })
 
             socketClient.on('muted-device', ({ type, isActive }) => {
@@ -165,6 +178,7 @@ export default function RoomCall() {
                 } else if (type === 'video') {
                     setIsPartVideo(isActive)
                 }
+
             })
 
             socketClient.on('cancel-call', ({ conversationId }) => {
@@ -192,13 +206,13 @@ export default function RoomCall() {
 
     const toggleAudio = (event) => {
         event.preventDefault();
+        console.log(isAudioActive)
 
         myStreamRef.current.srcObject.getAudioTracks().forEach(track => {
             track.enabled = !isAudioActive
         })
 
         socketClient.emit('mute-device', { type: 'audio', isActive: !isAudioActive })
-
         setIsAudioActive(!isAudioActive);
     }
 
@@ -215,6 +229,7 @@ export default function RoomCall() {
         <div className="room-call">
             {roomCallActive ?
                 <>
+                    {!isAccepted && <audio src="ring.mp3" type="audio/mpeg" autoPlay loop />}
                     <div className="video-content">
                         <div className="video-content-user">
                             <div className="user-video" >
@@ -224,12 +239,18 @@ export default function RoomCall() {
                                         alt={user.firstName} />
                                 }
                                 <video width="100%" height="100%" ref={myStreamRef} autoPlay muted />
-                                <div className="video-name">
-                                    You
+                                <div className="video-bottom">
+                                    <div className="video-name">
+                                        You
+                                    </div>
+                                    <span style={{ color: '#fff', display: 'flex', alignItems: 'center' }}> {isAudioActive ? <MicIcon /> : <MicOffIcon />}</span>
                                 </div>
+
                             </div>
                         </div>
+
                         <div className="video-content-part">
+
                             <div className="part-video">
 
                                 {participant &&
@@ -244,13 +265,14 @@ export default function RoomCall() {
                                                 alt={participant.firstName} />
                                             }
                                             <span style={{ color: '#fff' }}> {isAccepted ? '' : 'Joining...'}
-                                                <LoadingButton sx={{ color: '#fff' }} loading={!isAccepted} ></LoadingButton>
+                                                {!isAccepted && <CircularProgress sx={{ color: '#fff' }} />}
                                             </span>
                                         </div>
-
-                                        <div className="video-name">
-                                            {participant.userName}
-                                            <span style={{ color: '#fff' }}> {isPartAudio ? <MicIcon /> : <MicOffIcon />}</span>
+                                        <div className="video-bottom">
+                                            <div className="video-name">
+                                                {participant.userName}
+                                            </div>
+                                            <span style={{ color: '#fff', display: 'flex', alignItems: 'center' }}> {isPartAudio ? <MicIcon /> : <MicOffIcon />}</span>
                                         </div>
                                         {peer && <>
                                             <video width="100%" height="100%" ref={partStreamRef} autoPlay />
@@ -262,54 +284,60 @@ export default function RoomCall() {
                         </div>
                     </div>
                     <div className="room-btn">
-                        {
-                            !isEnableVideo ?
-                                <Tooltip placement="top" title="No camera found">
-                                    <div>
-                                        <IconButton style={{ borderColor: '#908f8f' }} disabled>
-                                            <i style={{ color: '#908f8f' }} className="fas fa-video-slash"></i>
-                                        </IconButton>
-                                    </div>
-                                </Tooltip >
-                                :
-                                <IconButton onClick={toggleVideo} >
-                                    {!isVideoActive ?
-                                        <Tooltip placement="top" title="Turn on camera">
-                                            <i className="fas fa-video-slash"></i>
+                        {isAccepted &&
+                            <>
+                                {
+                                    !isEnableVideo ?
+                                        <Tooltip placement="top" title="No camera found">
+                                            <div>
+                                                <IconButton style={{ borderColor: '#908f8f' }} disabled>
+                                                    <i style={{ color: '#908f8f' }} className="fas fa-video-slash"></i>
+                                                </IconButton>
+                                            </div>
+                                        </Tooltip >
+                                        :
+                                        <Tooltip placement="top" title={isVideoActive ? "Turn off camera" : "Turn on camera"}>
+                                            <div>
+                                                <IconButton onClick={toggleVideo} >
+                                                    {!isVideoActive ?
+                                                        <i className="fas fa-video-slash"></i>
+                                                        :
+                                                        <i className="fas fa-video"></i>
+                                                    }
+                                                </IconButton>
+                                            </div>
+                                        </Tooltip>
+                                }
+                                {
+                                    !isEnableAudio ?
+                                        <Tooltip placement="top" title="No micro found">
+                                            <div>
+                                                <IconButton style={{ color: '#908f8f', borderColor: '#908f8f' }} disabled >
+                                                    <MicOffIcon />
+                                                </IconButton>
+                                            </div>
                                         </Tooltip>
                                         :
-                                        <Tooltip placement="top" title="Turn off camera">
-                                            <i className="fas fa-video"></i>
-                                        </Tooltip>}
-                                </IconButton>
-                        }
-                        {
-                            !isEnableAudio ?
-                                <Tooltip placement="top" title="No micro found">
-                                    <div>
-                                        <IconButton style={{ color: '#908f8f', borderColor: '#908f8f' }} disabled >
-                                            <MicOffIcon />
-                                        </IconButton>
-                                    </div>
-                                </Tooltip>
-                                :
-                                <IconButton onClick={toggleAudio} >
-                                    {!isAudioActive ?
-                                        <Tooltip placement="top" title="Turn on mic">
-                                            <MicOffIcon />
+                                        <Tooltip placement="top" title={isVideoActive ? "Turn off mic" : "Turn on mic"}>
+                                            <div>
+                                                <IconButton onClick={toggleAudio} >
+                                                    {!isAudioActive ?
+                                                        <MicOffIcon />
+                                                        :
+                                                        <MicIcon />
+                                                    }
+                                                </IconButton>
+                                            </div>
                                         </Tooltip>
-                                        :
-                                        <Tooltip placement="top" title="Turn off mic">
-                                            <MicIcon />
-                                        </Tooltip>}
-                                </IconButton>
+                                }
+                            </>
+
                         }
                         <Tooltip placement="top" title="End the call">
-                            <IconButton style={{ backgroundColor: 'red', border: 'red' }} onClick={handleEndCall} >
+                            <IconButton style={{ backgroundColor: 'red', border: 'red', width: '70px', borderRadius: '20px' }} onClick={handleEndCall} >
                                 <CallEndIcon />
                             </IconButton>
                         </Tooltip>
-
                     </div>
                 </>
                 :
@@ -322,7 +350,7 @@ export default function RoomCall() {
                     fontSize: '36px',
                     height: '100%'
                 }}>
-                    Room call end.
+                    User ended the call
                     <Button variant="contained" onClick={handleEndCall}>Close</Button>
                 </div>
             }

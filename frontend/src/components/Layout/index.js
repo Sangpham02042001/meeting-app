@@ -112,9 +112,9 @@ export default function Layout({ children }) {
       dispatch(removeMessageCv({ conversationId, messageId, receiverId, senderId }))
     })
 
-    socketClient.on('conversation-start-calling', ({ conversationId, senderId, senderName, receiverId }) => {
+    socketClient.on('conversation-start-calling', ({ conversationId, senderId, senderName, receiverId, type }) => {
       //todo
-      dispatch(conversationCalling({ conversationId, senderId, senderName, receiverId }))
+      dispatch(conversationCalling({ conversationId, senderId, senderName, receiverId, type }))
     })
 
     socketClient.on('cancel-call', ({ conversationId }) => {
@@ -351,7 +351,7 @@ export default function Layout({ children }) {
     let width = 900;
     let height = 700;
 
-    window.open(`/public/#/room-call/conversation/${conversationCall.senderId}?cvId=${conversationCall.conversationId}`,
+    window.open(`/public/#/room-call/conversation/${conversationCall.senderId}?type=${conversationCall.type}&cvId=${conversationCall.conversationId}`,
       '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
 
     dispatch(acceptCall({
@@ -359,7 +359,7 @@ export default function Layout({ children }) {
     }))
     socketClient.emit('conversation-accept-call', {
       conversationId: conversationCall.conversationId,
-      senderId: userReducer.user.id, receiverId: conversationCall.senderId
+      senderId: userReducer.user.id, receiverId: conversationCall.senderId, type: conversationCall.type
     })
   };
 
@@ -446,6 +446,7 @@ export default function Layout({ children }) {
                 display: 'flex',
                 alignItems: 'center'
               }}>
+                <audio src="ring.mp3" type="audio/mpeg" autoPlay loop />
                 <Avatar src={`${baseURL}/api/user/avatar/${conversationCall.senderId}`}
                   alt="user avatar"
                   style={{
