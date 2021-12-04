@@ -173,6 +173,28 @@ const Message = React.memo(({
                   {message.content &&
                     parseMessage(message.content)
                   }
+                  {message.videos && message.videos.length > 0 &&
+                    <div className='message-photo-list'>
+                      {message.videos.map((video, idx) => {
+                        return (message.videos.length > 1 ? <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                          className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                          style={{
+                            width: getImageSize(message.videos.length).itemWidth,
+                            height: getImageSize(message.videos.length).height,
+                            background: 'black'
+                          }}>
+                        </video> :
+                          <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                            style={{
+                              maxWidth: getImageSize(message.videos.length).itemWidth,
+                              maxHeight: getImageSize(message.videos.length).height,
+                              background: 'black'
+                            }}>
+                          </video>)
+                      })}
+                    </div>
+                  }
                   {message.photos && message.photos.length > 0 &&
 
                     <div className='message-photo-list'>
@@ -252,6 +274,29 @@ const Message = React.memo(({
                   {message.content &&
                     <div className={'text-message ' + (hasAvatar ? 'user-last-message' : '')}>
                       {parseMessage(message.content)}
+                    </div>
+                  }
+                  {message.videos && message.videos.length > 0 &&
+                    <div className='message-photo-list'
+                      style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
+                      {message.videos.map((video, idx) => {
+                        return (message.videos.length > 1 ? <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                          className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                          style={{
+                            width: getImageSize(message.videos.length).itemWidth,
+                            height: getImageSize(message.videos.length).height,
+                            background: 'black'
+                          }}>
+                        </video> :
+                          <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                            style={{
+                              maxWidth: getImageSize(message.videos.length).itemWidth,
+                              maxHeight: getImageSize(message.videos.length).height,
+                              background: 'black'
+                            }}>
+                          </video>)
+                      })}
                     </div>
                   }
                   {message.photos && message.photos.length > 0 &&

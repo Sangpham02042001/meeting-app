@@ -90,15 +90,19 @@ const getMessages = async (req, res) => {
         for (let m of messages) {
             let tmpFiles = [];
             let tmpImages = []
+            let tmpVideos = []
             for (let media of m.dataValues.Media) {
                 if (media.type === "image") {
                     tmpImages.push(media)
+                } else if (media.type === 'video') {
+                    tmpVideos.push(media)
                 } else {
                     tmpFiles.push(media)
                 }
             }
             m.dataValues.files = tmpFiles;
             m.dataValues.photos = tmpImages;
+            m.dataValues.videos = tmpVideos;
             delete m.dataValues.Media;
         }
 
@@ -213,7 +217,7 @@ const setMessage = async ({ content, files, conversationId, senderId, audio }) =
                     pathName: fileName,
                     name: file.name,
                     size: file.size,
-                    type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
+                    type: /image\/(?!svg)/.test(file.type) ? 'image' : /video/.test(file.type) ? 'video' : 'file'
                 });
             }
         }
@@ -244,15 +248,19 @@ const setMessage = async ({ content, files, conversationId, senderId, audio }) =
         }))
         let tmpImages = []
         let tmpFiles = []
+        let tmpVideos = []
         for (let media of multiMedia) {
             if (media.type === "image") {
                 tmpImages.push(media)
+            } else if (media.type === 'video') {
+                tmpVideos.push(media)
             } else {
                 tmpFiles.push(media)
             }
         }
         message.files = tmpFiles;
         message.photos = tmpImages
+        message.videos = tmpVideos
         await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 1 " +
             "WHERE conversationId = :conversationId AND userId = :userId",
             {
@@ -316,7 +324,7 @@ const getFilesMessageCv = async (req, res) => {
             "SELECT m.id, m.messageId, m.name, m.size, m.type, m.createdAt FROM media m " +
             "JOIN messages msg on msg.id = m.messageId " +
             "JOIN conversations cv on cv.id = msg.conversationId " +
-            "WHERE msg.conversationId = :conversationId AND m.type = 'file' " +
+            "WHERE msg.conversationId = :conversationId AND (m.type = 'file' OR m.type = 'video') " +
             "ORDER BY m.updatedAt DESC"
             , {
                 replacements: {

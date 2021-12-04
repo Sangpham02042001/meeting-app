@@ -98,10 +98,10 @@ export default function Layout({ children }) {
     //conversation
     socketClient.on('conversation-receiveMessage', ({
       messageId, content, senderId, receiverId, conversationId,
-      files, photos, createdAt, senderName, noti }) => {
+      files, photos, videos, createdAt, senderName, noti }) => {
       dispatch(sendMessageCv({
         messageId, content, senderId, receiverId,
-        conversationId, files, photos, createdAt, senderName
+        conversationId, files, photos, videos, createdAt, senderName
       }));
       if (noti && noti.id) {
         dispatch(receivceNotification({ noti }))
@@ -135,9 +135,9 @@ export default function Layout({ children }) {
       }
     })
 
-    socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, files, photos, createdAt, noti }) => {
+    socketClient.on('receive-message-team', ({ messageId, teamId, senderId, content, files, photos, videos, createdAt, noti }) => {
       dispatch(sendMessage({
-        messageId, content, senderId, teamId, photos, files, isMessage: true, createdAt
+        messageId, content, senderId, teamId, photos, files, videos, isMessage: true, createdAt
       }))
       if (noti && noti.id) {
         dispatch(receivceNotification({ noti }))
@@ -351,7 +351,7 @@ export default function Layout({ children }) {
     let width = 900;
     let height = 700;
 
-    window.open(`/public/#/room-call/conversation/${conversationCall.senderId}?type=${conversationCall.type}&cvId=${conversationCall.conversationId}`,
+    window.open(`/public/#/room-call/conversation/${conversationCall.senderId}?cvId=${conversationCall.conversationId}`,
       '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
 
     dispatch(acceptCall({

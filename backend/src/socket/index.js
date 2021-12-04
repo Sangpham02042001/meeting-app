@@ -48,12 +48,12 @@ const socketServer = (io, socket) => {
         let members = await getMemberTeam({ teamId });
         members = members.filter(m => m.id !== senderId);
         const message = await sendMessage({ teamId, senderId, content, files, audio })
-        socket.emit('receive-message-team', { messageId: message.id, content, teamId, senderId, files: message.files, photos: message.photos, createdAt: message.createdAt })
+        socket.emit('receive-message-team', { messageId: message.id, content, teamId, senderId, files: message.files, photos: message.photos, videos: message.videos, createdAt: message.createdAt })
         const { noti } = await createMessageNotification({ teamId, senderId, senderName })
         for (let m of members) {
             if (userSockets[m.id] && userSockets[m.id].length) {
                 for (const socketId of userSockets[m.id]) {
-                    socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, files: message.files, photos: message.photos, createdAt: message.createdAt, noti });
+                    socket.to(socketId).emit('receive-message-team', { messageId: message.id, teamId, senderId, content, files: message.files, photos: message.photos, videos: message.videos, createdAt: message.createdAt, noti });
                 }
             }
         }
@@ -375,6 +375,7 @@ const socketServer = (io, socket) => {
             socket.emit('conversation-receiveMessage', {
                 messageId: message.id, content, senderId, receiverId,
                 conversationId: converId, files: message.files, photos: message.photos,
+                videos: message.videos,
                 createdAt: message.createdAt, senderName
             })
 
@@ -385,6 +386,7 @@ const socketServer = (io, socket) => {
                     socket.to(socketId).emit('conversation-receiveMessage', {
                         messageId: message.id, content, senderId, receiverId,
                         conversationId: converId, files: message.files, photos: message.photos,
+                        videos: message.videos,
                         createdAt: message.createdAt, senderName, noti
                     });
                 }
@@ -425,12 +427,12 @@ const socketServer = (io, socket) => {
         socket.join(`room-call-${conversationId}`)
     })
 
-    socket.on('conversation-send-signal', async ({ conversationId, senderId, receiverId, signal,  }) => {
+    socket.on('conversation-send-signal', async ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
         // socket.roomCallId = conversationId;
         // socket.join(`room-call-${conversationId}`)
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (let socketId of userSockets[receiverId]) {
-                socket.to(socketId).emit('conversation-sent-signal', { conversationId, senderId, receiverId, signal, })
+                socket.to(socketId).emit('conversation-sent-signal', { conversationId, senderId, receiverId, signal, isVideo, isAudio })
             }
         }
 

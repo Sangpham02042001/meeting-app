@@ -45,7 +45,7 @@ const downloadFileMessage = async (req, res) => {
     if (media.pathName) {
       let file = `./src/public/messages-files/${media.pathName}`;
       let fileStream = fs.createReadStream(file);
-      res.setHeader('Content-disposition', 'attachment; filename=' + media.name);
+      res.setHeader('Content-disposition', 'attachment; filename=' + encodeURIComponent(media.name));
       fileStream.pipe(res);
     }
   } catch (error) {

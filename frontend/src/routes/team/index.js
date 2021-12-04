@@ -466,7 +466,7 @@ export default function Team(props) {
       for (const file of e.target.files) {
         let url = URL.createObjectURL(file)
         urls.push({
-          type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file',
+          type: /image\/(?!svg)/.test(file.type) ? 'image' : /video/.test(file.type) ? 'video' : 'file',
           url,
           name: file.name
         })
@@ -574,7 +574,7 @@ export default function Team(props) {
                               height: '100px',
                               borderRadius: '15px'
                             }} />
-                            : <div
+                            : fileUrl.type === 'file' ? <div
                               style={{
                                 background: '#fff',
                                 borderRadius: '10px',
@@ -592,7 +592,14 @@ export default function Team(props) {
                               }}>
                                 {fileUrl.name}
                               </span>
-                            </div>}
+                            </div> :
+                              <video controls autoPlay muted class="video" src={`${fileUrl.url}`}
+                                style={{
+                                  width: '100px',
+                                  height: '100px',
+                                  borderRadius: '15px'
+                                }}>
+                              </video>}
                         </div>
                       )
                     })}

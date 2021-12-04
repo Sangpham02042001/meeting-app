@@ -36,6 +36,8 @@ export default function RoomCall() {
     const peerRef = useRef(null);
     const myStreamRef = useRef(null);
     const partStreamRef = useRef(null);
+    const isAudioRef = useRef(null);
+    const isVideoRef = useRef(null);
     // ~15s
     const TIME_END = 30000;
 
@@ -57,7 +59,8 @@ export default function RoomCall() {
         peer.on("signal", signal => {
 
             socketClient.emit("conversation-send-signal", {
-                conversationId, senderId: userId, receiverId: partId, signal
+                conversationId, senderId: userId, receiverId: partId, signal,
+                isAudio: isAudioRef.current, isVideo: isVideoRef.current
             })
         })
         return peer;
@@ -92,11 +95,17 @@ export default function RoomCall() {
     useEffect(() => {
         dispatch(getParticipant({ participantId }));
         getConnectedDevices('videoinput', (cameras) => {
-            if (cameras.length) setIsEnableVideo(true);
+            if (cameras.length) {
+                isVideoRef.current = true;
+                setIsEnableVideo(true);
+            }
         })
 
         getConnectedDevices('audioinput', (audios) => {
-            if (audios.length) setIsEnableAudio(true);
+            if (audios.length) {
+                isAudioRef.current = true;
+                setIsEnableAudio(true);
+            }
             setSetupDevice(true);
         })
 
@@ -128,12 +137,14 @@ export default function RoomCall() {
                     setPeer(peer);
                 })
 
-                socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, }) => {
+                socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
                     let peer = addPeer({ conversationId, incomingSignal: signal, userId: senderId, partId: receiverId, stream: false })
                     peerRef.current = peer;
                     setPeer(peer);
                     setIsAccepted(true);
                     isAcceptedRef.current = true;
+                    setIsPartAudio(isAudio)
+                    setIsPartVideo(isVideo)
                 })
 
             } else {
@@ -152,12 +163,14 @@ export default function RoomCall() {
                         })
 
 
-                        socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, }) => {
+                        socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
                             let peer = addPeer({ conversationId, incomingSignal: signal, userId: receiverId, partId: senderId, stream })
                             peerRef.current = peer;
                             setPeer(peer);
                             setIsAccepted(true);
                             isAcceptedRef.current = true;
+                            setIsPartAudio(isAudio)
+                            setIsPartVideo(isVideo)
                         })
                     })
                     .catch(error => {

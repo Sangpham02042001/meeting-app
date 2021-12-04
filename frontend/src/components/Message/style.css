@@ -133,7 +133,8 @@
 }
 
 .message-photo-list > img,
-.message-photo-list > div {
+.message-photo-list > div,
+.message-photo-list > video {
   border-radius: 15px;
   margin: 3px;
   cursor: pointer;
@@ -207,4 +208,9 @@
 
 .message-component .emoji-message .img-emoji {
   margin: 2px;
+}
+
+.message-video-list video {
+  border-radius: 10px;
+  cursor: pointer;
 }

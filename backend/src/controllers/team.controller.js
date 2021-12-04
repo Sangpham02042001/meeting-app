@@ -568,7 +568,7 @@ const sendMessage = async ({ teamId, senderId, content, files, audio }) => {
             pathName: fileName,
             name: file.name,
             size: file.size,
-            type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file'
+            type: /image\/(?!svg)/.test(file.type) ? 'image' : /video/.test(file.type) ? 'video' : 'file'
           });
         }
       }
@@ -596,15 +596,19 @@ const sendMessage = async ({ teamId, senderId, content, files, audio }) => {
     }))
     let tmpImages = []
     let tmpFiles = []
+    let tmpVideos = []
     for (let media of multiMedia) {
       if (media.type === "image") {
         tmpImages.push(media)
+      } else if (media.type === 'video') {
+        tmpVideos.push(media)
       } else {
         tmpFiles.push(media)
       }
     }
     message.files = tmpFiles;
-    message.photos = tmpImages
+    message.photos = tmpImages;
+    message.videos = tmpVideos;
     return message;
   } catch (error) {
     console.log(error)
@@ -723,16 +727,20 @@ const getTeamMeetMess = async (req, res) => {
     for (let m of meetmess) {
       if (!m.isMeeting) {
         let tmpFiles = [];
-        let tmpImages = []
+        let tmpImages = [];
+        let tmpVideos = [];
         for (let media of m.dataValues.Media) {
           if (media.type === "image") {
             tmpImages.push(media)
+          } else if (media.type === 'video') {
+            tmpVideos.push(media)
           } else {
             tmpFiles.push(media)
           }
         }
         m.dataValues.files = tmpFiles;
         m.dataValues.photos = tmpImages;
+        m.dataValues.videos = tmpVideos;
         delete m.dataValues.Media;
       }
     }
@@ -751,7 +759,7 @@ const getTeamSharedFiles = async (req, res) => {
       "SELECT m.id, m.messageId, m.name, m.size, m.type, m.createdAt FROM media m " +
       "INNER JOIN messages msg ON msg.id = m.messageId " +
       "INNER JOIN teams t ON t.id = msg.teamId " +
-      "WHERE msg.teamId = :teamId AND m.type = 'file' " +
+      "WHERE msg.teamId = :teamId AND (m.type = 'file' OR m.type = 'video') " +
       "ORDER BY m.updatedAt DESC",
       {
         replacements: {

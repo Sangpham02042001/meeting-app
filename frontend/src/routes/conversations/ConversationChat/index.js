@@ -321,7 +321,7 @@ export default function ConversationChat({ conversation, user }) {
       for (const file of e.target.files) {
         let url = URL.createObjectURL(file)
         urls.push({
-          type: /image\/(?!svg)/.test(file.type) ? 'image' : 'file',
+          type: /image\/(?!svg)/.test(file.type) ? 'image' : /video/.test(file.type) ? 'video' : 'file',
           url,
           name: file.name,
           size: getFileSize(file.size)
@@ -597,35 +597,41 @@ export default function ConversationChat({ conversation, user }) {
                         {fileUrl.type === 'image' ?
                           <img width='120' height='120' src={`${fileUrl.url}`} />
                           :
-                          <div
-                            style={{
-                              background: '#fff',
-                              borderRadius: '5px',
-                              padding: '16px',
-                              width: '120px',
-                              height: '120px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'space-between'
-                            }}>
-                            <DescriptionIcon />
-                            <span style={{
-                              overflow: 'hidden',
-                              whiteSpace: 'nowrap',
-                              textOverflow: 'ellipsis',
-                              fontWeight: '600',
-                              color: '#000'
-                            }}>
-                              {fileUrl.name}
-                            </span>
-                            <span style={{
-                              fontSize: '0.8em',
-                              opacity: '0.7',
-                              color: '#000'
-                            }}>
-                              {fileUrl.size}
-                            </span>
-                          </div>
+                          fileUrl.type === 'file' ?
+                            <div
+                              style={{
+                                background: '#fff',
+                                borderRadius: '5px',
+                                padding: '16px',
+                                width: '120px',
+                                height: '120px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between'
+                              }}>
+                              <DescriptionIcon />
+                              <span style={{
+                                overflow: 'hidden',
+                                whiteSpace: 'nowrap',
+                                textOverflow: 'ellipsis',
+                                fontWeight: '600',
+                                color: '#000'
+                              }}>
+                                {fileUrl.name}
+                              </span>
+                              <span style={{
+                                fontSize: '0.8em',
+                                opacity: '0.7',
+                                color: '#000'
+                              }}>
+                                {fileUrl.size}
+                              </span>
+                            </div> : <video controls muted autoPlay class="video" src={`${fileUrl.url}`}
+                              style={{
+                                width: '120px',
+                                height: '120px',
+                              }}>
+                            </video>
                         }
                       </div>
                     )

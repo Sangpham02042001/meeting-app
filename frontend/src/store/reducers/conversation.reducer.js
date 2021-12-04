@@ -119,7 +119,7 @@ export const conversationSlice = createSlice({
   reducers: {
     sendMessageCv: (state, action) => {
       const { messageId, content, senderId, receiverId,
-        conversationId, files, photos, createdAt, senderName } = action.payload;
+        conversationId, files, photos, videos, createdAt, senderName } = action.payload;
       let convParticipant = state.conversations.find(conv => {
         return (conv.participantId === receiverId || conv.participantId === senderId)
       });
@@ -138,7 +138,7 @@ export const conversationSlice = createSlice({
       }
 
       if (state.conversation.participant && (receiverId === state.conversation.participant.id || senderId === state.conversation.participant.id)) {
-        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, files, photos, createdAt });
+        state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, files, photos, videos, createdAt });
 
         if (files && files.length && files[0].type === 'file') {
           state.conversation.files.unshift(...files)
