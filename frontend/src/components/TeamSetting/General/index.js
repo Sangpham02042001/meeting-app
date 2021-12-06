@@ -117,8 +117,8 @@ export default function TeamGeneralSetting() {
           Private - Only team owners can add members
         </MenuItem>
       </TextField>
-      <Button variant="contained"
-        style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}
+      <Button variant="text"
+        style={{ color: 'var(--icon-color)' }}
         onClick={handleUpdateTeamInfo}
         disabled={(teamName && teamName.trim() === teamReducer.team.name)
           && !imageUrl && (teamType === teamReducer.team.teamType)}>

@@ -73,7 +73,7 @@ export default function Login() {
                                 Don't have account?{"\t"}
                                 <Link to="/signup" style={{ display: 'inline-block' }}>Sign up</Link>
                             </p>
-                            <Button type="submit" variant="contained"
+                            <Button type="submit" variant="text"
                             >Log in</Button>
                         </div>
                     </form>

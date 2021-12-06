@@ -307,11 +307,11 @@ export default function Profile() {
 											<p className='team-name'>{team.name}</p>
 										</Link>
 										{team.hostId !== userReducer.user.id ?
-											<Button className="team-action-btn" variant="contained"
-												style={{ backgroundColor: 'var(--primary-color)' }}
+											<Button className="team-action-btn" variant="text"
+												style={{ color: 'var(--icon-color)' }}
 												onClick={handleOutTeam(team.id)}>Out Team</Button> :
-											<Button className="team-action-btn" variant="contained"
-												style={{ backgroundColor: 'var(--primary-color)' }}
+											<Button className="team-action-btn" variant="text"
+												style={{ color: 'var(--icon-color)' }}
 												onClick={handleDeleteTeam(team.id)}>Delete team</Button>}
 									</div>
 								})
@@ -331,12 +331,12 @@ export default function Profile() {
 											<p className='team-name'>{team.name}</p>
 										</Link>
 										<div>
-											<Button className="team-action-btn" variant="contained"
-												style={{ backgroundColor: 'var(--primary-color)' }}
+											<Button className="team-action-btn" variant="text"
+												style={{ color: 'var(--text-color)' }}
 												onClick={handleConfirmInvitation(team.id)}>Agree</Button>
 											<Button className="team-action-btn"
-												style={{ marginLeft: '20px', backgroundColor: 'var(--primary-color)' }}
-												variant="contained"
+												style={{ marginLeft: '20px', color: 'var(--text-color)' }}
+												variant="text"
 												onClick={(handleRemoveInvitation(team.id))}>Disagree</Button>
 										</div>
 									</div>

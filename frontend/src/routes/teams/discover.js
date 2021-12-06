@@ -302,9 +302,9 @@ export default function TeamDiscover() {
                 <Avatar className='create-team-box-user' src="create-team-user2.svg" alt="Team Image" />
                 <Avatar className='create-team-box-user' src="create-team-user3.svg" alt="Team Image" />
               </div>}
-            <Button variant="contained" onClick={handleCreateTeam}
-              style={{ backgroundColor: 'var(--primary-color)' }}
-              startIcon={<GroupIcon style={{ color: '#FFF' }} />}>
+            <Button variant="text" onClick={handleCreateTeam}
+              style={{ color: 'var(--icon-color)' }}
+              startIcon={<GroupIcon style={{ color: 'var(--icon-color)' }} />}>
               Create team
             </Button>
           </span>
@@ -317,8 +317,8 @@ export default function TeamDiscover() {
                 onChange={e => setTeamCode(e.target.value)}
                 placeholder='Enter code' />
             </div>
-            <Button variant="contained" onClick={findTeamWithCode}
-              disabled={!teamCode} style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}>
+            <Button variant="text" onClick={findTeamWithCode}
+              disabled={!teamCode} style={{ color: 'var(--icon-color)' }}>
               Join team
             </Button>
           </span>
@@ -355,10 +355,10 @@ export default function TeamDiscover() {
               <Avatar src={`${baseURL}/api/team/coverphoto/${team.id}`} sx={{ width: '80px', height: '80px' }} />
               <h5>{team.name}</h5>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '80%' }}>
-                <Button variant='text' style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}
+                <Button variant='text' style={{ color: 'var(--icon-color)' }}
                   onClick={handleRequestJoin(team)}>Request</Button>
-                <Button variant='contained'
-                  style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}
+                <Button variant='text'
+                  style={{ color: 'var(--icon-color)' }}
                   onClick={e => {
                     e.preventDefault()
                     setSearchTeams(searchTeams.filter(t => t.id !== team.id))

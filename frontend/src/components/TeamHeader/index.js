@@ -175,9 +175,9 @@ export default function TeamHeader({ showTeamInfo }) {
         </LoadingButton>}
         {
           teamReducer.team.meetingActive
-          && <Button variant="contained"
+          && <Button variant="text"
             disabled={teamReducer.meetingJoined}
-            style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}
+            style={{ color: 'var(--icon-color)' }}
             className='join-meeting-btn' onClick={handleJoinMeeting}>
             Join Meeting
           </Button>
@@ -190,8 +190,8 @@ export default function TeamHeader({ showTeamInfo }) {
             <InfoIcon style={{ color: 'var(--icon-color)' }} />
           </IconButton>
         </Tooltip>
-        <Button variant="outlined" className="meeting-btn"
-          style={{ backgroundColor: 'var(--primary-bg)', color: 'var(--icon-color)' }}
+        <Button variant="text" className="meeting-btn"
+          style={{ color: 'var(--icon-color)' }}
           disabled={teamReducer.team.meetingActive}
           startIcon={<VideoCameraFrontIcon style={{ color: 'var(--icon-color)' }} />}
           onClick={e => {

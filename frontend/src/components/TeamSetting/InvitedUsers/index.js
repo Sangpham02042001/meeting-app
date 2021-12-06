@@ -50,13 +50,13 @@ export default function TeamInvitedUsers() {
               src={`${baseURL}/api/user/avatar/${member.id}`} />
             <span>{member.userName}</span>
           </div>
-          <Button variant='contained'
-            style={{ backgroundColor: 'var(--primary-color)' }}
+          <Button variant='text'
+            style={{ color: 'var(--icon-color)' }}
             onClick={e => {
               e.preventDefault()
               setShow(true)
               setUser(member.id)
-            }} variant='contained'>Cancel</Button>
+            }} >Cancel</Button>
         </div>)}
       </div>
       <Dialog open={isShow} onClose={handleClose}>

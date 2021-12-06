@@ -76,11 +76,18 @@ const createTeam = async (req, res) => {
           })
         }
       }
+      let teamCode = '', char
+      let randomString = v4()
+      for (let i = 0; i < 8; i++) {
+        char = randomString[Math.round(Math.random() * randomString.length)]
+        teamCode += char
+      }
       let team = await Team.create({
         name,
         coverPhoto,
         teamType,
-        hostId
+        hostId,
+        teamCode
       })
       team.coverPhoto = undefined
 

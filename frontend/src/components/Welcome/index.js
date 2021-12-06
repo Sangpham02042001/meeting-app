@@ -56,12 +56,12 @@ export default function Welcome() {
 
             <div className="authLink">
               <Link to="/login">
-                <Button variant="contained" size="medium">
+                <Button variant="text" size="medium">
                   Login
                 </Button>
               </Link>
               <Link to="/signup">
-                <Button variant="contained" size="medium">
+                <Button variant="text" size="medium">
                   Sign up
                 </Button>
               </Link>

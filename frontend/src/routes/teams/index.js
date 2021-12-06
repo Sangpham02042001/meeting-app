@@ -28,7 +28,7 @@ export default function Teams(props) {
 						<div className="teams-header">
 							<h3>Teams</h3>
 							<Link to='/teams/discover' style={{ textDecoration: 'none' }}>
-								<Button variant="contained" style={{ backgroundColor: 'var(--primary-color)', color: '#FFF' }}>
+								<Button variant="text" style={{ color: 'var(--icon-color)' }}>
 									<i className="fas fa-user-friends" style={{ marginRight: '10px' }}></i>
 									Join or create team
 								</Button>
