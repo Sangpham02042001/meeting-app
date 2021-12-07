@@ -62,6 +62,7 @@ export default function Home() {
         if (feedback) {
             console.log(feedback);
             dispatch(sendFeedback({ feedback, userId: user.id }))
+            setOpen(false);
         }
     }
 

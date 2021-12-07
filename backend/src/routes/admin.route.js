@@ -1,6 +1,6 @@
 const { Router } = require('express')
 const { isAdmin, requireSignin } = require('../controllers/auth.controller')
-const { adminSignin, getAllUsers, deleteUser, updateUserInfo, changePassword } = require('../controllers/admin.controller')
+const { adminSignin, getAllUsers, deleteUser, updateUserInfo, changePassword, getFeedbacks } = require('../controllers/admin.controller')
 const router = Router()
 
 
@@ -18,5 +18,8 @@ router.route('/api/users/:userId')
     .put(updateUserInfo)
     .patch(changePassword)
     .delete(deleteUser)
+
+router.route('/api/user/feedback')
+    .get(getFeedbacks)
 
 module.exports = router

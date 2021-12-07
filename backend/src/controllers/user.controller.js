@@ -4,6 +4,7 @@ const { v4 } = require('uuid')
 const formidable = require('formidable')
 const User = require('../models/user')
 const Team = require('../models/team')
+const Feedback = require('../models/feedback')
 const sequelize = require('../models')
 const { QueryTypes } = require('sequelize')
 
@@ -590,6 +591,30 @@ const socketConfirmInvitation = async ({ teamId, userId }) => {
   }
 }
 
+const saveFeedback = async (req, res) => {
+  const { id } = req.auth
+  const { feedback } = req.body
+  try {
+    // await sequelize.query(
+    //   "INSERT INTO feedbacks (id, content)" +
+    //   "VALUES (:id, :feedback)",
+    //   {
+    //     replacements: {
+    //       id, feedback
+    //     }
+    //   }
+    // )
+    const fb = await Feedback.create({
+      content: feedback, userId: id
+    })
+
+    return res.status(200).json({feedback: fb})
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({error})
+  }
+}
+
 module.exports = {
   signup, getUserInfo, updateUserInfo, getUserAvatar,
   requestJoinTeam, getJoinedTeams, getRequestingTeams,
@@ -597,5 +622,5 @@ module.exports = {
   removeInvitations, getInvitations, getNotifications,
   searchUsers, socketRequestTeam, getUserStatusList,
   setUserStatus, getUserStatus, socketCancelJoin,
-  socketOutTeam, socketConfirmInvitation
+  socketOutTeam, socketConfirmInvitation, saveFeedback
 }

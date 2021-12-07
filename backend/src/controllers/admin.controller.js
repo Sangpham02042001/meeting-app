@@ -121,7 +121,9 @@ const changePassword = async (req, res) => {
     }
 }
 
+const getFeedbacks = async (req, res) => {
+
+}
 
 
-
-module.exports = { adminSignin, getAllUsers, deleteUser, updateUserInfo, changePassword }
+module.exports = { adminSignin, getAllUsers, deleteUser, updateUserInfo, changePassword, getFeedbacks }

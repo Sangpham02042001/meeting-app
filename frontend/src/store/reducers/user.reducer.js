@@ -11,7 +11,18 @@ const initialState = {
 }
 
 export const sendFeedback = createAsyncThunk('user/sendFeedback', async ({ feedback, userId }, { rejectWithValue }) => {
-  
+  try {
+    const response = await axiosAuth.post(`/api/user/${userId}/feedback`, {
+      feedback, userId
+    });
+    return response.data;
+
+  } catch (error) {
+    console.log(error)
+      return rejectWithValue({
+        error: "Could not send this feedback!"
+      })
+  }
 })
 
 export const signin = createAsyncThunk('user/signin', async ({ email, password }, { rejectWithValue }) => {

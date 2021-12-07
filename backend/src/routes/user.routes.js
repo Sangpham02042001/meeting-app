@@ -3,7 +3,7 @@ const { signup, getUserInfo, updateUserInfo, getUserAvatar,
   requestJoinTeam, getJoinedTeams, getRequestingTeams,
   outTeam, cancelJoinRequest, confirmInvitations,
   removeInvitations, getInvitations, getNotifications,
-  searchUsers } = require('../controllers/user.controller')
+  searchUsers, saveFeedback } = require('../controllers/user.controller')
 const { requireSignin } = require('../controllers/auth.controller')
 
 const router = Router()
@@ -48,7 +48,8 @@ router.route('/api/users/:userId')
 router.route('/api/user/avatar/:userId')
   .get(getUserAvatar)
 
-
+router.route('/api/user/:userId/feedback')
+  .post(requireSignin, saveFeedback)
 
 
 module.exports = router
