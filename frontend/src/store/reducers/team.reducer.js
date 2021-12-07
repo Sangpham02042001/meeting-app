@@ -311,6 +311,9 @@ export const teamSlice = createSlice({
         if (files && files.length) {
           state.team.files.unshift(...files)
         }
+        if (videos && videos.length) {
+          state.team.files.unshift(...videos)
+        }
         if (photos && photos.length) {
           state.team.images.unshift(...photos)
         }

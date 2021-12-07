@@ -26,6 +26,9 @@ export default function Welcome() {
       url: "welcome/teams.png"
     },
     {
+      url: "welcome/room-call.png"
+    },
+    {
       url: "welcome/meetings.png"
     },
     {

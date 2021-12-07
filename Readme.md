@@ -26,3 +26,7 @@
 ## Meetings
 
 ![image](https://drive.google.com/uc?export=view&id=11wtjRz2M4pJzNvBX6psEizxxbUhZB5Qw)
+
+## Room call
+
+![image](https://drive.google.com/uc?export=view&id=1Gt25XHkTLChIo0M-jL7_vIAM0TqRiLhF)

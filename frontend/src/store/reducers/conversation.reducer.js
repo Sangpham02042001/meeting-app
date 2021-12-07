@@ -140,8 +140,11 @@ export const conversationSlice = createSlice({
       if (state.conversation.participant && (receiverId === state.conversation.participant.id || senderId === state.conversation.participant.id)) {
         state.conversation.messages.push({ id: messageId, content, userId: senderId, conversationId, files, photos, videos, createdAt });
 
-        if (files && files.length && files[0].type === 'file') {
+        if (files && files.length) {
           state.conversation.files.unshift(...files)
+        }
+        if (videos && videos.length) {
+          state.conversation.files.unshift(...videos)
         }
         if (photos && photos.length) {
           state.conversation.images.unshift(...photos)

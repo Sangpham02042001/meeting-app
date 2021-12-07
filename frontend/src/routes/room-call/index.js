@@ -438,7 +438,7 @@ export default function RoomCall() {
                                     }
                                     <div className="video-bottom">
                                         <div className="video-name">
-                                            {participant.userName}
+                                            {isShareActive ? 'You' : participant.userName}
                                         </div>
                                         <span style={{ color: '#fff' }}> {isPartAudio ? <MicIcon /> : <MicOffIcon />}</span>
                                     </div>

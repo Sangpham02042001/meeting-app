@@ -76,6 +76,7 @@
   margin-top: 2%;
   padding: 0;
 }
-.send-icon {
-  color: #fff;
+
+.schedule-container label {
+  color: var(--text-color) !important;
 }

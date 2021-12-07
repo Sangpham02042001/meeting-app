@@ -6,7 +6,7 @@ import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import StaticDatePicker from "@mui/lab/StaticDatePicker";
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import { IconButton, Modal } from '@mui/material';
+import { Dialog, DialogActions, DialogTitle, DialogContent, IconButton, Modal } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,7 +31,7 @@ export default function Home() {
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: 400,
-        bgcolor: 'background.paper',
+        bgcolor: 'var(--primary-bg)',
         borderRadius: '10px',
         boxShadow: 24,
         pt: 2,
@@ -124,59 +124,70 @@ export default function Home() {
                             }}
                         >Add event
                         </Button>
-                        <Modal
+                        <Dialog
                             open={openSchedule}
                             onClose={() => {
                                 setSchedule(false);
                             }}
-                            aria-labelledby="parent-modal-title"
-                            aria-describedby="parent-modal-description"
+                            maxWidth="sm" fullWidth={true}
                         >
-                            <Box sx={{ ...style }} className='add-event'>
-                                <h2>Schedule</h2>
+                            <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>Schedule</DialogTitle>
+                            <DialogContent style={{ backgroundColor: 'var(--primary-bg)' }} className="schedule-container">
                                 <p>Create your schedule</p>
                                 <TextField
                                     label="Title"
                                     type="text"
                                     fullWidth
-                                    className="event-input title"
-                                    margin="normal"
-                                    variant="outlined"
+                                    variant="standard"
+                                    style={{
+                                        color: 'var(--text-color)',
+                                        marginBottom: '15px'
+                                    }}
                                     onChange={(e) => {
                                         setTitle(e.target.value);
-                                    }}
-                                    focused />
+                                    }} />
                                 <TextField
                                     label="Date"
                                     type="text"
                                     fullWidth
-                                    margin="normal"
-                                    // variant="standard"
-                                    defaultValue={value.toLocaleDateString()}
-                                    focused />
+                                    style={{
+                                        color: 'var(--text-color)',
+                                        marginBottom: '15px'
+                                    }}
+                                    variant="standard"
+                                    defaultValue={value.toLocaleDateString()} />
                                 <TextField
                                     label="Content"
                                     type="text"
                                     multiline
                                     fullWidth
+                                    style={{
+                                        color: 'var(--text-color)',
+                                        marginBottom: '15px'
+                                    }}
                                     rows={5}
-                                    margin="normal"
-                                    // variant="standard"
-                                    className="event-input content"
+                                    variant="outlined"
                                     onChange={(e) => {
                                         setContent(e.target.value);
-                                    }}
-                                    focused />
+                                    }} />
+                            </DialogContent>
+                            <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
                                 <Button
-                                    variant="contained"
-                                    className="event-input save-button"
-                                    margin="normal"
+                                    variant="text"
                                     onClick={() => {
                                         addEvent(value);
                                     }}
+                                    style={{ color: 'var(--icon-color)' }}
                                 >Save</Button>
-                            </Box>
-                        </Modal>
+                                <Button
+                                    variant="text"
+                                    onClick={() => {
+                                        setSchedule(false);
+                                    }}
+                                    style={{ color: 'var(--icon-color)' }}
+                                >Close</Button>
+                            </DialogActions>
+                        </Dialog>
                     </div>
                 </div>
                 <div>

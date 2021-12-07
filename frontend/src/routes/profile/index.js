@@ -260,7 +260,6 @@ export default function Profile() {
 					<Tab label="Joined Teams" {...a11yProps(1)} />
 					<Tab label="Invited Teams" {...a11yProps(2)} />
 					<Tab label="Requesting Teams" {...a11yProps(3)} />
-					{/* <Tab label="Setting" {...a11yProps(4)} /> */}
 				</Tabs>
 				<div className='profile-right-tab'>
 					<TabPanel value={currentTab} index={0}>
@@ -304,7 +303,12 @@ export default function Profile() {
 											<Avatar alt="team coverphoto"
 												src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 												sx={{ width: 50, height: 50, }} />
-											<p className='team-name'>{team.name}</p>
+											<div style={{ marginLeft: '20px' }}>
+												<p className='team-name'>{team.name}</p>
+												{team.hostId === userReducer.user.id &&
+													<span style={{ fontSize: '14px' }}>You are the admin of this team</span>
+												}
+											</div>
 										</Link>
 										{team.hostId !== userReducer.user.id ?
 											<Button className="team-action-btn" variant="text"
@@ -366,19 +370,6 @@ export default function Profile() {
 								: <h3>No request team for show</h3>}
 						</div>
 					</TabPanel>
-					{/* <TabPanel value={currentTab} index={4}>
-						<div>
-							<h1>Setting</h1>
-							<FormControlLabel
-								control={
-									<Switch label="Dark Mode" checked={settingReducer.darkMode}
-										onChange={e => { dispatch(toggleDarkMode()) }}
-										color="default" />
-								}
-								label="Dark Mode"
-							/>
-						</div >
-					</TabPanel> */}
 				</div>
 
 				<Dialog
