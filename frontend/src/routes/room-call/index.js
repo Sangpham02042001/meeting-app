@@ -7,6 +7,8 @@ import { Tooltip, IconButton, Avatar, Button, CircularProgress } from '@mui/mate
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
+import ScreenShareIcon from '@mui/icons-material/ScreenShare';
+import CancelPresentationIcon from '@mui/icons-material/CancelPresentation';
 import Peer from 'simple-peer';
 import './style.css';
 
@@ -22,20 +24,25 @@ export default function RoomCall() {
     const [roomCallActive, setRoomCallActive] = useState(true);
     const [isAccepted, setIsAccepted] = useState(false);
     const [peer, setPeer] = useState(null);
+    const [shareScreenPeer, setShareScreenPeer] = useState(null)
     const [setupDevice, setSetupDevice] = useState(false);
     const [isEnableVideo, setIsEnableVideo] = useState(false);
     const [isEnableAudio, setIsEnableAudio] = useState(false);
     const [isVideoActive, setIsVideoActive] = useState(query.get('type') == 'video' || false);
     const [isAudioActive, setIsAudioActive] = useState(true);
+    const [isShareActive, setIsShareActive] = useState(false)
     const [isPartAudio, setIsPartAudio] = useState(true);
-    const [isPartVideo, setIsPartVideo] = useState(false);
-    const [conversationId] = useState(query.get('cvId'))
+    const [isPartVideo, setIsPartVideo] = useState(query.get('type') == 'video' || false);
+    const [conversationId] = useState(query.get('cvId'));
 
 
     const isAcceptedRef = useRef(false);
     const peerRef = useRef(null);
     const myStreamRef = useRef(null);
     const partStreamRef = useRef(null);
+    const myShareScreenRef = useRef(null);
+    const partShareScreenRef = useRef(null);
+    const peerScreenRef = useRef(null)
     const isAudioRef = useRef(false);
     const isVideoRef = useRef(false);
     // ~15s
@@ -57,7 +64,6 @@ export default function RoomCall() {
             stream,
         });
         peer.on("signal", signal => {
-
             socketClient.emit("conversation-send-signal", {
                 conversationId, senderId: userId, receiverId: partId, signal,
                 isAudio: isAudioRef.current, isVideo: isVideoRef.current
@@ -172,7 +178,9 @@ export default function RoomCall() {
                             setIsAccepted(true);
                             isAcceptedRef.current = true;
                             setIsPartAudio(isAudio);
-                            setIsPartVideo(isVideo);
+                            if (query.get('type') == 'video') {
+                                setIsPartVideo(isVideo);
+                            }
                         })
                     })
                     .catch(error => {
@@ -185,7 +193,10 @@ export default function RoomCall() {
                 setIsAccepted(true);
                 isAcceptedRef.current = true;
                 setIsPartAudio(isAudio);
-                setIsPartVideo(isVideo);
+                // setIsPartVideo(isVideo);
+                if (query.get('type') == 'video') {
+                    setIsPartVideo(isVideo);
+                }
             })
 
             socketClient.on('muted-device', ({ type, isActive }) => {
@@ -202,9 +213,74 @@ export default function RoomCall() {
                 setRoomCallActive(false);
             })
 
+            socketClient.on('started-share-screen', ({ signal }) => {
+                const peer = new Peer({
+                    initiator: false,
+                    trickle: false,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            {
+                                url: 'turn:numb.viagenie.ca',
+                                credential: 'muazkh',
+                                username: 'webrtc@live.com'
+                            }]
+                    },
+                    stream: false,
+                })
+
+                peer.on("signal", signal => {
+                    socketClient.emit("screen-return-signal", { signal })
+                })
+                peer.signal(signal);
+                setShareScreenPeer(peer)
+                peerScreenRef.current = peer
+            })
+
+            socketClient.on('screen-returning-signal', ({ signal }) => {
+                peerScreenRef.current.signal(signal);
+            })
+
+            socketClient.on('stopped-share-screen', () => {
+                if (peerScreenRef.current) {
+                    peerScreenRef.current.destroy()
+                    setShareScreenPeer(null)
+                    peerScreenRef.current = null
+                }
+            })
         }
 
     }, [setupDevice])
+
+    useEffect(() => {
+        if (isShareActive) {
+            navigator.mediaDevices.getDisplayMedia()
+                .then(stream => {
+                    myShareScreenRef.current.srcObject = stream;
+                    const peer = new Peer({
+                        initiator: true,
+                        trickle: false,
+                        config: {
+                            iceServers: [
+                                { urls: 'stun:stun.l.google.com:19302' },
+                                {
+                                    url: 'turn:numb.viagenie.ca',
+                                    credential: 'muazkh',
+                                    username: 'webrtc@live.com'
+                                }]
+                        },
+                        stream,
+                    });
+                    peer.on("signal", signal => {
+                        socketClient.emit("start-share-screen", { signal })
+                    })
+                    peerScreenRef.current = peer;
+                    setShareScreenPeer(peer);
+                })
+        } else {
+            socketClient.emit('stop-share-screen')
+        }
+    }, [isShareActive])
 
 
     useEffect(() => {
@@ -215,6 +291,15 @@ export default function RoomCall() {
             })
         }
     }, [peer])
+
+    useEffect(() => {
+        if (shareScreenPeer) {
+            shareScreenPeer.on('stream', stream => {
+                console.log(stream)
+                partShareScreenRef.current.srcObject = stream
+            })
+        }
+    }, [shareScreenPeer])
 
 
     const handleEndCall = () => {
@@ -242,6 +327,11 @@ export default function RoomCall() {
         setIsVideoActive(!isVideoActive);
     }
 
+    const toggleShare = (event) => {
+        event.preventDefault();
+        setIsShareActive(!isShareActive)
+    }
+
     return (
         <div className="room-call">
             {roomCallActive ?
@@ -249,6 +339,17 @@ export default function RoomCall() {
                     {!isAccepted && <audio src="ring.mp3" type="audio/mpeg" autoPlay loop />}
                     <div className="video-content">
                         <div className="video-content-user">
+                            <video width="200px" height="200px"
+                                style={{
+                                    opacity: shareScreenPeer ? 1 : 0
+                                }}
+                                ref={partShareScreenRef} autoPlay muted />
+                            <div className='my-share-screen'
+                                style={{
+                                    opacity: isShareActive ? 1 : 0
+                                }}>
+                                <video width="100%" height="100%" ref={myShareScreenRef} autoPlay muted />
+                            </div>
                             <div className="user-video" >
                                 {(!isVideoActive || !isEnableVideo) &&
                                     <div className="video-avatar">
@@ -296,10 +397,9 @@ export default function RoomCall() {
                                             </div>
                                             <span style={{ color: '#fff', display: 'flex', alignItems: 'center' }}> {isPartAudio ? <MicIcon /> : <MicOffIcon />}</span>
                                         </div>
-                                        {peer && <>
+                                        {peer &&
                                             <video width="100%" height="100%" ref={partStreamRef} autoPlay />
-
-                                        </>}
+                                        }
                                     </>
                                 }
                             </div>
@@ -352,6 +452,17 @@ export default function RoomCall() {
                                             </div>
                                         </Tooltip>
                                 }
+                                <Tooltip placement="top" title={isShareActive ? "Stop share screen" : "Start share screen"}>
+                                    <div>
+                                        <IconButton onClick={toggleShare} >
+                                            {!isShareActive ?
+                                                <ScreenShareIcon />
+                                                :
+                                                <CancelPresentationIcon />
+                                            }
+                                        </IconButton>
+                                    </div>
+                                </Tooltip>
                             </>
 
                         }

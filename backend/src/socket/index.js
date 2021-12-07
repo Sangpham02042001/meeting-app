@@ -406,6 +406,8 @@ const socketServer = (io, socket) => {
         }
     })
 
+    //**********************************ROOM CALL*************************************//
+
     socket.on('conversation-start-call', ({ conversationId, senderId, senderName, receiverId, type }) => {
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (const socketId of userSockets[receiverId]) {
@@ -461,6 +463,18 @@ const socketServer = (io, socket) => {
                 socket.to(socketId).emit('cancel-call', { conversationId })
             }
         }
+    })
+
+    socket.on('start-share-screen', ({ signal }) => {
+        socket.to(`room-call-${socket.roomCallId}`).emit('started-share-screen', { signal })
+    })
+
+    socket.on('stop-share-screen', () => {
+        socket.to(`room-call-${socket.roomCallId}`).emit('stopped-share-screen')
+    })
+
+    socket.on('screen-return-signal', ({ signal }) => {
+        socket.to(`room-call-${socket.roomCallId}`).emit('screen-returning-signal', { signal })
     })
 
     //**********************************CONVERSATION*************************************//
