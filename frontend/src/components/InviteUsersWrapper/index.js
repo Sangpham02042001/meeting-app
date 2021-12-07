@@ -125,10 +125,10 @@ export default function InviteUsersWrapper({ users }) {
   return (
     <>
       <div style={{ textAlign: 'right', marginBottom: '20px' }}>
-        <Button variant="contained" onClick={e => {
+        <Button variant="text" onClick={e => {
           e.preventDefault()
           setShow(true)
-        }} style={{ backgroundColor: 'var(--primary-color)' }}>Invite</Button>
+        }} style={{ color: 'var(--icon-color)' }}>Invite</Button>
       </div>
       <Dialog className='invite-user-wrapper' open={isShow} onClose={handleInviteModalClose} maxWidth={`sm`} fullWidth={true}>
         <DialogTitle style={{ backgroundColor: 'var(--primary-bg)' }}>

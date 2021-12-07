@@ -459,8 +459,8 @@ export default function Layout({ children }) {
 
             </DialogContent>
             <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
-              <Button onClick={handleCancelCall} variant="contained" color="error">Reject</Button>
-              <Button onClick={handleAcceptCall} variant="contained">
+              <Button onClick={handleCancelCall} variant="text" color="error">Reject</Button>
+              <Button onClick={handleAcceptCall} variant="text" style={{ color: 'var(--icon-color)' }}>
                 Accept
               </Button>
             </DialogActions>

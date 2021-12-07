@@ -54,8 +54,8 @@ export default function TeamMembers() {
               fontWeight: 500
             }}>{member.userName}</span>
           </div>
-          {member.id !== user.id && <Button variant='contained'
-            style={{ backgroundColor: 'var(--primary-color)' }}
+          {member.id !== user.id && <Button variant='text'
+            style={{ color: 'var(--icon-color)' }}
             onClick={e => {
               e.preventDefault()
               setShow(true)

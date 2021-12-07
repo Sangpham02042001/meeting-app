@@ -66,15 +66,15 @@ export default function TeamRequestUsers() {
             <span>{member.userName}</span>
           </div>
           <div>
-            <Button variant='contained'
-              style={{ marginRight: '20px', backgroundColor: 'var(--primary-color)' }}
+            <Button variant='text'
+              style={{ marginRight: '20px', color: 'var(--icon-color)' }}
               onClick={e => {
                 e.preventDefault()
                 setConfirmShow(true)
                 setUser(member.id)
               }}>Agree</Button>
-            <Button variant='contained'
-              style={{ backgroundColor: 'var(--primary-color)' }}
+            <Button variant='text'
+              style={{ color: 'var(--icon-color)' }}
               onClick={e => {
                 e.preventDefault()
                 setRefuseShow(true)

@@ -159,7 +159,7 @@ export default function SignUp() {
                                 <p style={{ marginBottom: 0 }}>
                                     Have account? <Link to="/login">Sign in</Link>
                                 </p>
-                                <Button variant="contained" type="submit">
+                                <Button variant="text" type="submit">
                                     Sign up
                                 </Button>
                             </div>
