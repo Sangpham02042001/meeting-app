@@ -465,6 +465,10 @@ const socketServer = (io, socket) => {
         }
     })
 
+    socket.on('init-share-screen', () => {
+        socket.to(`room-call-${socket.roomCallId}`).emit('init-share-screen')
+    })
+
     socket.on('start-share-screen', ({ signal }) => {
         socket.to(`room-call-${socket.roomCallId}`).emit('started-share-screen', { signal })
     })

@@ -22,12 +22,7 @@
   margin-left: 20px;
 }
 
-.room-call .user-video video {
-  position: absolute;
-  top: 0;
-}
-
-.room-call .part-video video {
+.room-call video {
   position: absolute;
   top: 0;
 }
@@ -56,21 +51,10 @@
 .room-call .user-video {
   width: 200px;
   height: 200px;
-  border-radius: 10px;
   position: absolute;
   background-color: var(--video-color);
   border-radius: 15px;
   bottom: 0px;
-}
-
-.room-call .my-share-screen {
-  width: 200px;
-  height: 200px;
-  border-radius: 10px;
-  position: absolute;
-  background-color: var(--video-color);
-  border-radius: 15px;
-  bottom: 230px;
 }
 
 .room-call .part-video {
@@ -81,19 +65,26 @@
   position: relative;
   background-color: var(--video-color);
   border-radius: 15px;
+  transition: width 1s, height 1s;
 }
 
-.part-video .video-name {
-  font-size: 22px;
+.room-call .part-video-share {
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  background-color: var(--video-color);
+  border-radius: 15px;
+  transform: translate(calc(-50vw + 10px), 30vh);
+  transition: width 1s, height 1s, transform 1s;
 }
 
-.part-video .waiting-join {
+.room-call .waiting-join {
   font-size: 22px;
   color: #fff;
   z-index: 2;
   position: absolute;
-  top: calc(100% / 2 + 70px);
-  left: calc(100% / 2 - 60px);
+  top: calc(100% / 2 + 80px);
+  left: calc(100% / 2 - 140px);
 }
 
 .room-call .video-avatar {
@@ -109,6 +100,15 @@
   align-items: center;
 }
 
+.video-avatar > div {
+  width: 80px;
+  height: 80px;
+}
+.part-video .video-avatar > div {
+  width: 120px;
+  height: 120px;
+}
+
 .room-call .video-bottom {
   position: absolute;
   width: 100%;
@@ -122,6 +122,12 @@
   z-index: 2;
 }
 
-.video-bottom svg {
+.room-call .video-bottom > span {
+  color: #fff;
+  display: flex;
+  align-items: center;
+}
+
+.room-call .video-bottom svg {
   font-size: 22px;
 }
