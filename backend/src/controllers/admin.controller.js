@@ -4,6 +4,7 @@ const User = require('../models/user')
 const sequelize = require('../models')
 const { QueryTypes } = require('sequelize')
 const bcrypt = require('bcrypt')
+const Feedback = require('../models/feedback')
 
 let saltRounds = 10
 const adminSignin = async (req, res) => {
@@ -122,7 +123,13 @@ const changePassword = async (req, res) => {
 }
 
 const getFeedbacks = async (req, res) => {
-
+    try {
+        const feedbacks = await Feedback.findAll({});
+        return res.status(200).json({feedbacks});
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({error});
+    }
 }
 
 
