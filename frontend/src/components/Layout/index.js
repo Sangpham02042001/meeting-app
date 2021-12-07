@@ -351,7 +351,7 @@ export default function Layout({ children }) {
     let width = 900;
     let height = 700;
 
-    window.open(`/public/#/room-call/conversation/${conversationCall.senderId}?cvId=${conversationCall.conversationId}`,
+    window.open(`/public/#/room-call/conversation/${conversationCall.senderId}?type=${conversationCall.type}&cvId=${conversationCall.conversationId}`,
       '_blank', `width=900,height=700,top=${wHeight / 2 - height / 2},left=${wWidth / 2 - width / 2}`)
 
     dispatch(acceptCall({
@@ -428,7 +428,6 @@ export default function Layout({ children }) {
             message="Try to connect network"
             action={reconnectAction}
           />
-
 
           <Dialog
             fullWidth={true}

@@ -52,32 +52,6 @@
   bottom: 0px;
 }
 
-.room-call .video-bottom {
-  position: absolute;
-  width: 100%;
-  bottom: 0px;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 16px;
-  color: #fff;
-  font-weight: 500;
-}
-
-.video-bottom svg {
-  font-size: 22px;
-}
-
-
-.user-video .video-avatar {
-  width: 80px;
-  height: 80px;
-  z-index: 10;
-  position: absolute;
-  top: 60px;
-  left: 60px;
-}
-
 .room-call .part-video {
   width: 85%;
   height: 100%;
@@ -92,11 +66,41 @@
   font-size: 22px;
 }
 
-.part-video .video-avatar {
-  z-index: 10;
-  font-size: 24px;
+.part-video .waiting-join {
+  font-size: 22px;
   color: #fff;
+  z-index: 2;
   position: absolute;
-  top: calc(100% / 2 - 40px);
-  left: calc(100% / 2 - 40px);
+  top: calc(100% / 2 + 70px);
+  left: calc(100% / 2 - 60px);
+}
+
+.room-call .video-avatar {
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  color: #fff;
+  background-color: var(--video-color);
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.room-call .video-bottom {
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  color: #fff;
+  font-weight: 500;
+  z-index: 2;
+}
+
+.video-bottom svg {
+  font-size: 22px;
 }

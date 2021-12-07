@@ -33,6 +33,7 @@
  */
 
 import adapter from 'webrtc-adapter';
+
 window['adapter'] = adapter;
 
 // List of sessions
@@ -115,7 +116,8 @@ Janus.useDefaultDependencies = function (deps) {
 				headers: {
 					'Accept': 'application/json, text/plain, */*'
 				},
-				cache: 'no-cache'
+				cache: 'no-cache',
+
 			};
 			if (options.verb === "POST") {
 				fetchOptions.headers['Content-Type'] = 'application/json';
@@ -126,6 +128,7 @@ Janus.useDefaultDependencies = function (deps) {
 			if (options.body) {
 				fetchOptions.body = JSON.stringify(options.body);
 			}
+
 
 			var fetching = f(url, fetchOptions).catch(function (error) {
 				return p.reject({ message: 'Probably a network error, is the server down?', error: error });

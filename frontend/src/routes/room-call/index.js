@@ -36,8 +36,8 @@ export default function RoomCall() {
     const peerRef = useRef(null);
     const myStreamRef = useRef(null);
     const partStreamRef = useRef(null);
-    const isAudioRef = useRef(null);
-    const isVideoRef = useRef(null);
+    const isAudioRef = useRef(false);
+    const isVideoRef = useRef(false);
     // ~15s
     const TIME_END = 30000;
 
@@ -86,6 +86,7 @@ export default function RoomCall() {
         peer.on("signal", signal => {
             socketClient.emit("conversation-return-signal", {
                 conversationId, senderId: userId, receiverId: partId, signal,
+                isAudio: isAudioRef.current, isVideo: isVideoRef.current
             })
         })
         peer.signal(incomingSignal);
@@ -135,6 +136,7 @@ export default function RoomCall() {
                     let peer = createPeer({ conversationId, userId: receiverId, partId: senderId, stream: false })
                     peerRef.current = peer;
                     setPeer(peer);
+
                 })
 
                 socketClient.on('conversation-sent-signal', ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
@@ -143,8 +145,8 @@ export default function RoomCall() {
                     setPeer(peer);
                     setIsAccepted(true);
                     isAcceptedRef.current = true;
-                    setIsPartAudio(isAudio)
-                    setIsPartVideo(isVideo)
+                    setIsPartAudio(isAudio);
+                    setIsPartVideo(isVideo);
                 })
 
             } else {
@@ -169,8 +171,8 @@ export default function RoomCall() {
                             setPeer(peer);
                             setIsAccepted(true);
                             isAcceptedRef.current = true;
-                            setIsPartAudio(isAudio)
-                            setIsPartVideo(isVideo)
+                            setIsPartAudio(isAudio);
+                            setIsPartVideo(isVideo);
                         })
                     })
                     .catch(error => {
@@ -178,10 +180,12 @@ export default function RoomCall() {
                     })
             }
 
-            socketClient.on('conversation-returning-signal', ({ signal }) => {
+            socketClient.on('conversation-returning-signal', ({ signal, isVideo, isAudio }) => {
                 peerRef.current.signal(signal);
                 setIsAccepted(true);
                 isAcceptedRef.current = true;
+                setIsPartAudio(isAudio);
+                setIsPartVideo(isVideo);
             })
 
             socketClient.on('muted-device', ({ type, isActive }) => {
@@ -247,40 +251,45 @@ export default function RoomCall() {
                         <div className="video-content-user">
                             <div className="user-video" >
                                 {(!isVideoActive || !isEnableVideo) &&
-                                    <Avatar className="video-avatar"
-                                        src={`${baseURL}/api/user/avatar/${user.id}`}
-                                        alt={user.firstName} />
+                                    <div className="video-avatar">
+                                        <Avatar
+                                            sx={{
+                                                width: '80px',
+                                                height: '80px'
+                                            }}
+                                            src={`${baseURL}/api/user/avatar/${user.id}`}
+                                            alt={user.firstName} />
+                                    </div>
                                 }
-                                <video width="100%" height="100%" ref={myStreamRef} autoPlay muted />
                                 <div className="video-bottom">
                                     <div className="video-name">
                                         You
                                     </div>
                                     <span style={{ color: '#fff', display: 'flex', alignItems: 'center' }}> {isAudioActive ? <MicIcon /> : <MicOffIcon />}</span>
                                 </div>
-
+                                <video width="100%" height="100%" ref={myStreamRef} autoPlay muted />
                             </div>
                         </div>
 
                         <div className="video-content-part">
-
                             <div className="part-video">
-
                                 {participant &&
                                     <>
-                                        <div className="video-avatar">
-                                            {!isPartVideo && < Avatar
-                                                sx={{
-                                                    width: '120px',
-                                                    height: '120px'
-                                                }}
-                                                src={`${baseURL}/api/user/avatar/${participant.id}`}
-                                                alt={participant.firstName} />
-                                            }
-                                            <span style={{ color: '#fff' }}> {isAccepted ? '' : 'Joining...'}
-                                                {!isAccepted && <CircularProgress sx={{ color: '#fff' }} />}
-                                            </span>
+                                        {!isPartVideo &&
+                                            <div className="video-avatar">
+                                                < Avatar
+                                                    sx={{
+                                                        width: '120px',
+                                                        height: '120px'
+                                                    }}
+                                                    src={`${baseURL}/api/user/avatar/${participant.id}`}
+                                                    alt={participant.firstName} />
+                                            </div>
+                                        }
+                                        <div className="waiting-join"> {isAccepted ? '' : 'Joining...'}
+                                            {!isAccepted && <CircularProgress sx={{ color: '#fff' }} />}
                                         </div>
+
                                         <div className="video-bottom">
                                             <div className="video-name">
                                                 {participant.userName}

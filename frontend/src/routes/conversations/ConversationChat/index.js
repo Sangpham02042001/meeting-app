@@ -597,7 +597,13 @@ export default function ConversationChat({ conversation, user }) {
                         {fileUrl.type === 'image' ?
                           <img width='120' height='120' src={`${fileUrl.url}`} />
                           :
-                          fileUrl.type === 'file' ?
+                          fileUrl.type === 'video' ?
+                            <video controls muted class="video" src={`${fileUrl.url}`}
+                              style={{
+                                width: '120px',
+                                height: '120px',
+                              }}>
+                            </video> :
                             <div
                               style={{
                                 background: '#fff',
@@ -626,12 +632,7 @@ export default function ConversationChat({ conversation, user }) {
                               }}>
                                 {fileUrl.size}
                               </span>
-                            </div> : <video controls muted autoPlay class="video" src={`${fileUrl.url}`}
-                              style={{
-                                width: '120px',
-                                height: '120px',
-                              }}>
-                            </video>
+                            </div>
                         }
                       </div>
                     )
@@ -894,24 +895,6 @@ export default function ConversationChat({ conversation, user }) {
         onClose={(e) => { setIsPreview(false) }}
         messageId={selectedMessageId} photoId={selectedPhotoId}
       />
-
-      {/* <Dialog
-        open={conversationCall.isCalling}
-      >
-        <DialogTitle id="alert-dialog-title" style={{ backgroundColor: 'var(--primary-bg)' }}>
-          <Avatar width='40px' height='40px'
-            userId={conversation.participantId} />
-          <span>{conversation.participantName}</span>
-        </DialogTitle>
-        <DialogContent style={{ backgroundColor: 'var(--primary-bg)' }}>
-          <DialogContentText id="alert-dialog-description" style={{ color: 'var(--text-color)' }}>
-            Wait for the other party to pick up the phone ...
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions style={{ backgroundColor: 'var(--primary-bg)' }}>
-          <Button onClick={handleCancelCall} style={{ color: 'var(--icon-color)' }}>Cancel</Button>
-        </DialogActions>
-      </Dialog> */}
 
       <Snackbar open={messageAlert.length > 0}
         autoHideDuration={3000}

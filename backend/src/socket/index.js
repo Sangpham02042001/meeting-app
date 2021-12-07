@@ -428,8 +428,7 @@ const socketServer = (io, socket) => {
     })
 
     socket.on('conversation-send-signal', async ({ conversationId, senderId, receiverId, signal, isVideo, isAudio }) => {
-        // socket.roomCallId = conversationId;
-        // socket.join(`room-call-${conversationId}`)
+
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (let socketId of userSockets[receiverId]) {
                 socket.to(socketId).emit('conversation-sent-signal', { conversationId, senderId, receiverId, signal, isVideo, isAudio })
@@ -442,10 +441,9 @@ const socketServer = (io, socket) => {
         }
     })
 
-    socket.on('conversation-return-signal', async ({ conversationId, senderId, receiverId, signal, }) => {
-        // socket.roomCallId = conversationId;
-        // socket.join(`room-call-${conversationId}`)
-        socket.to(`room-call-${conversationId}`).emit('conversation-returning-signal', { senderId, receiverId, signal })
+    socket.on('conversation-return-signal', async ({ conversationId, senderId, receiverId, signal, isAudio, isVideo }) => {
+
+        socket.to(`room-call-${conversationId}`).emit('conversation-returning-signal', { senderId, receiverId, signal, isAudio, isVideo })
 
         let report = await setUserStatus({ userId: senderId, status: 'busy' })
         if (report) {
