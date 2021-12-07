@@ -13,6 +13,9 @@ Message.init({
   content: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  type: {
+    type: DataTypes.STRING(10),
   }
 }, {
   sequelize,

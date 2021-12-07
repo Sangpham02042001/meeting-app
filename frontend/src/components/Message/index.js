@@ -140,219 +140,230 @@ const Message = React.memo(({
           </span>
         </div>
       }
-      {
-        message.userId === logInUserId ?
-          <div>
-            {changeMessage && getAmTime(message.createdAt) && <span className="own-time">
-              {changeMessage && getAmTime(message.createdAt)}
-            </span>}
-            <div className={`own-message ${lastMessage ? 'last-message' : ''}`}>
+      {(message.type === 'audiocall' || message.type === 'videocall') ?
+        <div className='time-text'>
+          <span>
+            <strong>Call</strong> {getAmTime(message.createdAt)}
+          </span>
+        </div>
+        :
+        <>
+          {
+            message.userId === logInUserId ?
               <div>
-                <IconButton onClick={handleOpenMenu}>
-                  <MoreVertIcon className="icon-hover-menu" />
-                </IconButton>
-                <Menu
-                  id="basic-menu"
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleCloseMenu}
-                  MenuListProps={{
-                    'aria-labelledby': 'basic-button',
-                  }}
-                  PaperProps={{
-                    sx: {
-                      background: 'var(--primary-bg)'
-                    }
-                  }}
-                >
-                  <MenuItem onClick={handleRemoveMessage} style={{ color: 'var(--text-color)' }}>Remove</MenuItem>
-                </Menu>
+                {changeMessage && getAmTime(message.createdAt) && <span className="own-time">
+                  {changeMessage && getAmTime(message.createdAt)}
+                </span>}
+                <div className={`own-message ${lastMessage ? 'last-message' : ''}`}>
+                  <div>
+                    <IconButton onClick={handleOpenMenu}>
+                      <MoreVertIcon className="icon-hover-menu" />
+                    </IconButton>
+                    <Menu
+                      id="basic-menu"
+                      anchorEl={anchorEl}
+                      open={open}
+                      onClose={handleCloseMenu}
+                      MenuListProps={{
+                        'aria-labelledby': 'basic-button',
+                      }}
+                      PaperProps={{
+                        sx: {
+                          background: 'var(--primary-bg)'
+                        }
+                      }}
+                    >
+                      <MenuItem onClick={handleRemoveMessage} style={{ color: 'var(--text-color)' }}>Remove</MenuItem>
+                    </Menu>
+                  </div>
+                  <Tooltip title={getTime(message.createdAt)} placement="left">
+                    <div>
+                      {message.content &&
+                        parseMessage(message.content)
+                      }
+                      {message.videos && message.videos.length > 0 &&
+                        <div className='message-photo-list'>
+                          {message.videos.map((video, idx) => {
+                            return (message.videos.length > 1 ? <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                              className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                              style={{
+                                width: getImageSize(message.videos.length).itemWidth,
+                                height: getImageSize(message.videos.length).height,
+                                background: 'black'
+                              }}>
+                            </video> :
+                              <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  maxWidth: getImageSize(message.videos.length).itemWidth,
+                                  maxHeight: getImageSize(message.videos.length).height,
+                                  background: 'black'
+                                }}>
+                              </video>)
+                          })}
+                        </div>
+                      }
+                      {message.photos && message.photos.length > 0 &&
+
+                        <div className='message-photo-list'>
+                          {message.photos.map((photo, idx) => {
+                            return (message.photos.length > 1 ?
+                              <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                                src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  width: getImageSize(message.photos.length).itemWidth,
+                                  height: getImageSize(message.photos.length).height,
+                                }} />
+                              :
+                              <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                                src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  maxWidth: getImageSize(message.photos.length).itemWidth,
+                                  maxHeight: getImageSize(message.photos.length).height,
+                                }} />
+                            )
+                          })}
+                        </div>
+                      }
+                      {message.files && message.files.length > 0 &&
+
+                        <div className="message-file-list">
+                          {message.files.map((file) => {
+                            return (
+                              file.type === "audio" ?
+
+                                <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
+
+                                :
+                                <div className="message-file" key={file.id} onClick={e => handleFileDownload(e, message.id, file.id)}>
+                                  <div className="file-name" >
+                                    <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                                    <span>
+                                      {file.name}
+                                    </span>
+                                  </div>
+                                  <div className="file-size">
+                                    {getFileSize(file.size)}
+                                  </div>
+                                </div>
+                            )
+                          })}
+                        </div>
+                      }
+                    </div>
+                  </Tooltip>
+                </div >
               </div>
-              <Tooltip title={getTime(message.createdAt)} placement="left">
-                <div>
-                  {message.content &&
-                    parseMessage(message.content)
-                  }
-                  {message.videos && message.videos.length > 0 &&
-                    <div className='message-photo-list'>
-                      {message.videos.map((video, idx) => {
-                        return (message.videos.length > 1 ? <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
-                          className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                          style={{
-                            width: getImageSize(message.videos.length).itemWidth,
-                            height: getImageSize(message.videos.length).height,
-                            background: 'black'
-                          }}>
-                        </video> :
-                          <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
-                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                            style={{
-                              maxWidth: getImageSize(message.videos.length).itemWidth,
-                              maxHeight: getImageSize(message.videos.length).height,
-                              background: 'black'
-                            }}>
-                          </video>)
-                      })}
+              :
+              <div >
+                <span className="message-time">
+                  {changeMessage && getAmTime(message.createdAt) &&
+                    <>
+                      <span style={{ maxWidth: '50px', overflow: 'hidden', textOverflow: 'ellipsis' }} >
+                        {userName.split(' ')[0]}
+                      </span>, {getAmTime(message.createdAt)}
+                    </>}
+                </span>
+                <div className={`message  ${lastMessage ? 'last-message' : ''}`}
+                  style={{ marginBottom: hasAvatar ? '10px' : 0 }}>
+                  {hasAvatar &&
+                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>{userName ?
+                      <Tooltip title={userName}>
+                        <Avatar sx={{ width: '40px', height: '40px' }}
+                          src={`${baseURL}/api/user/avatar/${message.userId}`} />
+                      </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
+                        src={`${baseURL}/api/user/avatar/${message.userId}`} />}
                     </div>
                   }
-                  {message.photos && message.photos.length > 0 &&
+                  <Tooltip title={getTime(message.createdAt)} placement='right'>
+                    <div className={message.photos && message.photos.length > 0 ? 'message-with-photo' : ''}>
+                      {message.content &&
+                        <div className={'text-message ' + (hasAvatar ? 'user-last-message' : '')}>
+                          {parseMessage(message.content)}
+                        </div>
+                      }
+                      {message.videos && message.videos.length > 0 &&
+                        <div className='message-photo-list'
+                          style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
+                          {message.videos.map((video, idx) => {
+                            return (message.videos.length > 1 ? <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                              className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                              style={{
+                                width: getImageSize(message.videos.length).itemWidth,
+                                height: getImageSize(message.videos.length).height,
+                                background: 'black'
+                              }}>
+                            </video> :
+                              <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  maxWidth: getImageSize(message.videos.length).itemWidth,
+                                  maxHeight: getImageSize(message.videos.length).height,
+                                  background: 'black'
+                                }}>
+                              </video>)
+                          })}
+                        </div>
+                      }
+                      {message.photos && message.photos.length > 0 &&
+                        <div className='message-photo-list'
+                          style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
+                          {message.photos.map((photo, idx) => {
+                            return (message.photos.length > 1 ?
+                              <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                                src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  width: getImageSize(message.photos.length).itemWidth,
+                                  height: getImageSize(message.photos.length).height,
+                                }} />
+                              :
+                              <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
+                                src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
+                                className={`${hasAvatar ? 'photo-last-message' : ''}`}
+                                style={{
+                                  maxWidth: getImageSize(message.photos.length).itemWidth,
+                                  maxHeight: getImageSize(message.photos.length).height,
+                                }} />
+                            )
+                          })}
+                        </div>
+                      }
+                      {message.files && message.files.length > 0 &&
+                        <div
+                          className="message-file-list"
+                          style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
+                          {message.files.map((file) => {
+                            return (
+                              file.type === 'audio' ?
 
-                    <div className='message-photo-list'>
-                      {message.photos.map((photo, idx) => {
-                        return (message.photos.length > 1 ?
-                          <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                            src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
-                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                            style={{
-                              width: getImageSize(message.photos.length).itemWidth,
-                              height: getImageSize(message.photos.length).height,
-                            }} />
-                          :
-                          <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                            src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
-                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                            style={{
-                              maxWidth: getImageSize(message.photos.length).itemWidth,
-                              maxHeight: getImageSize(message.photos.length).height,
-                            }} />
-                        )
-                      })}
+                                <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
+
+                                :
+                                <div className="message-file" key={file.id} onClick={e => handleFileDownload(e, message.id, file.id)}>
+                                  <div className="file-name">
+                                    <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
+                                    <span>
+                                      {file.name}
+                                    </span>
+                                  </div>
+                                  <div className="file-size">
+                                    {getFileSize(file.size)}
+                                  </div>
+                                </div>
+                            )
+                          })}
+                        </div>
+                      }
+
                     </div>
-                  }
-                  {message.files && message.files.length > 0 &&
-
-                    <div className="message-file-list">
-                      {message.files.map((file) => {
-                        return (
-                          file.type === "audio" ?
-
-                            <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
-
-                            :
-                            <div className="message-file" key={file.id} onClick={e => handleFileDownload(e, message.id, file.id)}>
-                              <div className="file-name" >
-                                <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
-                                <span>
-                                  {file.name}
-                                </span>
-                              </div>
-                              <div className="file-size">
-                                {getFileSize(file.size)}
-                              </div>
-                            </div>
-                        )
-                      })}
-                    </div>
-                  }
+                  </Tooltip>
                 </div>
-              </Tooltip>
-            </div >
-          </div>
-          :
-          <div >
-            <span className="message-time">
-              {changeMessage && getAmTime(message.createdAt) &&
-                <>
-                  <span style={{ maxWidth: '50px', overflow: 'hidden', textOverflow: 'ellipsis' }} >
-                    {userName.split(' ')[0]}
-                  </span>, {getAmTime(message.createdAt)}
-                </>}
-            </span>
-            <div className={`message  ${lastMessage ? 'last-message' : ''}`}
-              style={{ marginBottom: hasAvatar ? '10px' : 0 }}>
-              {hasAvatar &&
-                <div style={{ display: 'flex', alignItems: 'flex-end' }}>{userName ?
-                  <Tooltip title={userName}>
-                    <Avatar sx={{ width: '40px', height: '40px' }}
-                      src={`${baseURL}/api/user/avatar/${message.userId}`} />
-                  </Tooltip> : <Avatar sx={{ width: '40px', height: '40px' }}
-                    src={`${baseURL}/api/user/avatar/${message.userId}`} />}
-                </div>
-              }
-              <Tooltip title={getTime(message.createdAt)} placement='right'>
-                <div className={message.photos && message.photos.length > 0 ? 'message-with-photo' : ''}>
-                  {message.content &&
-                    <div className={'text-message ' + (hasAvatar ? 'user-last-message' : '')}>
-                      {parseMessage(message.content)}
-                    </div>
-                  }
-                  {message.videos && message.videos.length > 0 &&
-                    <div className='message-photo-list'
-                      style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
-                      {message.videos.map((video, idx) => {
-                        return (message.videos.length > 1 ? <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
-                          className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                          style={{
-                            width: getImageSize(message.videos.length).itemWidth,
-                            height: getImageSize(message.videos.length).height,
-                            background: 'black'
-                          }}>
-                        </video> :
-                          <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
-                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                            style={{
-                              maxWidth: getImageSize(message.videos.length).itemWidth,
-                              maxHeight: getImageSize(message.videos.length).height,
-                              background: 'black'
-                            }}>
-                          </video>)
-                      })}
-                    </div>
-                  }
-                  {message.photos && message.photos.length > 0 &&
-                    <div className='message-photo-list'
-                      style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
-                      {message.photos.map((photo, idx) => {
-                        return (message.photos.length > 1 ?
-                          <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                            src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
-                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                            style={{
-                              width: getImageSize(message.photos.length).itemWidth,
-                              height: getImageSize(message.photos.length).height,
-                            }} />
-                          :
-                          <img key={idx} onClick={e => handlePreviewImg(e, message.id, photo.id)}
-                            src={`${baseURL}/api/messages/${message.id}/image/${photo.id}`}
-                            className={`${hasAvatar ? 'photo-last-message' : ''}`}
-                            style={{
-                              maxWidth: getImageSize(message.photos.length).itemWidth,
-                              maxHeight: getImageSize(message.photos.length).height,
-                            }} />
-                        )
-                      })}
-                    </div>
-                  }
-                  {message.files && message.files.length > 0 &&
-                    <div
-                      className="message-file-list"
-                      style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
-                      {message.files.map((file) => {
-                        return (
-                          file.type === 'audio' ?
-
-                            <audio key={file.id} src={`${baseURL}/api/messages/${message.id}/files/${file.id}`} controls />
-
-                            :
-                            <div className="message-file" key={file.id} onClick={e => handleFileDownload(e, message.id, file.id)}>
-                              <div className="file-name">
-                                <DescriptionIcon sx={{ color: '#000', margin: '5px' }} />
-                                <span>
-                                  {file.name}
-                                </span>
-                              </div>
-                              <div className="file-size">
-                                {getFileSize(file.size)}
-                              </div>
-                            </div>
-                        )
-                      })}
-                    </div>
-                  }
-                </div>
-              </Tooltip>
-            </div>
-          </div>
+              </div>
+          }
+        </>
       }
 
       <Dialog

@@ -4,7 +4,7 @@ const { getMemberTeam, sendMessage, socketInviteUsers,
 const { getActiveMemberMeeting, addMemberMeeting,
     joinMeeting, outMeeting, getUserMeeting, getMeetingInfo,
     updateMeetingState, sendMessageMeeting, getMeetingHostId } = require('../controllers/meeting.controller')
-const { setConversation, setMessage, getParticipantId } = require('../controllers/conversation.controller');
+const { setConversation, setMessage, getParticipantId, startCall } = require('../controllers/conversation.controller');
 const { createTeamNofication, createMessageNotification, createMeetingNofication } = require('../controllers/notification.controller')
 const { socketRequestTeam, setUserStatus, getUserStatus,
     socketCancelJoin, socketOutTeam, socketConfirmInvitation } = require('../controllers/user.controller')
@@ -408,12 +408,15 @@ const socketServer = (io, socket) => {
 
     //**********************************ROOM CALL*************************************//
 
-    socket.on('conversation-start-call', ({ conversationId, senderId, senderName, receiverId, type }) => {
+    socket.on('conversation-start-call', async ({ conversationId, senderId, senderName, receiverId, type }) => {
+
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (const socketId of userSockets[receiverId]) {
                 socket.to(socketId).emit('conversation-start-calling', { conversationId, senderId, senderName, receiverId, type })
             }
         }
+        const message = await startCall({ conversationId, senderId, type });
+
     })
 
     socket.on('conversation-accept-call', ({ conversationId, senderId, senderName, receiverId }) => {

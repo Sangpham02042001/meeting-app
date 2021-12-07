@@ -134,12 +134,6 @@ export default function RoomCall() {
     }, [])
 
     useEffect(() => {
-        if (!roomCallActive) {
-            socketClient.disconnect();
-        }
-    }, [roomCallActive])
-
-    useEffect(() => {
         if (setupDevice && roomCallActive) {
             console.log(isEnableAudio, isEnableVideo)
             if (!isEnableVideo && !isEnableAudio) {
@@ -220,6 +214,7 @@ export default function RoomCall() {
 
             socketClient.on('cancel-call', ({ conversationId }) => {
                 setRoomCallActive(false);
+                socketClient.disconnect();
             })
 
             socketClient.on('started-share-screen', ({ signal }) => {

@@ -289,6 +289,37 @@ const setMessage = async ({ content, files, conversationId, senderId, audio }) =
     }
 }
 
+const startCall = async ({ conversationId, senderId, type }) => {
+    try {
+        const message = await Message.create({ conversationId, userId: senderId, type: type + 'call' });
+        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 1 " +
+            "WHERE conversationId = :conversationId AND userId = :userId",
+            {
+                replacements: {
+                    conversationId,
+                    userId: senderId
+                }
+            }
+        )
+
+        await sequelize.query("UPDATE users_conversations SET updatedAt = NOW(), isRead = 0 " +
+            "WHERE conversationId = :conversationId AND userId NOT LIKE :userId",
+            {
+                replacements: {
+                    conversationId,
+                    userId: senderId
+                }
+            }
+        )
+
+        return message;
+    } catch (error) {
+
+        console.log('error', error)
+        return null;
+    }
+}
+
 const getImagesMessageCv = async (req, res) => {
     try {
         const { conversationId } = req.params;
@@ -371,5 +402,5 @@ const getParticipantId = async ({ userId, conversationId }) => {
 module.exports = {
     getConversations, getMessages, getLastMessage,
     setConversation, setMessage, readConversation, getImagesMessageCv,
-    getFilesMessageCv, getNumberMessageUnRead, getParticipantId
+    getFilesMessageCv, getNumberMessageUnRead, getParticipantId, startCall
 }
