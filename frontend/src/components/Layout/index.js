@@ -445,7 +445,7 @@ export default function Layout({ children }) {
                 display: 'flex',
                 alignItems: 'center'
               }}>
-                <audio src="ring.mp3" type="audio/mpeg" autoPlay loop />
+                <audio src="ring.mp3" type="audio/mpeg" autoPlay loop muted={settingReducer.muted} />
                 <Avatar src={`${baseURL}/api/user/avatar/${conversationCall.senderId}`}
                   alt="user avatar"
                   style={{

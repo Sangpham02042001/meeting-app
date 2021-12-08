@@ -18,6 +18,7 @@ export default function RoomCall() {
     const query = new URLSearchParams(useLocation().search);
     const { participantId } = useParams();
     const user = useSelector(state => state.userReducer.user);
+    const settingReducer = useSelector(state => state.settingReducer)
     const participant = useSelector(state => state.conversationReducer.conversation.participant);
 
 
@@ -371,7 +372,7 @@ export default function RoomCall() {
         <div className="room-call">
             {roomCallActive ?
                 <>
-                    {!isAccepted && <audio src="ring.mp3" type="audio/mpeg" autoPlay loop />}
+                    {!isAccepted && <audio src="ring.mp3" type="audio/mpeg" autoPlay loop muted={settingReducer.muted} />}
                     <div className="video-content">
                         <div className="video-content-user">
                             <div className="user-video" >
