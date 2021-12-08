@@ -8,7 +8,7 @@ import Avatar from '../../../components/Avatar';
 import ImageIcon from '@mui/icons-material/Image';
 import AttachFile from '@mui/icons-material/AttachFile';
 import Badge from '@mui/material/Badge';
-
+import PhoneCallbackIcon from '@mui/icons-material/PhoneCallback';
 
 const getElementLastMessage = (lastMessage) => {
     if (lastMessage.photos && lastMessage.photos.length) {
@@ -25,7 +25,15 @@ const getElementLastMessage = (lastMessage) => {
                 Attach file
             </>
         )
-    } else {
+    } else if (lastMessage.type === 'videocall' || lastMessage.type === 'audiocall') {
+        return (
+            <>
+                <PhoneCallbackIcon color='primary' />
+                Call
+            </>
+        )
+    }
+    else {
         return lastMessage.content;
     }
 

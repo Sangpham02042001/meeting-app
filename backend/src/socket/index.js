@@ -409,7 +409,6 @@ const socketServer = (io, socket) => {
     //**********************************ROOM CALL*************************************//
 
     socket.on('conversation-start-call', async ({ conversationId, senderId, senderName, receiverId, type }) => {
-
         if (userSockets[receiverId] && userSockets[receiverId].length) {
             for (const socketId of userSockets[receiverId]) {
                 socket.to(socketId).emit('conversation-start-calling', { conversationId, senderId, senderName, receiverId, type })

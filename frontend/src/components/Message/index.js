@@ -184,7 +184,7 @@ const Message = React.memo(({
                       {message.videos && message.videos.length > 0 &&
                         <div className='message-photo-list'>
                           {message.videos.map((video, idx) => {
-                            return (message.videos.length > 1 ? <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                            return (message.videos.length > 1 ? <video key={idx} controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
                               className={`${hasAvatar ? 'photo-last-message' : ''}`}
                               style={{
                                 width: getImageSize(message.videos.length).itemWidth,
@@ -192,7 +192,7 @@ const Message = React.memo(({
                                 background: 'black'
                               }}>
                             </video> :
-                              <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                              <video key={idx} controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
                                 className={`${hasAvatar ? 'photo-last-message' : ''}`}
                                 style={{
                                   maxWidth: getImageSize(message.videos.length).itemWidth,
@@ -288,7 +288,7 @@ const Message = React.memo(({
                         <div className='message-photo-list'
                           style={{ marginLeft: hasAvatar ? '5px' : '45px' }}>
                           {message.videos.map((video, idx) => {
-                            return (message.videos.length > 1 ? <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                            return (message.videos.length > 1 ? <video key={idx} controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
                               className={`${hasAvatar ? 'photo-last-message' : ''}`}
                               style={{
                                 width: getImageSize(message.videos.length).itemWidth,
@@ -296,7 +296,7 @@ const Message = React.memo(({
                                 background: 'black'
                               }}>
                             </video> :
-                              <video controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
+                              <video key={idx} controls src={`${baseURL}/api/messages/${message.id}/files/${video.id}`}
                                 className={`${hasAvatar ? 'photo-last-message' : ''}`}
                                 style={{
                                   maxWidth: getImageSize(message.videos.length).itemWidth,

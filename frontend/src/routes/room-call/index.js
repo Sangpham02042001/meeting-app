@@ -62,11 +62,13 @@ export default function RoomCall() {
                         url: 'turn:numb.viagenie.ca',
                         credential: 'muazkh',
                         username: 'webrtc@live.com'
-                    }]
+                    }
+                ]
             },
             stream,
         });
         peer.on("signal", signal => {
+            console.log(signal);
             socketClient.emit("conversation-send-signal", {
                 conversationId, senderId: userId, receiverId: partId, signal,
                 isAudio: isAudioRef.current, isVideo: isVideoRef.current
@@ -441,7 +443,6 @@ export default function RoomCall() {
                                         <div className="video-name">
                                             {isShareActive ? 'You' : participant.userName}
                                         </div>
-                                        <span style={{ color: '#fff' }}> {isPartAudio ? <MicIcon /> : <MicOffIcon />}</span>
                                     </div>
                                     <video width="100%" height="100%"
                                         style={{ opacity: isShareActive ? 1 : 0 }}
