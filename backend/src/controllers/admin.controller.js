@@ -124,13 +124,55 @@ const changePassword = async (req, res) => {
 
 const getFeedbacks = async (req, res) => {
     try {
-        const feedbacks = await Feedback.findAll({});
-        return res.status(200).json({feedbacks});
+        const feedbacks = await Feedback.findAll({
+            include: { model: User, attributes: ['id', 'firstName', 'lastName'] },
+            order: [
+                ['updatedAt', 'DESC'],
+                ['createdAt', 'DESC']
+            ]
+        });
+        return res.status(200).json({ feedbacks });
     } catch (error) {
         console.log(error);
-        return res.status(400).json({error});
+        return res.status(400).json({ error });
     }
 }
 
+const updateFeedback = async (req, res) => {
+    try {
+        let { feedbackId } = req.params
+        let { content } = req.body
+        let feedback = await Feedback.findOne({
+            where: {
+                id: feedbackId
+            }
+        })
+        feedback.content = content
+        await feedback.save()
+        return res.status(200).json({ feedback })
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({ error });
+    }
+}
 
-module.exports = { adminSignin, getAllUsers, deleteUser, updateUserInfo, changePassword, getFeedbacks }
+const deleteFeedback = async (req, res) => {
+    try {
+        let { feedbackId } = req.params
+        let feedback = await Feedback.findOne({
+            where: {
+                id: feedbackId
+            }
+        })
+        await feedback.destroy()
+        return res.status(200).json({ message: 'success' })
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({ error });
+    }
+}
+
+module.exports = {
+    adminSignin, getAllUsers, deleteUser, updateUserInfo,
+    changePassword, getFeedbacks, updateFeedback, deleteFeedback
+}

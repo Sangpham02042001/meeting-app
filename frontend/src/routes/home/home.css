@@ -90,3 +90,8 @@
   background-color: var(--primary-bg);
   color: var(--text-color) !important;
 } */
+
+.home-component textarea,
+.home-component label {
+  color: var(--text-color) !important;
+}

@@ -6,7 +6,7 @@
 
 - Meeting
 - Real time messages(sent with files/images/audio)
-- Audio/Video call
+- Audio/Video call(share screen)
 - Manage profile
 - Manage team
 - Manage notifications
