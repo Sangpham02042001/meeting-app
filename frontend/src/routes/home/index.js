@@ -111,13 +111,11 @@ export default function Home() {
                     </LocalizationProvider>
 
                     <div>
-                        <p>You have no event on {value.toLocaleDateString()}</p>
+                        <p style={{ margin: '10px 0' }}>You have no event on {value.toLocaleDateString()}</p>
                         <Button
-                            variant="outlined"
+                            variant="text"
                             style={{
-                                marginTop: "20px",
-                                color: 'var(--icon-color)',
-                                borderColor: 'var(--icon-color)'
+                                color: 'var(--icon-color)'
                             }}
                             onClick={() => {
                                 setSchedule(true);

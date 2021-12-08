@@ -332,7 +332,9 @@ export default function Profile() {
 											<Avatar alt="team coverphoto"
 												src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 												sx={{ width: 50, height: 50, }} />
-											<p className='team-name'>{team.name}</p>
+											<div style={{ marginLeft: '20px' }}>
+												<p className='team-name'>{team.name}</p>
+											</div>
 										</Link>
 										<div>
 											<Button className="team-action-btn" variant="text"
@@ -358,11 +360,13 @@ export default function Profile() {
 											<Avatar alt="team coverphoto"
 												src={`${baseURL}/api/team/coverphoto/${team.id}")`}
 												sx={{ width: 50, height: 50, }} />
-											<p className='team-name'>{team.name}</p>
+											<div style={{ marginLeft: '20px' }}>
+												<p className='team-name'>{team.name}</p>
+											</div>
 										</span>
 										<Button className="team-action-btn"
-											style={{ marginLeft: '20px', backgroundColor: 'var(--primary-color)' }}
-											variant="contained"
+											style={{ marginLeft: '20px', color: 'var(--icon-color)' }}
+											variant="text"
 											onClick={handleCancelRequest(team.id)}
 										>Cancel</Button>
 									</div>

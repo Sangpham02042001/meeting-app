@@ -80,3 +80,13 @@
 .schedule-container label {
   color: var(--text-color) !important;
 }
+
+#calendar > div {
+  border-radius: 10px;
+}
+
+/* #calendar > div *,
+#calendar > div #text {
+  background-color: var(--primary-bg);
+  color: var(--text-color) !important;
+} */
