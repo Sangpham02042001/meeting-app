@@ -37,7 +37,8 @@ export default function TeamRequestUsers() {
   const handleConfirm = () => {
     socketClient.emit('team-confirm-request', {
       userId: selectedUser,
-      teamId: Number(team.id)
+      teamId: Number(team.id),
+      userName: team.requestUsers.find(u => u.id == selectedUser).userName
     })
     setUser(null)
   }

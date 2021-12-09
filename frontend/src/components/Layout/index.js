@@ -157,7 +157,13 @@ export default function Layout({ children }) {
     })
 
     socketClient.on('confirm-invitation-success', ({ id, name, hostId }) => {
-      dispatch(confirmInvitation({ id, name, hostId }))
+      dispatch(confirmInvitation({
+        id,
+        name,
+        hostId,
+        userId: userReducer.user.id,
+        userName: userReducer.user.firstName + ' ' + userReducer.user.lastName
+      }))
     })
 
     socketClient.on('request-join-team-success', ({ team }) => {

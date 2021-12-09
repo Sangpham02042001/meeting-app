@@ -191,7 +191,7 @@ export default function Team(props) {
   useEffect(() => {
     if (teamReducer.joinedTeams.map(team => team.id).indexOf(Number(teamId)) >= 0 && isInvitedModalShow && teamReducer.invitedTeamLoaded) {
       setInvitedModalShow(false)
-      location.reload()
+      // location.reload()
     }
   }, [teamReducer.joinedTeams.length])
 

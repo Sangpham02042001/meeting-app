@@ -91,10 +91,20 @@ const socketServer = (io, socket) => {
         }
     })
 
-    socket.on('team-confirm-request', async ({ teamId, userId }) => {
+    socket.on('team-confirm-request', async ({ teamId, userId, userName }) => {
+        let members = await getMemberTeam({ teamId })
         let result = await socketConfirmRequest({ teamId, userId, hostId: Number(socket.userId) })
         if (result.message && result.message === 'success') {
             socket.emit('team-confirm-user-success', { userId, teamId })
+            for (const m of members) {
+                if (userSockets[m.id] && userSockets[m.id].length) {
+                    for (const socketId of userSockets[m.id]) {
+                        socket.to(socketId).emit('new-member', {
+                            teamId, id: userId, userName
+                        })
+                    }
+                }
+            }
             let { hostName, teamName } = result
             let createdBy = socket.userId
             let relativeLink = `/teams/${teamId}`

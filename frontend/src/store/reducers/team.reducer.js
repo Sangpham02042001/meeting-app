@@ -435,20 +435,33 @@ export const teamSlice = createSlice({
       }
     },
     confirmInvitation: (state, action) => {
-      let { id, name, hostId } = action.payload
+      let { id, name, hostId, userId, userName } = action.payload
       state.joinedTeams.push({ id, name, hostId })
       let idx = state.invitedTeams.findIndex(t => t.id == id)
       if (idx >= 0) {
         state.invitedTeams.splice(idx, 1)
       }
+      if (state.team.id == id) {
+        state.team.members.push({
+          id: userId,
+          userName
+        })
+      }
     },
     newMember: (state, action) => {
       let { teamId, userName, id } = action.payload
       if (state.team.id == teamId) {
-        state.team.members.push({ id, userName })
         let idx = state.team.invitedUsers.findIndex(u => u.id == id)
         if (idx >= 0) {
           state.team.invitedUsers.splice(idx, 1)
+        }
+        idx = state.team.requestUsers.findIndex(u => u.id === id)
+        if (idx >= 0) {
+          state.team.requestUsers.splice(idx, 1)
+        }
+        idx = state.team.members.findIndex(m => m.id == id)
+        if (idx < 0) {
+          state.team.members.push({ id, userName })
         }
       }
     },
