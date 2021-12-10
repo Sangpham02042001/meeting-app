@@ -534,7 +534,9 @@ export default function ConversationChat({ conversation, user }) {
                   conversationId={conversationId}
                   participantId={conversation.participantId}
                   changeMessage={idx >= 1 ? message.userId != messages[idx - 1].userId : true}
-                  hasAvatar={idx + 1 === messages.length ? true : message.userId != messages[idx + 1].userId}
+                  hasAvatar={idx + 1 === messages.length
+                    ? true : (messages[idx + 1].type === 'videocall' || messages[idx + 1].type === 'audiocall' || message.userId != messages[idx + 1].userId)
+                  }
                   lastMessage={idx + 1 === messages.length ? true : false}
                   userName={conversation.participantName}
                   messageDif={idx >= 1 ? messageTimeDiff(messages[idx].createdAt, messages[idx - 1].createdAt) : ''}

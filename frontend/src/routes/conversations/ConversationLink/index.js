@@ -98,7 +98,7 @@ export default function ConversationLink({ conversation, user }) {
                 }}>
                     <span>{conversation.participantName}</span>
                 </div>
-                <div className={conversation.isRead ? 'last-message' : 'last-message-unread'}>
+                <div className={conversation.isRead ? 'last-message' : 'last-message last-message-unread'}>
                     {lastMessage &&
                         (lastMessage.userId === user.id ?
                             <span>You: {getElementLastMessage(lastMessage)}</span>

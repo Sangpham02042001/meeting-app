@@ -92,8 +92,9 @@ export default function Conversations(props) {
                                         return (
                                             <div key={userFind.id} className="user-find" onClick={event => handleChooseUser(userFind, event)}>
                                                 <Avatar width="40px" height="40px" userId={userFind.id} />
-                                                <div style={{ marginLeft: "15px" }}>
+                                                <div style={{ marginLeft: "15px", display: 'flex', flexDirection: 'column' }}>
                                                     <span>{userFind.userName}</span>
+                                                    <span style={{ opacity: '0.7' }}>{userFind.email}</span>
                                                 </div>
                                             </div>
                                         )

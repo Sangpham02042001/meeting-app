@@ -55,22 +55,22 @@ export default function ChatBox({ chatVisible }) {
     }
 
     useEffect(() => {
-        window.addEventListener('paste', e => {
-            if (document.activeElement == inputRef.current) {
-                if (e.clipboardData.files.length > 0) {
-                    let file = e.clipboardData.files[0]
-                    let regex = /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i
-                    if (regex.test(file.name)) {
-                        setFile(file)
-                        let reader = new FileReader()
-                        let url = reader.readAsDataURL(file)
-                        reader.onloadend = e => {
-                            setFileUrl(reader.result)
-                        }
-                    }
-                }
-            }
-        })
+        // window.addEventListener('paste', e => {
+        //     if (document.activeElement == inputRef.current) {
+        //         if (e.clipboardData.files.length > 0) {
+        //             let file = e.clipboardData.files[0]
+        //             let regex = /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i
+        //             if (regex.test(file.name)) {
+        //                 setFile(file)
+        //                 let reader = new FileReader()
+        //                 let url = reader.readAsDataURL(file)
+        //                 reader.onloadend = e => {
+        //                     setFileUrl(reader.result)
+        //                 }
+        //             }
+        //         }
+        //     }
+        // })
 
         return () => {
             window.removeEventListener('paste', () => {

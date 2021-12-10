@@ -131,6 +131,7 @@ const Message = React.memo(({
     }
   }
 
+
   return (
     <div className="message-component">
       {messageDif &&
